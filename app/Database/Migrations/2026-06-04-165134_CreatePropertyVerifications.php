@@ -1,7 +1,7 @@
 <?php namespace App\Database\Migrations;
 use CodeIgniter\Database\Migration;
 
-class CreatePropertyVerificationsTable extends Migration {
+class CreatePropertyVerifications extends Migration {
     public function up() {
         $this->forge->addField([
             'id'                    => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
