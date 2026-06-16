@@ -14,4 +14,10 @@ class Users extends BaseController
         
         return view('admin/users/user', $data);
     }
+
+    public function create()
+    {
+        $data = ['title' => 'Create New User - EstateAdmin Pro'];
+        return view('admin/users/create', $data);
+    }
 }

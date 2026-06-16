@@ -7,10 +7,9 @@
         <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-unit">User Management</h2>
         <p class="text-on-surface-variant font-body-md text-body-md">Oversee and manage registered marketplace accounts.</p>
     </div>
-    <button class="bg-primary text-on-primary px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity font-label-md text-label-md">
-        <span class="material-symbols-outlined text-sm">person_add</span>
-        Add New User
-    </button>
+    <a href="<?= base_url('admin/users/create') ?>" class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-outlined text-[18px]">person_add</span> Add New User
+    </a>
 </header>
 
 <div class="bg-surface-container-lowest p-stack-md rounded border border-outline-variant mb-stack-lg flex flex-col md:flex-row justify-between items-center gap-stack-md shadow-sm">

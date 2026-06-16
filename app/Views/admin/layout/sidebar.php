@@ -36,10 +36,25 @@
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/moderation')) ? 'icon-fill' : '' ?>">verified_user</span>
             <span class="font-label-md text-label-md">Property Moderation</span>
         </a>
+
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/master-data')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/master-data') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/master-data')) ? 'icon-fill' : '' ?>">database</span>
+            <span class="font-label-md text-label-md">Master Data</span>
+        </a>
         
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/leads')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/leads') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/leads')) ? 'icon-fill' : '' ?>">leaderboard</span>
             <span class="font-label-md text-label-md">Lead Management</span>
+        </a>
+
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/cms')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/cms') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/cms')) ? 'icon-fill' : '' ?>">article</span>
+            <span class="font-label-md text-label-md">CMS Management</span>
+        </a>
+
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/seo')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/seo') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/seo')) ? 'icon-fill' : '' ?>">search_insights</span>
+            <span class="font-label-md text-label-md">SEO Management</span>
         </a>
 
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/verifications')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/verifications') ?>">
@@ -50,6 +65,11 @@
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/subscriptions')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/subscriptions') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/subscriptions')) ? 'icon-fill' : '' ?>">subscriptions</span>
             <span class="font-label-md text-label-md">Subscription Management</span>
+        </a>
+
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/email-templates')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/email-templates') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/email-templates')) ? 'icon-fill' : '' ?>">mail</span>
+            <span class="font-label-md text-label-md">Email Templates</span>
         </a>
     </div>
     
