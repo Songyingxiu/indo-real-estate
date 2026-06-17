@@ -6,7 +6,6 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-
 // Public Facing Routes
 $routes->get('/', 'Home::index');
 
@@ -16,8 +15,8 @@ $routes->post('login', 'Auth::attemptLogin');
 $routes->post('register', 'Auth::attemptRegister');
 $routes->get('logout', 'Auth::logout');
 
-// Admin Panel Routes
-$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], static function ($routes) {
+// AdminFilter
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
     
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('users', 'Users::index');

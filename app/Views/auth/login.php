@@ -182,30 +182,30 @@
                                 
                                 <div>
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Full Name</label>
-                                    <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John Doe" required type="text">
+                                    <input name="fullname" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John Doe" required type="text">
                                 </div>
-                                
+
                                 <div>
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address</label>
-                                    <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="john@example.com" required type="email">
+                                    <input name="email" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="john@example.com" required type="email">
                                 </div>
 
                                 <div>
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Phone Number</label>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-outline font-semibold">+62</span>
-                                        <input class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
+                                        <input name="phone" class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
                                     </div>
                                 </div>
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Password</label>
-                                        <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
+                                        <input name="password" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
                                     </div>
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Confirm</label>
-                                        <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
+                                        <input name="password_confirm" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
                                     </div>
                                 </div>
                                 

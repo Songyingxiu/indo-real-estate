@@ -34,6 +34,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'adminAuth'     => \App\Filters\AdminFilter::class, 
     ];
 
     /**
@@ -66,8 +67,8 @@ class Filters extends BaseFilters
      * applied before and after every request.
      *
      * @var array{
-     *     before: array<string, array{except: list<string>|string}>|list<string>,
-     *     after: array<string, array{except: list<string>|string}>|list<string>
+     * before: array<string, array{except: list<string>|string}>|list<string>,
+     * after: array<string, array{except: list<string>|string}>|list<string>
      * }
      */
     public array $globals = [
