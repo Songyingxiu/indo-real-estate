@@ -17,15 +17,15 @@ class ExampleMigration extends Migration
             'class'      => ['type' => 'varchar', 'constraint' => 63],
             'icon'       => ['type' => 'varchar', 'constraint' => 31],
             'summary'    => ['type' => 'varchar', 'constraint' => 255],
-            'created_at' => ['type' => 'datetime', 'null' => true],
-            'updated_at' => ['type' => 'datetime', 'null' => true],
+            'created_date' => ['type' => 'datetime', 'null' => true],
+            'modified_date' => ['type' => 'datetime', 'null' => true],
             'deleted_at' => ['type' => 'datetime', 'null' => true],
         ]);
 
         $this->forge->addKey('name');
         $this->forge->addKey('uid');
         $this->forge->addKey(['deleted_at', 'id']);
-        $this->forge->addKey('created_at');
+        $this->forge->addKey('created_date');
 
         $this->forge->createTable('factories');
     }

@@ -9,8 +9,10 @@ class CreatePropertyVerifications extends Migration {
             'ownership_certificate' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'land_certificate'      => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'supporting_documents'  => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
-            'status'                => ['type' => 'ENUM', 'constraint' => ['Not Verified', 'Pending Verification', 'Verified', 'Rejected'], 'default' => 'Not Verified'],
-            'created_at'            => ['type' => 'DATETIME', 'null' => true],
+            'approval_status'       => ['type' => 'ENUM', 'constraint' => ['Not Verified', 'Pending Verification', 'Verified', 'Rejected'], 'default' => 'Not Verified'],
+            'status'                => ['type' => 'ENUM', 'constraint' => ['Active', 'Inactive'], 'default' => 'Active'],
+            'created_date'          => ['type' => 'DATETIME', 'null' => true],
+            'modified_date'         => ['type' => 'DATETIME', 'null' => true],
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('property_id', 'properties', 'id', 'CASCADE', 'CASCADE');

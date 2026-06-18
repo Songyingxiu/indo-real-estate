@@ -1,18 +1,18 @@
 <?php namespace App\Models;
-
 use CodeIgniter\Model;
 
-class PropertyTypeModel extends Model {
-    protected $table            = 'property_types';
+class PropertyImageModel extends Model {
+    protected $table            = 'property_images';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';
+    protected $useSoftDeletes   = false;
     
-    // Core Configuration
-    protected $useSoftDeletes   = false; // Changed to false
-    protected $allowedFields    = ['name', 'status'];
+    protected $allowedFields    = [
+        'property_id', 'title', 'image_path', 'seq_no', 
+        'is_primary', 'status'
+    ];
 
-    // Timestamps Fixed
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_date';

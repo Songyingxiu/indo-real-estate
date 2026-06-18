@@ -11,15 +11,16 @@ class UserModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     
-    // We use soft deletes so user records are never permanently lost
+    // soft deletes so user records are never permanently lost
     protected $useSoftDeletes   = true;
 
-    // These are the exact columns we set up in your Registration form
-    protected $allowedFields    = [
-        'role', 
-        'fullname', 
+    // Registration form
+   protected $allowedFields    = [
+        'role_id', 
+        'first_name', 
+        'last_name', 
         'email', 
-        'phone', 
+        'phone_number', 
         'password', 
         'status'
     ];
@@ -27,7 +28,7 @@ class UserModel extends Model
     // Dates
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
+    protected $createdField  = 'created_date';
+    protected $updatedField  = 'modified_date';
     protected $deletedField  = 'deleted_at';
 }

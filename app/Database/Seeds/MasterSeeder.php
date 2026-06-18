@@ -1,84 +1,48 @@
-<?php 
-
-namespace App\Database\Seeds;
+<?php namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
 
-class MasterSeeder extends Seeder 
+class MasterSeeder extends Seeder
 {
-    public function run() 
+    public function run()
     {
-        // System Roles
+        // Seed Roles (Visitor removed)
         $roles = [
-            ['name' => 'Visitor'], 
-            ['name' => 'Buyer'], 
-            ['name' => 'Property Owner'], 
-            ['name' => 'Agent'], 
-            ['name' => 'Admin']
+            ['id' => 1, 'name' => 'Buyer', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 2, 'name' => 'Owner', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 3, 'name' => 'Agent', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 4, 'name' => 'Admin', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
         ];
         $this->db->table('roles')->insertBatch($roles);
 
-
-        // Subscription Plans
-        $plans = [
-            [
-                'name'  => 'Free', 
-                'price' => 0.00
-            ],
-            [
-                'name'  => 'Basic', 
-                'price' => 150000.00
-            ],
-            [
-                'name'  => 'Premium', 
-                'price' => 500000.00
-            ],
-            [
-                'name'  => 'Enterprise', 
-                'price' => 1500000.00
-            ]
+        // Seed States
+        $states = [
+            ['id' => 1, 'name' => 'DKI Jakarta', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 2, 'name' => 'Jawa Barat',  'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
         ];
-        $this->db->table('subscription_plans')->insertBatch($plans);
+        $this->db->table('states')->insertBatch($states);
 
-
-        // Property Types
-        $types = [
-            ['name' => 'House'], 
-            ['name' => 'Villa'], 
-            ['name' => 'Apartment'],
-            ['name' => 'Condominium'], 
-            ['name' => 'Office'], 
-            ['name' => 'Warehouse'],
-            ['name' => 'Land'], 
-            ['name' => 'Hotel'], 
-            ['name' => 'Ruko']
+        // Seed Cities
+        $cities = [
+            ['id' => 1, 'state_id' => 1, 'name' => 'Jakarta Selatan', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 2, 'state_id' => 2, 'name' => 'Bandung',         'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
         ];
-        $this->db->table('property_types')->insertBatch($types);
+        $this->db->table('cities')->insertBatch($cities);
 
-
-        // Locations by Map
-        $locations = [
-            [
-                'region_name' => 'Summarecon Bekasi, West Java', 
-                'latitude'    => -6.22390000, 
-                'longitude'   => 106.98960000
-            ],
-            [
-                'region_name' => 'Rawamangun, East Jakarta', 
-                'latitude'    => -6.19550000, 
-                'longitude'   => 106.88350000
-            ],
-            [
-                'region_name' => 'Kemang, South Jakarta', 
-                'latitude'    => -6.26150000, 
-                'longitude'   => 106.81060000
-            ],
-            [
-                'region_name' => 'Canggu, Bali', 
-                'latitude'    => -8.64780000, 
-                'longitude'   => 115.13850000
-            ]
+        // Seed Zipcodes
+        $zipcodes = [
+            ['id' => 1, 'city_id' => 1, 'zipcode' => '12430', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')], // Jaksel
+            ['id' => 2, 'city_id' => 2, 'zipcode' => '40115', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')], // Bandung
         ];
-        $this->db->table('locations')->insertBatch($locations);
+        $this->db->table('zipcodes')->insertBatch($zipcodes);
+
+        // Seed Property Types
+        $propertyTypes = [
+            ['id' => 1, 'name' => 'House',     'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 2, 'name' => 'Apartment', 'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 3, 'name' => 'Villa',     'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+            ['id' => 4, 'name' => 'Land',      'status' => 'Active', 'created_date' => date('Y-m-d H:i:s')],
+        ];
+        $this->db->table('property_types')->insertBatch($propertyTypes);
     }
 }

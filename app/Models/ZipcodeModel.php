@@ -2,17 +2,15 @@
 
 use CodeIgniter\Model;
 
-class PropertyTypeModel extends Model {
-    protected $table            = 'property_types';
+class ZipcodeModel extends Model {
+    protected $table            = 'zipcodes';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';
+    protected $useSoftDeletes   = false;
     
-    // Core Configuration
-    protected $useSoftDeletes   = false; // Changed to false
-    protected $allowedFields    = ['name', 'status'];
+    protected $allowedFields    = ['city_id', 'zipcode', 'status'];
 
-    // Timestamps Fixed
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_date';

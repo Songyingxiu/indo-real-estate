@@ -2,17 +2,15 @@
 
 use CodeIgniter\Model;
 
-class PropertyTypeModel extends Model {
-    protected $table            = 'property_types';
+class FeatureModel extends Model {
+    protected $table            = 'features';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';
+    protected $useSoftDeletes   = false;
     
-    // Core Configuration
-    protected $useSoftDeletes   = false; // Changed to false
-    protected $allowedFields    = ['name', 'status'];
+    protected $allowedFields    = ['category_id', 'name', 'status'];
 
-    // Timestamps Fixed
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_date';

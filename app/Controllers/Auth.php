@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\UserModel;
 
 class Auth extends BaseController
 {
@@ -16,9 +17,11 @@ class Auth extends BaseController
         // Validate the incoming form data
         $rules = [
             'role'             => 'required|in_list[buyer,owner,agent]',
-            'fullname'         => 'required|min_length[3]|max_length[100]',
-            'email'            => 'required|valid_email',
-            'phone'            => 'required|min_length[8]',
+            'first_name'       => 'required|min_length[2]|max_length[100]',
+            'last_name'        => 'required|min_length[2]|max_length[100]',
+            // Ensure email is unique in the users table to prevent database errors
+            'email'            => 'required|valid_email|is_unique[users.email]',
+            'phone_number'     => 'required|min_length[8]',
             'password'         => 'required|min_length[8]',
             'password_confirm' => 'required|matches[password]'
         ];
@@ -31,24 +34,33 @@ class Auth extends BaseController
         $plaintextPassword = $this->request->getPost('password');
         $hashedPassword = password_hash($plaintextPassword, PASSWORD_BCRYPT);
 
+        // Map the string role from the form to the new integer role_ids in your DB
+        $roleMap = [
+            'buyer' => 1,
+            'owner' => 2,
+            'agent' => 3
+        ];
+        $selectedRole = $this->request->getPost('role');
+        $roleId = $roleMap[$selectedRole] ?? 1; // Default to buyer
+
         // Prepare the data array for the database
         $userData = [
-            'role'       => $this->request->getPost('role'),
-            'fullname'   => $this->request->getPost('fullname'),
-            'email'      => $this->request->getPost('email'),
-            'phone'      => $this->request->getPost('phone'),
-            'password'   => $hashedPassword,
-            'created_at' => date('Y-m-d H:i:s')
+            'role_id'      => $roleId,
+            'first_name'   => $this->request->getPost('first_name'),
+            'last_name'    => $this->request->getPost('last_name'),
+            'email'        => $this->request->getPost('email'),
+            'phone_number' => $this->request->getPost('phone_number'),
+            'password'     => $hashedPassword,
+            'status'       => 'Active'
+            // 'created_date' is handled automatically by the Model's useTimestamps
         ];
 
-        /* 
-         * TODO: UNCOMMENT WHEN DATABASE IS APPROVED
-         * $userModel = new \App\Models\UserModel();
-         * $userModel->insert($userData);
-         */
+        // Insert into the database
+        $userModel = new UserModel();
+        $userModel->insert($userData);
 
-        // Redirect to dashboard for now to simulate success
-        return redirect()->to(base_url('admin/dashboard'))->with('success', 'Account created successfully!');
+        // Redirect to login page with a success message
+        return redirect()->to(base_url('login'))->with('success', 'Account created successfully! Please sign in.');
     }
 
     public function attemptLogin()
@@ -56,28 +68,39 @@ class Auth extends BaseController
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
-        /* 
-         * TODO: UNCOMMENT WHEN DATABASE IS APPROVED
-         * $userModel = new \App\Models\UserModel();
-         * $user = $userModel->where('email', $email)->first();
-         *
-         * // Verify the hashed password against the database
-         * if ($user && password_verify($password, $user['password'])) {
-         *     // Set User Session Here
-         *     return redirect()->to(base_url('admin/dashboard'));
-         * } else {
-         *     return redirect()->back()->with('error', 'Invalid Email or Password');
-         * }
-         */
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $email)->first();
 
-        // For now, bypass the database check and just log them in so you can test the UI!
-        return redirect()->to(base_url('admin/dashboard'));
+        // Verify the user exists and the password matches
+        if ($user && password_verify($password, $user['password'])) {
+            
+            // Prevent inactive or suspended users from logging in
+            if ($user['status'] !== 'Active') {
+                return redirect()->back()->withInput()->with('error', 'Your account is currently inactive. Please contact support.');
+            }
+
+            // Set User Session
+            $sessionData = [
+                'user_id'    => $user['id'],
+                'role_id'    => $user['role_id'],
+                'first_name' => $user['first_name'],
+                'last_name'  => $user['last_name'],
+                'email'      => $user['email'],
+                'isLoggedIn' => true
+            ];
+            session()->set($sessionData);
+
+            return redirect()->to(base_url('admin/dashboard'));
+            
+        } else {
+            return redirect()->back()->withInput()->with('error', 'Invalid Email or Password');
+        }
     }
 
     public function logout()
     {
-        // TODO: Destroy session when database/sessions are active
-        // session()->destroy();
-        return redirect()->to(base_url('login'));
+        // Destroy the session
+        session()->destroy();
+        return redirect()->to(base_url('login'))->with('success', 'You have been logged out successfully.');
     }
 }

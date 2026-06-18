@@ -180,9 +180,15 @@
                                     </label>
                                 </div>
                                 
-                                <div>
-                                    <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Full Name</label>
-                                    <input name="fullname" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John Doe" required type="text">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">First Name</label>
+                                        <input name="first_name" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John" required type="text">
+                                    </div>
+                                    <div>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Last Name</label>
+                                        <input name="last_name" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="Doe" required type="text">
+                                    </div>
                                 </div>
 
                                 <div>
@@ -194,7 +200,7 @@
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Phone Number</label>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-outline font-semibold">+62</span>
-                                        <input name="phone" class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
+                                        <input name="phone_number" class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
                                     </div>
                                 </div>
 

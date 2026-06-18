@@ -1,82 +1,67 @@
-<?php 
-
-namespace App\Database\Seeds;
+<?php namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
-use CodeIgniter\I18n\Time;
 
-class PropertySeeder extends Seeder 
+class PropertySeeder extends Seeder
 {
-    public function run() 
+    public function run()
     {
-        // 1. Fetch the correct newly seeded users
-        $owner = $this->db->table('users')->where('email', 'taka.owner@indo-realestate.id')->get()->getRow();
-        $agent = $this->db->table('users')->where('email', 'mika.agent@indo-realestate.id')->get()->getRow();
-        $buyer = $this->db->table('users')->where('email', 'riksa.buyer@gmail.com')->get()->getRow();
+        $date = date('Y-m-d H:i:s');
 
-        // 2. Map properties to the new owner ($owner->id)
         $properties = [
+            // Property 1: Sale - High-end House in South Jakarta
             [
-                'owner_id'         => $owner->id, 
-                'property_type_id' => 1, // House
-                'location_id'      => 1, // Bekasi
-                'title'            => 'Burgundy Residence Summarecon Bekasi Full Renovasi',
-                'description'      => 'DIJUAL RUMAH SIAP HUNI DI BURGUNDY - BANGUNAN LUAS, FUNGSIONAL, DAN SUDAH FULL RENOVASI. 2,5 Lantai Siap Huni. Luas Tanah: 91 m², Luas Bangunan: 84 m². 5 Kamar Tidur, 3 Kamar Mandi.',
-                'price'            => 2450000000.00, // Rp 2.45 Billion
-                'listing_type'     => 'Sale', 
-                'status'           => 'Published',
-                'created_at'       => Time::now(), 
-                'updated_at'       => Time::now()
+                'id' => 1, 'owner_id' => 2, 'property_type_id' => 1, 'city_id' => 1, 'zipcode_id' => 1,
+                'title' => 'Rumah Mewah Pondok Indah Posisi Hook Siap Huni',
+                'description' => 'Dijual Rumah Mewah Di Pondok Indah Posisi Hook. Kondisi sangat terawat, lokasi pinggir jalan utama, dan dekat dengan lapangan Golf. Fasilitas premium dan lingkungan elit.',
+                'listing_type' => 'Sale', 'address_line_1' => 'Jl. Metro Pondok Indah', 'area_name' => 'Kebayoran Lama', 'unit_number' => null, 'building_society_name' => 'Pondok Indah Real Estate',
+                'year_built' => '2018', 'total_floors' => 2, 
+                'bed' => 4, 'bath' => 3, 'total_area' => 600.00, 'total_land_area' => 335.00, 'usable_area' => 580.00,
+                'parking' => 'Y', 'total_parking' => 3, 'basement' => 'N', 'water_facility' => 'Y',
+                'tax_price' => 25000000000.00,
+                'approval_status' => 'Published', 'status' => 'Active', 'created_date' => $date
             ],
+
+            // Property 2: Rent - Premium Apartment in Bandung
             [
-                'owner_id'         => $owner->id, 
-                'property_type_id' => 9, // Ruko
-                'location_id'      => 2, // Rawamangun
-                'title'            => 'Sewa Ruko Rawamangun 2 Lantai Bekas Percetakan',
-                'description'      => 'Disewakan Ruko Rawamangun (bentuk Ngantong/Hoki) di Rawamangun. Luas Bangunan 167m² bentuk L (lebar di belakang). 2 Lantai, 1 Kamar Mandi.',
-                'price'            => 350000000.00, // Rp 350 million/year
-                'listing_type'     => 'Rent', 
-                'status'           => 'Published',
-                'created_at'       => Time::now(), 
-                'updated_at'       => Time::now()
+                'id' => 2, 'owner_id' => 3, 'property_type_id' => 2, 'city_id' => 2, 'zipcode_id' => 2,
+                'title' => 'Sewa Apartemen Landmark Residence 2BR Cicendo',
+                'description' => 'For Rent: Landmark Apartment Tower A - 2 Bedroom. Fully furnished dengan pemandangan gunung dan kota. Termasuk elektronik (water heater, AC) dan dekat ke Paskal 23.',
+                'listing_type' => 'Rent', 'address_line_1' => 'Jl. Bima No.81', 'area_name' => 'Cicendo', 'unit_number' => 'Tower A 15F', 'building_society_name' => 'Landmark Residence',
+                'year_built' => '2020', 'total_floors' => 1, 
+                'bed' => 2, 'bath' => 1, 'total_area' => 63.00, 'total_land_area' => 63.00, 'usable_area' => 63.00,
+                'parking' => 'Y', 'total_parking' => 1, 'basement' => 'Y', 'water_facility' => 'Y',
+                'tax_price' => 100000000.00,
+                'approval_status' => 'Published', 'status' => 'Active', 'created_date' => $date
             ],
+
+            // Property 3: Sale - Townhouse in South Jakarta
             [
-                'owner_id'         => $owner->id, 
-                'property_type_id' => 3, // Apartment
-                'location_id'      => 3, // Kemang
-                'title'            => 'Apartemen Kemang Village Tower Tiffany 2 Bed Plus 1',
-                'description'      => 'Jual Apartemen Kemang Village 2 Bedroom+1, 2 Bathroom+1. Luas 144 m², Tower Tiffany Lantai Rendah. View City, Full Furnished.',
-                'price'            => 3400000000.00, // Rp 3.4 Billion
-                'listing_type'     => 'Sale', 
-                'status'           => 'Published',
-                'created_at'       => Time::now(), 
-                'updated_at'       => Time::now()
+                'id' => 3, 'owner_id' => 4, 'property_type_id' => 1, 'city_id' => 1, 'zipcode_id' => 1,
+                'title' => 'Townhouse Classic Modern Dekat Tol Simatupang',
+                'description' => 'Townhouse Classic Modern Bangunan 2 lantai Plus Rooftop Lokasi Sangat Strategis dekat tol Simatupang dan Mall AEON Jaksel. One Gate System, aman dan nyaman.',
+                'listing_type' => 'Sale', 'address_line_1' => 'Jl. TB Simatupang', 'area_name' => 'Pasar Minggu', 'unit_number' => 'Kav B', 'building_society_name' => 'Townhouse AEON',
+                'year_built' => '2023', 'total_floors' => 3, 
+                'bed' => 3, 'bath' => 2, 'total_area' => 150.00, 'total_land_area' => 120.00, 'usable_area' => 140.00,
+                'parking' => 'Y', 'total_parking' => 2, 'basement' => 'N', 'water_facility' => 'Y',
+                'tax_price' => 3800000000.00,
+                'approval_status' => 'Pending Review', 'status' => 'Active', 'created_date' => $date
             ],
+
+            // Property 4: Rent - Large House in Bandung
             [
-                'owner_id'         => $owner->id, 
-                'property_type_id' => 2, // Villa
-                'location_id'      => 4, // Canggu
-                'title'            => 'Villa Canggu Kolam Renang Eksklusif 2 Kamar Tidur',
-                'description'      => 'DI JUAL Villa Canggu Kolam Renang Eksklusif 2 Kamar Tidur Domisili Villas Canggu! Luas tanah 120 m², Luas bangunan 108 m². Full furnished, siap huni.',
-                'price'            => 5500000000.00, // Rp 5.5 Billion
-                'listing_type'     => 'Sale', 
-                'status'           => 'Published',
-                'created_at'       => Time::now(), 
-                'updated_at'       => Time::now()
+                'id' => 4, 'owner_id' => 5, 'property_type_id' => 1, 'city_id' => 2, 'zipcode_id' => 2,
+                'title' => 'Rumah Mewah Disewakan di Tatar Kamandaka, Kota Baru Parahyangan',
+                'description' => 'Disewakan rumah mewah full furnished di Tatar Kamandaka KBP. Tinggal bawa koper. Lingkungan elit, asri, dengan sistem keamanan 24 jam.',
+                'listing_type' => 'Rent', 'address_line_1' => 'Jl. Tatar Kamandaka Raya', 'area_name' => 'Kota Baru Parahyangan', 'unit_number' => null, 'building_society_name' => 'Kota Baru Parahyangan',
+                'year_built' => '2021', 'total_floors' => 2, 
+                'bed' => 4, 'bath' => 3, 'total_area' => 150.00, 'total_land_area' => 180.00, 'usable_area' => 150.00,
+                'parking' => 'Y', 'total_parking' => 2, 'basement' => 'N', 'water_facility' => 'Y',
+                'tax_price' => 160000000.00,
+                'approval_status' => 'Published', 'status' => 'Active', 'created_date' => $date
             ]
         ];
-        $this->db->table('properties')->insertBatch($properties);
 
-        // 3. Seed an initial pipeline lead mapping with the new buyer and agent
-        $insertedProperty = $this->db->table('properties')->get()->getRow()->id;
-        $this->db->table('leads')->insert([
-            'property_id' => $insertedProperty,
-            'buyer_id'    => $buyer->id,
-            'agent_id'    => $agent->id,
-            'source'      => 'Contact Form',
-            'status'      => 'New',
-            'created_at'  => Time::now(),
-            'updated_at'  => Time::now()
-        ]);
+        $this->db->table('properties')->insertBatch($properties);
     }
 }
