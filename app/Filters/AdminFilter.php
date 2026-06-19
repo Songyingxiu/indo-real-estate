@@ -12,21 +12,29 @@ class AdminFilter implements FilterInterface
     {
         // Check if the user is logged in at all
         if (! session()->get('isLoggedIn')) {
-            // Kick them back to the login page with an error
             return redirect()->to(base_url('login'))->with('error', 'You must be logged in to access the dashboard.');
         }
 
         // Role-Based Access Control (RBAC)
-        $userRole = session()->get('role');
-        $allowedRoles = ['admin', 'owner', 'agent']; // Define who gets access
+        // We use role_id numbers based on the MasterSeeder:
+        // 1 = Buyer
+        // 2 = Owner
+        // 3 = Agent
+        // 4 = Admin
+        
+        $userRoleId = session()->get('role_id');
+        // Define who gets access to the admin panel (Owners, Agents, Admins)
+        $allowedRoles = [2, 3, 4]; 
 
-        // checking role
-        if (! in_array($userRole, $allowedRoles)) {
-            return redirect()->to(base_url('/'))->with('error', 'You do not have permission to access this area.');
+        // Kick out unauthorized users and destroy their session
+        if (! in_array($userRoleId, $allowedRoles)) {
+            session()->destroy();
+            return redirect()->to(base_url('login'))->with('error', 'Your account type does not have dashboard access.');
         }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
+        
     }
 }
