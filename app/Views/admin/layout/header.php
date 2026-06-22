@@ -1,3 +1,10 @@
+<?php
+    $firstName = session()->get('first_name') ?? 'User';
+    $lastName = session()->get('last_name') ?? '';
+    $email = session()->get('email') ?? 'user@example.com';
+    $fullName = trim($firstName . ' ' . $lastName);
+    $initial = strtoupper(substr($firstName, 0, 1));
+?>
 <header class="hidden md:flex w-full h-16 justify-between items-center px-margin-desktop sticky top-0 z-50 bg-surface border-b border-outline-variant transition-colors duration-300">
     
     <div class="flex items-center gap-stack-md">
@@ -12,6 +19,7 @@
             <span class="material-symbols-outlined" id="theme-icon-desktop">dark_mode</span>
         </button>
 
+        <!-- Notification -->
         <div x-data="{ open: false }" class="relative">
             <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
                 <span class="material-symbols-outlined">notifications</span>
@@ -42,14 +50,6 @@
                         </div>
                         <p class="font-caption text-caption text-on-surface-variant line-clamp-2">Budi Santoso just registered as a Property Owner.</p>
                     </a>
-                    
-                    <a href="#" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50">
-                        <div class="flex justify-between items-start mb-1">
-                            <span class="font-label-md text-label-md text-on-surface">Property Flagged</span>
-                            <span class="font-caption text-caption text-outline">2 hrs ago</span>
-                        </div>
-                        <p class="font-caption text-caption text-on-surface-variant line-clamp-2">Listing #MOD-8924A has been flagged by the automated system for review.</p>
-                    </a>
                 </div>
                 
                 <div class="px-4 py-2 border-t border-outline-variant bg-surface-container-lowest text-center">
@@ -62,9 +62,10 @@
             <span class="material-symbols-outlined">settings</span>
         </button>
 
+        <!-- DROPDOWN -->
         <div x-data="{ open: false }" class="relative ml-2">
             <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                A
+                <?= esc($initial) ?>
             </button>
             
             <div x-show="open" 
@@ -78,8 +79,8 @@
                  style="display: none;">
                 
                 <div class="px-4 py-3 border-b border-outline-variant mb-1">
-                    <p class="font-label-md text-label-md text-on-surface truncate">Administrator</p>
-                    <p class="font-caption text-caption text-on-surface-variant truncate">admin@estatepro.id</p>
+                    <p class="font-label-md text-label-md text-on-surface truncate font-bold"><?= esc($fullName) ?></p>
+                    <p class="font-caption text-caption text-on-surface-variant truncate"><?= esc($email) ?></p>
                 </div>
                 
                 <a href="#" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
@@ -89,10 +90,6 @@
                 <a href="#" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
                     <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
                     <span class="font-body-sm text-body-sm">Account Settings</span>
-                </a>
-                <a href="#" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined text-[18px]">security</span>
-                    <span class="font-label-md text-label-md">Privacy & Security</span>
                 </a>
                 
                 <div class="border-t border-outline-variant mt-1 pt-1">
@@ -106,27 +103,3 @@
 
     </div>
 </header>
-
-<script>
-    const themeToggles = [document.getElementById('theme-toggle-desktop'), document.getElementById('theme-toggle-mobile')];
-    const themeIcons = [document.getElementById('theme-icon-desktop'), document.getElementById('theme-icon-mobile')];
-    const htmlEl = document.documentElement;
-
-    function updateIcons(isDark) {
-        themeIcons.forEach(icon => {
-            if(icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-        });
-    }
-
-    // Set initial icon state based on class added in head
-    updateIcons(htmlEl.classList.contains('dark'));
-
-    themeToggles.forEach(btn => {
-        if(!btn) return;
-        btn.addEventListener('click', () => {
-            const isDark = htmlEl.classList.toggle('dark');
-            localStorage.theme = isDark ? 'dark' : 'light';
-            updateIcons(isDark);
-        });
-    });
-</script>

@@ -1,124 +1,63 @@
 <?= $this->extend('admin/layout/master') ?>
-
 <?= $this->section('content') ?>
-
-<div class="mb-stack-lg mt-4">
-    <h2 class="font-headline-lg text-headline-lg text-on-background mb-stack-sm">SEO Configuration</h2>
-    <p class="font-body-md text-body-md text-on-surface-variant">Manage meta tags and search engine visibility for primary platform pages.</p>
+<div class="mt-4 mb-6">
+    <h1 class="text-2xl font-bold text-on-surface">SEO Settings</h1>
+    <p class="text-on-surface-variant">Configure how your platform appears on search engines.</p>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-    
-    <div class="lg:col-span-2 space-y-stack-lg">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-lg hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300">
-            <div class="space-y-stack-md">
-                
-                <div>
-                    <label class="block font-label-md text-label-md text-on-surface mb-stack-sm">Target Page</label>
-                    <div class="relative">
-                        <select class="w-full appearance-none bg-surface border border-outline-variant rounded px-stack-md py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all">
-                            <option>Homepage</option>
-                            <option>Property Directory</option>
-                            <option>Blog</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
-                    </div>
-                </div>
-                
-                <div>
-                    <div class="flex justify-between items-center mb-stack-sm">
-                        <label class="font-label-md text-label-md text-on-surface">Meta Title</label>
-                        <span class="font-caption text-caption text-on-surface-variant" id="title-counter">50 / 60</span>
-                    </div>
-                    <input class="w-full bg-surface border border-outline-variant rounded px-stack-md py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all" id="meta-title-input" placeholder="Sewa & Beli Properti Terbaik di Indonesia" type="text" value="Sewa & Beli Properti Mewah Terbaik di Indonesia | App Name">
-                </div>
-                
-                <div>
-                    <div class="flex justify-between items-center mb-stack-sm">
-                        <label class="font-label-md text-label-md text-on-surface">Meta Description</label>
-                        <span class="font-caption text-caption text-on-surface-variant" id="desc-counter">148 / 160</span>
-                    </div>
-                    <textarea class="w-full bg-surface border border-outline-variant rounded px-stack-md py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all resize-none" id="meta-desc-input" placeholder="Temukan hunian eksklusif dan peluang investasi real estate..." rows="4">Temukan hunian eksklusif dan peluang investasi real estate premium di seluruh Indonesia. Platform tepercaya untuk pembeli, penyewa, dan investor serius.</textarea>
-                </div>
-                
-                <div>
-                    <label class="block font-label-md text-label-md text-on-surface mb-stack-sm">Focus Keywords</label>
-                    <input class="w-full bg-surface border border-outline-variant rounded px-stack-md py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all" placeholder="e.g. real estate, rumah mewah indonesia" type="text" value="properti mewah, real estate indonesia, investasi rumah">
-                    <p class="font-caption text-caption text-on-surface-variant mt-2">Pisahkan kata kunci dengan koma.</p>
-                </div>
+<div x-data="{ 
+    metaTitle: '<?= esc($seo['meta_title'] ?? 'EstateAdmin Pro | Find Your Dream Property') ?>', 
+    metaDesc: '<?= esc($seo['meta_description'] ?? 'Discover the most exclusive real estate listings. Buy, sell, and rent properties with trusted verified agents.') ?>' 
+}" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <div class="bg-surface border border-outline-variant rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-on-surface mb-6 border-b border-outline-variant pb-2">Global Meta Data</h3>
+        
+        <form action="<?= base_url('admin/seo/save') ?>" method="POST" class="flex flex-col gap-5">
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Platform Meta Title</label>
+                <input name="meta_title" x-model="metaTitle" type="text" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <p class="text-xs text-on-surface-variant mt-1">Recommended length: 50-60 characters.</p>
             </div>
             
-            <div class="mt-stack-lg flex justify-end gap-stack-sm border-t border-outline-variant pt-stack-md">
-                <button class="px-6 py-2 font-label-md text-label-md text-primary-container border border-transparent hover:bg-surface-container-low rounded transition-colors">Discard</button>
-                <button class="px-6 py-2 font-label-md text-label-md bg-primary-container text-on-primary hover:bg-primary transition-colors rounded shadow-sm">Save Changes</button>
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Meta Description</label>
+                <textarea name="meta_description" x-model="metaDesc" rows="3" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"></textarea>
+                <p class="text-xs text-on-surface-variant mt-1">Recommended length: 150-160 characters.</p>
             </div>
-        </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Target Keywords</label>
+                <input name="focus_keywords" type="text" value="<?= esc($seo['focus_keywords'] ?? 'real estate, buy house, verified agents, property listing') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+            </div>
+
+            <button type="submit" class="mt-4 bg-primary text-on-primary font-semibold py-2.5 rounded hover:opacity-90 transition w-32">Save SEO</button>
+        </form>
     </div>
 
-    <div class="lg:col-span-1 space-y-stack-lg">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-stack-lg sticky top-24 shadow-sm">
-            <h3 class="font-label-md text-label-md text-on-surface mb-stack-md flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px]">visibility</span> Search Engine Preview
-            </h3>
-            
-            <div class="bg-surface p-stack-md rounded border border-outline-variant mt-stack-sm">
-                <div class="flex items-center gap-2 mb-1">
-                    <div class="w-6 h-6 rounded-full bg-surface-variant flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-[14px] text-on-surface-variant">domain</span>
-                    </div>
-                    <div>
-                        <p class="font-caption text-caption text-on-surface leading-tight">App Name</p>
-                        <p class="font-caption text-[11px] text-on-surface-variant leading-tight">https://www.appname.co.id</p>
-                    </div>
-                    <span class="material-symbols-outlined text-[16px] text-on-surface-variant ml-auto">more_vert</span>
+    <div>
+        <h3 class="text-lg font-semibold text-on-surface mb-4">Search Engine Preview</h3>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center font-bold text-primary">E</div>
+                <div>
+                    <div class="text-sm text-on-surface font-semibold">EstateAdmin Pro</div>
+                    <div class="text-xs text-on-surface-variant">https://www.estateadmin.com</div>
                 </div>
-                <h4 class="font-body-lg text-body-lg text-[#1a0dab] hover:underline cursor-pointer mb-1 leading-tight" id="preview-title">Sewa & Beli Properti Mewah Terbaik di Indonesia | App Name</h4>
-                <p class="font-caption text-[13px] text-[#4d5156] leading-relaxed line-clamp-2" id="preview-desc">Temukan hunian eksklusif dan peluang investasi real estate premium di seluruh Indonesia. Platform tepercaya untuk pembeli, penyewa, dan investor serius.</p>
             </div>
-            
-            <div class="mt-stack-md p-stack-sm bg-surface-container-low rounded border border-outline-variant border-dashed">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-tertiary-container text-[18px]">check_circle</span>
-                    <span class="font-caption text-caption text-on-surface font-semibold">SEO Score: Good</span>
-                </div>
-                <ul class="font-caption text-caption text-on-surface-variant space-y-1 list-disc pl-5">
-                    <li>Title length is optimal.</li>
-                    <li>Description length is optimal.</li>
-                    <li>Keywords present in title.</li>
-                </ul>
+            <h4 class="text-[#1a0dab] text-xl font-medium cursor-pointer hover:underline truncate" x-text="metaTitle || 'Please enter a title'"></h4>
+            <p class="text-[#4d5156] text-sm mt-1" x-text="metaDesc || 'Please enter a description to see how it looks.'"></p>
+        </div>
+        
+        <div class="bg-surface-container-low border border-outline-variant rounded p-4 flex items-start gap-3 mt-6">
+            <span class="material-symbols-outlined text-primary mt-0.5">info</span>
+            <div>
+                <h4 class="font-semibold text-sm">Dynamic SEO</h4>
+                <p class="text-sm text-on-surface-variant">Individual property pages automatically generate their own SEO tags based on the property title, location, and description.</p>
             </div>
         </div>
     </div>
 
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const titleInput = document.getElementById('meta-title-input');
-        const descInput = document.getElementById('meta-desc-input');
-        const previewTitle = document.getElementById('preview-title');
-        const previewDesc = document.getElementById('preview-desc');
-        const titleCounter = document.getElementById('title-counter');
-        const descCounter = document.getElementById('desc-counter');
-
-        if(titleInput && previewTitle) {
-            titleInput.addEventListener('input', (e) => {
-                previewTitle.textContent = e.target.value || 'Sewa & Beli Properti Terbaik di Indonesia';
-                titleCounter.textContent = `${e.target.value.length} / 60`;
-                if(e.target.value.length > 60) titleCounter.classList.add('text-error');
-                else titleCounter.classList.remove('text-error');
-            });
-        }
-
-        if(descInput && previewDesc) {
-            descInput.addEventListener('input', (e) => {
-                previewDesc.textContent = e.target.value || 'Temukan hunian eksklusif...';
-                descCounter.textContent = `${e.target.value.length} / 160`;
-                if(e.target.value.length > 160) descCounter.classList.add('text-error');
-                else descCounter.classList.remove('text-error');
-            });
-        }
-    });
-</script>
 
 <?= $this->endSection() ?>

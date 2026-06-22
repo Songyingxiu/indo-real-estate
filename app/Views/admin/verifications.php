@@ -1,110 +1,101 @@
 <?= $this->extend('admin/layout/master') ?>
-
 <?= $this->section('content') ?>
-
-<div class="mb-stack-lg">
-    <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Verification Center</h2>
-    <p class="font-body-md text-body-md text-on-surface-variant">Review pending documents and payments requiring manual administrative approval.</p>
+<div class="mt-4 mb-6">
+    <h1 class="text-2xl font-bold text-on-surface">Verification Center</h1>
+    <p class="text-on-surface-variant">Review pending Agent identity documents and offline payment proofs.</p>
 </div>
 
-<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
-    <div class="p-stack-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-        <div>
-            <h3 class="font-brand-text text-brand-text text-on-surface">Action Required</h3>
-            <p class="font-caption text-caption text-on-surface-variant">Please review the following submissions carefully.</p>
-        </div>
-    </div>
-    
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-surface-container-lowest border-b border-outline-variant">
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Type</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Submitted By</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Date</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Status</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold text-right">Actions</th>
+<?php if (session()->getFlashdata('success')) : ?>
+    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('success') ?></div>
+<?php endif; ?>
+
+<div x-data="{ showModal: false, docName: '', submitter: '', verificationId: 0 }" class="bg-surface border border-outline-variant rounded-lg overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
+            <tr>
+                <th class="p-4 font-semibold text-on-surface-variant">Document Type</th>
+                <th class="p-4 font-semibold text-on-surface-variant">Submitted By</th>
+                <th class="p-4 font-semibold text-on-surface-variant">Date Submitted</th>
+                <th class="p-4 font-semibold text-on-surface-variant">Status</th>
+                <th class="p-4 font-semibold text-on-surface-variant text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-sm text-on-surface">
+            <?php if (!empty($verifications)): ?>
+                <?php foreach ($verifications as $v): ?>
+                <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
+                    <td class="p-4 flex items-center gap-3">
+                        <div class="bg-surface-container p-2 rounded border border-outline-variant">
+                            <span class="material-symbols-outlined text-outline-variant text-[20px]">badge</span>
+                        </div>
+                        <span class="font-medium">Agent KTP (ID Card)</span>
+                    </td>
+                    <td class="p-4"><?= esc($v['first_name'] . ' ' . $v['last_name']) ?></td>
+                    <td class="p-4 text-on-surface-variant"><?= date('M d, Y h:i A', strtotime($v['created_date'])) ?></td>
+                    <td class="p-4">
+                        <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v['approval_status']) ?></span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button @click="showModal = true; 
+                                        docName = 'Agent KTP (ID Card)'; 
+                                        submitter = '<?= esc(addslashes($v['first_name'] . ' ' . $v['last_name'])) ?>';
+                                        verificationId = <?= $v['id'] ?>;" 
+                                class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition">
+                            View File
+                        </button>
+                    </td>
                 </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-variant">
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="5" class="p-6 text-center text-on-surface-variant italic">No documents currently pending verification.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+
+    <div x-show="showModal" 
+         style="display: none;"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        
+        <div @click.outside="showModal = false" 
+             x-show="showModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <div>
+                    <h2 class="text-xl font-bold text-on-surface" x-text="docName"></h2>
+                    <p class="text-sm text-on-surface-variant">Submitted by <span class="font-semibold" x-text="submitter"></span></p>
+                </div>
+                <button @click="showModal = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="p-6 bg-surface-container-low flex justify-center items-center min-h-[300px]">
+                <div class="flex flex-col items-center text-outline">
+                    <span class="material-symbols-outlined text-[64px] mb-2">image</span>
+                    <p class="text-sm">Document preview will load here from database</p>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
                 
-                <tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors">
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-                            </div>
-                            <span class="font-body-md text-body-md text-on-surface">Offline Payment</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center font-label-md text-xs">JD</div>
-                            <span class="font-body-md text-body-md text-on-surface">John Doe</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md font-body-md text-body-md text-on-surface-variant">Oct 24, 2023</td>
-                    <td class="p-stack-md">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-caption text-caption border border-secondary">Pending Review</span>
-                    </td>
-                    <td class="p-stack-md text-right space-x-2 whitespace-nowrap">
-                        <button class="bg-primary-container text-on-primary-container font-label-md text-label-md px-3 py-1.5 rounded hover:opacity-90 transition-opacity">Approve</button>
-                        <button class="border border-outline font-label-md text-label-md px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors">Reject</button>
-                    </td>
-                </tr>
+                <form :action="'<?= base_url('admin/verifications/process/') ?>' + verificationId" method="POST">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="px-6 py-2 border border-error text-error rounded font-semibold hover:bg-error-container transition">Reject</button>
+                </form>
+                
+                <form :action="'<?= base_url('admin/verifications/process/') ?>' + verificationId" method="POST">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Approve Document</button>
+                </form>
 
-                <tr class="bg-background hover:bg-surface-container transition-colors">
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-[18px]">id_card</span>
-                            </div>
-                            <span class="font-body-md text-body-md text-on-surface">Agent KTP</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 bg-tertiary-container text-on-tertiary-container rounded-full flex items-center justify-center font-label-md text-xs">JS</div>
-                            <span class="font-body-md text-body-md text-on-surface">Jane Smith</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md font-body-md text-body-md text-on-surface-variant">Oct 23, 2023</td>
-                    <td class="p-stack-md">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-caption text-caption border border-secondary">Pending Review</span>
-                    </td>
-                    <td class="p-stack-md text-right space-x-2 whitespace-nowrap">
-                        <button class="bg-primary-container text-on-primary-container font-label-md text-label-md px-3 py-1.5 rounded hover:opacity-90 transition-opacity">Approve</button>
-                        <button class="border border-outline font-label-md text-label-md px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors">Reject</button>
-                    </td>
-                </tr>
-
-                <tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors">
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-[18px]">description</span>
-                            </div>
-                            <span class="font-body-md text-body-md text-on-surface">Property Document</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 bg-primary-fixed text-on-primary-fixed rounded-full flex items-center justify-center font-label-md text-xs">ML</div>
-                            <span class="font-body-md text-body-md text-on-surface">Michael Lee</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md font-body-md text-body-md text-on-surface-variant">Oct 23, 2023</td>
-                    <td class="p-stack-md">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-caption text-caption border border-secondary">Pending Review</span>
-                    </td>
-                    <td class="p-stack-md text-right space-x-2 whitespace-nowrap">
-                        <button class="bg-primary-container text-on-primary-container font-label-md text-label-md px-3 py-1.5 rounded hover:opacity-90 transition-opacity">Approve</button>
-                        <button class="border border-outline font-label-md text-label-md px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors">Reject</button>
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 </div>
 

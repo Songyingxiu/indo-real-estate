@@ -1,17 +1,9 @@
-<?php
-
-namespace App\Controllers\Admin;
-
+<?php namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 
-class Subscriptions extends BaseController
-{
-    public function index()
-    {
-        $data = [
-            'title' => 'Subscription Management - EstateAdmin Pro'
-        ];
-        
-        return view('admin/subscriptions', $data); 
+class Subscriptions extends BaseController {
+    public function index() {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+        return view('admin/subscriptions');
     }
 }

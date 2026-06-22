@@ -5,7 +5,7 @@ class AgentVerificationModel extends Model {
     protected $table            = 'agent_verifications';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'object';
+    protected $returnType       = 'array'; 
     protected $useSoftDeletes   = false;
     
     protected $allowedFields    = [

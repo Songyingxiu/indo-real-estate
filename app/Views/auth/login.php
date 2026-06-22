@@ -45,23 +45,15 @@
     </script>
     <style type="text/tailwindcss">
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        
-        /* The Tab Switching Logic */
         .tab-content { display: none; }
-        
         #tab-login:checked ~ .form-container #content-login { display: block; }
         #tab-register:checked ~ .form-container #content-register { display: block; }
-
-        /* The Tab Label Styling Logic */
         #tab-login:checked ~ .tab-headers label[for="tab-login"],
         #tab-register:checked ~ .tab-headers label[for="tab-register"] {
             @apply text-primary-container border-b-2 border-primary-container;
         }
-        
-        /* Role Selector Logic */
         .role-radio:checked + div { @apply border-primary-container bg-surface-container-low ring-1 ring-primary-container shadow-sm; }
         .role-radio:checked + div .material-symbols-outlined { @apply text-primary-container; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
@@ -90,10 +82,23 @@
         <div class="w-full md:w-1/2 lg:w-2/5 bg-surface-container-lowest h-screen overflow-y-auto z-10 relative shadow-[-4px_0_24px_rgba(26,54,93,0.03)]">
             
             <div class="min-h-full flex flex-col pt-16 pb-12 px-6 md:pt-15 md:pb-16 md:px-12 lg:px-16">
+                
+                <?php if (session()->getFlashdata('error')) : ?>
+                    <div class="bg-[#ffdad6] text-[#410002] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('error') ?></div>
+                <?php endif; ?>
+                <?php if (session()->getFlashdata('success')) : ?>
+                    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('success') ?></div>
+                <?php endif; ?>
+
+                <?php 
+                    // SMART TABS: If they submitted the register form and failed, keep the register tab open!
+                    $isRegistering = old('first_name') ? true : false; 
+                ?>
+
                 <div class="max-w-md w-full mx-auto relative">
                     
-                    <input type="radio" name="auth-tabs" id="tab-login" class="hidden" checked>
-                    <input type="radio" name="auth-tabs" id="tab-register" class="hidden">
+                    <input type="radio" name="auth-tabs" id="tab-login" class="hidden" <?= !$isRegistering ? 'checked' : '' ?>>
+                    <input type="radio" name="auth-tabs" id="tab-register" class="hidden" <?= $isRegistering ? 'checked' : '' ?>>
                     
                     <div class="tab-headers flex border-b border-outline-variant mb-8 w-full relative z-20">
                         <label for="tab-login" class="flex-1 text-center py-4 font-label-md text-[14px] font-semibold text-on-surface-variant border-b-2 border-transparent hover:text-primary-container transition-colors cursor-pointer block">Sign In</label>
@@ -109,22 +114,22 @@
                             <form action="<?= base_url('login') ?>" class="space-y-4" method="POST">
                                 <div>
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address</label>
-                                    <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" name="email" placeholder="name@example.com" required type="email">
+                                    <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" name="email" value="<?= old('email') ?>" placeholder="name@example.com" required type="email">
                                 </div>
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface">Password</label>
-                                        <a class="font-label-md text-[14px] font-semibold text-primary-container hover:underline transition-all" href="#">Forgot Password?</a>
+                                        <a onclick="alert('Password reset module coming soon!')" class="font-label-md text-[14px] font-semibold text-primary-container hover:underline transition-all cursor-pointer">Forgot Password?</a>
                                     </div>
                                     <div class="relative">
                                         <input class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" name="password" placeholder="••••••••" required type="password">
-                                        <button class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+                                        <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
                                             <span class="material-symbols-outlined">visibility_off</span>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 pt-2 pb-4">
-                                    <input class="w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container cursor-pointer" type="checkbox">
+                                    <input class="w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container cursor-pointer" type="checkbox" name="remember">
                                     <label class="font-body-md text-[14px] text-on-surface-variant cursor-pointer">Keep me signed in</label>
                                 </div>
                                 <button class="w-full bg-primary-container text-on-primary font-label-md text-[15px] font-semibold py-3 rounded hover:bg-primary transition-colors flex items-center justify-center gap-2 relative z-30" type="submit">Sign In</button>
@@ -137,14 +142,10 @@
                                         <span class="px-4 bg-surface-container-lowest font-caption text-[12px] text-on-surface-variant">Or continue with</span>
                                     </div>
                                 </div>
-                                <div class="mt-6 grid grid-cols-2 gap-4">
-                                    <button class="w-full bg-transparent border border-outline-variant text-on-surface-variant font-label-md text-[14px] font-semibold py-3 rounded hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2 relative z-30" type="button">
+                                <div class="mt-6 grid grid-cols-1 gap-4">
+                                    <button onclick="alert('Google Auth integration coming soon!')" class="w-full bg-transparent border border-outline-variant text-on-surface-variant font-label-md text-[14px] font-semibold py-3 rounded hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2 relative z-30" type="button">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></svg>
                                         Google
-                                    </button>
-                                    <button class="w-full bg-transparent border border-outline-variant text-on-surface-variant font-label-md text-[14px] font-semibold py-3 rounded hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2 relative z-30" type="button">
-                                        <svg class="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path></svg>
-                                        Facebook
                                     </button>
                                 </div>
                             </div>
@@ -156,23 +157,24 @@
                             
                             <form action="<?= base_url('register') ?>" class="space-y-4" method="POST">
                                 
+                                <?php $oldRole = old('role') ?: 'buyer'; ?>
                                 <div class="grid grid-cols-3 gap-3 mb-6 relative z-30">
                                     <label class="cursor-pointer relative group">
-                                        <input checked class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="buyer">
+                                        <input <?= $oldRole == 'buyer' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="buyer">
                                         <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
                                             <span class="material-symbols-outlined text-outline mb-1 text-[24px]">person_search</span>
                                             <span class="font-label-md text-[13px] font-semibold text-on-surface">Buyer</span>
                                         </div>
                                     </label>
                                     <label class="cursor-pointer relative group">
-                                        <input class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="owner">
+                                        <input <?= $oldRole == 'owner' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="owner">
                                         <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
                                             <span class="material-symbols-outlined text-outline mb-1 text-[24px]">real_estate_agent</span>
                                             <span class="font-label-md text-[13px] font-semibold text-on-surface">Owner</span>
                                         </div>
                                     </label>
                                     <label class="cursor-pointer relative group">
-                                        <input class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="agent">
+                                        <input <?= $oldRole == 'agent' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="agent">
                                         <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
                                             <span class="material-symbols-outlined text-outline mb-1 text-[24px]">verified_user</span>
                                             <span class="font-label-md text-[13px] font-semibold text-on-surface">Agent</span>
@@ -183,35 +185,45 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">First Name</label>
-                                        <input name="first_name" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John" required type="text">
+                                        <input name="first_name" value="<?= old('first_name') ?>" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John" required type="text">
                                     </div>
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Last Name</label>
-                                        <input name="last_name" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="Doe" required type="text">
+                                        <input name="last_name" value="<?= old('last_name') ?>" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="Doe" required type="text">
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address</label>
-                                    <input name="email" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="john@example.com" required type="email">
+                                    <input name="email" value="<?= old('email') ?>" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="john@example.com" required type="email">
                                 </div>
 
                                 <div>
                                     <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Phone Number</label>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-outline font-semibold">+62</span>
-                                        <input name="phone_number" class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
+                                        <input name="phone_number" value="<?= old('phone_number') ?>" class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Password</label>
-                                        <input name="password" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
+                                        <div class="relative">
+                                            <input name="password" class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
+                                            <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+                                                <span class="material-symbols-outlined">visibility_off</span>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Confirm</label>
-                                        <input name="password_confirm" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
+                                        <div class="relative">
+                                            <input name="password_confirm" class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
+                                            <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+                                                <span class="material-symbols-outlined">visibility_off</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -230,7 +242,7 @@
                                     <div class="flex-grow border-t border-outline-variant"></div>
                                 </div>
                                 
-                                <button class="w-full bg-transparent border border-outline-variant text-on-surface-variant font-label-md text-[14px] font-semibold py-3 rounded hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2 relative z-30" type="button">
+                                <button onclick="alert('Google Auth integration coming soon!')" class="w-full bg-transparent border border-outline-variant text-on-surface-variant font-label-md text-[14px] font-semibold py-3 rounded hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2 relative z-30" type="button">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path></svg>
                                     Sign up with Google
                                 </button>
@@ -242,5 +254,20 @@
             </div>
         </div>
     </main>
+
+    <script>
+        function togglePassword(button) {
+            const input = button.previousElementSibling;
+            const icon = button.querySelector('span');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        }
+    </script>
 </body>
 </html>

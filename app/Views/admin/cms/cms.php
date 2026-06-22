@@ -1,117 +1,89 @@
 <?= $this->extend('admin/layout/master') ?>
-
 <?= $this->section('content') ?>
-
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-stack-lg gap-4 mt-4">
-    <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background">CMS Management</h1>
-    <button class="bg-primary-container text-on-primary font-label-md text-label-md px-4 py-2 rounded flex items-center gap-2 hover:bg-primary-container/90 transition-colors shadow-sm">
-        <span class="material-symbols-outlined text-[18px]">add</span>
-        Create New Post
-    </button>
-</div>
-
-<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-surface border-b border-outline-variant">
-                    <th class="font-label-md text-label-md text-on-surface-variant py-3 px-4 w-1/2">Article Title</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant py-3 px-4">Author</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant py-3 px-4">Publish Date</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant py-3 px-4">Status</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant py-3 px-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="font-body-md text-body-md">
-                
-                <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
-                    <td class="py-4 px-4">
-                        <div class="font-semibold text-primary">Top 10 Bali Investment Villas</div>
-                        <div class="text-sm text-on-surface-variant mt-1">/blog/investment/bali-villas-2024</div>
-                    </td>
-                    <td class="py-4 px-4 text-on-background">Budi Santoso</td>
-                    <td class="py-4 px-4 text-on-background">Oct 12, 2023</td>
-                    <td class="py-4 px-4">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-tertiary-container/20 text-on-tertiary-container text-xs font-semibold">
-                            Published
-                        </span>
-                    </td>
-                    <td class="py-4 px-4 text-right">
-                        <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded hover:bg-surface-container">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
-                    </td>
-                </tr>
-                
-                <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group bg-background">
-                    <td class="py-4 px-4">
-                        <div class="font-semibold text-primary">Jakarta Property Trends 2024</div>
-                        <div class="text-sm text-on-surface-variant mt-1">/blog/market-trends/jakarta-2024</div>
-                    </td>
-                    <td class="py-4 px-4 text-on-background">Siti Rahma</td>
-                    <td class="py-4 px-4 text-on-background">Nov 05, 2023</td>
-                    <td class="py-4 px-4">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-tertiary-container/20 text-on-tertiary-container text-xs font-semibold">
-                            Published
-                        </span>
-                    </td>
-                    <td class="py-4 px-4 text-right">
-                        <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded hover:bg-surface-container">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
-                    <td class="py-4 px-4">
-                        <div class="font-semibold text-primary">Guide to SHM Certification</div>
-                        <div class="text-sm text-on-surface-variant mt-1">/guides/legal/shm-certification-explained</div>
-                    </td>
-                    <td class="py-4 px-4 text-on-background">Ahmad Wijaya</td>
-                    <td class="py-4 px-4 text-on-surface-variant italic">Pending</td>
-                    <td class="py-4 px-4">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-surface-container-highest text-on-surface-variant text-xs font-semibold">
-                            Draft
-                        </span>
-                    </td>
-                    <td class="py-4 px-4 text-right">
-                        <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded hover:bg-surface-container">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr class="hover:bg-surface-container-low transition-colors group bg-background">
-                    <td class="py-4 px-4">
-                        <div class="font-semibold text-primary">Bandung Residential Growth</div>
-                        <div class="text-sm text-on-surface-variant mt-1">/blog/market-trends/bandung-growth</div>
-                    </td>
-                    <td class="py-4 px-4 text-on-background">Budi Santoso</td>
-                    <td class="py-4 px-4 text-on-background">Nov 18, 2023</td>
-                    <td class="py-4 px-4">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-tertiary-container/20 text-on-tertiary-container text-xs font-semibold">
-                            Published
-                        </span>
-                    </td>
-                    <td class="py-4 px-4 text-right">
-                        <button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded hover:bg-surface-container">
-                            <span class="material-symbols-outlined">more_vert</span>
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<div x-data="{ showEditor: false, postTitle: '' }">
+    <div class="flex justify-between items-center mt-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-on-surface">Content Management</h1>
+            <p class="text-on-surface-variant">Manage platform news, blog posts, and static pages.</p>
+        </div>
+        <button @click="showEditor = true; postTitle = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">add</span> New Post
+        </button>
     </div>
 
-    <div class="border-t border-outline-variant px-4 py-3 flex items-center justify-between bg-surface-container-lowest">
-        <span class="font-caption text-caption text-on-surface-variant">Showing 1 to 4 of 24 entries</span>
-        <div class="flex items-center gap-2">
-            <button class="p-1 border border-outline-variant rounded text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50" disabled="">
-                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-            </button>
-            <button class="p-1 border border-outline-variant rounded text-on-surface-variant hover:bg-surface-container-low">
-                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-            </button>
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('success') ?></div>
+    <?php endif; ?>
+
+    <div class="bg-surface border border-outline-variant rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
+                    <tr>
+                        <th class="p-4 font-semibold text-on-surface-variant">Post Title</th>
+                        <th class="p-4 font-semibold text-on-surface-variant">Category</th>
+                        <th class="p-4 font-semibold text-on-surface-variant">Published Date</th>
+                        <th class="p-4 font-semibold text-on-surface-variant text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    <?php if (!empty($posts)): ?>
+                        <?php foreach ($posts as $post): ?>
+                            <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
+                                <td class="p-4 font-medium text-on-surface"><?= esc($post['title']) ?></td>
+                                <td class="p-4 text-on-surface-variant"><?= esc($post['category']) ?></td>
+                                <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($post['published_at'])) ?></td>
+                                <td class="p-4 text-right">
+                                    <button @click="showEditor = true; postTitle = '<?= esc($post['title'], 'js') ?>'" class="text-primary hover:underline font-medium">Edit</button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="4" class="p-6 text-center text-on-surface-variant italic">No posts have been published yet.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div x-show="showEditor" 
+         style="display: none;"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        
+        <div @click.outside="showEditor = false" 
+             x-show="showEditor"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             class="bg-surface w-full max-w-3xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface" x-text="postTitle ? 'Edit Post' : 'Create New Post'"></h2>
+                <button @click="showEditor = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form action="<?= base_url('admin/cms/save') ?>" method="POST">
+                <div class="p-6 flex flex-col gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Post Title</label>
+                        <input name="title" type="text" x-model="postTitle" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Content Body</label>
+                        <textarea name="content_body" required rows="8" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Write your content here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showEditor = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save & Publish</button>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>

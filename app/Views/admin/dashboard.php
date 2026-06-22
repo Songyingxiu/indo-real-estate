@@ -1,21 +1,21 @@
 <?= $this->extend('admin/layout/master') ?>
 
 <?= $this->section('content') ?>
-
 <div class="mb-stack-lg mt-4">
     <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
-    <p class="font-body-md text-body-md text-on-surface-variant">Welcome back. Here is the current status of the marketplace.</p>
+    <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace.</p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
+    
     <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
         <div class="flex justify-between items-start mb-stack-sm">
             <span class="font-label-md text-label-md text-on-surface-variant">Pending Tasks</span>
             <span class="material-symbols-outlined text-primary">assignment_late</span>
         </div>
-        <div class="font-headline-lg text-headline-lg text-primary">142</div>
-        <div class="font-caption text-caption text-error mt-unit flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">trending_up</span> +12% from yesterday
+        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingTasks) ?></div>
+        <div class="font-caption text-caption text-error flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">trending_up</span> +12% from yesterday
         </div>
     </div>
     
@@ -24,20 +24,20 @@
             <span class="font-label-md text-label-md text-on-surface-variant">Active Users</span>
             <span class="material-symbols-outlined text-primary">group</span>
         </div>
-        <div class="font-headline-lg text-headline-lg text-primary">24.5k</div>
-        <div class="font-caption text-caption text-tertiary-container mt-unit flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">trending_up</span> +5% this week
+        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($totalUsers) ?></div>
+        <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">trending_up</span> +5% this week
         </div>
     </div>
     
     <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
         <div class="flex justify-between items-start mb-stack-sm">
-            <span class="font-label-md text-label-md text-on-surface-variant">Total Revenue</span>
-            <span class="material-symbols-outlined text-primary">payments</span>
+            <span class="font-label-md text-label-md text-on-surface-variant">Active Properties</span>
+            <span class="material-symbols-outlined text-primary">real_estate_agent</span>
         </div>
-        <div class="font-headline-lg text-headline-lg text-primary">$1.2M</div>
-        <div class="font-caption text-caption text-tertiary-container mt-unit flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">trending_up</span> +8% this month
+        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($activeProperties) ?></div>
+        <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">trending_up</span> +8% this month
         </div>
     </div>
     
@@ -46,90 +46,80 @@
             <span class="font-label-md text-label-md text-on-surface-variant">Moderation Queue</span>
             <span class="material-symbols-outlined text-primary">gavel</span>
         </div>
-        <div class="font-headline-lg text-headline-lg text-primary">89</div>
-        <div class="font-caption text-caption text-error mt-unit flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">trending_up</span> Needs attention
+        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingProperties) ?></div>
+        <div class="font-caption text-caption text-error flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">trending_up</span> Needs attention
         </div>
     </div>
+
 </div>
 
-<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden mb-stack-lg">
-    <div class="p-stack-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<!-- VERIFICATION CENTER TABLE -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg mt-8 shadow-sm">
+    <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low rounded-t-lg">
         <div>
-            <h3 class="font-brand-text text-brand-text text-on-surface">Verification Center</h3>
-            <p class="font-caption text-caption text-on-surface-variant">Pending documents and payments requiring manual review.</p>
+            <h2 class="text-xl font-bold text-on-surface">Verification Center</h2>
+            <p class="text-sm text-on-surface-variant mt-1">Pending documents and payments requiring manual review.</p>
         </div>
-        <button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
-            View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </button>
+        <a href="<?= base_url('admin/verifications') ?>" class="text-primary font-semibold flex items-center gap-1 hover:bg-primary-container hover:text-on-primary-container px-3 py-2 rounded transition-colors">
+            View All <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </a>
     </div>
+    
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-surface-container-lowest border-b border-outline-variant">
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Type</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Submitted By</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Date</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold">Status</th>
-                    <th class="font-label-md text-label-md text-on-surface-variant p-stack-md font-semibold text-right">Actions</th>
+            <thead class="bg-surface border-b border-outline-variant">
+                <tr>
+                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Type</th>
+                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Submitted By</th>
+                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Date</th>
+                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Status</th>
+                    <th class="p-4 font-semibold text-sm text-on-surface-variant text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant">
-                <tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors">
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+            <tbody class="text-sm text-on-surface">
+                <?php if(!empty($verifications)): ?>
+                    <?php foreach($verifications as $task): ?>
+                        <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
+                            <td class="p-4 flex items-center gap-3">
+                                <div class="bg-surface-container p-2 rounded border border-outline-variant">
+                                    <span class="material-symbols-outlined text-outline-variant"><?= esc($task['icon']) ?></span>
+                                </div>
+                                <span class="font-medium text-primary"><?= esc($task['type']) ?></span>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-full bg-surface-container-high text-xs flex items-center justify-center font-bold text-on-surface-variant">
+                                        <?= esc($task['initials']) ?>
+                                    </div>
+                                    <?= esc($task['submitter']) ?>
+                                </div>
+                            </td>
+                            <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($task['date'])) ?></td>
+                            <td class="p-4">
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold">
+                                    <?= esc($task['status']) ?>
+                                </span>
+                            </td>
+                            <td class="p-4 text-right">
+                                <button class="bg-[#2d3142] text-white px-4 py-1.5 rounded font-semibold hover:bg-opacity-90 transition mr-2 shadow-sm">Review</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-on-surface-variant">
+                            <div class="flex flex-col items-center">
+                                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2">task_alt</span>
+                                <p>No pending verifications found! You are all caught up.</p>
                             </div>
-                            <span class="font-body-md text-body-md text-on-surface">Offline Payment</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <img alt="User avatar" class="w-6 h-6 rounded-full" src="https://ui-avatars.com/api/?name=John+Doe&background=e0e3e5&color=002045"/>
-                            <span class="font-body-md text-body-md text-on-surface">John Doe</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md font-body-md text-body-md text-on-surface-variant">Oct 24, 2023</td>
-                    <td class="p-stack-md">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-caption text-caption border border-secondary">
-                            Pending Review
-                        </span>
-                    </td>
-                    <td class="p-stack-md text-right space-x-2">
-                        <button class="bg-primary-container text-on-primary-container font-label-md text-label-md px-3 py-1.5 rounded hover:opacity-90 transition-opacity">Approve</button>
-                        <button class="border border-outline font-label-md text-label-md px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors">Reject</button>
-                    </td>
-                </tr>
-                <tr class="bg-background hover:bg-surface-container transition-colors">
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <div class="w-8 h-8 rounded bg-surface-container-high flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-[18px]">id_card</span>
-                            </div>
-                            <span class="font-body-md text-body-md text-on-surface">Agent KTP</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md">
-                        <div class="flex items-center gap-stack-sm">
-                            <img alt="User avatar" class="w-6 h-6 rounded-full" src="https://ui-avatars.com/api/?name=Jane+Smith&background=e0e3e5&color=002045"/>
-                            <span class="font-body-md text-body-md text-on-surface">Jane Smith</span>
-                        </div>
-                    </td>
-                    <td class="p-stack-md font-body-md text-body-md text-on-surface-variant">Oct 23, 2023</td>
-                    <td class="p-stack-md">
-                        <span class="inline-flex items-center px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-caption text-caption border border-secondary">
-                            Pending Review
-                        </span>
-                    </td>
-                    <td class="p-stack-md text-right space-x-2">
-                        <button class="bg-primary-container text-on-primary-container font-label-md text-label-md px-3 py-1.5 rounded hover:opacity-90 transition-opacity">Approve</button>
-                        <button class="border border-outline font-label-md text-label-md px-3 py-1.5 rounded hover:bg-surface-container-high transition-colors">Reject</button>
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 
 <?= $this->endSection() ?>
+        
