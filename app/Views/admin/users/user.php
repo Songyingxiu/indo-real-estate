@@ -5,6 +5,9 @@
         <h2 class="font-headline-lg text-primary mb-unit">User Management</h2>
         <p class="text-on-surface-variant">Oversee and manage registered marketplace accounts.</p>
     </div>
+    <a href="<?= base_url('admin/users/create') ?>" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
+        <span class="material-symbols-outlined text-[18px]">person_add</span> Create User
+    </a>
 </header>
 
 <?php if (session()->getFlashdata('success')) : ?>
@@ -13,7 +16,8 @@
     </div>
 <?php endif; ?>
 
-<div class="flex flex-col gap-unit">
+<div x-data="{ showRoleModal: false, selectedUserId: 0, selectedRole: 1, userName: '' }" class="flex flex-col gap-unit">
+    
     <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-surface border-b border-outline-variant font-label-md uppercase tracking-wider rounded-t">
         <div class="col-span-4">User Details</div>
         <div class="col-span-3">Role</div>
@@ -31,6 +35,7 @@
                 if ($user['role_id'] == 4) { $roleName = 'Admin'; $badgeColor = 'bg-primary-fixed text-on-primary-fixed'; }
                 if ($user['role_id'] == 3) { $roleName = 'Agent'; $badgeColor = 'bg-secondary-fixed text-on-secondary-fixed'; }
                 if ($user['role_id'] == 2) { $roleName = 'Owner'; $badgeColor = 'bg-tertiary-fixed text-on-tertiary-fixed'; }
+                if ($user['role_id'] == 1) { $roleName = 'Buyer'; $badgeColor = 'bg-surface-container-high text-on-surface-variant'; }
 
                 $isSuspended = !empty($user['deleted_at']);
             ?>
@@ -50,13 +55,63 @@
                 </div>
                 <div class="col-span-1 md:col-span-2 flex justify-end gap-2">
                     <?php if(!$isSuspended): ?>
+                        
+                        <button @click="showRoleModal = true; 
+                                        selectedUserId = <?= $user['id'] ?>; 
+                                        selectedRole = <?= $user['role_id'] ?>; 
+                                        userName = '<?= esc(addslashes($user['first_name'] . ' ' . $user['last_name'])) ?>';" 
+                                class="text-primary hover:bg-surface-container-high p-2 rounded-full transition-colors" title="Change Role">
+                            <span class="material-symbols-outlined">manage_accounts</span>
+                        </button>
+
                         <form action="<?= base_url('admin/users/delete/' . $user['id']) ?>" method="POST" onsubmit="return confirm('Suspend this user account?');">
-                            <button type="submit" class="text-error hover:bg-error-container p-2 rounded-full transition-colors"><span class="material-symbols-outlined">person_remove</span></button>
+                            <button type="submit" class="text-error hover:bg-error-container p-2 rounded-full transition-colors" title="Suspend User"><span class="material-symbols-outlined">person_remove</span></button>
                         </form>
+
                     <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
+
+    <div x-show="showRoleModal" 
+         style="display: none;"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        
+        <div @click.outside="showRoleModal = false" 
+             x-show="showRoleModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Change User Role</h2>
+                <button type="button" @click="showRoleModal = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form :action="'<?= base_url('admin/users/updateRole/') ?>' + selectedUserId" method="POST">
+                <div class="p-6">
+                    <p class="text-sm text-on-surface-variant mb-4">Updating role for <span class="font-bold text-on-surface" x-text="userName"></span></p>
+                    
+                    <label class="block text-sm font-semibold text-on-surface mb-1">Select New Role</label>
+                    <select name="role_id" x-model="selectedRole" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                        <option value="4">Admin</option>
+                        <option value="3">Agent</option>
+                        <option value="2">Owner</option>
+                        <option value="1">Buyer</option>
+                    </select>
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showRoleModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
+
 <?= $this->endSection() ?>

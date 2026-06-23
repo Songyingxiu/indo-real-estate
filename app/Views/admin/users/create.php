@@ -1,66 +1,72 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
-<div class="max-w-3xl mx-auto mt-4">
-    <a href="<?= base_url('admin/users') ?>" class="inline-flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold mb-6">
-        <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back to Users List
-    </a>
+<div class="mt-4 mb-6">
+    <div class="flex items-center gap-3 mb-2">
+        <a href="<?= base_url('admin/users') ?>" class="text-on-surface-variant hover:text-primary transition">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <h1 class="text-2xl font-bold text-on-surface">Create New User</h1>
+    </div>
+    <p class="text-on-surface-variant ml-9">Manually register a new Administrator, Agent, or System User.</p>
+</div>
 
-    <h2 class="text-2xl font-bold text-on-surface mb-2">Create New User</h2>
-    <p class="text-on-surface-variant mb-8">Add a new user to the platform.</p>
+<?php if (session()->has('errors')) : ?>
+    <div class="bg-error-container text-on-error-container p-4 rounded mb-6 text-sm">
+        <ul class="list-disc pl-5">
+            <?php foreach (session('errors') as $error) : ?>
+                <li><?= esc($error) ?></li>
+            <?php endforeach ?>
+        </ul>
+    </div>
+<?php endif ?>
 
-    <form action="<?= base_url('admin/users/store') ?>" method="POST" class="bg-surface border border-outline-variant rounded-lg p-6 md:p-8">
+<div class="bg-surface border border-outline-variant rounded-lg p-6 max-w-3xl">
+    <form action="<?= base_url('admin/users/store') ?>" method="POST" class="flex flex-col gap-5">
         
-        <h3 class="text-lg font-semibold text-on-surface border-b border-outline-variant pb-2 mb-6">Personal Information</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold mb-2">Full Name</label>
-                <input type="text" name="full_name" required placeholder="e.g. Budi Santoso" class="w-full p-3 border border-outline-variant rounded bg-surface">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">First Name</label>
+                <input name="first_name" type="text" value="<?= old('first_name') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
             </div>
             <div>
-                <label class="block text-sm font-semibold mb-2">Email Address</label>
-                <input type="email" name="email" required placeholder="budi.santoso@example.com" class="w-full p-3 border border-outline-variant rounded bg-surface">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold mb-2">Phone Number</label>
-                <input type="text" name="phone" placeholder="+62 812-3456-7890" class="w-full p-3 border border-outline-variant rounded bg-surface">
+                <label class="block text-sm font-semibold text-on-surface mb-1">Last Name</label>
+                <input name="last_name" type="text" value="<?= old('last_name') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
             </div>
         </div>
 
-        <h3 class="text-lg font-semibold text-on-surface border-b border-outline-variant pb-2 mb-6">System Access</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-sm font-semibold mb-2">System Role</label>
-                <select name="role_id" class="w-full p-3 border border-outline-variant rounded bg-surface">
-                    <option value="" disabled selected>Select a role...</option>
-                    <option value="4">Admin</option>
-                    <option value="3">Agent</option>
-                    <option value="2">Owner</option>
-                    <option value="1">Buyer</option>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Email Address</label>
+                <input name="email" type="email" value="<?= old('email') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number</label>
+                <input name="phone_number" type="text" value="<?= old('phone_number') ?>" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Password</label>
+                <input name="password" type="password" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <p class="text-xs text-on-surface-variant mt-1">Must be at least 8 characters.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Assign System Role</label>
+                <select name="role_id" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
+                    <option value="" disabled <?= old('role_id') ? '' : 'selected' ?>>Select a Role...</option>
+                    <?php if(!empty($roles)): ?>
+                        <?php foreach($roles as $role): ?>
+                            <option value="<?= $role['id'] ?>" <?= old('role_id') == $role['id'] ? 'selected' : '' ?>><?= esc($role['name']) ?></option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select>
             </div>
-            <div>
-                <label class="block text-sm font-semibold mb-2">Account Status</label>
-                <select name="status" class="w-full p-3 border border-outline-variant rounded bg-surface">
-                    <option value="Active">Active</option>
-                    <option value="Suspended">Suspended</option>
-                </select>
-                <p class="text-xs text-outline mt-1">Suspended users cannot log in or access platform features.</p>
-            </div>
         </div>
 
-        <div class="bg-surface-container-low border border-outline-variant rounded p-4 flex items-start gap-3 mb-8">
-            <span class="material-symbols-outlined text-primary mt-0.5">info</span>
-            <div>
-                <h4 class="font-semibold text-sm">Password Generation</h4>
-                <p class="text-sm text-on-surface-variant">A temporary password will be automatically generated and sent to the user's email address upon saving.</p>
-            </div>
-        </div>
-
-        <div class="flex items-center justify-end gap-4 pt-4 border-t border-outline-variant">
-            <a href="<?= base_url('admin/users') ?>" class="px-6 py-2 text-on-surface-variant font-semibold hover:bg-surface-container-low rounded transition-colors">Cancel</a>
-            <button type="submit" class="bg-primary text-on-primary px-8 py-2.5 rounded font-semibold hover:bg-opacity-90 transition-opacity shadow-sm">Save User</button>
+        <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-outline-variant">
+            <a href="<?= base_url('admin/users') ?>" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</a>
+            <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Create User Account</button>
         </div>
     </form>
 </div>

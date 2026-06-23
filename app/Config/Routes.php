@@ -24,6 +24,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     // User Management
     $routes->get('users', 'Users::index');
     $routes->get('users/create', 'Users::create');
+    $routes->post('users/store', 'Users::store');                          
+    $routes->post('users/updateRole/(:num)', 'Users::updateRole/$1');
     $routes->post('users/delete/(:num)', 'Users::delete/$1');                
     
     // Property Management & Listings
