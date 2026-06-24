@@ -16,7 +16,7 @@
     </div>
 <?php endif; ?>
 
-<div x-data="{ showRoleModal: false, selectedUserId: 0, selectedRole: 1, userName: '' }" class="flex flex-col gap-unit">
+<div x-data="{ showRoleModal: false, selectedUserId: 0, selectedRole: 1, userName: '', showDeleteModal: false, deleteUrl: '', deleteUserName: '' }" class="flex flex-col gap-unit">
     
     <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-surface border-b border-outline-variant font-label-md uppercase tracking-wider rounded-t">
         <div class="col-span-4">User Details</div>
@@ -64,9 +64,12 @@
                             <span class="material-symbols-outlined">manage_accounts</span>
                         </button>
 
-                        <form action="<?= base_url('admin/users/delete/' . $user['id']) ?>" method="POST" onsubmit="return confirm('Suspend this user account?');">
-                            <button type="submit" class="text-error hover:bg-error-container p-2 rounded-full transition-colors" title="Suspend User"><span class="material-symbols-outlined">person_remove</span></button>
-                        </form>
+                        <button @click="showDeleteModal = true; 
+                                        deleteUrl = '<?= base_url('admin/users/delete/' . $user['id']) ?>'; 
+                                        deleteUserName = '<?= esc(addslashes($user['first_name'] . ' ' . $user['last_name'])) ?>';" 
+                                class="text-error hover:bg-error-container p-2 rounded-full transition-colors" title="Suspend User">
+                            <span class="material-symbols-outlined">person_remove</span>
+                        </button>
 
                     <?php endif; ?>
                 </div>
@@ -74,28 +77,17 @@
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <div x-show="showRoleModal" 
-         style="display: none;"
-         class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
-        
-        <div @click.outside="showRoleModal = false" 
-             x-show="showRoleModal"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="transform opacity-0 scale-95"
-             x-transition:enter-end="transform opacity-100 scale-100"
-             class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
-            
+    <div x-show="showRoleModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showRoleModal = false" x-show="showRoleModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <h2 class="text-xl font-bold text-on-surface">Change User Role</h2>
                 <button type="button" @click="showRoleModal = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-
             <form :action="'<?= base_url('admin/users/updateRole/') ?>' + selectedUserId" method="POST">
                 <div class="p-6">
                     <p class="text-sm text-on-surface-variant mb-4">Updating role for <span class="font-bold text-on-surface" x-text="userName"></span></p>
-                    
                     <label class="block text-sm font-semibold text-on-surface mb-1">Select New Role</label>
                     <select name="role_id" x-model="selectedRole" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                         <option value="4">Admin</option>
@@ -109,6 +101,25 @@
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div x-show="showDeleteModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showDeleteModal = false" x-show="showDeleteModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 rounded-full bg-error-container text-error flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-[32px]">no_accounts</span>
+                </div>
+                <h2 class="text-xl font-bold text-on-surface mb-2">Suspend User Account</h2>
+                <p class="text-sm text-on-surface-variant mb-2">Are you sure you want to suspend <span class="font-bold text-on-surface" x-text="deleteUserName"></span>?</p>
+                <p class="text-xs text-error">They will immediately lose access to the platform.</p>
+            </div>
+            <div class="px-6 py-4 flex justify-between gap-3 bg-surface-container-lowest border-t border-outline-variant">
+                <button type="button" @click="showDeleteModal = false" class="flex-1 px-4 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                <form :action="deleteUrl" method="POST" class="flex-1">
+                    <button type="submit" class="w-full px-4 py-2 bg-error text-on-error rounded font-semibold hover:opacity-90 transition">Suspend</button>
+                </form>
+            </div>
         </div>
     </div>
 

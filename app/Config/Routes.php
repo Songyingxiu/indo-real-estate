@@ -42,11 +42,18 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('master-data', 'MasterData::index');
     $routes->post('master-data/store-type', 'MasterData::storeType');
     $routes->post('master-data/store-city', 'MasterData::storeCity');
+    $routes->post('master-data/store-state', 'MasterData::storeState');
+    $routes->post('master-data/delete-type/(:num)', 'MasterData::deleteType/$1'); 
+    $routes->post('master-data/delete-city/(:num)', 'MasterData::deleteCity/$1'); 
+    $routes->post('master-data/delete-state/(:num)', 'MasterData::deleteState/$1');
+    $routes->post('master-data/update-type/(:num)', 'MasterData::updateType/$1');
+    $routes->post('master-data/update-state/(:num)', 'MasterData::updateState/$1');
+    $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
     
     // Lead & Verification Management
     $routes->get('leads', 'Leads::index');                
     $routes->get('verifications', 'Verifications::index'); 
-    $routes->post('verifications/process/(:num)', 'Verifications::process/$1'); // ADDED VERIFICATION ROUTE
+    $routes->post('verifications/process/(:num)', 'Verifications::process/$1');
     
     // System Settings & Content
     $routes->get('subscriptions', 'Subscriptions::index'); 
