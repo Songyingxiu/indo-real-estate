@@ -8,13 +8,16 @@ class Verifications extends BaseController {
     public function index() {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
-        $db = \Config\Database::connect();
-        $builder = $db->table('agent_verifications');
-        $builder->select('agent_verifications.*, users.first_name, users.last_name');
-        $builder->join('users', 'users.id = agent_verifications.user_id');
-        $builder->whereIn('agent_verifications.approval_status', ['Pending', 'Under Review']);
+        $verificationModel = new AgentVerificationModel();
         
-        $data['verifications'] = $builder->get()->getResultArray();
+        // Select all fields from verifications, plus the user's name
+        $verificationModel->select('agent_verifications.*, users.first_name, users.last_name');
+        $verificationModel->join('users', 'users.id = agent_verifications.user_id');
+        $verificationModel->whereIn('agent_verifications.approval_status', ['Pending', 'Under Review']);
+        
+        // Pagination instead of getResultArray()
+        $data['verifications'] = $verificationModel->orderBy('agent_verifications.created_date', 'DESC')->paginate(10, 'verifications');
+        $data['pager'] = $verificationModel->pager;
         
         return view('admin/verifications', $data);
     }

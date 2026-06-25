@@ -2,68 +2,90 @@
 <?= $this->section('content') ?>
 <div class="mt-4 mb-6">
     <h1 class="text-2xl font-bold text-on-surface">Verification Center</h1>
-    <p class="text-on-surface-variant">Review pending Agent identity documents and offline payment proofs.</p>
+    <p class="text-on-surface-variant">Review pending Agent identity documents and business licenses.</p>
 </div>
 
 <?php if (session()->getFlashdata('success')) : ?>
-    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('success') ?></div>
+    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
+        <span class="material-symbols-outlined">check_circle</span>
+        <?= session()->getFlashdata('success') ?>
+    </div>
 <?php endif; ?>
 
-<div x-data="{ showModal: false, docName: '', submitter: '', verificationId: 0 }" class="bg-surface border border-outline-variant rounded-lg overflow-hidden">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
-            <tr>
-                <th class="p-4 font-semibold text-on-surface-variant">Document Type</th>
-                <th class="p-4 font-semibold text-on-surface-variant">Submitted By</th>
-                <th class="p-4 font-semibold text-on-surface-variant">Date Submitted</th>
-                <th class="p-4 font-semibold text-on-surface-variant">Status</th>
-                <th class="p-4 font-semibold text-on-surface-variant text-right">Actions</th>
-            </tr>
-        </thead>
-        <tbody class="text-sm text-on-surface">
-            <?php if (!empty($verifications)): ?>
-                <?php foreach ($verifications as $v): ?>
-                <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
-                    <td class="p-4 flex items-center gap-3">
-                        <div class="bg-surface-container p-2 rounded border border-outline-variant">
-                            <span class="material-symbols-outlined text-outline-variant text-[20px]">badge</span>
-                        </div>
-                        <span class="font-medium">Agent KTP (ID Card)</span>
-                    </td>
-                    <td class="p-4"><?= esc($v['first_name'] . ' ' . $v['last_name']) ?></td>
-                    <td class="p-4 text-on-surface-variant"><?= date('M d, Y h:i A', strtotime($v['created_date'])) ?></td>
-                    <td class="p-4">
-                        <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v['approval_status']) ?></span>
-                    </td>
-                    <td class="p-4 text-right">
-                        <button @click="showModal = true; 
-                                        docName = 'Agent KTP (ID Card)'; 
-                                        submitter = '<?= esc(addslashes($v['first_name'] . ' ' . $v['last_name'])) ?>';
-                                        verificationId = <?= $v['id'] ?>;" 
-                                class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition">
-                            View File
-                        </button>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
+<div x-data="{ showModal: false, docName: '', submitter: '', verificationId: 0, docUrl: '' }" class="pb-12">
+    
+    <div class="bg-surface border border-outline-variant rounded-lg overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
                 <tr>
-                    <td colspan="5" class="p-6 text-center text-on-surface-variant italic">No documents currently pending verification.</td>
+                    <th class="p-4 font-semibold text-on-surface-variant">Document Type</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Submitted By</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Date Submitted</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Status</th>
+                    <th class="p-4 font-semibold text-on-surface-variant text-right">Actions</th>
                 </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody class="text-sm text-on-surface">
+                <?php if (!empty($verifications)): ?>
+                    <?php foreach ($verifications as $v): ?>
+                        
+                        <?php 
+                            // Determine which document to show if multiple exist
+                            $docType = 'Agent KTP (ID Card)';
+                            $docPath = $v['ktp_document'];
+                            $icon = 'badge';
+                            
+                            // If they uploaded a business license, we can flag it here
+                            if(!empty($v['business_license'])) {
+                                $docType = 'Business License';
+                                $docPath = $v['business_license'];
+                                $icon = 'storefront';
+                            }
+                        ?>
 
-    <div x-show="showModal" 
-         style="display: none;"
-         class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
-        
-        <div @click.outside="showModal = false" 
-             x-show="showModal"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="transform opacity-0 scale-95"
-             x-transition:enter-end="transform opacity-100 scale-100"
-             class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+                        <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
+                            <td class="p-4 flex items-center gap-3">
+                                <div class="bg-surface-container p-2 rounded border border-outline-variant">
+                                    <span class="material-symbols-outlined text-outline-variant text-[20px]"><?= $icon ?></span>
+                                </div>
+                                <span class="font-medium"><?= $docType ?></span>
+                            </td>
+                            <td class="p-4"><?= esc($v['first_name'] . ' ' . $v['last_name']) ?></td>
+                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v['created_date'])) ?></td>
+                            <td class="p-4">
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v['approval_status']) ?></span>
+                            </td>
+                            <td class="p-4 text-right">
+                                <button @click="showModal = true; 
+                                                docName = '<?= $docType ?>'; 
+                                                submitter = '<?= esc(addslashes($v['first_name'] . ' ' . $v['last_name'])) ?>';
+                                                verificationId = <?= $v['id'] ?>;
+                                                docUrl = '<?= base_url('uploads/documents/' . $docPath) ?>';" 
+                                        class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
+                                    View File
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-on-surface-variant italic">
+                            <span class="material-symbols-outlined text-[48px] opacity-50 mb-2">task</span>
+                            <p>No documents currently pending verification.</p>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <?php if (isset($pager) && $pager) : ?>
+            <?= $pager->links('verifications', 'tailwind') ?>
+        <?php endif ?>
+
+    </div>
+
+    <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showModal = false" x-show="showModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <div>
@@ -75,25 +97,31 @@
                 </button>
             </div>
 
-            <div class="p-6 bg-surface-container-low flex justify-center items-center min-h-[300px]">
-                <div class="flex flex-col items-center text-outline">
-                    <span class="material-symbols-outlined text-[64px] mb-2">image</span>
-                    <p class="text-sm">Document preview will load here from database</p>
-                </div>
+            <div class="p-6 bg-surface-container-low flex justify-center items-center min-h-[300px] max-h-[60vh] overflow-y-auto">
+                
+                <template x-if="docUrl && !docUrl.endsWith('/')">
+                    <img :src="docUrl" alt="Document Preview" class="max-w-full rounded border border-outline-variant shadow-sm" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center text-outline-variant\'><span class=\'material-symbols-outlined text-[48px] mb-2\'>broken_image</span><p>Image file not found on server.</p></div>';">
+                </template>
+                
+                <template x-if="!docUrl || docUrl.endsWith('/')">
+                    <div class="flex flex-col items-center text-outline-variant">
+                        <span class="material-symbols-outlined text-[48px] mb-2">image_not_supported</span>
+                        <p class="text-sm">No valid document file uploaded.</p>
+                    </div>
+                </template>
+
             </div>
 
             <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
-                
                 <form :action="'<?= base_url('admin/verifications/process/') ?>' + verificationId" method="POST">
                     <input type="hidden" name="action" value="reject">
-                    <button type="submit" class="px-6 py-2 border border-error text-error rounded font-semibold hover:bg-error-container transition">Reject</button>
+                    <button type="submit" class="px-6 py-2 border border-error text-error rounded font-semibold hover:bg-error-container transition" onsubmit="return confirm('Reject this document?');">Reject</button>
                 </form>
                 
                 <form :action="'<?= base_url('admin/verifications/process/') ?>' + verificationId" method="POST">
                     <input type="hidden" name="action" value="approve">
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Approve Document</button>
                 </form>
-
             </div>
         </div>
     </div>
