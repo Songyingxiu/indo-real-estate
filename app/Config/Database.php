@@ -26,10 +26,10 @@ class Database extends Config
      */
     public array $default = [
         'DSN'          => '',
-        'hostname'     => 'localhost',
-        'username'     => '',
-        'password'     => '',
-        'database'     => '',
+        'hostname'     => 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
+        'username'     => 'oKo9hIjmpDNTezw.root',
+        'password'     => 'YOUR_REAL_PASSWORD_HERE',
+        'database'     => 'indo_real_estate',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
@@ -37,13 +37,13 @@ class Database extends Config
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
         'swapPre'      => '',
-        'encrypt' => [
-                    'ssl_verify' => false
-                    ],
+        'encrypt'      => [
+            'ssl_verify' => false
+        ],
         'compress'     => false,
         'strictOn'     => false,
         'failover'     => [],
-        'port'         => 3306,
+        'port'         => 4000,
         'numberNative' => false,
         'foundRows'    => false,
         'dateFormat'   => [
