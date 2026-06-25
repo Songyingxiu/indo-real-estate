@@ -1,6 +1,6 @@
 <?= $this->extend('admin/layout/master') ?>
-
 <?= $this->section('content') ?>
+
 <div class="mb-stack-lg mt-4">
     <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
     <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace.</p>
@@ -8,16 +8,18 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
     
-    <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
-        <div class="flex justify-between items-start mb-stack-sm">
-            <span class="font-label-md text-label-md text-on-surface-variant">Pending Tasks</span>
-            <span class="material-symbols-outlined text-primary">assignment_late</span>
+    <?php if(session()->get('role_id') == 4): ?>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
+            <div class="flex justify-between items-start mb-stack-sm">
+                <span class="font-label-md text-label-md text-on-surface-variant">Pending Tasks</span>
+                <span class="material-symbols-outlined text-primary">assignment_late</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingTasks ?? 0) ?></div>
+            <div class="font-caption text-caption text-error flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">trending_up</span> Action Required
+            </div>
         </div>
-        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingTasks) ?></div>
-        <div class="font-caption text-caption text-error flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span> +12% from yesterday
-        </div>
-    </div>
+    <?php endif; ?>
     
     <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
         <div class="flex justify-between items-start mb-stack-sm">
@@ -26,7 +28,7 @@
         </div>
         <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($totalUsers) ?></div>
         <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span> +5% this week
+            <span class="material-symbols-outlined text-[14px]">trending_up</span> Platform Total
         </div>
     </div>
     
@@ -37,89 +39,91 @@
         </div>
         <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($activeProperties) ?></div>
         <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span> +8% this month
+            <span class="material-symbols-outlined text-[14px]">trending_up</span> Published Listings
         </div>
     </div>
     
-    <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
-        <div class="flex justify-between items-start mb-stack-sm">
-            <span class="font-label-md text-label-md text-on-surface-variant">Moderation Queue</span>
-            <span class="material-symbols-outlined text-primary">gavel</span>
+    <?php if(session()->get('role_id') == 4): ?>
+        <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
+            <div class="flex justify-between items-start mb-stack-sm">
+                <span class="font-label-md text-label-md text-on-surface-variant">Moderation Queue</span>
+                <span class="material-symbols-outlined text-primary">gavel</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingProperties ?? 0) ?></div>
+            <div class="font-caption text-caption text-error flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">trending_up</span> Needs attention
+            </div>
         </div>
-        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingProperties) ?></div>
-        <div class="font-caption text-caption text-error flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span> Needs attention
-        </div>
-    </div>
+    <?php endif; ?>
 
 </div>
 
-<!-- VERIFICATION CENTER TABLE -->
-<div class="bg-surface-container-lowest border border-outline-variant rounded-lg mt-8 shadow-sm">
-    <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low rounded-t-lg">
-        <div>
-            <h2 class="text-xl font-bold text-on-surface">Verification Center</h2>
-            <p class="text-sm text-on-surface-variant mt-1">Pending documents and payments requiring manual review.</p>
+<?php if(session()->get('role_id') == 4): ?>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg mt-8 shadow-sm">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low rounded-t-lg">
+            <div>
+                <h2 class="text-xl font-bold text-on-surface">Verification Center</h2>
+                <p class="text-sm text-on-surface-variant mt-1">Pending documents and payments requiring manual review.</p>
+            </div>
+            <a href="<?= base_url('admin/verifications') ?>" class="text-primary font-semibold flex items-center gap-1 hover:bg-primary-container hover:text-on-primary-container px-3 py-2 rounded transition-colors">
+                View All <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
         </div>
-        <a href="<?= base_url('admin/verifications') ?>" class="text-primary font-semibold flex items-center gap-1 hover:bg-primary-container hover:text-on-primary-container px-3 py-2 rounded transition-colors">
-            View All <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </a>
-    </div>
-    
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead class="bg-surface border-b border-outline-variant">
-                <tr>
-                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Type</th>
-                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Submitted By</th>
-                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Date</th>
-                    <th class="p-4 font-semibold text-sm text-on-surface-variant">Status</th>
-                    <th class="p-4 font-semibold text-sm text-on-surface-variant text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="text-sm text-on-surface">
-                <?php if(!empty($verifications)): ?>
-                    <?php foreach($verifications as $task): ?>
-                        <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                            <td class="p-4 flex items-center gap-3">
-                                <div class="bg-surface-container p-2 rounded border border-outline-variant">
-                                    <span class="material-symbols-outlined text-outline-variant"><?= esc($task['icon']) ?></span>
-                                </div>
-                                <span class="font-medium text-primary"><?= esc($task['type']) ?></span>
-                            </td>
-                            <td class="p-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-full bg-surface-container-high text-xs flex items-center justify-center font-bold text-on-surface-variant">
-                                        <?= esc($task['initials']) ?>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-surface border-b border-outline-variant">
+                    <tr>
+                        <th class="p-4 font-semibold text-sm text-on-surface-variant">Type</th>
+                        <th class="p-4 font-semibold text-sm text-on-surface-variant">Submitted By</th>
+                        <th class="p-4 font-semibold text-sm text-on-surface-variant">Date</th>
+                        <th class="p-4 font-semibold text-sm text-on-surface-variant">Status</th>
+                        <th class="p-4 font-semibold text-sm text-on-surface-variant text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm text-on-surface">
+                    <?php if(!empty($verifications)): ?>
+                        <?php foreach($verifications as $task): ?>
+                            <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
+                                <td class="p-4 flex items-center gap-3">
+                                    <div class="bg-surface-container p-2 rounded border border-outline-variant">
+                                        <span class="material-symbols-outlined text-outline-variant"><?= esc($task['icon']) ?></span>
                                     </div>
-                                    <?= esc($task['submitter']) ?>
+                                    <span class="font-medium text-primary"><?= esc($task['type']) ?></span>
+                                </td>
+                                <td class="p-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-surface-container-high text-xs flex items-center justify-center font-bold text-on-surface-variant">
+                                            <?= esc($task['initials']) ?>
+                                        </div>
+                                        <?= esc($task['submitter']) ?>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($task['date'])) ?></td>
+                                <td class="p-4">
+                                    <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold">
+                                        <?= esc($task['status']) ?>
+                                    </span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <a href="<?= base_url('admin/verifications') ?>" class="bg-[#2d3142] text-white px-4 py-1.5 rounded font-semibold hover:bg-opacity-90 transition mr-2 shadow-sm inline-block">Review</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-on-surface-variant">
+                                <div class="flex flex-col items-center">
+                                    <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2">task_alt</span>
+                                    <p>No pending verifications found! You are all caught up.</p>
                                 </div>
-                            </td>
-                            <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($task['date'])) ?></td>
-                            <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold">
-                                    <?= esc($task['status']) ?>
-                                </span>
-                            </td>
-                            <td class="p-4 text-right">
-                                <button class="bg-[#2d3142] text-white px-4 py-1.5 rounded font-semibold hover:bg-opacity-90 transition mr-2 shadow-sm">Review</button>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="5" class="p-8 text-center text-on-surface-variant">
-                            <div class="flex flex-col items-center">
-                                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2">task_alt</span>
-                                <p>No pending verifications found! You are all caught up.</p>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+<?php endif; ?>
 
 <?= $this->endSection() ?>
-        
