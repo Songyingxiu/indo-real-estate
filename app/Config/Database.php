@@ -37,7 +37,9 @@ class Database extends Config
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
         'swapPre'      => '',
-        'encrypt'      => true,
+        'encrypt' => [
+                    'ssl_verify' => false
+                    ],
         'compress'     => false,
         'strictOn'     => false,
         'failover'     => [],
