@@ -13,29 +13,30 @@ class Moderation extends BaseController
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
 
         $propertyModel = new PropertyModel();
-        $pendingProperty = $propertyModel->where('approval_status', 'Pending Review')->first();
+        
+        // Grab ALL pending properties and join the users table to get the agent's name
+        $propertyModel->select('properties.*, users.first_name, users.last_name');
+        $propertyModel->join('users', 'users.id = properties.owner_id', 'left');
+        $data['properties'] = $propertyModel->where('approval_status', 'Pending Review')->findAll();
 
-        if ($pendingProperty) {
-            $userModel = new UserModel();
-            $owner = $userModel->find($pendingProperty['owner_id']);
-            $pendingProperty['owner_name'] = ($owner['first_name'] ?? '') . ' ' . ($owner['last_name'] ?? '');
-        }
-
-        $data['property'] = $pendingProperty;
         return view('admin/moderation', $data);
     }
 
     public function approve($id)
     {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+        
         $propertyModel = new PropertyModel();
         $propertyModel->update($id, ['approval_status' => 'Published']);
-        return redirect()->to(base_url('admin/moderation'))->with('success', 'Property published!');
+        return redirect()->to(base_url('admin/moderation'))->with('success', 'Property successfully published to the marketplace!');
     }
 
     public function reject($id)
     {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+        
         $propertyModel = new PropertyModel();
         $propertyModel->update($id, ['approval_status' => 'Rejected']);
-        return redirect()->to(base_url('admin/moderation'))->with('error', 'Property rejected.');
+        return redirect()->to(base_url('admin/moderation'))->with('error', 'Property listing rejected.');
     }
 }

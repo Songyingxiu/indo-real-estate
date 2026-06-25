@@ -93,13 +93,16 @@
     <div class="px-margin-desktop mt-auto flex flex-col gap-unit pt-stack-md border-t border-outline-variant mx-4">
         
         <?php if(session()->get('role_id') == 4): ?>
-            <button class="w-full bg-primary-container text-on-primary-container rounded font-label-md text-label-md py-2 mb-stack-sm hover:opacity-90 transition-opacity">Generate Report</button>
+            <a href="<?= base_url('admin/reports/export') ?>" class="w-full bg-primary-container text-on-primary-container rounded font-label-md text-label-md py-2 mb-stack-sm hover:opacity-90 transition-opacity text-center block shadow-sm">
+                Generate Report
+            </a>
         <?php endif; ?>
 
-        <a class="flex items-center gap-stack-sm py-2 px-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg transition-all" href="#">
-            <span class="material-symbols-outlined">help</span>
+        <a class="flex items-center gap-stack-sm py-2 px-2 <?= (current_url() == base_url('admin/support')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all" href="<?= base_url('admin/support') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/support')) ? 'icon-fill' : '' ?>">help</span>
             <span class="font-label-md text-label-md">Support</span>
         </a>
+        
         <a class="flex items-center gap-stack-sm py-2 px-2 text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-all" href="<?= base_url('logout') ?>">
             <span class="material-symbols-outlined">logout</span>
             <span class="font-label-md text-label-md">Sign Out</span>
