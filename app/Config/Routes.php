@@ -73,5 +73,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     // Reports and Support
     $routes->get('reports/export', 'Reports::export');
     $routes->get('support', 'Support::index');
+
+    // Profile & Settings
+    $routes->get('profile', 'Profile::index');
+    $routes->post('profile/update', 'Profile::update');
+    $routes->post('profile/update-password', 'Profile::updatePassword');
     
 });

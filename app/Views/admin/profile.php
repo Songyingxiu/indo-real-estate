@@ -1,0 +1,202 @@
+<?= $this->extend('admin/layout/master') ?>
+<?= $this->section('content') ?>
+
+<div class="pb-12" x-data="{ showEditModal: false, showPasswordModal: false }">
+
+    <div class="mt-4 mb-6">
+        <h1 class="text-2xl font-bold text-on-surface">My Profile & Settings</h1>
+        <p class="text-on-surface-variant">Manage your personal information and account preferences.</p>
+    </div>
+
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-1">
+            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm flex flex-col items-center text-center">
+                <?php 
+                    $initials = strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'] ?? '', 0, 1));
+                    $roleName = 'User';
+                    if($user['role_id'] == 4) $roleName = 'Administrator';
+                    if($user['role_id'] == 3) $roleName = 'Real Estate Agent';
+                    if($user['role_id'] == 2) $roleName = 'Property Owner';
+                    if($user['role_id'] == 1) $roleName = 'Buyer';
+                ?>
+                
+                <div class="w-24 h-24 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-3xl font-bold mb-4 shadow-inner">
+                    <?= esc($initials) ?>
+                </div>
+                
+                <h2 class="text-xl font-bold text-on-surface"><?= esc($user['first_name'] . ' ' . $user['last_name']) ?></h2>
+                <p class="text-primary font-medium text-sm mb-4"><?= esc($roleName) ?></p>
+                
+                <div class="w-full border-t border-outline-variant pt-4 mt-2">
+                    <button @click="showEditModal = true" class="w-full py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">edit</span> Edit Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            
+            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">person</span> Personal Information
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm font-semibold text-on-surface-variant mb-1">Full Name</p>
+                        <p class="text-on-surface"><?= esc($user['first_name'] . ' ' . $user['last_name']) ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-on-surface-variant mb-1">Email Address</p>
+                        <p class="text-on-surface"><?= esc($user['email']) ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-on-surface-variant mb-1">Phone Number</p>
+                        <p class="text-on-surface"><?= esc($user['phone_number'] ?? 'Not provided') ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-on-surface-variant mb-1">Member Since</p>
+                        <p class="text-on-surface"><?= date('F j, Y', strtotime($user['created_date'])) ?></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">shield_lock</span> Security Settings
+                </h3>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-on-surface">Two-Factor Authentication (2FA)</p>
+                            <p class="text-sm text-on-surface-variant">Require an extra security code when logging in.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-outline-variant flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-on-surface">Account Password</p>
+                            <p class="text-sm text-on-surface-variant">Ensure your account is using a long, random password.</p>
+                        </div>
+                        <button @click="showPasswordModal = true" class="px-4 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm" id="settings">
+                <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">settings</span> App Preferences
+                </h3>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-on-surface">Email Notifications</p>
+                            <p class="text-sm text-on-surface-variant">Receive alerts for new leads and verifications.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-outline-variant">
+                        <div>
+                            <p class="font-semibold text-on-surface">Dark Mode Default</p>
+                            <p class="text-sm text-on-surface-variant">Force the dashboard to always load in dark theme.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer" x-data="{ isDark: document.documentElement.classList.contains('dark') }">
+                            <input type="checkbox" x-model="isDark" @change="isDark ? (document.documentElement.classList.add('dark'), localStorage.theme = 'dark') : (document.documentElement.classList.remove('dark'), localStorage.theme = 'light')" class="sr-only peer">
+                            <div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showEditModal = false" x-show="showEditModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Edit Profile</h2>
+                <button type="button" @click="showEditModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form action="<?= base_url('admin/profile/update') ?>" method="POST">
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">First Name</label>
+                            <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Last Name</label>
+                            <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Email Address</label>
+                        <input type="email" name="email" value="<?= esc($user['email']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number</label>
+                        <input type="text" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showEditModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div x-show="showPasswordModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showPasswordModal = false" x-show="showPasswordModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Change Password</h2>
+                <button type="button" @click="showPasswordModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form action="<?= base_url('admin/profile/update-password') ?>" method="POST">
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Current Password</label>
+                        <input type="password" name="current_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">New Password</label>
+                        <input type="password" name="new_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        <p class="text-xs text-on-surface-variant mt-1">Must be at least 8 characters long.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Confirm New Password</label>
+                        <input type="password" name="confirm_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showPasswordModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<?= $this->endSection() ?>
