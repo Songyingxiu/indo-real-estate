@@ -30,16 +30,25 @@ abstract class BaseController extends Controller
     /**
      * @return void
      */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
     {
-        // Load here all helpers you want to be available in your controllers that extend BaseController.
-        // Caution: Do not put the this below the parent::initController() call below.
-        // $this->helpers = ['form', 'url'];
-
-        // Caution: Do not edit this line.
+        // Do Not Edit This Line
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+        // Fetch Notifications Globally
+        $db = \Config\Database::connect();
+        
+        // Example: Let's fetch the 5 newest leads to use as "Notifications"
+        $notifications = $db->table('leads')
+            ->select('leads.*, properties.title as property_title, users.first_name, users.last_name')
+            ->join('properties', 'properties.id = leads.property_id', 'left')
+            ->join('users', 'users.id = leads.buyer_id', 'left')
+            ->orderBy('leads.created_date', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResultObject();
+
+        // Share the variable with every view
+        $GLOBALS['global_notifications'] = $notifications;
     }
 }
