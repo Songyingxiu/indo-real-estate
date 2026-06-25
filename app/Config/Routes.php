@@ -37,6 +37,12 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('moderation', 'Moderation::index');
     $routes->post('moderation/approve/(:num)', 'Moderation::approve/$1');
     $routes->post('moderation/reject/(:num)', 'Moderation::reject/$1');
+
+    // Subscriptions Management
+    $routes->get('subscriptions', 'Subscriptions::index');
+    $routes->post('subscriptions/store', 'Subscriptions::store');
+    $routes->post('subscriptions/update/(:num)', 'Subscriptions::update/$1');
+    $routes->post('subscriptions/delete/(:num)', 'Subscriptions::delete/$1');
     
     // Master Data & Configuration
     $routes->get('master-data', 'MasterData::index');
@@ -51,7 +57,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
     
     // Lead & Verification Management
-    $routes->get('leads', 'Leads::index');                
+    $routes->get('leads', 'Leads::index');       
+    $routes->post('leads/update-status/(:num)', 'Leads::updateStatus/$1');
+    $routes->post('leads/delete/(:num)', 'Leads::delete/$1');         
     $routes->get('verifications', 'Verifications::index'); 
     $routes->post('verifications/process/(:num)', 'Verifications::process/$1');
     
@@ -61,5 +69,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('cms/save', 'Cms::savePost');
     $routes->get('seo', 'Seo::index');
     $routes->post('seo/save', 'Seo::saveSettings');
+
+    // Reports and Support
+    $routes->get('reports/export', 'Reports::export');
+    $routes->get('support', 'Support::index');
     
 });
