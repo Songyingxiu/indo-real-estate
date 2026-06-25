@@ -28,7 +28,7 @@ class Database extends Config
         'DSN'          => '',
         'hostname'     => 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
         'username'     => 'oKo9hIjmpDNTezw.root',
-        'password'     => 'YOUR_REAL_PASSWORD_HERE',
+        'password'     => 'YOUR_ACTUAL_GENERATED_TIDB_PASSWORD',
         'database'     => 'indo_real_estate',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
@@ -36,13 +36,9 @@ class Database extends Config
         'DBDebug'      => true,
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
-        'swapPre'      => '',
         'encrypt'      => [
             'ssl_verify' => false
         ],
-        'compress'     => false,
-        'strictOn'     => false,
-        'failover'     => [],
         'port'         => 4000,
         'numberNative' => false,
         'foundRows'    => false,
