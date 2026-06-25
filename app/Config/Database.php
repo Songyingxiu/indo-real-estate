@@ -26,19 +26,17 @@ class Database extends Config
      */
     public array $default = [
         'DSN'          => '',
-        'hostname'     => 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
-        'username'     => 'oKo9hIjmpDNTezw.root',
-        'password'     => 'YOUR_ACTUAL_GENERATED_TIDB_PASSWORD',
-        'database'     => 'indo_real_estate',
+        'hostname'     => '',
+        'username'     => '',
+        'password'     => '',
+        'database'     => '',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
         'DBDebug'      => true,
         'charset'      => 'utf8mb4',
         'DBCollat'     => 'utf8mb4_general_ci',
-        'encrypt'      => [
-            'ssl_verify' => false
-        ],
+        'encrypt'      => ['ssl_verify' => false],
         'port'         => 4000,
         'numberNative' => false,
         'foundRows'    => false,
@@ -192,9 +190,13 @@ class Database extends Config
     {
         parent::__construct();
 
-        // Ensure that we always set the database group to 'tests' if
-        // we are currently running an automated test suite, so that
-        // we don't overwrite live data on accident.
+        $this->default['hostname'] = env('database_default_hostname', 'localhost');
+        $this->default['username'] = env('database_default_username', 'root');
+        $this->default['password'] = env('database_default_password', '');
+        $this->default['database'] = env('database_default_database', 'indo_real_estate');
+        $this->default['DBDriver'] = env('database_default_DBDriver', 'MySQLi');
+        $this->default['port']     = (int) env('database_default_port', 4000);
+
         if (ENVIRONMENT === 'testing') {
             $this->defaultGroup = 'tests';
         }
