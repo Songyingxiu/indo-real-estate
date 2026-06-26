@@ -6,14 +6,31 @@
         
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4">Property Details</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
+                stateId: '', 
+                cities: [], 
+                isLoading: false,
+                fetchCities() {
+                    if (!this.stateId) {
+                        this.cities = [];
+                        return;
+                    }
+                    this.isLoading = true;
+                    fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.cities = data;
+                            this.isLoading = false;
+                        });
+                }
+            }">
                 
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Property Title *</label>
                     <input type="text" name="title" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
-                <!-- Dynamic Property Type Dropdown -->
                 <div>
                     <label class="block font-semibold mb-2">Property Type *</label>
                     <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
@@ -28,10 +45,9 @@
                     </select>
                 </div>
 
-                <!-- Dynamic Region/State Dropdown -->
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
-                    <select name="state_id" id="state_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <select name="state_id" id="state_id" x-model="stateId" @change="fetchCities()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="" disabled selected>Select a region...</option>
                         <?php if (!empty($states)): ?>
                             <?php foreach ($states as $state): ?>
@@ -40,6 +56,18 @@
                         <?php else: ?>
                             <option value="" disabled>No regions found</option>
                         <?php endif; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">
+                        City * <span x-show="isLoading" style="display: none;" class="text-xs text-primary font-normal ml-2 animate-pulse">Fetching cities...</span>
+                    </label>
+                    <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0">
+                        <option value="" disabled selected>Select a city...</option>
+                        <template x-for="city in cities" :key="city.id">
+                            <option :value="city.id" x-text="city.city_name || city.name"></option>
+                        </template>
                     </select>
                 </div>
 

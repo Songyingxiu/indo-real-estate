@@ -6,7 +6,8 @@ use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\PropertyImageModel;
 use App\Models\PropertyTypeModel; 
-use App\Models\StateModel;        
+use App\Models\StateModel;
+use App\Models\CityModel; // ADDED: City Model for AJAX
 
 class Properties extends BaseController
 {
@@ -43,23 +44,25 @@ class Properties extends BaseController
         $imageModel = new PropertyImageModel();
         
         $data = [
-            'title'           => $this->request->getPost('title'),
-            'description'     => $this->request->getPost('description'),
-            'listing_type'    => $this->request->getPost('listing_type'),
-            'property_type_id'=> $this->request->getPost('property_type_id'),
-            'tax_price'       => $this->request->getPost('tax_price'),
-            'bed'             => $this->request->getPost('bed'),
-            'bath'            => $this->request->getPost('bath'),
-            'total_land_area' => $this->request->getPost('total_land_area'),
-            'usable_area'     => $this->request->getPost('usable_area'),
-            'parking'         => $this->request->getPost('parking'),
-            'total_parking'   => $this->request->getPost('total_parking'),
-            'total_floors'    => $this->request->getPost('total_floors'),
-            'year_built'      => $this->request->getPost('year_built'),
-            'address_line_1'  => $this->request->getPost('address_line_1'),
-            'owner_id'        => session()->get('user_id'),
-            'approval_status' => 'Pending Review',
-            'status'          => 'Active',
+            'title'            => $this->request->getPost('title'),
+            'description'      => $this->request->getPost('description'),
+            'listing_type'     => $this->request->getPost('listing_type'),
+            'property_type_id' => $this->request->getPost('property_type_id'),
+            'state_id'         => $this->request->getPost('state_id'), // Ensures region is saved
+            'city_id'          => $this->request->getPost('city_id'),  // Ensures city is saved
+            'tax_price'        => $this->request->getPost('tax_price'),
+            'bed'              => $this->request->getPost('bed'),
+            'bath'             => $this->request->getPost('bath'),
+            'total_land_area'  => $this->request->getPost('total_land_area'),
+            'usable_area'      => $this->request->getPost('usable_area'),
+            'parking'          => $this->request->getPost('parking'),
+            'total_parking'    => $this->request->getPost('total_parking'),
+            'total_floors'     => $this->request->getPost('total_floors'),
+            'year_built'       => $this->request->getPost('year_built'),
+            'address_line_1'   => $this->request->getPost('address_line_1'),
+            'owner_id'         => session()->get('user_id'),
+            'approval_status'  => 'Pending Review',
+            'status'           => 'Active',
         ];
 
         $propertyModel->insert($data);
@@ -91,5 +94,13 @@ class Properties extends BaseController
         }
 
         return redirect()->to(base_url('admin/properties'))->with('success', 'Property successfully submitted for moderation!');
+    }
+    
+    public function getCities($stateId)
+    {
+        $cityModel = new CityModel();
+        $cities = $cityModel->where('state_id', $stateId)->findAll();
+        
+        return $this->response->setJSON($cities);
     }
 }
