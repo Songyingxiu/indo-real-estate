@@ -5,6 +5,8 @@
 use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\PropertyImageModel;
+use App\Models\PropertyTypeModel; 
+use App\Models\StateModel;        
 
 class Properties extends BaseController
 {
@@ -25,7 +27,14 @@ class Properties extends BaseController
 
     public function create()
     {
-        return view('admin/properties/create');
+        $propertyTypeModel = new PropertyTypeModel();
+        $stateModel = new StateModel();
+        
+        // Fetch Master Data for the dropdown menus
+        $data['propertyTypes'] = $propertyTypeModel->findAll();
+        $data['states'] = $stateModel->where('status', 'Active')->findAll();
+        
+        return view('admin/properties/create', $data);
     }
 
     public function store()
@@ -37,6 +46,7 @@ class Properties extends BaseController
             'title'           => $this->request->getPost('title'),
             'description'     => $this->request->getPost('description'),
             'listing_type'    => $this->request->getPost('listing_type'),
+            'property_type_id'=> $this->request->getPost('property_type_id'),
             'tax_price'       => $this->request->getPost('tax_price'),
             'bed'             => $this->request->getPost('bed'),
             'bath'            => $this->request->getPost('bath'),

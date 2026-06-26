@@ -7,10 +7,33 @@
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4">Property Details</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Property Title *</label>
                     <input type="text" name="title" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Property Type *</label>
+                    <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                        <option value="" disabled selected>Select a type...</option>
+                        <?php foreach ($propertyTypes as $type): ?>
+                            <option value="<?= esc($type['id']) ?>"><?= esc($type['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Region / State *</label>
+                    <select name="state_id" id="state_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                        <option value="" disabled selected>Select a region...</option>
+                        <?php foreach ($states as $state): ?>
+                            <option value="<?= esc($state['id']) ?>"><?= esc($state['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+
                 <div>
                     <label class="block font-semibold mb-2">Listing Type *</label>
                     <select name="listing_type" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
@@ -18,14 +41,17 @@
                         <option value="Rent">For Rent</option>
                     </select>
                 </div>
+                
                 <div>
                     <label class="block font-semibold mb-2">Asking Price (IDR) *</label>
                     <input type="number" name="tax_price" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
+                
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Address *</label>
                     <input type="text" name="address_line_1" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
+                
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Description</label>
                     <textarea name="description" rows="4" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded"></textarea>
