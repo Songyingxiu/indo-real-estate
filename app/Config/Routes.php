@@ -32,7 +32,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('properties', 'Properties::index');
     $routes->get('properties/create', 'Properties::create');
     $routes->post('properties/store', 'Properties::store');
-    $routes->get('properties/get-cities/(:num)', 'Properties::getCities/$1');
+    $routes->get('properties/get-cities/(:any)', 'Properties::getCities/$1');
     
     // Property Moderation Queue
     $routes->get('moderation', 'Moderation::index');

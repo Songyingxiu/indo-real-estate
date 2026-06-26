@@ -17,10 +17,19 @@
                         return;
                     }
                     this.isLoading = true;
+                    // Safely fetch the data and log any errors to the console
                     fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
-                        .then(response => response.json())
+                        .then(response => {
+                            if(!response.ok) throw new Error('Server returned an error. Check column names.');
+                            return response.json();
+                        })
                         .then(data => {
                             this.cities = data;
+                            this.isLoading = false;
+                        })
+                        .catch(error => {
+                            console.error('AJAX Error:', error);
+                            this.cities = [];
                             this.isLoading = false;
                         });
                 }
@@ -60,11 +69,10 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">
-                        City * <span x-show="isLoading" style="display: none;" class="text-xs text-primary font-normal ml-2 animate-pulse">Fetching cities...</span>
-                    </label>
-                    <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0">
-                        <option value="" disabled selected>Select a city...</option>
+                    <label class="block font-semibold mb-2">City *</label>
+                    <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
+                        <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
+                        
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" x-text="city.city_name || city.name"></option>
                         </template>
