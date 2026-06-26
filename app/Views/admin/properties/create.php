@@ -13,25 +13,33 @@
                     <input type="text" name="title" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
-                <!-- ADDED: Dynamic Property Type Dropdown -->
+                <!-- Dynamic Property Type Dropdown -->
                 <div>
                     <label class="block font-semibold mb-2">Property Type *</label>
                     <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="" disabled selected>Select a type...</option>
-                        <?php foreach ($propertyTypes as $type): ?>
-                            <option value="<?= esc($type->id) ?>"><?= esc($type->type_name) ?></option>
-                        <?php endforeach; ?>
+                        <?php if (!empty($propertyTypes)): ?>
+                            <?php foreach ($propertyTypes as $type): ?>
+                                <option value="<?= esc($type->id) ?>"><?= esc($type->type_name ?? $type->name) ?></option>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <option value="" disabled>No property types found</option>
+                        <?php endif; ?>
                     </select>
                 </div>
 
-                <!-- ADDED: Dynamic Region/State Dropdown -->
+                <!-- Dynamic Region/State Dropdown -->
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
                     <select name="state_id" id="state_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="" disabled selected>Select a region...</option>
-                        <?php foreach ($states as $state): ?>
-                            <option value="<?= esc($state->id) ?>"><?= esc($state->region_name) ?></option>
-                        <?php endforeach; ?>
+                        <?php if (!empty($states)): ?>
+                            <?php foreach ($states as $state): ?>
+                                <option value="<?= esc($state->id) ?>"><?= esc($state->region_name ?? $state->name) ?></option>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <option value="" disabled>No regions found</option>
+                        <?php endif; ?>
                     </select>
                 </div>
 
