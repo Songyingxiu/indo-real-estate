@@ -73,6 +73,53 @@
         <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200">
             <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg">
                 <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">format_list_bulleted</span> Property Features (Amenities)
+                </h2>
+                <form action="<?= base_url('admin/master-data/store-feature') ?>" method="POST" class="flex gap-2">
+                    <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add feature (e.g., Swimming Pool, WiFi)..." type="text"/>
+                    <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-colors flex items-center gap-1 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[18px]">add</span> Add
+                    </button>
+                </form>
+            </div>
+            <div class="flex-1 overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface border-b border-outline-variant">
+                            <th class="py-3 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Feature Name</th>
+                            <th class="py-3 px-6 font-label-md text-label-md text-on-surface-variant font-medium text-right w-32">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(!empty($features)): foreach($features as $feature): ?>
+                            <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
+                                <td class="py-3 px-6 font-body-md text-body-md text-on-surface flex items-center gap-3">
+                                    <span class="font-semibold"><?= esc($feature->name ?? $feature->feature_name ?? 'Unknown Feature') ?></span>
+                                </td>
+                                <td class="py-3 px-6 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature/' . $feature->id) ?>'; deleteMessage = 'Are you sure you want to delete this feature?';" class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; else: ?>
+                            <tr><td colspan="2" class="py-6 text-center text-outline">No features found.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+                
+                <?php if ($pager) : ?>
+                    <?= $pager->links('features', 'tailwind') ?>
+                <?php endif ?>
+                
+            </div>
+        </section>
+
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200">
+            <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg">
+                <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">map</span> Regions / States
                 </h2>
                 <form action="<?= base_url('admin/master-data/store-state') ?>" method="POST" class="flex gap-2">
