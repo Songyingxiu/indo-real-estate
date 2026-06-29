@@ -7,7 +7,9 @@ use App\Models\PropertyModel;
 use App\Models\PropertyImageModel;
 use App\Models\PropertyTypeModel; 
 use App\Models\StateModel;
-use App\Models\CityModel; // ADDED: City Model for AJAX
+use App\Models\CityModel; 
+use App\Models\FeatureModel;          // ADDED
+use App\Models\PropertyFeatureModel;  // ADDED
 
 class Properties extends BaseController
 {
@@ -30,10 +32,13 @@ class Properties extends BaseController
     {
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
+        $featureModel = new FeatureModel(); // ADDED
         
-        // Fetch Master Data for the dropdown menus
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
+        
+        // Fetch active features for the checkboxes
+        $data['features'] = $featureModel->where('status', 'Active')->findAll();
         
         return view('admin/properties/create', $data);
     }
@@ -42,14 +47,16 @@ class Properties extends BaseController
     {
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
+        $propertyFeatureModel = new PropertyFeatureModel(); // ADDED
         
+        // --- 1. Save Core Property Data ---
         $data = [
             'title'            => $this->request->getPost('title'),
             'description'      => $this->request->getPost('description'),
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
-            'state_id'         => $this->request->getPost('state_id'), // Ensures region is saved
-            'city_id'          => $this->request->getPost('city_id'),  // Ensures city is saved
+            'state_id'         => $this->request->getPost('state_id'), 
+            'city_id'          => $this->request->getPost('city_id'),  
             'tax_price'        => $this->request->getPost('tax_price'),
             'bed'              => $this->request->getPost('bed'),
             'bath'             => $this->request->getPost('bath'),
@@ -68,6 +75,21 @@ class Properties extends BaseController
         $propertyModel->insert($data);
         $propertyId = $propertyModel->getInsertID();
 
+        // --- 2. Save Dynamic Features (Amenities) ---
+        $selectedFeatures = $this->request->getPost('features');
+        
+        // Safety Check: Only loop if features were actually checked!
+        if (!empty($selectedFeatures) && is_array($selectedFeatures)) {
+            foreach ($selectedFeatures as $featureId) {
+                $propertyFeatureModel->insert([
+                    'property_id' => $propertyId,
+                    'feature_id'  => $featureId,
+                    'status'      => 'Active'
+                ]);
+            }
+        }
+
+        // --- 3. Save Images ---
         if ($imagefile = $this->request->getFiles()) {
             if (array_key_exists('property_images', $imagefile)) {
                 $isFirst = true;
@@ -87,6 +109,7 @@ class Properties extends BaseController
             }
         }
 
+        // --- 4. Save Documents ---
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
             $shmName = $shmFile->getRandomName();

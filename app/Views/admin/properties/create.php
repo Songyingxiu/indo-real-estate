@@ -17,10 +17,9 @@
                         return;
                     }
                     this.isLoading = true;
-                    // Safely fetch the data and log any errors to the console
                     fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
                         .then(response => {
-                            if(!response.ok) throw new Error('Server returned an error. Check column names.');
+                            if(!response.ok) throw new Error('Server returned an error.');
                             return response.json();
                         })
                         .then(data => {
@@ -111,7 +110,25 @@
             </div>
         </div>
 
-        <div>
+        <div class="border-t border-outline-variant pt-6">
+            <h3 class="font-headline-md text-lg font-semibold mb-2">Features & Amenities</h3>
+            <p class="text-sm text-on-surface-variant mb-4">Select the premium amenities included with this property.</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <?php if (!empty($features)): ?>
+                    <?php foreach ($features as $feature): ?>
+                        <label class="flex items-center gap-2 cursor-pointer hover:bg-surface-bright p-2 rounded transition-colors">
+                            <input type="checkbox" name="features[]" value="<?= esc($feature->id) ?>" class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
+                            <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="text-sm text-on-surface-variant col-span-full">No additional features have been set up in Master Data.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="border-t border-outline-variant pt-6">
             <h3 class="font-headline-md text-lg font-semibold mb-4">Media & Legal Verification</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
