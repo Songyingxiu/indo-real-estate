@@ -1,15 +1,13 @@
 <?php namespace App\Controllers\Admin;
-/**
- * @author
- */
+
 use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\PropertyImageModel;
 use App\Models\PropertyTypeModel; 
 use App\Models\StateModel;
 use App\Models\CityModel; 
-use App\Models\FeatureModel;          // ADDED
-use App\Models\PropertyFeatureModel;  // ADDED
+use App\Models\FeatureModel;
+use App\Models\PropertyFeatureModel;
 
 class Properties extends BaseController
 {
@@ -32,12 +30,12 @@ class Properties extends BaseController
     {
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
-        $featureModel = new FeatureModel(); // ADDED
+        $featureModel = new FeatureModel(); 
         
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
         
-        // Fetch active features for the checkboxes
+        // Fetch active features from Master Data for the checkboxes
         $data['features'] = $featureModel->where('status', 'Active')->findAll();
         
         return view('admin/properties/create', $data);
@@ -47,9 +45,9 @@ class Properties extends BaseController
     {
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
-        $propertyFeatureModel = new PropertyFeatureModel(); // ADDED
+        $propertyFeatureModel = new PropertyFeatureModel(); 
         
-        // --- 1. Save Core Property Data ---
+        // --- 1. Save Core Property Data (Numbers & Text) ---
         $data = [
             'title'            => $this->request->getPost('title'),
             'description'      => $this->request->getPost('description'),
@@ -62,10 +60,6 @@ class Properties extends BaseController
             'bath'             => $this->request->getPost('bath'),
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
-            'parking'          => $this->request->getPost('parking'),
-            'total_parking'    => $this->request->getPost('total_parking'),
-            'total_floors'     => $this->request->getPost('total_floors'),
-            'year_built'       => $this->request->getPost('year_built'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
             'owner_id'         => session()->get('user_id'),
             'approval_status'  => 'Pending Review',
@@ -75,10 +69,10 @@ class Properties extends BaseController
         $propertyModel->insert($data);
         $propertyId = $propertyModel->getInsertID();
 
-        // --- 2. Save Dynamic Features (Amenities) ---
+        // --- 2. Save Dynamic Features (Checkboxes) ---
         $selectedFeatures = $this->request->getPost('features');
         
-        // Safety Check: Only loop if features were actually checked!
+        // Safety Check: Only save if the user actually checked some boxes
         if (!empty($selectedFeatures) && is_array($selectedFeatures)) {
             foreach ($selectedFeatures as $featureId) {
                 $propertyFeatureModel->insert([

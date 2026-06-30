@@ -19,6 +19,6 @@ class UserSeeder extends Seeder
             ['id' => 7, 'role_id' => 1, 'first_name' => 'Etna', 'last_name' => 'Crimson', 'phone_number' => '081234567896', 'email' => 'etna@buyer.com', 'password' => $defaultPassword, 'status' => 'Active', 'created_date' => $date], // Buyer
         ];
 
-        $this->db->table('users')->insertBatch($users);
+        $this->db->table('users')->ignore(true)->insertBatch($users);
     }
 }

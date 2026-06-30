@@ -71,7 +71,6 @@
                     <label class="block font-semibold mb-2">City *</label>
                     <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
                         <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
-                        
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" x-text="city.city_name || city.name"></option>
                         </template>
@@ -103,10 +102,10 @@
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <div><label class="block text-xs mb-1">Beds</label><input type="number" name="bed" class="w-full px-3 py-2 border rounded"></div>
-                <div><label class="block text-xs mb-1">Baths</label><input type="number" name="bath" class="w-full px-3 py-2 border rounded"></div>
-                <div><label class="block text-xs mb-1">Land (m2)</label><input type="number" name="total_land_area" class="w-full px-3 py-2 border rounded"></div>
-                <div><label class="block text-xs mb-1">Building (m2)</label><input type="number" name="usable_area" class="w-full px-3 py-2 border rounded"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Beds</label><input type="number" name="bed" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 3"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Baths</label><input type="number" name="bath" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 2"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Land (m2)</label><input type="number" name="total_land_area" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 150"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Building (m2)</label><input type="number" name="usable_area" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 120"></div>
             </div>
         </div>
 
