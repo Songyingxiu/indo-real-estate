@@ -7,7 +7,12 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // Public Facing Routes
-$routes->get('/', 'Auth::login');
+$routes->get('/', 'Home::index');            
+$routes->get('search', 'Home::search');      
+
+// Authentication Routes
+$routes->get('login', 'Auth::login');
+$routes->post('login', 'Auth::attemptLogin');
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');
