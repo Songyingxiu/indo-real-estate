@@ -3,8 +3,7 @@
 <main class="flex-grow">
     <section class="relative w-full h-[600px] flex items-center justify-center bg-surface-container-highest">
         <div class="absolute inset-0 z-0">
-            <!-- Updated realistic Hero Image -->
-            <img alt="Modern exterior at dusk" class="w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80">
+            <img alt="Modern exterior at dusk" class="w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1920&q=80">
             <div class="absolute inset-0 bg-primary/40"></div>
         </div>
         
@@ -43,7 +42,8 @@
                 <?php foreach ($featuredProperties as $property): ?>
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden">
                         <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block">
-                            <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80">
+                            <?php $imgSrc = !empty($property->image_path) ? base_url(esc($property->image_path)) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
+                            <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="<?= $imgSrc ?>">
                             <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                 <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                             </div>

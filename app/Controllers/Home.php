@@ -18,7 +18,7 @@ class Home extends BaseController
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->orderBy('properties.created_date', 'DESC')
-            ->limit(3)
+            ->limit(6)
             ->find();
 
         $data['title'] = 'HuniKita - Real Estate Platform';
