@@ -8,7 +8,8 @@ use CodeIgniter\Router\RouteCollection;
 
 // Public Facing Routes
 $routes->get('/', 'Home::index');            
-$routes->get('search', 'Home::search');      
+$routes->get('search', 'Home::search');
+$routes->get('property/(:num)', 'Home::detail/$1');      
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');

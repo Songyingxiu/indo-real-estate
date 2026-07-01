@@ -71,4 +71,33 @@ class Home extends BaseController
         $data['title'] = 'Search Properties - Lunera';
         return view('front/properties/search', $data);
     }
+
+    /**
+     * Display Property Detail
+     */
+    public function detail($id)
+    {
+        $propertyModel = new PropertyModel();
+        
+        // Fetch the specific property and join the agent/owner data
+        $property = $propertyModel
+            ->asObject()
+            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone, users.email')
+            ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
+            ->join('users', 'users.id = properties.owner_id', 'left')
+            ->where('properties.id', $id)
+            ->where('properties.status', 'Active')
+            ->where('properties.approval_status', 'Published')
+            ->first();
+
+        // If someone types an ID that doesn't exist, show a 404 page
+        if (!$property) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
+        }
+
+        $data['property'] = $property;
+        $data['title'] = $property->title . ' - Lunera';
+        
+        return view('front/properties/detail', $data);
+    }
 }
