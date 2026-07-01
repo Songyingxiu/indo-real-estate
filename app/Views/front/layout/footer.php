@@ -2,7 +2,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 px-4 md:px-10 py-8 w-full max-w-[1280px] mx-auto">
         <!-- Brand Column -->
         <div class="flex flex-col gap-4">
-            <span class="font-brand-text text-[24px] font-bold text-on-primary">Lunera</span>
+            <span class="font-brand-text text-[24px] font-bold text-on-primary">HuniKita</span>
             <p class="text-on-primary/80 font-caption text-[12px] leading-relaxed max-w-xs">
                 Premium real estate platform connecting discerning buyers with verified agents and exclusive properties.
             </p>
@@ -31,7 +31,7 @@
     <!-- Bottom Bar -->
     <div class="border-t border-white/20 px-4 md:px-10 py-4">
         <div class="max-w-[1280px] mx-auto text-center md:text-left text-on-primary/60 text-[12px]">
-            © <?= date('Y') ?> Lunera Real Estate. All rights reserved.
+            © <?= date('Y') ?> HuniKita Real Estate. All rights reserved.
         </div>
     </div>
 </footer>

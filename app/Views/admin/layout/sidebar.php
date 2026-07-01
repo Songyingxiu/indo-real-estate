@@ -1,7 +1,7 @@
 <nav class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-50 bg-surface border-b border-outline-variant transition-colors duration-300">
     <div class="flex items-center gap-stack-sm">
-        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-xl">E</div>
-        <span class="font-brand-text text-brand-text text-primary">EstateAdmin</span>
+        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-xl">H</div>
+        <span class="font-brand-text text-brand-text text-primary">HuniKita Admin</span>
     </div>
     <div class="flex gap-stack-sm text-primary">
         <button id="theme-toggle-mobile" class="hover:bg-surface-container-low transition-colors rounded-full p-2">
@@ -15,8 +15,9 @@
 
 <nav class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 py-stack-md bg-surface-container-low border-r border-outline-variant transition-colors duration-300 z-40">
     <div class="px-margin-desktop mb-stack-lg flex flex-col items-center">
-        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-3xl mb-stack-sm shadow-sm">E</div>
-        <h1 class="font-brand-text text-brand-text text-primary text-center">App Name</h1>
+        <!-- Logo Image Reference -->
+        <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-16 h-16 rounded-full object-cover shadow-sm bg-white mb-stack-sm" onerror="this.outerHTML='<div class=\'w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-3xl mb-stack-sm shadow-sm\'>H</div>'">
+        <h1 class="font-brand-text text-brand-text text-primary text-center">HuniKita</h1>
         
         <p class="font-caption text-caption text-on-surface-variant mt-unit text-center font-bold">
             <?php 

@@ -41,8 +41,9 @@
                 <?php if(!empty($properties)): ?>
                     <?php foreach($properties as $property): ?>
                         <article class="bg-surface border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
-                            <!-- Updated to be a clickable link -->
                             <a href="<?= base_url('property/' . $property->id) ?>" class="h-48 w-full bg-surface-container-high relative block">
+                                <?php $imgSrc = !empty($property->image_path) ? base_url(esc($property->image_path)) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
+                                <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="<?= $imgSrc ?>">
                                 <div class="absolute top-3 left-3 bg-white/90 text-primary font-bold text-[12px] px-2 py-1 rounded shadow-sm">
                                     <?= esc($property->listing_type) ?>
                                 </div>

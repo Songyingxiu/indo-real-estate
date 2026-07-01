@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title><?= esc($title ?? 'Lunera - Real Estate Platform') ?></title>
+    <title><?= esc($title ?? 'HuniKita - Real Estate Platform') ?></title>
     <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
@@ -71,10 +71,8 @@
     <div class="flex justify-between items-center h-20 px-4 md:px-10 w-full max-w-[1280px] mx-auto">
         <!-- Logo & Brand -->
         <a href="<?= base_url() ?>" class="flex items-center gap-2">
-            <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-on-surface-variant">real_estate_agent</span>
-            </div>
-            <span class="font-brand-text text-[24px] font-bold tracking-tight text-primary">Lunera</span>
+            <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-10 h-10 rounded-full object-cover border border-outline-variant shadow-sm bg-white" onerror="this.outerHTML='<div class=\'w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold\'>H</div>'">
+            <span class="font-brand-text text-[24px] font-bold tracking-tight text-primary">HuniKita</span>
         </a>
         <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex items-center gap-8">

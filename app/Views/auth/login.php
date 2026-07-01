@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Authentication - EstateAdmin</title>
+    <title>Authentication - HuniKita</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -61,10 +61,10 @@
 <body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased overflow-x-hidden">
     
     <header class="absolute top-0 left-0 w-full p-6 md:p-10 z-20 flex items-center gap-3 pointer-events-none">
-        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-            <span class="material-symbols-outlined text-on-primary text-[20px]">real_estate_agent</span>
-        </div>
-        <span class="font-brand-text text-[24px] font-bold text-primary-container drop-shadow-sm">App Name</span>
+        <a href="<?= base_url() ?>" class="pointer-events-auto flex items-center gap-3">
+            <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-10 h-10 rounded-full object-cover border border-outline-variant shadow-sm bg-white" onerror="this.outerHTML='<div class=\'w-10 h-10 bg-primary rounded-full flex items-center justify-center\'><span class=\'material-symbols-outlined text-on-primary text-[20px]\'>real_estate_agent</span></div>'">
+            <span class="font-brand-text text-[24px] font-bold text-primary-container drop-shadow-sm">HuniKita</span>
+        </a>
     </header>
     
     <main class="flex-grow flex flex-col md:flex-row min-h-screen">
@@ -75,7 +75,7 @@
             </div>
             <div class="absolute bottom-12 left-12 right-12 text-on-primary z-10 pointer-events-none">
                 <h1 class="font-headline-xl text-[48px] font-bold mb-4 text-white drop-shadow-md leading-tight">Unlock Exceptional Properties</h1>
-                <p class="font-body-lg text-[18px] text-white/90 max-w-lg drop-shadow">Join our exclusive network of discerning buyers, distinguished sellers, and verified industry professionals.</p>
+                <p class="font-body-lg text-[18px] text-white/90 max-w-lg drop-shadow">Join HuniKita's exclusive network of discerning buyers, distinguished sellers, and verified industry professionals.</p>
             </div>
         </div>
 
@@ -95,7 +95,7 @@
                     $isRegistering = old('first_name') ? true : false; 
                 ?>
 
-                <div class="max-w-md w-full mx-auto relative">
+                <div class="max-w-md w-full mx-auto relative mt-8">
                     
                     <input type="radio" name="auth-tabs" id="tab-login" class="hidden" <?= !$isRegistering ? 'checked' : '' ?>>
                     <input type="radio" name="auth-tabs" id="tab-register" class="hidden" <?= $isRegistering ? 'checked' : '' ?>>

@@ -13,7 +13,7 @@
     
     <div class="flex items-center gap-stack-md">
         <div class="flex items-center gap-stack-sm cursor-pointer active:opacity-80 transition-opacity">
-            <span class="font-brand-text text-brand-text text-primary">EstateAdmin Pro</span>
+            <span class="font-brand-text text-brand-text text-primary">HuniKita Admin</span>
         </div>
     </div>
     

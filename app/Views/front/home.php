@@ -3,14 +3,15 @@
 <main class="flex-grow">
     <section class="relative w-full h-[600px] flex items-center justify-center bg-surface-container-highest">
         <div class="absolute inset-0 z-0">
-            <img alt="Modern exterior at dusk" class="w-full h-full object-cover opacity-80" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+            <!-- Updated realistic Hero Image -->
+            <img alt="Modern exterior at dusk" class="w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80">
             <div class="absolute inset-0 bg-primary/40"></div>
         </div>
         
         <div class="relative z-10 w-full max-w-4xl px-4 md:px-0">
             <div class="text-center mb-8">
                 <h1 class="font-headline-xl text-[32px] md:text-[48px] font-bold text-white mb-2 drop-shadow-md">Find Your Perfect Property</h1>
-                <p class="font-body-lg text-[18px] text-white/90 drop-shadow-sm">Discover high-end real estate tailored to your lifestyle.</p>
+                <p class="font-body-lg text-[18px] text-white/90 drop-shadow-sm">Discover high-end real estate tailored to your lifestyle with HuniKita.</p>
             </div>
             
             <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
@@ -41,16 +42,14 @@
             <?php if (!empty($featuredProperties)): ?>
                 <?php foreach ($featuredProperties as $property): ?>
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden">
-                        <!-- Updated to be a clickable link -->
                         <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block">
-                            <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+                            <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80">
                             <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                 <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                             </div>
                         </a>
                         <div class="p-4 flex flex-col flex-grow">
                             <h3 class="font-label-md text-[18px] font-semibold text-on-background mb-1 truncate">
-                                <!-- Updated to be a clickable link -->
                                 <a href="<?= base_url('property/' . $property->id) ?>" class="hover:text-primary transition-colors">
                                     <?= esc($property->title) ?>
                                 </a>

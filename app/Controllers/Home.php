@@ -2,6 +2,7 @@
 
 use App\Models\PropertyModel;
 use App\Models\PropertyTypeModel;
+use App\Models\PropertyImageModel;
 
 class Home extends BaseController
 {
@@ -11,15 +12,16 @@ class Home extends BaseController
         
         $data['featuredProperties'] = $propertyModel
             ->asObject() 
-            ->select('properties.*, property_types.name as type_name')
+            ->select('properties.*, property_types.name as type_name, property_images.image_path')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->orderBy('properties.created_date', 'DESC')
             ->limit(3)
             ->find();
 
-        $data['title'] = 'Lunera - Real Estate Platform';
+        $data['title'] = 'HuniKita - Real Estate Platform';
         return view('front/home', $data);
     }
 
@@ -30,20 +32,19 @@ class Home extends BaseController
         
         $data['propertyTypes'] = $typeModel->asObject()->where('status', 'Active')->findAll();
 
-        // Capture search inputs
         $keyword     = $this->request->getGet('q');
         $types       = $this->request->getGet('type');
         $listingType = $this->request->getGet('listing_type');
 
         $builder = $propertyModel
             ->asObject() 
-            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name')
+            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('users', 'users.id = properties.owner_id', 'left')
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published');
 
-        // Apply Keyword Filter
         if (!empty($keyword)) {
             $builder->groupStart()
                     ->like('properties.title', $keyword)
@@ -51,33 +52,27 @@ class Home extends BaseController
                     ->groupEnd();
         }
 
-        // Apply Property Type Filter
         if (!empty($types) && is_array($types)) {
             $builder->whereIn('properties.property_type_id', $types);
         }
 
-        // Apply Listing Type Filter (Sale or Rent)
         if (!empty($listingType)) {
             $builder->where('properties.listing_type', $listingType);
         }
 
         $data['properties'] = $builder->paginate(9);
         $data['pager']      = $propertyModel->pager;
-        
-        // Get total safely after pagination
         $data['total']      = $propertyModel->pager->getTotal(); 
         $data['keyword']    = $keyword;
         
-        $data['title'] = 'Search Properties - Lunera';
+        $data['title'] = 'Search Properties - HuniKita';
         return view('front/properties/search', $data);
     }
 
-    /**
-     * Display Property Detail
-     */
     public function detail($id)
     {
         $propertyModel = new PropertyModel();
+        $imageModel = new PropertyImageModel();
         
         $property = $propertyModel
             ->asObject()
@@ -93,8 +88,9 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
+        $data['images'] = $imageModel->asObject()->where('property_id', $id)->findAll();
         $data['property'] = $property;
-        $data['title'] = $property->title . ' - Lunera';
+        $data['title'] = $property->title . ' - HuniKita';
         
         return view('front/properties/details', $data);
     }

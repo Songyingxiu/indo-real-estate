@@ -1,157 +1,75 @@
 <?= $this->include('front/layout/header') ?>
 
-<!-- Add Leaflet CSS for the Map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-<main class="max-w-[1280px] mx-auto px-4 md:px-10 py-8">
-    <!-- Breadcrumb -->
-    <nav aria-label="Breadcrumb" class="mb-4 flex items-center text-on-surface-variant text-[12px] font-caption">
-        <a class="hover:text-primary transition-colors" href="<?= base_url() ?>">Home</a>
-        <span class="mx-2 material-symbols-outlined text-[16px]">chevron_right</span>
-        <a class="hover:text-primary transition-colors" href="<?= base_url('search') ?>">Properties</a>
-        <span class="mx-2 material-symbols-outlined text-[16px]">chevron_right</span>
-        <span class="text-on-surface font-medium"><?= esc($property->title) ?></span>
-    </nav>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 mb-8 rounded overflow-hidden h-[500px]">
-        <div class="md:col-span-2 md:row-span-2 relative group overflow-hidden">
-            <img alt="Featured" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
-            <div class="absolute bottom-4 left-4 bg-white/70 backdrop-blur-md px-4 py-2 rounded flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-[20px] fill">photo_library</span>
-                <span class="font-label-md text-[14px] text-primary font-bold">View All Photos</span>
+<main class="flex-grow">
+    <section class="relative w-full h-[600px] flex items-center justify-center bg-surface-container-highest">
+        <div class="absolute inset-0 z-0">
+            <img alt="Modern exterior at dusk" class="w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80">
+            <div class="absolute inset-0 bg-primary/40"></div>
+        </div>
+        
+        <div class="relative z-10 w-full max-w-4xl px-4 md:px-0">
+            <div class="text-center mb-8">
+                <h1 class="font-headline-xl text-[32px] md:text-[48px] font-bold text-white mb-2 drop-shadow-md">Find Your Perfect Property</h1>
+                <p class="font-body-lg text-[18px] text-white/90 drop-shadow-sm">Discover high-end real estate tailored to your lifestyle with HuniKita.</p>
             </div>
-        </div>
-        <div class="relative overflow-hidden group hidden md:block">
-            <img alt="Gallery 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
-        </div>
-        <div class="relative overflow-hidden group hidden md:block">
-            <img alt="Gallery 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
-        </div>
-        <div class="md:col-span-2 relative overflow-hidden group hidden md:block">
-            <div class="w-full h-full bg-surface-container-high flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all cursor-pointer">
-                <span class="material-symbols-outlined text-[32px] mb-2">360</span>
-                <span class="font-label-md text-[14px] font-bold">Virtual Tour</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
-        <div class="lg:col-span-8 flex flex-col gap-8">
             
-            <section>
-                <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-secondary-fixed text-on-secondary-fixed-variant px-2 py-1 rounded text-[12px] font-bold"><?= esc($property->listing_type) ?></span>
-                            <span class="text-on-surface-variant text-[12px] flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">schedule</span> Just Listed</span>
-                        </div>
-                        <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface mb-2"><?= esc($property->title) ?></h1>
-                        <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
-                            <span class="material-symbols-outlined mr-2">location_on</span>
-                            <?= esc($property->address_line_1 ?? $property->area_name) ?>
-                        </p>
+            <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
+                <form action="<?= base_url('search') ?>" method="GET" class="flex flex-col md:flex-row gap-4">
+                    <div class="relative flex-grow">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                        <input name="q" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by Keyword, Address, or ID..." type="text">
                     </div>
-                    <div class="text-left md:text-right">
-                        <p class="font-headline-lg text-[28px] md:text-[32px] font-bold text-primary">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></p>
-                    </div>
-                </div>
+                    <button type="submit" class="bg-primary text-on-primary font-label-md text-[14px] font-semibold px-6 py-3 rounded hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
+                        Search Properties
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
 
-                <div class="flex flex-wrap gap-6 py-4 border-t border-b border-outline-variant">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined">bed</span>
-                        </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->bed) ?> Bedrooms</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined">shower</span>
-                        </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->bath) ?> Bathrooms</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined">straighten</span>
-                        </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->usable_area) ?> Sqm</p>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">About This Property</h2>
-                <div class="prose prose-sm md:prose-base max-w-none text-on-surface-variant font-body-md text-[16px]">
-                    <p><?= nl2br(esc($property->description)) ?></p>
-                </div>
-            </section>
-
-            <section>
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Location</h2>
-                <div class="border border-outline-variant rounded overflow-hidden h-[400px] relative bg-surface-container-low z-0">
-                    <!-- Leaflet Map Container -->
-                    <div id="propertyMap" class="w-full h-full"></div>
-                </div>
-            </section>
+    <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2">Popular Listings</h2>
+            </div>
+            <a href="<?= base_url('search') ?>" class="flex items-center gap-1 text-primary font-label-md text-[14px] font-semibold hover:underline">
+                View All <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </a>
         </div>
 
-        <!-- Right Column: Sticky Sidebar -->
-        <div class="lg:col-span-4">
-            <div class="sticky top-28 flex flex-col gap-6">
-                <!-- Contact Card -->
-                <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm">
-                    <!-- Agent Profile -->
-                    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-outline-variant">
-                        <div class="relative">
-                            <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-                                <span class="material-symbols-outlined text-[40px]">person</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <?php if (!empty($featuredProperties)): ?>
+                <?php foreach ($featuredProperties as $property): ?>
+                    <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden">
+                        <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block">
+                            <?php $imgSrc = !empty($property->image_path) ? base_url(esc($property->image_path)) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
+                            <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="<?= $imgSrc ?>">
+                            <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
+                                <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
+                            </div>
+                        </a>
+                        <div class="p-4 flex flex-col flex-grow">
+                            <h3 class="font-label-md text-[18px] font-semibold text-on-background mb-1 truncate">
+                                <a href="<?= base_url('property/' . $property->id) ?>" class="hover:text-primary transition-colors">
+                                    <?= esc($property->title) ?>
+                                </a>
+                            </h3>
+                            <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name) ?>
+                            </p>
+                            <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->usable_area) ?> m²</div>
                             </div>
                         </div>
-                        <div>
-                            <h3 class="font-label-md text-[16px] text-on-surface font-bold"><?= esc($property->first_name . ' ' . $property->last_name) ?></h3>
-                            <p class="text-[12px] text-on-surface-variant mb-1">Premium Property Agent</p>
-                            <span class="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded text-[12px] text-primary border border-outline-variant/50">
-                                <span class="material-symbols-outlined text-[12px]">badge</span> Verified
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Contact Form -->
-                    <form class="flex flex-col gap-3">
-                        <input class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white" placeholder="Full Name" type="text">
-                        <input class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white" placeholder="Phone Number" type="tel">
-                        <textarea class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"></textarea>
-                        
-                        <button class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2" type="button">
-                            <span class="material-symbols-outlined text-[20px]">mail</span> Contact Agent
-                        </button>
-                    </form>
-                </div>
-            </div>
+                    </article>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="col-span-3 text-center text-on-surface-variant">No properties currently available.</p>
+            <?php endif; ?>
         </div>
-    </div>
+    </section>
 </main>
 
 <?= $this->include('front/layout/footer') ?>
-
-<!-- Add Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Fallback to Jakarta coordinates if DB columns are empty
-        var lat = <?= esc($property->latitude ?? -6.200000) ?>;
-        var lng = <?= esc($property->longitude ?? 106.816666) ?>;
-        
-        // Initialize Map
-        var map = L.map('propertyMap').setView([lat, lng], 15);
-        
-        // Add OpenStreetMap Tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        
-        // Add Pin Marker
-        L.marker([lat, lng]).addTo(map)
-            .bindPopup('<b><?= esc($property->title) ?></b><br><?= esc($property->area_name) ?>')
-            .openPopup();
-    });
-</script>
