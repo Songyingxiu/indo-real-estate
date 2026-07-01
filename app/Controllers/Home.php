@@ -79,10 +79,9 @@ class Home extends BaseController
     {
         $propertyModel = new PropertyModel();
         
-        // Fetch the specific property and join the agent/owner data
         $property = $propertyModel
             ->asObject()
-            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone, users.email')
+            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone_number, users.email')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('users', 'users.id = properties.owner_id', 'left')
             ->where('properties.id', $id)
@@ -90,7 +89,6 @@ class Home extends BaseController
             ->where('properties.approval_status', 'Published')
             ->first();
 
-        // If someone types an ID that doesn't exist, show a 404 page
         if (!$property) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
