@@ -1,6 +1,6 @@
 <?php namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
-use App\Models\SubscriptionPlanModel;
+use App\Models\SubscriptionModel;
 
 class Subscriptions extends BaseController 
 {
@@ -8,47 +8,25 @@ class Subscriptions extends BaseController
     {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
-        $model = new SubscriptionPlanModel();
-        // Sorting by price
-        $data['plans'] = $model->orderBy('price', 'ASC')->findAll();
+        $model = new SubscriptionModel();
+        
+        $data['subscriptions'] = $model->select('subscriptions.*, users.first_name, users.last_name, subscription_plans.name as plan_name, subscription_plans.price')
+                                       ->join('users', 'users.id = subscriptions.user_id', 'left')
+                                       ->join('subscription_plans', 'subscription_plans.id = subscriptions.plan_id', 'left')
+                                       ->orderBy('subscriptions.created_date', 'DESC')
+                                       ->findAll();
         
         return view('admin/subscriptions', $data);
     }
 
-    public function store()
+    public function activate($id)
     {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
-        $model = new SubscriptionPlanModel();
-        $model->insert([
-            'name'   => $this->request->getPost('name'),
-            'price'  => $this->request->getPost('price'),
-            'status' => 'Active'
-        ]);
+        $model = new SubscriptionModel();
+        // Update user's offline payment request to Active
+        $model->update($id, ['status' => 'Active']);
         
-        return redirect()->to(base_url('admin/subscriptions'))->with('success', 'Subscription plan created successfully!');
-    }
-
-    public function update($id)
-    {
-        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
-        
-        $model = new SubscriptionPlanModel();
-        $model->update($id, [
-            'name'   => $this->request->getPost('name'),
-            'price'  => $this->request->getPost('price')
-        ]);
-        
-        return redirect()->to(base_url('admin/subscriptions'))->with('success', 'Subscription plan updated!');
-    }
-
-    public function delete($id)
-    {
-        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
-        
-        $model = new SubscriptionPlanModel();
-        $model->delete($id);
-        
-        return redirect()->to(base_url('admin/subscriptions'))->with('success', 'Subscription plan removed.');
+        return redirect()->to(base_url('admin/subscriptions'))->with('success', 'User subscription successfully activated!');
     }
 }

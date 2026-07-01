@@ -2,6 +2,20 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+<!-- Photo Gallery Lightbox (Hidden by default) -->
+<div id="photoGallery" class="fixed inset-0 z-[100] hidden bg-black/95 flex-col items-center justify-center p-4">
+    <button onclick="closeGallery()" class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2">
+        <span class="material-symbols-outlined text-[36px]">close</span>
+    </button>
+    <div class="w-full max-w-5xl overflow-y-auto max-h-screen flex flex-col gap-6 custom-scrollbar p-4 md:p-8">
+        <?php if(!empty($images)): foreach($images as $img): ?>
+            <img src="<?= base_url(esc($img->image_path)) ?>" class="w-full h-auto rounded-lg shadow-2xl object-cover">
+        <?php endforeach; else: ?>
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80" class="w-full h-auto rounded-lg shadow-2xl">
+        <?php endif; ?>
+    </div>
+</div>
+
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-8">
     <nav aria-label="Breadcrumb" class="mb-4 flex items-center text-on-surface-variant text-[12px] font-caption">
         <a class="hover:text-primary transition-colors" href="<?= base_url() ?>">Home</a>
@@ -17,31 +31,26 @@
         $img2 = !empty($images[2]) ? base_url(esc($images[2]->image_path)) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';
     ?>
 
+    <!-- Adjusted Grid: Replaced 360 block, main image takes 3 cols, side images take 1 -->
     <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 mb-8 rounded overflow-hidden h-[500px]">
-        <div class="md:col-span-2 md:row-span-2 relative group overflow-hidden">
+        <div class="md:col-span-3 md:row-span-2 relative group overflow-hidden cursor-pointer" onclick="openGallery()">
             <img alt="Featured" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $mainImg ?>">
-            <div class="absolute bottom-4 left-4 bg-white/70 backdrop-blur-md px-4 py-2 rounded flex items-center gap-2">
+            <div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded flex items-center gap-2 hover:bg-white transition-colors">
                 <span class="material-symbols-outlined text-primary text-[20px] fill">photo_library</span>
-                <span class="font-label-md text-[14px] text-primary font-bold">View All Photos</span>
+                <span class="font-label-md text-[14px] text-primary font-bold">View All Photos (<?= count($images) ?>)</span>
             </div>
         </div>
-        <div class="relative overflow-hidden group hidden md:block">
+        <div class="relative overflow-hidden group hidden md:block cursor-pointer" onclick="openGallery()">
             <img alt="Gallery 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $img1 ?>">
         </div>
-        <div class="relative overflow-hidden group hidden md:block">
+        <div class="relative overflow-hidden group hidden md:block cursor-pointer" onclick="openGallery()">
             <img alt="Gallery 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $img2 ?>">
-        </div>
-        <div class="md:col-span-2 relative overflow-hidden group hidden md:block">
-            <div class="w-full h-full bg-surface-container-high flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all cursor-pointer">
-                <span class="material-symbols-outlined text-[32px] mb-2">360</span>
-                <span class="font-label-md text-[14px] font-bold">Virtual Tour</span>
-            </div>
+            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
         <div class="lg:col-span-8 flex flex-col gap-8">
-            
             <section>
                 <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
                     <div>
@@ -134,18 +143,24 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Map Logic
     document.addEventListener('DOMContentLoaded', function() {
         var lat = <?= esc($property->latitude ?? -6.200000) ?>;
         var lng = <?= esc($property->longitude ?? 106.816666) ?>;
-        
         var map = L.map('propertyMap').setView([lat, lng], 15);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        
-        L.marker([lat, lng]).addTo(map)
-            .bindPopup('<b><?= esc($property->title) ?></b><br><?= esc($property->area_name) ?>')
-            .openPopup();
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+        L.marker([lat, lng]).addTo(map).bindPopup('<b><?= esc($property->title) ?></b>').openPopup();
     });
+
+    // Gallery Logic
+    function openGallery() {
+        document.body.style.overflow = 'hidden';
+        document.getElementById('photoGallery').classList.remove('hidden');
+        document.getElementById('photoGallery').classList.add('flex');
+    }
+    function closeGallery() {
+        document.body.style.overflow = 'auto';
+        document.getElementById('photoGallery').classList.add('hidden');
+        document.getElementById('photoGallery').classList.remove('flex');
+    }
 </script>

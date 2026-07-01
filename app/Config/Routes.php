@@ -14,10 +14,6 @@ $routes->get('property/(:num)', 'Home::detail/$1');
 // Authentication Routes
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
-
-// Authentication Routes
-$routes->get('login', 'Auth::login');
-$routes->post('login', 'Auth::attemptLogin');
 $routes->post('register', 'Auth::attemptRegister');
 $routes->get('logout', 'Auth::logout');
 
@@ -45,27 +41,32 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('moderation/approve/(:num)', 'Moderation::approve/$1');
     $routes->post('moderation/reject/(:num)', 'Moderation::reject/$1');
 
-    // Subscriptions Management
+    // Subscriptions Management (User Approvals)
     $routes->get('subscriptions', 'Subscriptions::index');
-    $routes->post('subscriptions/store', 'Subscriptions::store');
-    $routes->post('subscriptions/update/(:num)', 'Subscriptions::update/$1');
-    $routes->post('subscriptions/delete/(:num)', 'Subscriptions::delete/$1');
+    $routes->post('subscriptions/activate/(:num)', 'Subscriptions::activate/$1');
     
     // Master Data & Configuration
     $routes->get('master-data', 'MasterData::index');
+    
+    // Store
     $routes->post('master-data/store-type', 'MasterData::storeType');
     $routes->post('master-data/store-city', 'MasterData::storeCity');
     $routes->post('master-data/store-state', 'MasterData::storeState');
     $routes->post('master-data/store-feature', 'MasterData::storeFeature'); 
+    $routes->post('master-data/store-plan', 'MasterData::storePlan'); 
     
+    // Delete
     $routes->post('master-data/delete-type/(:num)', 'MasterData::deleteType/$1'); 
     $routes->post('master-data/delete-city/(:num)', 'MasterData::deleteCity/$1'); 
     $routes->post('master-data/delete-state/(:num)', 'MasterData::deleteState/$1');
     $routes->post('master-data/delete-feature/(:num)', 'MasterData::deleteFeature/$1');
+    $routes->post('master-data/delete-plan/(:num)', 'MasterData::deletePlan/$1');
     
+    // Update
     $routes->post('master-data/update-type/(:num)', 'MasterData::updateType/$1');
     $routes->post('master-data/update-state/(:num)', 'MasterData::updateState/$1');
     $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
+    $routes->post('master-data/update-plan/(:num)', 'MasterData::updatePlan/$1');
 
     // Lead & Verification Management
     $routes->get('leads', 'Leads::index');       
@@ -88,5 +89,4 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('profile', 'Profile::index');
     $routes->post('profile/update', 'Profile::update');
     $routes->post('profile/update-password', 'Profile::updatePassword');
-    
 });
