@@ -13,7 +13,6 @@
             <div class="flex flex-col gap-2">
                 <label class="font-label-md text-[14px] font-semibold text-on-surface">Property Type</label>
                 <?php 
-                    // Safely handle the URL parameter to ensure it's always an array
                     $currentTypes = isset($_GET['type']) ? $_GET['type'] : [];
                     if (!is_array($currentTypes)) $currentTypes = [$currentTypes]; 
                 ?>
@@ -42,13 +41,18 @@
                 <?php if(!empty($properties)): ?>
                     <?php foreach($properties as $property): ?>
                         <article class="bg-surface border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
-                            <div class="h-48 w-full bg-surface-container-high relative">
+                            <!-- Updated to be a clickable link -->
+                            <a href="<?= base_url('property/' . $property->id) ?>" class="h-48 w-full bg-surface-container-high relative block">
                                 <div class="absolute top-3 left-3 bg-white/90 text-primary font-bold text-[12px] px-2 py-1 rounded shadow-sm">
                                     <?= esc($property->listing_type) ?>
                                 </div>
-                            </div>
+                            </a>
                             <div class="p-4 flex flex-col flex-1">
-                                <h3 class="text-[18px] font-semibold text-on-surface line-clamp-1" title="<?= esc($property->title) ?>"><?= esc($property->title) ?></h3>
+                                <h3 class="text-[18px] font-semibold text-on-surface line-clamp-1" title="<?= esc($property->title) ?>">
+                                    <a href="<?= base_url('property/' . $property->id) ?>" class="hover:text-primary transition-colors">
+                                        <?= esc($property->title) ?>
+                                    </a>
+                                </h3>
                                 <p class="text-[20px] font-bold text-primary my-2">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></p>
                                 <p class="text-[14px] text-on-surface-variant"><?= esc($property->area_name) ?></p>
                             </div>

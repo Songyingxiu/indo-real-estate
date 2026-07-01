@@ -41,14 +41,20 @@
             <?php if (!empty($featuredProperties)): ?>
                 <?php foreach ($featuredProperties as $property): ?>
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden">
-                        <div class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high">
+                        <!-- Updated to be a clickable link -->
+                        <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block">
                             <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
                             <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                 <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                             </div>
-                        </div>
+                        </a>
                         <div class="p-4 flex flex-col flex-grow">
-                            <h3 class="font-label-md text-[18px] font-semibold text-on-background mb-1 truncate"><?= esc($property->title) ?></h3>
+                            <h3 class="font-label-md text-[18px] font-semibold text-on-background mb-1 truncate">
+                                <!-- Updated to be a clickable link -->
+                                <a href="<?= base_url('property/' . $property->id) ?>" class="hover:text-primary transition-colors">
+                                    <?= esc($property->title) ?>
+                                </a>
+                            </h3>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name) ?>
                             </p>
