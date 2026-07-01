@@ -9,8 +9,8 @@ class Home extends BaseController
     {
         $propertyModel = new PropertyModel();
         
-        // Fetch 3 most recent Published properties
         $data['featuredProperties'] = $propertyModel
+            ->asObject() 
             ->select('properties.*, property_types.name as type_name')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->where('properties.status', 'Active')
@@ -28,14 +28,14 @@ class Home extends BaseController
         $propertyModel = new PropertyModel();
         $typeModel = new PropertyTypeModel();
         
-        // Fetch dynamic property types for the Sidebar checkboxes
-        $data['propertyTypes'] = $typeModel->where('status', 'Active')->findAll();
+        $data['propertyTypes'] = $typeModel->asObject()->where('status', 'Active')->findAll();
 
         // Capture search inputs
         $keyword = $this->request->getGet('q');
-        $types   = $this->request->getGet('type'); // Array of ID numbers now!
+        $types   = $this->request->getGet('type');
 
         $builder = $propertyModel
+            ->asObject() 
             ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('users', 'users.id = properties.owner_id', 'left')
@@ -50,14 +50,16 @@ class Home extends BaseController
                     ->groupEnd();
         }
 
-        // Apply Property Type Filter (Proper ID matching!)
+        // Apply Property Type Filter
         if (!empty($types) && is_array($types)) {
             $builder->whereIn('properties.property_type_id', $types);
         }
 
         $data['properties'] = $builder->paginate(9);
         $data['pager']      = $propertyModel->pager;
-        $data['total']      = $builder->countAllResults(false);
+        
+        // Get total safely after pagination
+        $data['total']      = $propertyModel->pager->getTotal(); 
         $data['keyword']    = $keyword;
         
         $data['title'] = 'Search Properties - Lunera';
