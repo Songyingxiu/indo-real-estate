@@ -31,8 +31,9 @@ class Home extends BaseController
         $data['propertyTypes'] = $typeModel->asObject()->where('status', 'Active')->findAll();
 
         // Capture search inputs
-        $keyword = $this->request->getGet('q');
-        $types   = $this->request->getGet('type');
+        $keyword     = $this->request->getGet('q');
+        $types       = $this->request->getGet('type');
+        $listingType = $this->request->getGet('listing_type');
 
         $builder = $propertyModel
             ->asObject() 
@@ -53,6 +54,11 @@ class Home extends BaseController
         // Apply Property Type Filter
         if (!empty($types) && is_array($types)) {
             $builder->whereIn('properties.property_type_id', $types);
+        }
+
+        // Apply Listing Type Filter (Sale or Rent)
+        if (!empty($listingType)) {
+            $builder->where('properties.listing_type', $listingType);
         }
 
         $data['properties'] = $builder->paginate(9);

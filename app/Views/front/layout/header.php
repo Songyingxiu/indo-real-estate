@@ -78,8 +78,8 @@
         </a>
         <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex items-center gap-8">
-            <a class="font-body-md text-[16px] text-primary border-b-2 border-primary pb-1 transition-colors duration-200" href="<?= base_url('search') ?>">Buy</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?type=rent') ?>">Rent</a>
+            <a class="font-body-md text-[16px] text-primary border-b-2 border-primary pb-1 transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Rent') ?>">Rent</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">New Projects</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Agents</a>
         </nav>
