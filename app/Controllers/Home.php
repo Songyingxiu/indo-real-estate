@@ -96,6 +96,6 @@ class Home extends BaseController
         $data['property'] = $property;
         $data['title'] = $property->title . ' - Lunera';
         
-        return view('front/properties/detail', $data);
+        return view('front/properties/details', $data);
     }
 }
