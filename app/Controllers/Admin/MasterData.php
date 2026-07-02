@@ -6,6 +6,7 @@ use App\Models\CityModel;
 use App\Models\StateModel; 
 use App\Models\FeatureModel;
 use App\Models\SubscriptionPlanModel;
+use App\Models\ZipcodeModel;
 
 class MasterData extends BaseController
 {
@@ -20,12 +21,17 @@ class MasterData extends BaseController
         $stateModel = new StateModel(); 
         $featureModel = new FeatureModel(); 
         $planModel = new SubscriptionPlanModel();
+        $zipcodeModel = new ZipcodeModel();
 
         $data['propertyTypes'] = $propertyTypeModel->orderBy('id', 'DESC')->paginate(5, 'types');
         
         $cityModel->select('cities.*, states.name as state_name');
         $cityModel->join('states', 'states.id = cities.state_id', 'left');
         $data['cities'] = $cityModel->orderBy('cities.id', 'DESC')->paginate(5, 'cities');
+
+        $zipcodeModel->select('zipcodes.*, cities.name as city_name');
+        $zipcodeModel->join('cities', 'cities.id = zipcodes.city_id', 'left');
+        $data['zipcodes'] = $zipcodeModel->orderBy('zipcodes.id', 'DESC')->paginate(5, 'zipcodes');
 
         $data['states'] = $stateModel->orderBy('id', 'DESC')->paginate(5, 'states');
         $data['features'] = $featureModel->orderBy('id', 'DESC')->paginate(5, 'features');
@@ -38,15 +44,11 @@ class MasterData extends BaseController
 
     // --- CREATE METHODS ---
 
-    public function storeType()
-    {
+    public function storeType() 
+    { 
         $model = new PropertyTypeModel();
-        $model->insert([
-            'name' => $this->request->getPost('name'), 
-            'status' => 'Active'
-        ]);
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'New property type added!');
+        $model->insert(['name' => $this->request->getPost('name'), 'status' => 'Active']); 
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'New property type added!'); 
     }
 
     public function storeCity()
@@ -57,30 +59,32 @@ class MasterData extends BaseController
             'name'     => $this->request->getPost('name'),
             'status'   => 'Active'
         ]);
-        
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New location added!');
     }
 
     public function storeState()
     {
         $model = new StateModel();
-        $model->insert([
-            'name' => $this->request->getPost('name'), 
-            'status' => 'Active'
-        ]);
-        
+        $model->insert(['name' => $this->request->getPost('name'), 'status' => 'Active']);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New region added successfully!');
     }
 
     public function storeFeature()
     {
         $model = new FeatureModel();
-        $model->insert([
-            'name' => $this->request->getPost('name'), 
-            'status' => 'Active'
-        ]);
-        
+        $model->insert(['name' => $this->request->getPost('name'), 'status' => 'Active']);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New feature added!');
+    }
+
+    public function storeZipcode()
+    {
+        $model = new ZipcodeModel();
+        $model->insert([
+            'city_id' => $this->request->getPost('city_id'), 
+            'zipcode' => $this->request->getPost('zipcode'),
+            'status'  => 'Active'
+        ]);
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Zipcode added!');
     }
 
     public function storePlan()
@@ -97,83 +101,35 @@ class MasterData extends BaseController
             'direct_email_inquiry'   => $this->request->getPost('direct_email_inquiry'),
             'status'                 => 'Active'
         ]);
-        
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Subscription Plan created!');
     }
     
     // --- DELETE METHODS ---
 
-    public function deleteType($id) 
-    { 
-        $model = new PropertyTypeModel();
-        $model->delete($id); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type removed.'); 
-    }
-
-    public function deleteCity($id) 
-    { 
-        $model = new CityModel();
-        $model->delete($id); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Location removed.'); 
-    }
-
-    public function deleteState($id) 
-    { 
-        $model = new StateModel();
-        $model->delete($id); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Region removed.'); 
-    }
-
-    public function deleteFeature($id) 
-    { 
-        $model = new FeatureModel();
-        $model->delete($id); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature removed.'); 
-    }
-
-    public function deletePlan($id) 
-    { 
-        $model = new SubscriptionPlanModel();
-        $model->delete($id); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Plan removed.'); 
-    }
+    public function deleteType($id) { (new PropertyTypeModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type removed.'); }
+    public function deleteCity($id) { (new CityModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Location removed.'); }
+    public function deleteState($id) { (new StateModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Region removed.'); }
+    public function deleteFeature($id) { (new FeatureModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature removed.'); }
+    public function deletePlan($id) { (new SubscriptionPlanModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Plan removed.'); }
+    public function deleteZipcode($id) { (new ZipcodeModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Zipcode removed.'); }
 
     // --- UPDATE METHODS ---
 
-    public function updateType($id) 
-    { 
-        $model = new PropertyTypeModel();
-        $model->update($id, [
-            'name' => $this->request->getPost('name')
-        ]); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type updated successfully.'); 
-    }
-
-    public function updateState($id) 
-    { 
-        $model = new StateModel();
-        $model->update($id, [
-            'name' => $this->request->getPost('name')
-        ]); 
-        
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'Region updated successfully.'); 
-    }
-
-    public function updateCity($id) 
-    { 
-        $model = new CityModel();
-        $model->update($id, [
+    public function updateType($id) { (new PropertyTypeModel())->update($id, ['name' => $this->request->getPost('name')]); return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type updated successfully.'); }
+    public function updateState($id) { (new StateModel())->update($id, ['name' => $this->request->getPost('name')]); return redirect()->to(base_url('admin/master-data'))->with('success', 'Region updated successfully.'); }
+    public function updateCity($id) { 
+        (new CityModel())->update($id, [
             'state_id' => $this->request->getPost('state_id'), 
             'name' => $this->request->getPost('name')
         ]); 
-        
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Location updated successfully.'); 
+    }
+    public function updateZipcode($id) { 
+        (new ZipcodeModel())->update($id, [
+            'city_id' => $this->request->getPost('city_id'), 
+            'zipcode' => $this->request->getPost('zipcode')
+        ]); 
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Zipcode updated successfully.'); 
     }
 
     public function updatePlan($id)
@@ -189,7 +145,6 @@ class MasterData extends BaseController
             'allow_messages'         => $this->request->getPost('allow_messages'),
             'direct_email_inquiry'   => $this->request->getPost('direct_email_inquiry')
         ]);
-        
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Subscription Plan updated!');
     }
 }

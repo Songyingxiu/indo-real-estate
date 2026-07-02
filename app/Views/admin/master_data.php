@@ -94,9 +94,9 @@
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">map</span> Regions
                     </h2>
-                    <form action="<?= base_url('admin/master-data/store-state') ?>" method="POST" class="flex gap-2">
-                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add region..." type="text"/>
-                        <button type="submit" class="h-10 px-4 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container transition-colors">Add</button>
+                    <form action="<?= base_url('admin/master-data/store-state') ?>" method="POST" class="flex flex-col gap-3">
+                        <input name="name" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add region..." type="text"/>
+                        <button type="submit" class="w-full h-10 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add Region</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -105,7 +105,7 @@
                             <?php if(!empty($states)): ?>
                                 <?php foreach($states as $state): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-4 font-body-md text-on-surface font-semibold"><?= esc($state->name) ?></td>
+                                        <td class="py-3 px-4 text-sm text-on-surface font-semibold"><?= esc($state->name) ?></td>
                                         <td class="py-3 px-4 text-right">
                                             <button type="button" @click="showEditStateModal = true; editStateId = <?= $state->id ?>; editStateName = '<?= esc(addslashes($state->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[18px]">edit</span></button>
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-state/' . $state->id) ?>'; deleteMessage = 'Delete this region?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[18px]">delete</span></button>
@@ -113,7 +113,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="2" class="py-6 text-center text-outline">No regions found.</td></tr>
+                                <tr><td colspan="2" class="py-6 text-center text-outline text-sm">No regions found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -129,17 +129,15 @@
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">location_city</span> Cities
                     </h2>
-                    <form action="<?= base_url('admin/master-data/store-city') ?>" method="POST" class="flex flex-col gap-2">
-                        <select name="state_id" required class="h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest cursor-pointer">
+                    <form action="<?= base_url('admin/master-data/store-city') ?>" method="POST" class="flex flex-col gap-3">
+                        <select name="state_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Select Region...</option>
                             <?php if(!empty($states)): foreach($states as $state): ?>
                                 <option value="<?= $state->id ?>"><?= esc($state->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
-                        <div class="flex gap-2">
-                            <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add city..." type="text"/>
-                            <button type="submit" class="h-10 px-4 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container transition-colors">Add</button>
-                        </div>
+                        <input name="name" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add city..." type="text"/>
+                        <button type="submit" class="w-full h-10 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add City</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -148,8 +146,8 @@
                             <?php if(!empty($cities)): ?>
                                 <?php foreach($cities as $city): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-4 font-body-md text-on-surface">
-                                            <span class="font-semibold block"><?= esc($city->name ?? '') ?></span>
+                                        <td class="py-3 px-4">
+                                            <span class="font-semibold block text-sm text-on-surface"><?= esc($city->name ?? '') ?></span>
                                             <span class="text-xs text-on-surface-variant"><?= esc($city->state_name ?? '') ?></span>
                                         </td>
                                         <td class="py-3 px-4 text-right">
@@ -159,7 +157,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="2" class="py-6 text-center text-outline">No cities found.</td></tr>
+                                <tr><td colspan="2" class="py-6 text-center text-outline text-sm">No cities found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -175,19 +173,15 @@
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">mark_as_unread</span> Zipcodes
                     </h2>
-                    <form action="<?= base_url('admin/master-data/store-zipcode') ?>" method="POST" class="flex flex-col gap-2">
-                        <select name="city_id" required class="h-10 px-3 border border-outline-variant rounded bg-surface-container-lowest cursor-pointer">
+                    <form action="<?= base_url('admin/master-data/store-zipcode') ?>" method="POST" class="flex flex-col gap-3">
+                        <select name="city_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Select City...</option>
                             <?php if(!empty($cities)): foreach($cities as $city): ?>
                                 <option value="<?= $city->id ?>"><?= esc($city->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
-                        <div class="flex gap-2">
-                            <input name="zipcode" required class="flex-1 h-10 px-3 border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add code (e.g., 12310)..." type="text"/>
-                            <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container transition-colors flex items-center justify-center gap-1 whitespace-nowrap">
-                                Add
-                            </button>
-                        </div>
+                        <input name="zipcode" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add code (e.g., 12310)..." type="text"/>
+                        <button type="submit" class="w-full h-10 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add Zipcode</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -196,18 +190,18 @@
                             <?php if(!empty($zipcodes)): ?>
                                 <?php foreach($zipcodes as $zip): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-6 font-body-md text-body-md text-on-surface flex items-center gap-2">
-                                            <span class="font-semibold text-primary"><?= esc($zip->zipcode ?? '') ?></span>
-                                            <span class="text-on-surface-variant text-sm">, <?= esc($zip->city_name ?? 'Unknown City') ?></span>
+                                        <td class="py-3 px-4">
+                                            <span class="font-semibold block text-sm text-primary"><?= esc($zip->zipcode ?? '') ?></span>
+                                            <span class="text-xs text-on-surface-variant"><?= esc($zip->city_name ?? 'Unknown City') ?></span>
                                         </td>
-                                        <td class="py-3 px-6 text-right">
+                                        <td class="py-3 px-4 text-right">
                                             <button type="button" @click="showEditZipcodeModal = true; editZipcodeId = <?= $zip->id ?>; editZipcodeVal = '<?= esc(addslashes($zip->zipcode ?? '')) ?>'; editZipcodeCityId = '<?= $zip->city_id ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[18px]">edit</span></button>
-                                            <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-zipcode/' . $zip->id) ?>'; deleteMessage = 'Delete this zip code?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                                            <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-zipcode/' . $zip->id) ?>'; deleteMessage = 'Delete this zip code?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[18px]">delete</span></button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="2" class="py-6 text-center text-outline">No zipcodes found.</td></tr>
+                                <tr><td colspan="2" class="py-6 text-center text-outline text-sm">No zipcodes found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -228,8 +222,8 @@
                         <span class="material-symbols-outlined text-primary">category</span> Property Types
                     </h2>
                     <form action="<?= base_url('admin/master-data/store-type') ?>" method="POST" class="flex gap-2">
-                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add new type..." type="text"/>
-                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container transition-colors">Add</button>
+                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add new type..." type="text"/>
+                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -238,7 +232,7 @@
                             <?php if(!empty($propertyTypes)): ?>
                                 <?php foreach($propertyTypes as $type): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-6 font-body-md text-body-md text-on-surface"><?= esc($type->type_name ?? $type->name) ?></td>
+                                        <td class="py-3 px-6 text-sm text-on-surface"><?= esc($type->type_name ?? $type->name) ?></td>
                                         <td class="py-3 px-6 text-right">
                                             <div class="flex items-center justify-end gap-2">
                                                 <button type="button" @click="showEditTypeModal = true; editTypeId = <?= $type->id ?>; editTypeName = '<?= esc(addslashes($type->type_name ?? $type->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
@@ -248,7 +242,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="2" class="py-6 text-center text-outline">No property types found.</td></tr>
+                                <tr><td colspan="2" class="py-6 text-center text-outline text-sm">No property types found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -264,8 +258,8 @@
                         <span class="material-symbols-outlined text-primary">format_list_bulleted</span> Features (Amenities)
                     </h2>
                     <form action="<?= base_url('admin/master-data/store-feature') ?>" method="POST" class="flex gap-2">
-                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add feature..." type="text"/>
-                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container transition-colors">Add</button>
+                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add feature..." type="text"/>
+                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -274,14 +268,14 @@
                             <?php if(!empty($features)): ?>
                                 <?php foreach($features as $feature): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-6 font-body-md text-body-md text-on-surface font-semibold"><?= esc($feature->name ?? $feature->feature_name) ?></td>
+                                        <td class="py-3 px-6 text-sm text-on-surface font-semibold"><?= esc($feature->name ?? $feature->feature_name) ?></td>
                                         <td class="py-3 px-6 text-right">
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature/' . $feature->id) ?>'; deleteMessage = 'Delete this feature?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="2" class="py-6 text-center text-outline">No features found.</td></tr>
+                                <tr><td colspan="2" class="py-6 text-center text-outline text-sm">No features found.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -334,7 +328,7 @@
                             <span class="text-sm font-medium">Allow In-App Message System</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="hidden" name="direct_email_inquiry" value="0"><input type="checkbox" name="direct_email_inquiry" value="1" class="rounded"> 
+                            <input type="hidden" name="direct_email_inquiry" value="0"><input type="checkbox" name="direct_email_inquiry" value="1" class="rounded border-outline-variant text-primary focus:ring-primary"> 
                             <span class="text-sm">Forward Lead Alerts Direct to Email</span>
                         </label>
                     </div>
@@ -446,7 +440,7 @@
     <div x-show="showEditCityModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showEditCityModal = false" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
-                <h2 class="text-xl font-bold text-on-surface">Edit Location Location</h2>
+                <h2 class="text-xl font-bold text-on-surface">Edit Location</h2>
                 <button type="button" @click="showEditCityModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form :action="'<?= base_url('admin/master-data/update-city/') ?>' + editCityId" method="POST">
