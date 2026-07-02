@@ -53,7 +53,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/store-city', 'MasterData::storeCity');
     $routes->post('master-data/store-state', 'MasterData::storeState');
     $routes->post('master-data/store-feature', 'MasterData::storeFeature'); 
-    $routes->post('master-data/store-plan', 'MasterData::storePlan'); 
+    $routes->post('master-data/store-plan', 'MasterData::storePlan');
+    $routes->post('master-data/store-zipcode', 'MasterData::storeZipcode'); 
     
     // Delete
     $routes->post('master-data/delete-type/(:num)', 'MasterData::deleteType/$1'); 
@@ -61,12 +62,14 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/delete-state/(:num)', 'MasterData::deleteState/$1');
     $routes->post('master-data/delete-feature/(:num)', 'MasterData::deleteFeature/$1');
     $routes->post('master-data/delete-plan/(:num)', 'MasterData::deletePlan/$1');
+    $routes->post('master-data/delete-zipcode/(:num)', 'MasterData::deleteZipcode/$1');
     
     // Update
     $routes->post('master-data/update-type/(:num)', 'MasterData::updateType/$1');
     $routes->post('master-data/update-state/(:num)', 'MasterData::updateState/$1');
     $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
     $routes->post('master-data/update-plan/(:num)', 'MasterData::updatePlan/$1');
+    $routes->post('master-data/update-zipcode/(:num)', 'MasterData::updateZipcode/$1');
 
     // Lead & Verification Management
     $routes->get('leads', 'Leads::index');       

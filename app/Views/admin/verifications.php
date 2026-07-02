@@ -79,7 +79,7 @@
         </table>
 
         <?php if (isset($pager) && $pager) : ?>
-            <?= $pager->links('verifications', 'tailwind') ?>
+            <?= $pager->links('default', 'tailwind_pagination') ?>
         <?php endif ?>
 
     </div>
