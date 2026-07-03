@@ -43,11 +43,25 @@ class Properties extends BaseController
 
     public function store()
     {
+        // --- 1. Form Validation ---
+        $rules = [
+            'title'            => 'required|min_length[5]|max_length[255]',
+            'property_type_id' => 'required|numeric',
+            'state_id'         => 'required|numeric',
+            'city_id'          => 'required|numeric',
+            'tax_price'        => 'required|numeric',
+            'address_line_1'   => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
         $propertyFeatureModel = new PropertyFeatureModel(); 
         
-        // --- 1. Save Core Property Data (Numbers & Text) ---
+        // --- 2. Save Core Property Data ---
         $data = [
             'title'            => $this->request->getPost('title'),
             'description'      => $this->request->getPost('description'),
@@ -62,14 +76,14 @@ class Properties extends BaseController
             'usable_area'      => $this->request->getPost('usable_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
             'owner_id'         => session()->get('user_id'),
-            'approval_status'  => 'Pending Review',
+            'approval_status'  => 'Draft', // Updated per July 7 requirements
             'status'           => 'Active',
         ];
 
         $propertyModel->insert($data);
         $propertyId = $propertyModel->getInsertID();
 
-        // --- 2. Save Dynamic Features (Checkboxes) ---
+        // --- 3. Save Dynamic Features (Checkboxes) ---
         $selectedFeatures = $this->request->getPost('features');
         
         // Safety Check: Only save if the user actually checked some boxes
@@ -83,7 +97,7 @@ class Properties extends BaseController
             }
         }
 
-        // --- 3. Save Images ---
+        // --- 4. Save Images ---
         if ($imagefile = $this->request->getFiles()) {
             if (array_key_exists('property_images', $imagefile)) {
                 $isFirst = true;
@@ -103,14 +117,14 @@ class Properties extends BaseController
             }
         }
 
-        // --- 4. Save Documents ---
+        // --- 5. Save Documents ---
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
             $shmName = $shmFile->getRandomName();
             $shmFile->move(FCPATH . 'uploads/documents', $shmName);
         }
 
-        return redirect()->to(base_url('admin/properties'))->with('success', 'Property successfully submitted for moderation!');
+        return redirect()->to(base_url('admin/properties'))->with('success', 'Property successfully saved as a Draft!');
     }
     
     public function getCities($stateId)

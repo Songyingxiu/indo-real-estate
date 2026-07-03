@@ -2,6 +2,22 @@
 <?= $this->section('content') ?>
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Create New Listing</h2>
+    
+    <!-- Validation Errors Display -->
+    <?php if (session()->has('errors')) : ?>
+        <div class="bg-error-container text-on-error-container p-4 rounded-lg mb-6 border flex items-start gap-2 shadow-sm">
+            <span class="material-symbols-outlined mt-0.5">warning</span>
+            <div>
+                <p class="font-bold text-[14px]">Please fix the following errors:</p>
+                <ul class="list-disc pl-5 text-[14px] mt-1">
+                    <?php foreach (session('errors') as $error) : ?>
+                        <li><?= esc($error) ?></li>
+                    <?php endforeach ?>
+                </ul>
+            </div>
+        </div>
+    <?php endif ?>
+
     <form action="<?= base_url('admin/properties/store') ?>" method="POST" enctype="multipart/form-data" class="bg-surface-container-lowest shadow-sm rounded-lg border border-outline-variant p-6 space-y-8">
         
         <div>
@@ -142,7 +158,7 @@
         </div>
 
         <div class="pt-6 border-t flex justify-end">
-            <button type="submit" class="bg-primary text-on-primary px-8 py-3 rounded font-semibold">Submit for Admin Review</button>
+            <button type="submit" class="bg-primary text-on-primary px-8 py-3 rounded font-semibold">Save as Draft</button>
         </div>
     </form>
 </div>

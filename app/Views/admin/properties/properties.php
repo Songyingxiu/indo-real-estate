@@ -39,6 +39,7 @@
                                     $badge = 'bg-surface-container text-on-surface';
                                     if ($property['approval_status'] == 'Published') $badge = 'bg-[#c4eed0] text-[#0d652d]';
                                     if ($property['approval_status'] == 'Pending Review') $badge = 'bg-[#fef7e0] text-[#b06000]';
+                                    if ($property['approval_status'] == 'Draft') $badge = 'bg-surface-container-high text-on-surface-variant border border-outline-variant';
                                 ?>
                                 <span class="px-3 py-1 rounded-full <?= $badge ?>"><?= esc($property['approval_status']) ?></span>
                             </td>
