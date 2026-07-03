@@ -133,6 +133,7 @@
                     </div>
                 </div>
 
+                <!-- User Profile Dropdown -->
                 <div x-data="{ open: false }" class="relative ml-2">
                     <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors">
                         <?= esc($initial) ?>
@@ -144,6 +145,12 @@
                             <p class="font-caption text-caption text-on-surface-variant truncate"><?= esc($email) ?></p>
                         </div>
                         
+                        <!-- NEW: My Profile Link (Accessible to both Users and Admins) -->
+                        <a href="<?= base_url($roleId == 1 ? 'user/profile' : 'admin/profile') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">person</span>
+                            <span class="font-body-sm text-body-sm">My Profile</span>
+                        </a>
+
                         <?php if($roleId != 1): ?>
                             <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">dashboard</span>

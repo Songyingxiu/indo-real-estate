@@ -19,8 +19,13 @@ $routes->post('login', 'Auth::attemptLogin');
 $routes->post('register', 'Auth::attemptRegister');
 $routes->get('logout', 'Auth::logout');
 
+
+// User Routes
 $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->get('inbox', 'User::inbox');
+    $routes->get('profile', 'User::profile');
+    $routes->post('update-profile', 'User::updateProfile');
+    $routes->post('update-password', 'User::updatePassword');
 });
 
 // Admin Dashboard Routes (Protected by AdminFilter)
