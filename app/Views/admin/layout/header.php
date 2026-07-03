@@ -37,6 +37,15 @@
             <span class="material-symbols-outlined" x-text="isDark ? 'light_mode' : 'dark_mode'"></span>
         </button>
 
+        <!-- NEW INBOX ICON -->
+        <a href="<?= base_url('admin/leads') ?>" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative" title="Inbox">
+            <span class="material-symbols-outlined">mail</span>
+            <?php if ($unreadCount > 0): ?>
+                <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+            <?php endif; ?>
+        </a>
+
+        <!-- NOTIFICATIONS DROPDOWN -->
         <div x-data="{ open: false }" class="relative">
             <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
                 <span class="material-symbols-outlined">notifications</span>
@@ -56,8 +65,7 @@
                  style="display: none;">
                 
                 <div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-                    <span class="font-label-md text-label-md text-on-surface font-bold">Notifications</span>
-                    <a href="#" class="text-primary font-caption text-caption hover:underline">Mark all as read</a>
+                    <span class="font-label-md text-label-md text-on-surface font-bold">Recent Inquiries</span>
                 </div>
                 
                 <div class="max-h-96 overflow-y-auto">
@@ -71,13 +79,13 @@
                             <a href="<?= base_url('admin/leads') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
                                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
                                 <div class="flex justify-between items-start mb-1">
-                                    <span class="font-label-md text-label-md text-on-surface">New Lead Received</span>
-                                    <span class="font-caption text-caption text-primary font-medium">
+                                    <span class="font-label-md text-label-md text-on-surface truncate pr-2"><?= esc($notif->name ?? $notif->first_name) ?></span>
+                                    <span class="font-caption text-caption text-primary font-medium shrink-0">
                                         <?= date('M d', strtotime($notif->created_date)) ?>
                                     </span>
                                 </div>
                                 <p class="font-caption text-caption text-on-surface-variant line-clamp-2">
-                                    <?= esc($notif->first_name . ' ' . $notif->last_name) ?> inquired about <?= esc($notif->property_title) ?>.
+                                    Inquired about: <?= esc($notif->property_title) ?>
                                 </p>
                             </a>
                         <?php endforeach; ?>
@@ -85,11 +93,12 @@
                 </div>
                 
                 <div class="px-4 py-2 border-t border-outline-variant bg-surface-container-lowest text-center">
-                    <a href="<?= base_url('admin/leads') ?>" class="text-primary font-label-md text-label-md hover:underline inline-block w-full py-1">View All Activity</a>
+                    <a href="<?= base_url('admin/leads') ?>" class="text-primary font-label-md text-label-md hover:underline inline-block w-full py-1">Go to Inbox</a>
                 </div>
             </div>
         </div>
 
+        <!-- PROFILE DROPDOWN -->
         <div x-data="{ open: false }" class="relative ml-2">
             <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                 <?= esc($initial) ?>

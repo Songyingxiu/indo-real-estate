@@ -46,6 +46,17 @@ class Leads extends BaseController
         return view('admin/leads', $data);
     }
 
+    public function markRead($id)
+    {
+        $roleId = session()->get('role_id');
+        if (!in_array($roleId, [2, 3, 4])) return redirect()->to(base_url('admin/dashboard'));
+
+        $model = new LeadModel();
+        $model->update($id, ['is_read' => 1]);
+        
+        return redirect()->back()->with('success', 'Message marked as read.');
+    }
+
     public function updateStatus($id)
     {
         $roleId = session()->get('role_id');

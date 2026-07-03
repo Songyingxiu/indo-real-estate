@@ -8,7 +8,12 @@ class SubscriptionPlanModel extends Model {
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     
-    protected $allowedFields    = ['name', 'price', 'status'];
+    protected $allowedFields    = [
+        'code', 'name', 'description', 'price', 
+        'max_properties', 'max_agents', 
+        'allow_messages', 'direct_email_inquiry', 
+        'status'
+    ];
 
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';

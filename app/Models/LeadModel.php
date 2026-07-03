@@ -10,7 +10,7 @@ class LeadModel extends Model {
     
     protected $allowedFields    = [
         'property_id', 'buyer_id', 'agent_id', 'source', 
-        'lead_status', 'status'
+        'lead_status', 'status', 'name', 'phone', 'email', 'message', 'is_read'
     ];
 
     protected $useTimestamps = true;

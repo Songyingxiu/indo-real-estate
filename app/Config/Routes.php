@@ -9,7 +9,9 @@ use CodeIgniter\Router\RouteCollection;
 // Public Facing Routes
 $routes->get('/', 'Home::index');            
 $routes->get('search', 'Home::search');
-$routes->get('property/(:num)', 'Home::detail/$1');      
+$routes->get('property/(:num)', 'Home::detail/$1');
+$routes->post('contact/submit-lead', 'Contact::submitLead');
+$routes->get('page/(:segment)', 'Cms::page/$1');      
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');
@@ -77,7 +79,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('leads/delete/(:num)', 'Leads::delete/$1');        
     $routes->get('verifications', 'Verifications::index'); 
     $routes->post('verifications/process/(:num)', 'Verifications::process/$1');
-    
+    $routes->post('leads/mark-read/(:num)', 'Leads::markRead/$1');
+
     // System Settings & Content
     $routes->get('cms', 'Cms::index');
     $routes->post('cms/save', 'Cms::savePost');

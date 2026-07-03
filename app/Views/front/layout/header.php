@@ -1,17 +1,27 @@
+<?php
+    $isLoggedIn = session()->get('id') ? true : false;
+    $firstName = session()->get('first_name') ?? 'User';
+    $lastName = session()->get('last_name') ?? '';
+    $email = session()->get('email') ?? '';
+    $fullName = trim($firstName . ' ' . $lastName);
+    $initial = strtoupper(substr($firstName, 0, 1));
+    
+    // Fetch the global notifications
+    $notifications = $GLOBALS['global_notifications'] ?? [];
+    $unreadCount = count($notifications);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title><?= esc($title ?? 'HuniKita - Real Estate Platform') ?></title>
-    <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Tailwind Config -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -28,7 +38,8 @@
                         "surface": "#f7fafc",
                         "on-background": "#181c1e",
                         "on-primary": "#ffffff",
-                        "primary": "#002045"
+                        "primary": "#002045",
+                        "error": "#ba1a1a"
                     },
                     fontFamily: {
                         "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
@@ -45,19 +56,10 @@
         }
     </script>
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .material-symbols-outlined.fill {
-            font-variation-settings: 'FILL' 1;
-        }
-        .property-card {
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-        .property-card:hover {
-            box-shadow: 0px 4px 20px rgba(26, 54, 93, 0.08);
-            transform: translateY(-2px);
-        }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+        .property-card { transition: box-shadow 0.3s ease, transform 0.3s ease; }
+        .property-card:hover { box-shadow: 0px 4px 20px rgba(26, 54, 93, 0.08); transform: translateY(-2px); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f7fafc; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #c4c6cf; border-radius: 4px; }
@@ -76,19 +78,76 @@
         </a>
         <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex items-center gap-8">
-            <a class="font-body-md text-[16px] text-primary border-b-2 border-primary pb-1 transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
+            <a class="font-body-md text-[16px] text-primary hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Rent') ?>">Rent</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">New Projects</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Agents</a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/about-us') ?>">About Us</a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>">Privacy</a>
         </nav>
+        
         <!-- Trailing Actions -->
         <div class="hidden md:flex items-center gap-4">
             <a href="<?= base_url('admin/properties/create') ?>" class="font-label-md text-[14px] font-semibold text-primary bg-transparent border border-primary px-4 py-2 rounded hover:bg-surface-container-high transition-colors">
                 Post Listing
             </a>
-            <a href="<?= base_url('login') ?>" class="font-label-md text-[14px] font-semibold text-on-primary bg-primary px-4 py-2 rounded hover:bg-primary-container transition-colors">
-                Sign In
-            </a>
+
+            <?php if($isLoggedIn): ?>
+                <!-- Notifications Dropdown -->
+                <div x-data="{ open: false }" class="relative ml-2">
+                    <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <?php if ($unreadCount > 0): ?>
+                            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+                        <?php endif; ?>
+                    </button>
+                    
+                    <div x-show="open" style="display: none;" class="absolute right-0 mt-2 w-80 bg-surface rounded-lg shadow-lg border border-outline-variant overflow-hidden z-50">
+                        <div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+                            <span class="font-label-md text-label-md text-on-surface font-bold">Notifications</span>
+                        </div>
+                        <div class="max-h-96 overflow-y-auto">
+                            <?php if (empty($notifications)): ?>
+                                <div class="px-4 py-6 text-center text-on-surface-variant">
+                                    <p class="font-caption text-caption">No new notifications.</p>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($notifications as $notif): ?>
+                                    <a href="<?= base_url('admin/leads') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
+                                        <p class="font-caption text-caption text-on-surface-variant line-clamp-2">New message received.</p>
+                                    </a>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div x-data="{ open: false }" class="relative ml-2">
+                    <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors">
+                        <?= esc($initial) ?>
+                    </button>
+                    
+                    <div x-show="open" style="display: none;" class="absolute right-0 mt-2 w-56 bg-surface rounded-lg shadow-lg border border-outline-variant overflow-hidden z-50 py-1">
+                        <div class="px-4 py-3 border-b border-outline-variant mb-1">
+                            <p class="font-label-md text-label-md text-on-surface truncate font-bold"><?= esc($fullName) ?></p>
+                            <p class="font-caption text-caption text-on-surface-variant truncate"><?= esc($email) ?></p>
+                        </div>
+                        <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                            <span class="font-body-sm text-body-sm">Dashboard</span>
+                        </a>
+                        <div class="border-t border-outline-variant mt-1 pt-1">
+                            <a href="<?= base_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-error hover:bg-error-container transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">logout</span>
+                                <span class="font-label-md text-label-md">Sign Out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <a href="<?= base_url('login') ?>" class="font-label-md text-[14px] font-semibold text-on-primary bg-primary px-4 py-2 rounded hover:bg-primary-container transition-colors">
+                    Sign In
+                </a>
+            <?php endif; ?>
         </div>
         <!-- Mobile Menu Toggle -->
         <button class="md:hidden flex items-center justify-center w-10 h-10 text-primary">
