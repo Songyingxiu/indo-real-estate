@@ -67,6 +67,7 @@ class Auth extends BaseController
             }
 
             $sessionData = [
+                'id'         => $user['id'], // Added standard 'id'
                 'user_id'    => $user['id'],
                 'role_id'    => $user['role_id'],
                 'first_name' => $user['first_name'],
@@ -76,7 +77,14 @@ class Auth extends BaseController
             ];
             session()->set($sessionData);
 
-            return redirect()->to(base_url('admin/dashboard'));
+            // Dynamic Redirect Based on Role
+            if ($user['role_id'] == 1) {
+                // Role 1 (Buyer) goes to Front Homepage
+                return redirect()->to(base_url('/'));
+            } else {
+                // Roles 2, 3, 4 go to Admin Dashboard
+                return redirect()->to(base_url('admin/dashboard'));
+            }
             
         } else {
             return redirect()->back()->withInput()->with('error', 'Invalid Email or Password.');

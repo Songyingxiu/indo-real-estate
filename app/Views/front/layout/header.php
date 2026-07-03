@@ -1,14 +1,14 @@
 <?php
     $isLoggedIn = session()->get('id') ? true : false;
+    $roleId = session()->get('role_id');
     $firstName = session()->get('first_name') ?? 'User';
     $lastName = session()->get('last_name') ?? '';
     $email = session()->get('email') ?? '';
     $fullName = trim($firstName . ' ' . $lastName);
     $initial = strtoupper(substr($firstName, 0, 1));
     
-    // Fetch the global notifications
     $notifications = $GLOBALS['global_notifications'] ?? [];
-    $unreadCount = count($notifications);
+    $unreadCount = $GLOBALS['unread_count'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,15 +68,14 @@
 </head>
 <body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
 
-<!-- TopNavBar -->
 <header class="bg-surface border-b border-outline-variant w-full z-50 sticky top-0">
     <div class="flex justify-between items-center h-20 px-4 md:px-10 w-full max-w-[1280px] mx-auto">
-        <!-- Logo & Brand -->
+        
         <a href="<?= base_url() ?>" class="flex items-center gap-2">
             <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-10 h-10 rounded-full object-cover border border-outline-variant shadow-sm bg-white" onerror="this.outerHTML='<div class=\'w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold\'>H</div>'">
             <span class="font-brand-text text-[24px] font-bold tracking-tight text-primary">HuniKita</span>
         </a>
-        <!-- Desktop Navigation Links -->
+        
         <nav class="hidden md:flex items-center gap-8">
             <a class="font-body-md text-[16px] text-primary hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Rent') ?>">Rent</a>
@@ -84,15 +83,24 @@
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>">Privacy</a>
         </nav>
         
-        <!-- Trailing Actions -->
         <div class="hidden md:flex items-center gap-4">
-            <a href="<?= base_url('admin/properties/create') ?>" class="font-label-md text-[14px] font-semibold text-primary bg-transparent border border-primary px-4 py-2 rounded hover:bg-surface-container-high transition-colors">
-                Post Listing
-            </a>
+            
+            <?php if($roleId != 1): ?>
+                <a href="<?= base_url('admin/properties/create') ?>" class="font-label-md text-[14px] font-semibold text-primary bg-transparent border border-primary px-4 py-2 rounded hover:bg-surface-container-high transition-colors">
+                    Post Listing
+                </a>
+            <?php endif; ?>
 
             <?php if($isLoggedIn): ?>
-                <!-- Notifications Dropdown -->
-                <div x-data="{ open: false }" class="relative ml-2">
+                
+                <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/leads') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Inbox">
+                    <span class="material-symbols-outlined">mail</span>
+                    <?php if ($unreadCount > 0): ?>
+                        <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+                    <?php endif; ?>
+                </a>
+
+                <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
                         <span class="material-symbols-outlined">notifications</span>
                         <?php if ($unreadCount > 0): ?>
@@ -102,17 +110,22 @@
                     
                     <div x-show="open" style="display: none;" class="absolute right-0 mt-2 w-80 bg-surface rounded-lg shadow-lg border border-outline-variant overflow-hidden z-50">
                         <div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-                            <span class="font-label-md text-label-md text-on-surface font-bold">Notifications</span>
+                            <span class="font-label-md text-label-md text-on-surface font-bold">Activity</span>
                         </div>
                         <div class="max-h-96 overflow-y-auto">
                             <?php if (empty($notifications)): ?>
                                 <div class="px-4 py-6 text-center text-on-surface-variant">
-                                    <p class="font-caption text-caption">No new notifications.</p>
+                                    <p class="font-caption text-caption">No recent activity.</p>
                                 </div>
                             <?php else: ?>
                                 <?php foreach ($notifications as $notif): ?>
-                                    <a href="<?= base_url('admin/leads') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
-                                        <p class="font-caption text-caption text-on-surface-variant line-clamp-2">New message received.</p>
+                                    <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/leads') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
+                                        <p class="font-label-md text-[13px] text-on-surface font-bold truncate">
+                                            <?= esc($notif->property_title) ?>
+                                        </p>
+                                        <p class="font-caption text-caption text-on-surface-variant">
+                                            <?= $roleId == 1 ? 'Status updated to: ' . esc($notif->lead_status) : 'New inquiry received.' ?>
+                                        </p>
                                     </a>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -120,7 +133,6 @@
                     </div>
                 </div>
 
-                <!-- User Profile Dropdown -->
                 <div x-data="{ open: false }" class="relative ml-2">
                     <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors">
                         <?= esc($initial) ?>
@@ -131,10 +143,14 @@
                             <p class="font-label-md text-label-md text-on-surface truncate font-bold"><?= esc($fullName) ?></p>
                             <p class="font-caption text-caption text-on-surface-variant truncate"><?= esc($email) ?></p>
                         </div>
-                        <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-[18px]">dashboard</span>
-                            <span class="font-body-sm text-body-sm">Dashboard</span>
-                        </a>
+                        
+                        <?php if($roleId != 1): ?>
+                            <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                                <span class="font-body-sm text-body-sm">Admin Dashboard</span>
+                            </a>
+                        <?php endif; ?>
+
                         <div class="border-t border-outline-variant mt-1 pt-1">
                             <a href="<?= base_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-error hover:bg-error-container transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">logout</span>
@@ -149,7 +165,7 @@
                 </a>
             <?php endif; ?>
         </div>
-        <!-- Mobile Menu Toggle -->
+        
         <button class="md:hidden flex items-center justify-center w-10 h-10 text-primary">
             <span class="material-symbols-outlined">menu</span>
         </button>

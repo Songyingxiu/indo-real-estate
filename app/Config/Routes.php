@@ -19,6 +19,10 @@ $routes->post('login', 'Auth::attemptLogin');
 $routes->post('register', 'Auth::attemptRegister');
 $routes->get('logout', 'Auth::logout');
 
+$routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
+    $routes->get('inbox', 'User::inbox');
+});
+
 // Admin Dashboard Routes (Protected by AdminFilter)
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
 
