@@ -13,7 +13,15 @@
 
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
+            <span class="material-symbols-outlined mt-0.5">check_circle</span>
             <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="bg-error-container text-on-error-container p-4 rounded mb-6 border flex items-center gap-2">
+            <span class="material-symbols-outlined mt-0.5">warning</span>
+            <?= session()->getFlashdata('error') ?>
         </div>
     <?php endif; ?>
 
@@ -34,7 +42,7 @@
                             <td class="py-4 px-6 font-semibold text-primary"><?= esc($property['title']) ?></td>
                             <td class="py-4 px-6"><span class="px-3 py-1 rounded-full bg-surface-container"><?= esc($property['listing_type']) ?></span></td>
                             <td class="py-4 px-6">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></td>
-                            <td class="py-4 px-6">
+                            <td class="py-4 px-6 whitespace-nowrap">
                                 <?php 
                                     $badge = 'bg-surface-container text-on-surface';
                                     if ($property['approval_status'] == 'Published') $badge = 'bg-[#c4eed0] text-[#0d652d]';
@@ -42,6 +50,10 @@
                                     if ($property['approval_status'] == 'Draft') $badge = 'bg-surface-container-high text-on-surface-variant border border-outline-variant';
                                 ?>
                                 <span class="px-3 py-1 rounded-full <?= $badge ?>"><?= esc($property['approval_status']) ?></span>
+                                
+                                <a href="<?= base_url('admin/properties/edit/' . $property['id']) ?>" class="ml-3 text-primary hover:text-primary-container transition p-1 inline-block" title="Edit Property">
+                                    <span class="material-symbols-outlined text-[20px] align-middle">edit</span>
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

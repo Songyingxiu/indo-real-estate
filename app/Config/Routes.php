@@ -66,6 +66,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/store-feature', 'MasterData::storeFeature'); 
     $routes->post('master-data/store-plan', 'MasterData::storePlan');
     $routes->post('master-data/store-zipcode', 'MasterData::storeZipcode'); 
+    $routes->get('properties/edit/(:num)', 'Properties::edit/$1');
+    $routes->post('properties/update/(:num)', 'Properties::update/$1');
     
     // Delete
     $routes->post('master-data/delete-type/(:num)', 'MasterData::deleteType/$1'); 
