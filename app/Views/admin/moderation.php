@@ -1,8 +1,8 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 <div class="mt-4 mb-6">
-    <h1 class="text-2xl font-bold text-on-surface">Moderation Queue</h1>
-    <p class="text-on-surface-variant">Review new property listings before they are published to the public.</p>
+    <h1 class="text-2xl font-bold text-on-surface">Moderation & State Machine</h1>
+    <p class="text-on-surface-variant">Review listings and manage the complete property workflow lifecycle.</p>
 </div>
 
 <?php if (session()->getFlashdata('success')) : ?>
@@ -19,53 +19,74 @@
     </div>
 <?php endif; ?>
 
-<div class="bg-surface border border-outline-variant rounded-lg overflow-hidden">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
-            <tr>
-                <th class="p-4 font-semibold text-on-surface-variant">Property Details</th>
-                <th class="p-4 font-semibold text-on-surface-variant">Submitted By</th>
-                <th class="p-4 font-semibold text-on-surface-variant">Price</th>
-                <th class="p-4 font-semibold text-on-surface-variant text-right">Actions</th>
-            </tr>
-        </thead>
-        <tbody class="text-sm">
-            <?php if (!empty($properties)): ?>
-                <?php foreach ($properties as $prop): ?>
-                    <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
-                        <td class="p-4">
-                            <div class="font-semibold text-on-surface"><?= esc($prop['title'] ?? 'Untitled Property') ?></div>
-                            <div class="text-xs text-on-surface-variant">Property ID: #<?= esc($prop['id']) ?></div>
-                        </td>
-                        <td class="p-4 text-on-surface-variant">
-                            <?= esc(($prop['first_name'] ?? '') . ' ' . ($prop['last_name'] ?? '')) ?>
-                        </td>
-                        <td class="p-4 text-on-surface font-medium">
-                            Rp <?= number_format($prop['price'] ?? 0, 0, ',', '.') ?>
-                        </td>
-                        <td class="p-4 text-right flex justify-end gap-2">
-                            
-                            <form action="<?= base_url('admin/moderation/approve/' . $prop['id']) ?>" method="POST" onsubmit="return confirm('Publish this property to the live marketplace?');">
-                                <button type="submit" class="bg-[#2d3142] text-white px-4 py-1.5 rounded font-semibold hover:bg-opacity-90 transition">Approve</button>
-                            </form>
+<div class="bg-surface border border-outline-variant rounded-lg overflow-hidden shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[800px]">
+            <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
+                <tr>
+                    <th class="p-4 font-semibold text-on-surface-variant">Property Details</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Submitted By</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Price</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Current State</th>
+                    <th class="p-4 font-semibold text-on-surface-variant text-right">Workflow Action</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                <?php if (!empty($properties)): ?>
+                    <?php foreach ($properties as $prop): ?>
+                        <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
+                            <td class="p-4">
+                                <div class="font-semibold text-on-surface text-[15px]"><?= esc($prop['title'] ?? 'Untitled Property') ?></div>
+                                <div class="text-xs text-on-surface-variant mt-0.5">Property ID: #<?= esc($prop['id']) ?></div>
+                            </td>
+                            <td class="p-4 text-on-surface-variant">
+                                <?= esc(($prop['first_name'] ?? '') . ' ' . ($prop['last_name'] ?? '')) ?>
+                            </td>
+                            <td class="p-4 text-on-surface font-medium">
+                                Rp <?= number_format($prop['tax_price'] ?? 0, 0, ',', '.') ?>
+                            </td>
+                            <td class="p-4">
+                                <?php 
+                                    $badge = 'bg-surface-container text-on-surface';
+                                    if ($prop['approval_status'] == 'Published') $badge = 'bg-[#c4eed0] text-[#0d652d]';
+                                    if ($prop['approval_status'] == 'Approved') $badge = 'bg-[#d3e3fd] text-[#001d35]';
+                                    if ($prop['approval_status'] == 'Pending Review') $badge = 'bg-[#fef7e0] text-[#b06000]';
+                                    if ($prop['approval_status'] == 'Rejected') $badge = 'bg-error-container text-on-error-container';
+                                    if ($prop['approval_status'] == 'Draft' || $prop['approval_status'] == 'Archived' || $prop['approval_status'] == 'Expired') $badge = 'bg-surface-container-high text-on-surface-variant border border-outline-variant';
+                                ?>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold <?= $badge ?>"><?= esc($prop['approval_status']) ?></span>
+                            </td>
+                            <td class="p-4 text-right flex justify-end gap-2">
+                                
+                                <form action="<?= base_url('admin/moderation/update-status/' . $prop['id']) ?>" method="POST" class="flex items-center gap-2">
+                                    <select name="approval_status" class="border border-outline-variant bg-surface rounded px-2 py-1.5 text-sm outline-none focus:border-primary">
+                                        <option value="Draft" <?= $prop['approval_status'] == 'Draft' ? 'selected' : '' ?>>Draft</option>
+                                        <option value="Pending Review" <?= $prop['approval_status'] == 'Pending Review' ? 'selected' : '' ?>>Pending Review</option>
+                                        <option value="Approved" <?= $prop['approval_status'] == 'Approved' ? 'selected' : '' ?>>Approved</option>
+                                        <option value="Published" <?= $prop['approval_status'] == 'Published' ? 'selected' : '' ?>>Published</option>
+                                        <option value="Rejected" <?= $prop['approval_status'] == 'Rejected' ? 'selected' : '' ?>>Rejected</option>
+                                        <option value="Expired" <?= $prop['approval_status'] == 'Expired' ? 'selected' : '' ?>>Expired</option>
+                                        <option value="Archived" <?= $prop['approval_status'] == 'Archived' ? 'selected' : '' ?>>Archived</option>
+                                    </select>
+                                    
+                                    <button type="submit" class="bg-primary text-on-primary px-4 py-1.5 rounded font-semibold hover:bg-primary-container transition-colors">
+                                        Update
+                                    </button>
+                                </form>
 
-                            <form action="<?= base_url('admin/moderation/reject/' . $prop['id']) ?>" method="POST" onsubmit="return confirm('Reject this property listing?');">
-                                <button type="submit" class="bg-error text-white px-4 py-1.5 rounded font-semibold hover:bg-opacity-90 transition">Reject</button>
-                            </form>
-
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[48px] opacity-50 mb-2">inbox</span>
+                            <p>No properties exist in the workflow.</p>
                         </td>
                     </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="4" class="p-8 text-center text-on-surface-variant">
-                        <span class="material-symbols-outlined text-[48px] opacity-50 mb-2">inbox</span>
-                        <p>No properties are currently pending review.</p>
-                    </td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
-
 <?= $this->endSection() ?>

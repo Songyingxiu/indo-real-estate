@@ -51,6 +51,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('moderation', 'Moderation::index');
     $routes->post('moderation/approve/(:num)', 'Moderation::approve/$1');
     $routes->post('moderation/reject/(:num)', 'Moderation::reject/$1');
+    $routes->get('moderation', 'Moderation::index');
+    $routes->post('moderation/update-status/(:num)', 'Moderation::updateStatus/$1');
 
     // Subscriptions Management (User Approvals)
     $routes->get('subscriptions', 'Subscriptions::index');
