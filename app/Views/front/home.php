@@ -14,14 +14,25 @@
             </div>
             
             <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
-                <form action="<?= base_url('search') ?>" method="GET" class="flex flex-col md:flex-row gap-4">
-                    <div class="relative flex-grow">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                        <input name="q" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by Keyword, Address, or ID..." type="text">
+                <form action="<?= base_url('search') ?>" method="GET" class="flex flex-col gap-4">
+                    
+                    <input type="hidden" name="listing_type" id="home_listing_type" value="Sale">
+
+                    <div class="flex gap-2 border-b border-outline-variant pb-2">
+                        <button type="button" onclick="document.getElementById('home_listing_type').value='Sale'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors">For Sale</button>
+                        
+                        <button type="button" onclick="document.getElementById('home_listing_type').value='Rent'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">For Rent</button>
                     </div>
-                    <button type="submit" class="bg-primary text-on-primary font-label-md text-[14px] font-semibold px-6 py-3 rounded hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
-                        Search Properties
-                    </button>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="relative flex-grow">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                            <input name="q" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by Keyword, Address, or ID..." type="text">
+                        </div>
+                        <button type="submit" class="bg-primary text-on-primary font-label-md text-[14px] font-semibold px-6 py-3 rounded hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
+                            Search Properties
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

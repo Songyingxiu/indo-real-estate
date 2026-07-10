@@ -63,7 +63,11 @@ class Home extends BaseController
         $data['properties'] = $builder->paginate(9);
         $data['pager']      = $propertyModel->pager;
         $data['total']      = $propertyModel->pager->getTotal(); 
-        $data['keyword']    = $keyword;
+        
+        // Pass states back to view to keep inputs populated
+        $data['keyword']       = $keyword;
+        $data['selectedTypes'] = $types ?? [];
+        $data['listingType']   = $listingType;
         
         $data['title'] = 'Search Properties - HuniKita';
         return view('front/properties/search', $data);
