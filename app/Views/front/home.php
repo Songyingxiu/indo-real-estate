@@ -24,10 +24,15 @@
                         <button type="button" onclick="document.getElementById('home_listing_type').value='Rent'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">For Rent</button>
                     </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex flex-col md:flex-row gap-4 relative">
                         <div class="relative flex-grow">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                            <input name="q" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by Keyword, Address, or ID..." type="text">
+                            
+                            <!-- UPDATED: Added id="searchInput" and autocomplete="off" -->
+                            <input name="q" id="searchInput" autocomplete="off" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by Keyword, Address, or ID..." type="text">
+                            
+                            <!-- ADDED: Dropdown Container -->
+                            <div id="suggestDropdown" class="absolute left-0 right-0 top-full mt-1 bg-surface border border-outline-variant rounded shadow-lg z-50 hidden max-h-60 overflow-y-auto"></div>
                         </div>
                         <button type="submit" class="bg-primary text-on-primary font-label-md text-[14px] font-semibold px-6 py-3 rounded hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
                             Search Properties
@@ -82,5 +87,68 @@
         </div>
     </section>
 </main>
+
+<!-- ADDED: Auto-Suggest JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const suggestDropdown = document.getElementById('suggestDropdown');
+    let timeout = null;
+
+    if (!searchInput || !suggestDropdown) return;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            suggestDropdown.classList.add('hidden');
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestDropdown.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'px-4 py-2 hover:bg-surface-container-low cursor-pointer flex items-center justify-between border-b border-outline-variant/30 last:border-0';
+                            
+                            let icon = 'real_estate_agent';
+                            if (item.category === 'Location' || item.category === 'Region') icon = 'location_on';
+                            
+                            div.innerHTML = `
+                                <div class="flex items-center gap-2 text-on-surface">
+                                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant">${icon}</span>
+                                    <span class="font-body-md text-[14px]">${item.text}</span>
+                                </div>
+                                <span class="text-[10px] bg-surface-container px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">${item.category}</span>
+                            `;
+                            
+                            div.addEventListener('click', () => {
+                                searchInput.value = item.text;
+                                suggestDropdown.classList.add('hidden');
+                                searchInput.closest('form').submit();
+                            });
+                            suggestDropdown.appendChild(div);
+                        });
+                        suggestDropdown.classList.remove('hidden');
+                    } else {
+                        suggestDropdown.classList.add('hidden');
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestDropdown.contains(e.target)) {
+            suggestDropdown.classList.add('hidden');
+        }
+    });
+});
+</script>
 
 <?= $this->include('front/layout/footer') ?>

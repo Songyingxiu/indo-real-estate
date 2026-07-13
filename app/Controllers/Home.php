@@ -3,6 +3,8 @@
 use App\Models\PropertyModel;
 use App\Models\PropertyTypeModel;
 use App\Models\PropertyImageModel;
+use App\Models\CityModel;
+use App\Models\StateModel;
 
 class Home extends BaseController
 {
@@ -63,11 +65,8 @@ class Home extends BaseController
         $data['properties'] = $builder->paginate(9);
         $data['pager']      = $propertyModel->pager;
         $data['total']      = $propertyModel->pager->getTotal(); 
-        
-        // Pass states back to view to keep inputs populated
-        $data['keyword']       = $keyword;
-        $data['selectedTypes'] = $types ?? [];
-        $data['listingType']   = $listingType;
+        $data['keyword']    = $keyword;
+        $data['listingType']= $listingType;
         
         $data['title'] = 'Search Properties - HuniKita';
         return view('front/properties/search', $data);
@@ -97,5 +96,61 @@ class Home extends BaseController
         $data['title'] = $property->title . ' - HuniKita';
         
         return view('front/properties/details', $data);
+    }
+
+    // --- July 16 Task: Auto-Suggest API Endpoint ---
+    public function suggest()
+    {
+        $query = $this->request->getGet('q');
+
+        // Only search if the user has typed at least 2 characters
+        if (empty($query) || strlen($query) < 2) {
+            return $this->response->setJSON([]);
+        }
+
+        $cityModel = new CityModel();
+        $stateModel = new StateModel();
+        $propertyModel = new PropertyModel();
+
+        $results = [];
+
+        // 1. Search Active Cities
+        $cities = $cityModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
+        foreach ($cities as $city) {
+            $results[] = [
+                'text' => $city->name,
+                'category' => 'Location'
+            ];
+        }
+
+        // 2. Search Active Regions/States
+        $states = $stateModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
+        foreach ($states as $state) {
+            $results[] = [
+                'text' => $state->name,
+                'category' => 'Region'
+            ];
+        }
+
+        // 3. Search Published Properties (By Title or Area Name)
+        $properties = $propertyModel->asObject()
+            ->groupStart()
+                ->like('title', $query)
+                ->orLike('area_name', $query)
+            ->groupEnd()
+            ->where('status', 'Active')
+            ->where('approval_status', 'Published')
+            ->limit(4)
+            ->find();
+
+        foreach ($properties as $prop) {
+            $results[] = [
+                'text' => $prop->title,
+                'category' => 'Property Listing'
+            ];
+        }
+
+        // Return standard JSON payload
+        return $this->response->setJSON($results);
     }
 }

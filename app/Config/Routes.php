@@ -9,6 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 // Public Facing Routes
 $routes->get('/', 'Home::index');            
 $routes->get('search', 'Home::search');
+$routes->get('api/suggest', 'Home::suggest');
 $routes->get('property/(:num)', 'Home::detail/$1');
 $routes->post('contact/submit-lead', 'Contact::submitLead');
 $routes->get('page/(:segment)', 'Cms::page/$1');      
@@ -45,12 +46,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('properties', 'Properties::index');
     $routes->get('properties/create', 'Properties::create');
     $routes->post('properties/store', 'Properties::store');
+    $routes->get('properties/edit/(:num)', 'Properties::edit/$1');
+    $routes->post('properties/update/(:num)', 'Properties::update/$1');
     $routes->get('properties/get-cities/(:any)', 'Properties::getCities/$1');
     
-    // Property Moderation Queue
-    $routes->get('moderation', 'Moderation::index');
-    $routes->post('moderation/approve/(:num)', 'Moderation::approve/$1');
-    $routes->post('moderation/reject/(:num)', 'Moderation::reject/$1');
+    // Property Moderation & State Machine
     $routes->get('moderation', 'Moderation::index');
     $routes->post('moderation/update-status/(:num)', 'Moderation::updateStatus/$1');
 
@@ -68,8 +68,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/store-feature', 'MasterData::storeFeature'); 
     $routes->post('master-data/store-plan', 'MasterData::storePlan');
     $routes->post('master-data/store-zipcode', 'MasterData::storeZipcode'); 
-    $routes->get('properties/edit/(:num)', 'Properties::edit/$1');
-    $routes->post('properties/update/(:num)', 'Properties::update/$1');
     
     // Delete
     $routes->post('master-data/delete-type/(:num)', 'MasterData::deleteType/$1'); 

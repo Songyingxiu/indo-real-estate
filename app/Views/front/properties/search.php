@@ -3,7 +3,7 @@
 <div class="flex-1 flex overflow-hidden min-h-[calc(100vh-80px)]">
     
     <aside class="w-80 bg-surface border-r border-outline-variant flex-shrink-0 flex flex-col h-full overflow-y-auto custom-scrollbar">
-        <form id="filterForm" action="<?= base_url('search') ?>" method="GET" class="p-6 flex flex-col gap-8 h-full">
+        <form id="filterForm" action="<?= base_url('search') ?>" method="GET" class="p-6 flex flex-col gap-8 h-full relative">
             
             <input type="hidden" name="listing_type" id="filter_listing_type" value="<?= esc($listingType ?? 'Sale') ?>">
 
@@ -14,7 +14,12 @@
                     <label class="font-label-md text-[14px] text-on-surface">Keyword / Location</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline text-[20px]">search</span>
-                        <input name="q" value="<?= esc($keyword ?? '') ?>" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-fixed-dim outline-none transition-all font-body-md text-[14px] text-on-surface" placeholder="e.g. Pool, Canggu" type="text"/>
+                        
+                        <!-- UPDATED: Added id="sidebarSearchInput" and autocomplete="off" -->
+                        <input name="q" id="sidebarSearchInput" autocomplete="off" value="<?= esc($keyword ?? '') ?>" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-fixed-dim outline-none transition-all font-body-md text-[14px] text-on-surface" placeholder="e.g. Pool, Canggu" type="text"/>
+                        
+                        <!-- ADDED: Dropdown Container -->
+                        <div id="sidebarSuggestDropdown" class="absolute left-0 right-0 top-full mt-1 bg-surface border border-outline-variant rounded shadow-lg z-50 hidden max-h-60 overflow-y-auto w-full"></div>
                     </div>
                 </div>
             </div>
@@ -115,5 +120,67 @@
         </div>
     </main>
 </div>
+
+<!-- ADDED: Sidebar Auto-Suggest JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('sidebarSearchInput');
+    const suggestDropdown = document.getElementById('sidebarSuggestDropdown');
+    let timeout = null;
+
+    if (!searchInput || !suggestDropdown) return;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            suggestDropdown.classList.add('hidden');
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestDropdown.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'px-4 py-2 hover:bg-surface-container-low cursor-pointer flex items-center justify-between border-b border-outline-variant/30 last:border-0';
+                            
+                            let icon = 'real_estate_agent';
+                            if (item.category === 'Location' || item.category === 'Region') icon = 'location_on';
+                            
+                            div.innerHTML = `
+                                <div class="flex items-center gap-2 text-on-surface">
+                                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant">${icon}</span>
+                                    <span class="font-body-md text-[14px] truncate max-w-[150px]">${item.text}</span>
+                                </div>
+                            `;
+                            
+                            div.addEventListener('click', () => {
+                                searchInput.value = item.text;
+                                suggestDropdown.classList.add('hidden');
+                                searchInput.closest('form').submit();
+                            });
+                            suggestDropdown.appendChild(div);
+                        });
+                        suggestDropdown.classList.remove('hidden');
+                    } else {
+                        suggestDropdown.classList.add('hidden');
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestDropdown.contains(e.target)) {
+            suggestDropdown.classList.add('hidden');
+        }
+    });
+});
+</script>
 
 <?= $this->include('front/layout/footer') ?>
