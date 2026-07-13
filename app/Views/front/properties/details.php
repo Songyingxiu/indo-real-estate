@@ -2,7 +2,6 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<!-- Photo Gallery Lightbox (Hidden by default) -->
 <div id="photoGallery" class="fixed inset-0 z-[100] hidden bg-black/95 flex-col items-center justify-center p-4">
     <button onclick="closeGallery()" class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2">
         <span class="material-symbols-outlined text-[36px]">close</span>
@@ -114,6 +113,13 @@
                         <p class="font-label-md text-[14px] leading-relaxed"><?= session()->getFlashdata('success') ?></p>
                     </div>
                 <?php endif; ?>
+                
+                <?php if (session()->getFlashdata('error')) : ?>
+                    <div class="bg-[#ffdad6] text-[#410002] p-4 rounded-xl border border-error/30 flex items-start gap-2 shadow-sm">
+                        <span class="material-symbols-outlined mt-0.5">warning</span>
+                        <p class="font-label-md text-[14px] leading-relaxed"><?= session()->getFlashdata('error') ?></p>
+                    </div>
+                <?php endif; ?>
 
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-outline-variant">
@@ -132,25 +138,28 @@
                     </div>
 
                     <?php if(session()->get('id')): ?>
-                        <!-- Logged In: Show Contact Form -->
                         <form action="<?= base_url('contact/submit-lead') ?>" method="POST" class="flex flex-col gap-3">
                             <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
                             <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
                             
-                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Full Name" type="text" value="<?= esc(session()->get('first_name') . ' ' . session()->get('last_name')) ?>">
-                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Phone Number" type="tel">
-                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Email Address" type="email" value="<?= esc(session()->get('email')) ?>">
-                            <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"></textarea>
+                            <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
+                                <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>>I want to ask a question</option>
+                                <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>>I want to schedule a visit</option>
+                            </select>
+
+                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Full Name" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') . ' ' . session()->get('last_name'))) ?>">
+                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Phone Number" type="tel" value="<?= esc(old('phone')) ?>">
+                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Email Address" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
+                            <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
                             
                             <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-[20px]">send</span> Send Message
                             </button>
                         </form>
                     <?php else: ?>
-                        <!-- Logged Out: Prompt to Sign In -->
                         <div class="text-center py-4">
                             <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2 opacity-50">lock</span>
-                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6">You must be logged in to contact the agent and send inquiries securely.</p>
+                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6">You must be logged in to contact the agent and schedule a visit securely.</p>
                             <a href="<?= base_url('login') ?>" class="w-full inline-block bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors">
                                 Sign In to Contact
                             </a>
