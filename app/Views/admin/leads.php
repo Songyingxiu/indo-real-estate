@@ -18,7 +18,22 @@ if (!empty($leads)) {
 <div class="pb-12 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8" x-data="{ 
     showStatusModal: false, editId: '', currentStatus: '', buyerName: '',
     showDeleteModal: false, deleteUrl: '',
-    showModal: false, modalName: '', modalEmail: '', modalPhone: '', modalMessage: '', modalProp: '', modalDate: ''
+    showModal: false, modalName: '', modalEmail: '', modalPhone: '', modalMessage: '', modalProp: '', modalDate: '',
+    
+    // Live WhatsApp Link Generator (Formats 08xxx to 628xxx dynamically)
+    get waLink() {
+        let phone = this.modalPhone.replace(/\D/g, '');
+        if (phone.startsWith('0')) {
+            phone = '62' + phone.substring(1);
+        }
+        let messageText = 'Halo ' + this.modalName + ', saya agen dari HuniKita. Menanggapi ketertarikan Anda pada properti *' + this.modalProp + '*, ';
+        return 'https://wa.me/' + phone + '?text=' + encodeURIComponent(messageText);
+    },
+    
+    // Live Email Mailto Link Generator
+    get emailLink() {
+        return 'mailto:' + this.modalEmail + '?subject=' + encodeURIComponent('Tanggapan Inkuiri Properti HuniKita: ' + this.modalProp);
+    }
 }">
 
     <div class="mt-4 mb-6">
@@ -43,6 +58,7 @@ if (!empty($leads)) {
     <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm overflow-hidden">
         <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar min-h-[500px]">
             
+            <!-- NEW COLUMN -->
             <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">New</h3>
@@ -74,6 +90,7 @@ if (!empty($leads)) {
                 </div>
             </div>
 
+            <!-- CONTACTED COLUMN -->
             <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Contacted</h3>
@@ -102,6 +119,7 @@ if (!empty($leads)) {
                 </div>
             </div>
 
+            <!-- QUALIFIED COLUMN -->
             <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Qualified / Follow Up</h3>
@@ -130,6 +148,7 @@ if (!empty($leads)) {
                 </div>
             </div>
 
+            <!-- NEGOTIATION COLUMN -->
             <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Negotiation</h3>
@@ -167,6 +186,7 @@ if (!empty($leads)) {
         <?php endif ?>
     </div>
 
+    <!-- INQUIRY DETAILS ACTIONABLE MODAL -->
     <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showModal = false" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -196,12 +216,30 @@ if (!empty($leads)) {
                     <div class="bg-surface-container-lowest p-4 rounded border border-outline-variant text-on-surface whitespace-pre-wrap leading-relaxed" x-text="modalMessage"></div>
                 </div>
             </div>
-            <div class="px-6 py-4 border-t border-outline-variant flex justify-end bg-surface-container-lowest">
-                <button type="button" @click="showModal = false" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition-all">Close</button>
+            
+            <!-- FOOTER WITH COMMUNICATE ACTION BUTTONS -->
+            <div class="px-6 py-4 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-3 bg-surface-container-lowest">
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <!-- Dynamic WhatsApp Link -->
+                    <a :href="waLink" target="_blank" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded font-semibold hover:opacity-90 transition-all text-sm shadow-sm">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-11.09c.307-.074.524-.303.659-.541.21-.37.408-.752.597-1.137.078-.16.035-.306-.02-.45-.094-.246-.192-.489-.286-.735-.146-.382-.289-.766-.435-1.149-.115-.303-.357-.492-.684-.504-.26-.01-.522-.005-.783-.005-.319.001-.572.138-.724.417-.26.478-.492.97-.704 1.472-.375.89-.582 1.83-.586 2.787-.009 2.192.983 4.157 2.457 5.688.196.203.418.388.643.562 1.905 1.481 4.192 2.193 6.587 2.106 1.009-.036 1.97-.272 2.883-.703.541-.256.974-.636 1.229-1.173.308-.648.56-1.325.748-2.022.069-.257-.038-.475-.25-.611-.456-.293-.923-.571-1.396-.84-.265-.15-.515-.126-.74.075-.245.22-.475.457-.71.688-.232.228-.487.279-.781.145-.522-.239-1.007-.542-1.458-.897-.56-.441-1.048-.948-1.47-1.523-.192-.26-.178-.508.043-.746.223-.241.457-.472.684-.71.246-.26.246-.531.026-.807z"/>
+                        </svg>
+                        WhatsApp
+                    </a>
+                    
+                    <!-- Dynamic Mailto Link -->
+                    <a :href="emailLink" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface rounded font-semibold border border-outline-variant hover:bg-surface-container-highest transition-all text-sm shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">mail</span>
+                        Email
+                    </a>
+                </div>
+                <button type="button" @click="showModal = false" class="w-full sm:w-auto px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition-all text-sm">Close</button>
             </div>
         </div>
     </div>
 
+    <!-- UPDATE STATUS MODAL -->
     <div x-show="showStatusModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showStatusModal = false" x-show="showStatusModal" class="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
