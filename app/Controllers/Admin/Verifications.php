@@ -2,38 +2,58 @@
 
 use App\Controllers\BaseController;
 use App\Models\AgentVerificationModel;
+use App\Models\PropertyVerificationModel;
 
 class Verifications extends BaseController {
     
     public function index() {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
-        $verificationModel = new AgentVerificationModel();
-        
-        // Select all fields from verifications, plus the user's name
-        $verificationModel->select('agent_verifications.*, users.first_name, users.last_name');
-        $verificationModel->join('users', 'users.id = agent_verifications.user_id');
-        $verificationModel->whereIn('agent_verifications.approval_status', ['Pending', 'Under Review']);
-        
-        // Pagination instead of getResultArray()
-        $data['verifications'] = $verificationModel->orderBy('agent_verifications.created_date', 'DESC')->paginate(10, 'verifications');
-        $data['pager'] = $verificationModel->pager;
+        // 1. Fetch Agent Verifications
+        $agentModel = new AgentVerificationModel();
+        $agentModel->select('agent_verifications.*, users.first_name, users.last_name');
+        $agentModel->join('users', 'users.id = agent_verifications.user_id');
+        $agentModel->whereIn('agent_verifications.approval_status', ['Pending', 'Under Review']);
+        $data['agent_verifications'] = $agentModel->orderBy('agent_verifications.created_date', 'DESC')->findAll();
+
+        // 2. Fetch Property Verifications
+        $propModel = new PropertyVerificationModel();
+        $propModel->select('property_verifications.*, properties.title as property_title, users.first_name, users.last_name');
+        $propModel->join('properties', 'properties.id = property_verifications.property_id');
+        $propModel->join('users', 'users.id = properties.owner_id');
+        $propModel->whereIn('property_verifications.approval_status', ['Pending Verification', 'Under Review']);
+        $data['prop_verifications'] = $propModel->orderBy('property_verifications.created_date', 'DESC')->findAll();
         
         return view('admin/verifications', $data);
     }
 
-    public function process($id) {
+    public function processAgent($id) {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
 
         $action = $this->request->getPost('action');
-        $verificationModel = new AgentVerificationModel();
+        $model = new AgentVerificationModel();
         
         if ($action === 'approve') {
-            $verificationModel->update($id, ['approval_status' => 'Verified']);
+            $model->update($id, ['approval_status' => 'Verified']);
         } elseif ($action === 'reject') {
-            $verificationModel->update($id, ['approval_status' => 'Rejected']);
+            $model->update($id, ['approval_status' => 'Rejected']);
         }
 
-        return redirect()->to(base_url('admin/verifications'))->with('success', 'Document status updated successfully!');
+        return redirect()->to(base_url('admin/verifications'))->with('success', 'Agent Identity status updated!');
+    }
+
+    public function processProperty($id) {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+
+        $action = $this->request->getPost('action');
+        $model = new PropertyVerificationModel();
+        
+        if ($action === 'approve') {
+            $model->update($id, ['approval_status' => 'Verified']);
+        } elseif ($action === 'reject') {
+            $model->update($id, ['approval_status' => 'Rejected']);
+        }
+
+        return redirect()->to(base_url('admin/verifications'))->with('success', 'Property Document status updated!');
     }
 }

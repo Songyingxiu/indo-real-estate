@@ -2,6 +2,7 @@
 
 use App\Models\LeadModel;
 use App\Models\UserModel;
+use App\Models\AgentVerificationModel;
 
 class User extends BaseController
 {
@@ -16,7 +17,6 @@ class User extends BaseController
         
         $data['title'] = 'My Inbox - HuniKita';
         
-        // Fetch leads submitted by this specific buyer
         $data['leads'] = $leadModel
             ->select('leads.*, properties.title as property_title, properties.address_line_1')
             ->join('properties', 'properties.id = leads.property_id', 'left')
@@ -31,9 +31,8 @@ class User extends BaseController
 
     public function profile()
     {
-        if (session()->get('role_id') != 1) {
-            return redirect()->to(base_url('login'))->with('error', 'Please log in to view your profile.');
-        }
+        // Allowed for ALL logged in users (Buyers, Owners, Agents)
+        if (!session()->get('id')) return redirect()->to(base_url('login'));
 
         $userModel = new UserModel();
         $data['title'] = 'My Profile - HuniKita';
@@ -44,7 +43,7 @@ class User extends BaseController
 
     public function updateProfile()
     {
-        if (session()->get('role_id') != 1) return redirect()->to(base_url('login'));
+        if (!session()->get('id')) return redirect()->to(base_url('login'));
 
         $userId = session()->get('id');
         $userModel = new UserModel();
@@ -67,7 +66,6 @@ class User extends BaseController
 
         $userModel->update($userId, $updateData);
 
-        // Update active session so the header changes immediately
         session()->set([
             'first_name' => $updateData['first_name'],
             'last_name'  => $updateData['last_name']
@@ -78,7 +76,7 @@ class User extends BaseController
 
     public function updatePassword()
     {
-        if (session()->get('role_id') != 1) return redirect()->to(base_url('login'));
+        if (!session()->get('id')) return redirect()->to(base_url('login'));
 
         $userId = session()->get('id');
         $userModel = new UserModel();
@@ -94,19 +92,56 @@ class User extends BaseController
             return redirect()->back()->with('error', 'Password validation failed. Ensure your new password is at least 8 characters and matches the confirmation.');
         }
 
-        $currentPassword = $this->request->getPost('current_password');
-        $newPassword = $this->request->getPost('new_password');
-
-        // Verify the old password
-        if (!password_verify($currentPassword, $user['password'])) {
+        if (!password_verify($this->request->getPost('current_password'), $user['password'])) {
             return redirect()->back()->with('error', 'Your current password is incorrect.');
         }
 
-        // Hash and save the new password
         $userModel->update($userId, [
-            'password' => password_hash($newPassword, PASSWORD_BCRYPT)
+            'password' => password_hash($this->request->getPost('new_password'), PASSWORD_BCRYPT)
         ]);
 
         return redirect()->to(base_url('user/profile'))->with('success', 'Password updated successfully.');
+    }
+
+    public function uploadAgentDocs()
+    {
+        if (!session()->get('id')) return redirect()->to(base_url('login'));
+
+        $agentVerifyModel = new AgentVerificationModel();
+        
+        $ktpName = null; $npwpName = null; $licenseName = null;
+
+        if ($ktpFile = $this->request->getFile('ktp_document')) {
+            if ($ktpFile->isValid() && !$ktpFile->hasMoved()) {
+                $ktpName = $ktpFile->getRandomName();
+                $ktpFile->move(FCPATH . 'uploads/documents', $ktpName);
+            }
+        }
+        if ($npwpFile = $this->request->getFile('npwp')) {
+            if ($npwpFile->isValid() && !$npwpFile->hasMoved()) {
+                $npwpName = $npwpFile->getRandomName();
+                $npwpFile->move(FCPATH . 'uploads/documents', $npwpName);
+            }
+        }
+        if ($licenseFile = $this->request->getFile('business_license')) {
+            if ($licenseFile->isValid() && !$licenseFile->hasMoved()) {
+                $licenseName = $licenseFile->getRandomName();
+                $licenseFile->move(FCPATH . 'uploads/documents', $licenseName);
+            }
+        }
+
+        if ($ktpName) {
+            $agentVerifyModel->insert([
+                'user_id'          => session()->get('id'),
+                'ktp_document'     => $ktpName,
+                'npwp'             => $npwpName,
+                'business_license' => $licenseName,
+                'approval_status'  => 'Pending',
+                'status'           => 'Active'
+            ]);
+            return redirect()->back()->with('success', 'Verification documents uploaded! Please wait for Admin review.');
+        }
+
+        return redirect()->back()->with('error', 'KTP document is required for verification.');
     }
 }

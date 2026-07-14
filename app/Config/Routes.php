@@ -27,6 +27,7 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->get('profile', 'User::profile');
     $routes->post('update-profile', 'User::updateProfile');
     $routes->post('update-password', 'User::updatePassword');
+    $routes->post('upload-agent-docs', 'User::uploadAgentDocs');
 });
 
 // Admin Dashboard Routes (Protected by AdminFilter)
@@ -88,9 +89,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('leads', 'Leads::index');       
     $routes->post('leads/update-status/(:num)', 'Leads::updateStatus/$1');
     $routes->post('leads/delete/(:num)', 'Leads::delete/$1');        
-    $routes->get('verifications', 'Verifications::index'); 
-    $routes->post('verifications/process/(:num)', 'Verifications::process/$1');
     $routes->post('leads/mark-read/(:num)', 'Leads::markRead/$1');
+    
+    $routes->get('verifications', 'Verifications::index'); 
+    $routes->post('verifications/process-agent/(:num)', 'Verifications::processAgent/$1');
+    $routes->post('verifications/process-property/(:num)', 'Verifications::processProperty/$1');
 
     // System Settings & Content
     $routes->get('cms', 'Cms::index');
