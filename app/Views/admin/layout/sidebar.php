@@ -47,13 +47,15 @@
             <span class="font-label-md text-label-md">Lead Management</span>
         </a>
 
-        <!-- NEW: Pricing / Upgrade Plan Link -->
-        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/pricing') ?>">
-            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/pricing')) ? 'icon-fill' : '' ?>">workspace_premium</span>
-            <span class="font-label-md text-label-md">Upgrade Plan</span>
-        </a>
+        <!-- HIDDEN FROM ADMIN (ROLE 4) -->
+        <?php if($role != 4): ?>
+            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/pricing') ?>">
+                <span class="material-symbols-outlined <?= (current_url() == base_url('admin/pricing')) ? 'icon-fill' : '' ?>">workspace_premium</span>
+                <span class="font-label-md text-label-md">Upgrade Plan</span>
+            </a>
+        <?php endif; ?>
 
-        <?php if(session()->get('role_id') == 4): ?>
+        <?php if($role == 4): ?>
             
             <div class="px-6 py-3 mt-4">
                 <p class="text-[11px] font-bold text-outline uppercase tracking-wider">Administration</p>
@@ -99,7 +101,7 @@
     
     <div class="px-margin-desktop mt-auto flex flex-col gap-unit pt-stack-md border-t border-outline-variant mx-4">
         
-        <?php if(session()->get('role_id') == 4): ?>
+        <?php if($role == 4): ?>
             <a href="<?= base_url('admin/reports/export') ?>" class="w-full bg-primary-container text-on-primary-container rounded font-label-md text-label-md py-2 mb-stack-sm hover:opacity-90 transition-opacity text-center block shadow-sm">
                 Generate Report
             </a>

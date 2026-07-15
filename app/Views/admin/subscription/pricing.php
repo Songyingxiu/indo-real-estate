@@ -37,12 +37,12 @@
                         <span class="text-on-surface text-sm font-medium"><?= $plan->max_properties == 0 ? 'Unlimited' : esc($plan->max_properties) ?> Property Listings</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined <?= $plan->allow_messages ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= $plan->allow_messages ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= $plan->allow_messages ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct In-App Messaging</span>
+                        <span class="material-symbols-outlined <?= ($plan->allow_messages ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_messages ?? false) ? 'check_circle' : 'cancel' ?></span>
+                        <span class="text-on-surface text-sm <?= ($plan->allow_messages ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct In-App Messaging</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined <?= $plan->direct_email_inquiry ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= $plan->direct_email_inquiry ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= $plan->direct_email_inquiry ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Email & Phone Inquiries</span>
+                        <span class="material-symbols-outlined <?= ($plan->direct_email_inquiry ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->direct_email_inquiry ?? false) ? 'check_circle' : 'cancel' ?></span>
+                        <span class="text-on-surface text-sm <?= ($plan->direct_email_inquiry ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Email & Phone Inquiries</span>
                     </li>
                 </ul>
 
