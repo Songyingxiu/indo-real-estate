@@ -8,10 +8,11 @@ class SubscriptionPlanModel extends Model {
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     
+    // UPDATED: Mapped to the actual database columns
     protected $allowedFields    = [
-        'code', 'name', 'description', 'price', 
+        'package_code', 'name', 'description', 'price', 
         'max_properties', 'max_agents', 
-        'allow_messages', 'direct_email_inquiry', 
+        'allow_messages', 'allow_direct_email', 
         'status'
     ];
 

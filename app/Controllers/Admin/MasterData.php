@@ -91,15 +91,15 @@ class MasterData extends BaseController
     {
         $model = new SubscriptionPlanModel();
         $model->insert([
-            'code'                   => strtoupper($this->request->getPost('code')),
-            'name'                   => $this->request->getPost('name'),
-            'description'            => $this->request->getPost('description'),
-            'price'                  => $this->request->getPost('price'),
-            'max_properties'         => $this->request->getPost('max_properties'),
-            'max_agents'             => $this->request->getPost('max_agents'),
-            'allow_messages'         => $this->request->getPost('allow_messages'),
-            'direct_email_inquiry'   => $this->request->getPost('direct_email_inquiry'),
-            'status'                 => 'Active'
+            'package_code'       => strtoupper($this->request->getPost('code')),
+            'name'               => $this->request->getPost('name'),
+            'description'        => $this->request->getPost('description'),
+            'price'              => $this->request->getPost('price'),
+            'max_properties'     => $this->request->getPost('max_properties'),
+            'max_agents'         => $this->request->getPost('max_agents'),
+            'allow_messages'     => $this->request->getPost('allow_messages'),
+            'allow_direct_email' => $this->request->getPost('direct_email_inquiry'),
+            'status'             => 'Active'
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Subscription Plan created!');
     }
@@ -136,14 +136,14 @@ class MasterData extends BaseController
     {
         $model = new SubscriptionPlanModel();
         $model->update($id, [
-            'code'                   => strtoupper($this->request->getPost('code')),
-            'name'                   => $this->request->getPost('name'),
-            'description'            => $this->request->getPost('description'),
-            'price'                  => $this->request->getPost('price'),
-            'max_properties'         => $this->request->getPost('max_properties'),
-            'max_agents'             => $this->request->getPost('max_agents'),
-            'allow_messages'         => $this->request->getPost('allow_messages'),
-            'direct_email_inquiry'   => $this->request->getPost('direct_email_inquiry')
+            'package_code'       => strtoupper($this->request->getPost('code')),
+            'name'               => $this->request->getPost('name'),
+            'description'        => $this->request->getPost('description'),
+            'price'              => $this->request->getPost('price'),
+            'max_properties'     => $this->request->getPost('max_properties'),
+            'max_agents'         => $this->request->getPost('max_agents'),
+            'allow_messages'     => $this->request->getPost('allow_messages'),
+            'allow_direct_email' => $this->request->getPost('direct_email_inquiry')
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Subscription Plan updated!');
     }
