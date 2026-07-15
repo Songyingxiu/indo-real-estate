@@ -1,6 +1,8 @@
 <?php namespace App\Controllers\Admin;
+
 use App\Controllers\BaseController;
 use App\Models\SubscriptionModel;
+use App\Models\OfflinePaymentModel; // NEW: Added this to update the payment status
 
 class Subscriptions extends BaseController 
 {
@@ -10,9 +12,11 @@ class Subscriptions extends BaseController
         
         $model = new SubscriptionModel();
         
-        $data['subscriptions'] = $model->select('subscriptions.*, users.first_name, users.last_name, subscription_plans.name as plan_name, subscription_plans.price')
+        // UPGRADED: Joined the offline_payments table to get the receipt image and invoice details
+        $data['subscriptions'] = $model->select('subscriptions.*, users.first_name, users.last_name, subscription_plans.name as plan_name, subscription_plans.price, offline_payments.payment_proof, offline_payments.invoice_number, offline_payments.phone_number')
                                        ->join('users', 'users.id = subscriptions.user_id', 'left')
                                        ->join('subscription_plans', 'subscription_plans.id = subscriptions.plan_id', 'left')
+                                       ->join('offline_payments', 'offline_payments.subscription_id = subscriptions.id', 'left')
                                        ->orderBy('subscriptions.created_date', 'DESC')
                                        ->findAll();
         
@@ -23,10 +27,22 @@ class Subscriptions extends BaseController
     {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
-        $model = new SubscriptionModel();
-        // Update user's offline payment request to Active
-        $model->update($id, ['status' => 'Active']);
+        $subModel = new SubscriptionModel();
+        $paymentModel = new OfflinePaymentModel();
         
-        return redirect()->to(base_url('admin/subscriptions'))->with('success', 'User subscription successfully activated!');
+        // UPGRADED: Set the subscription to Active and define the 1-year validity period
+        $subModel->update($id, [
+            'status'     => 'Active',
+            'sub_status' => 'Active',
+            'start_date' => date('Y-m-d H:i:s'),
+            'end_date'   => date('Y-m-d H:i:s', strtotime('+1 year'))
+        ]);
+        
+        // Also update the offline payment record to Verified
+        $paymentModel->where('subscription_id', $id)
+                     ->set(['approval_status' => 'Verified'])
+                     ->update();
+        
+        return redirect()->to(base_url('admin/subscriptions'))->with('success', 'Payment verified! The user subscription is now active for 1 year.');
     }
 }

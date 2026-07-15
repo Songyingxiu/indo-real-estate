@@ -1,7 +1,7 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<div class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
+<div x-data="{ showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '' }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
     
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
@@ -12,12 +12,11 @@
 
     <div class="mb-stack-lg">
         <h2 class="font-headline-lg text-headline-lg text-primary mb-unit">Subscription Management</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant">Verify and manage offline payment requests and user accounts.</p>
+        <p class="font-body-md text-body-md text-on-surface-variant">Verify manual bank transfers and activate user upgrade packages.</p>
     </div>
 
-    <!-- Data Table Card -->
     <div class="bg-surface rounded-lg border border-outline-variant overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto pb-6">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-surface-container-low border-b border-outline-variant">
@@ -45,11 +44,21 @@
                                 </span>
                             </td>
                             <td class="py-4 px-4 text-on-surface-variant"><?= date('d M Y', strtotime($sub->created_date)) ?></td>
+                            
                             <td class="py-4 px-4">
-                                <button class="flex items-center gap-1 text-primary hover:underline font-label-md text-label-md">
-                                    <span class="material-symbols-outlined text-[18px]">receipt_long</span> View Receipt
-                                </button>
+                                <?php if(!empty($sub->payment_proof)): ?>
+                                    <button @click="showModal = true; 
+                                                    receiptUrl = '<?= base_url('uploads/payments/' . $sub->payment_proof) ?>'; 
+                                                    invoiceNum = '<?= esc($sub->invoice_number) ?>'; 
+                                                    phoneNum = '<?= esc($sub->phone_number) ?>';" 
+                                            type="button" class="flex items-center gap-1 text-primary border border-outline-variant px-3 py-1.5 rounded hover:bg-surface-container transition-colors font-label-md text-label-md">
+                                        <span class="material-symbols-outlined text-[18px]">receipt_long</span> View Receipt
+                                    </button>
+                                <?php else: ?>
+                                    <span class="text-outline-variant text-sm italic">No receipt uploaded</span>
+                                <?php endif; ?>
                             </td>
+
                             <td class="py-4 px-4">
                                 <?php if($sub->status == 'Pending'): ?>
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-error-container text-on-error-container font-label-md text-caption">
@@ -63,7 +72,7 @@
                             </td>
                             <td class="py-4 px-4 text-right">
                                 <?php if($sub->status == 'Pending'): ?>
-                                    <form action="<?= base_url('admin/subscriptions/activate/' . $sub->id) ?>" method="POST">
+                                    <form action="<?= base_url('admin/subscriptions/activate/' . $sub->id) ?>" method="POST" onsubmit="return confirm('Activate this subscription for 1 year?');">
                                         <button type="submit" class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
                                             Activate
                                         </button>
@@ -82,6 +91,42 @@
             </table>
         </div>
     </div>
+
+    <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showModal = false" x-show="showModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <div>
+                    <h2 class="text-lg font-bold text-on-surface">Payment Receipt</h2>
+                    <p class="text-sm text-primary font-bold mt-1" x-text="invoiceNum"></p>
+                </div>
+                <button @click="showModal = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="p-6 bg-surface-container-low flex flex-col justify-center items-center min-h-[300px] max-h-[60vh] overflow-y-auto">
+                <template x-if="receiptUrl && !receiptUrl.endsWith('/')">
+                    <img :src="receiptUrl" alt="Receipt Preview" class="max-w-full rounded border border-outline-variant shadow-sm" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center text-outline-variant\'><span class=\'material-symbols-outlined text-[48px] mb-2\'>broken_image</span><p>Image file not found on server.</p></div>';">
+                </template>
+                <template x-if="!receiptUrl || receiptUrl.endsWith('/')">
+                    <div class="flex flex-col items-center text-outline-variant">
+                        <span class="material-symbols-outlined text-[48px] mb-2">image_not_supported</span>
+                        <p class="text-sm">No valid receipt file uploaded.</p>
+                    </div>
+                </template>
+            </div>
+
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <div class="flex items-center gap-2 text-sm text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[18px]">call</span>
+                    <span x-text="phoneNum"></span>
+                </div>
+                <button type="button" @click="showModal = false" class="px-6 py-2 border border-outline-variant text-on-surface rounded font-semibold hover:bg-surface-container transition">Close</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <?= $this->endSection() ?>

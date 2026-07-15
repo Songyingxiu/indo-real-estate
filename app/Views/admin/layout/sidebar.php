@@ -47,6 +47,12 @@
             <span class="font-label-md text-label-md">Lead Management</span>
         </a>
 
+        <!-- NEW: Pricing / Upgrade Plan Link -->
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/pricing') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/pricing')) ? 'icon-fill' : '' ?>">workspace_premium</span>
+            <span class="font-label-md text-label-md">Upgrade Plan</span>
+        </a>
+
         <?php if(session()->get('role_id') == 4): ?>
             
             <div class="px-6 py-3 mt-4">

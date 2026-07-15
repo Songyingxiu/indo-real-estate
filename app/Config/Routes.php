@@ -30,11 +30,6 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->post('upload-agent-docs', 'User::uploadAgentDocs');
 });
 
-// Public & User Subscription Routes
-$routes->get('pricing', 'Subscription::pricing');
-$routes->post('subscription/checkout', 'Subscription::checkout', ['filter' => 'userAuth']);
-$routes->post('subscription/upload-proof', 'Subscription::uploadProof', ['filter' => 'userAuth']);
-
 // Admin Dashboard Routes (Protected by AdminFilter)
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
 
@@ -64,6 +59,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('subscriptions', 'Subscriptions::index');
     $routes->post('subscriptions/activate/(:num)', 'Subscriptions::activate/$1');
     
+    // Agent/Owner Subscription Upgrade Routes
+    $routes->get('pricing', 'Subscription::pricing');
+    $routes->post('subscription/checkout', 'Subscription::checkout');
+    $routes->post('subscription/upload-proof', 'Subscription::uploadProof');
+
     // Master Data & Configuration
     $routes->get('master-data', 'MasterData::index');
     
