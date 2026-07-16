@@ -140,28 +140,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <?php if (!empty($tips)): ?>
                 <?php foreach ($tips as $tip): ?>
-                    <article class="bg-surface rounded-xl border border-outline-variant overflow-hidden flex flex-col hover:shadow-lg transition-shadow duration-300">
-                        <div class="h-48 bg-surface-container-highest relative overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80" alt="Article image" class="w-full h-full object-cover">
-                            <div class="absolute top-4 left-4 bg-primary text-on-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Guide</div>
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <span class="text-xs text-on-surface-variant mb-3 font-semibold tracking-wide">
+                    <article class="bg-surface rounded-xl border border-outline-variant flex flex-col hover:shadow-lg transition-shadow duration-300 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Guide</span>
+                            <span class="text-xs text-on-surface-variant font-semibold tracking-wide">
                                 <?= date('F j, Y', strtotime($tip->published_at ?? $tip->created_at ?? 'now')) ?>
                             </span>
-                            <h3 class="text-xl font-bold text-on-background mb-3 leading-tight hover:text-primary transition-colors">
-                                <a href="<?= base_url('page/' . $tip->slug) ?>">
-                                    <?= esc($tip->title) ?>
-                                </a>
-                            </h3>
-                            <p class="text-on-surface-variant text-sm mb-6 flex-grow line-clamp-3">
-                                <?= esc(substr(strip_tags($tip->content_body), 0, 120)) ?>...
-                            </p>
-                            <a href="<?= base_url('page/' . $tip->slug) ?>" class="text-primary font-bold text-sm flex items-center gap-1 group mt-auto">
-                                Read Article 
-                                <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_right_alt</span>
-                            </a>
                         </div>
+                        <h3 class="text-xl font-bold text-on-background mb-3 leading-tight hover:text-primary transition-colors">
+                            <a href="<?= base_url('page/' . $tip->slug) ?>">
+                                <?= esc($tip->title) ?>
+                            </a>
+                        </h3>
+                        <p class="text-on-surface-variant text-sm mb-6 flex-grow line-clamp-3">
+                            <?= esc(substr(strip_tags($tip->content_body), 0, 120)) ?>...
+                        </p>
+                        <a href="<?= base_url('page/' . $tip->slug) ?>" class="text-primary font-bold text-sm flex items-center gap-1 group mt-auto w-fit">
+                            Read Article 
+                            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_right_alt</span>
+                        </a>
                     </article>
                 <?php endforeach; ?>
             <?php else: ?>
