@@ -9,28 +9,37 @@ class Cms extends BaseController {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
         $cmsModel = new CmsModel();
-        // Fetch all blog posts from the database, newest first
+        // Fetch all pages and blog posts from the database, newest first
         $data['posts'] = $cmsModel->orderBy('created_at', 'DESC')->findAll();
         
         return view('admin/cms/cms', $data);
     }
 
     public function savePost() {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+
         $cmsModel = new CmsModel();
-        
+        $id = $this->request->getPost('id');
         $title = $this->request->getPost('title');
         
         $data = [
             'title'        => $title,
             'slug'         => strtolower(url_title($title)),
-            'category'     => 'Blog',
+            'category'     => $this->request->getPost('category'),
             'content_body' => $this->request->getPost('content_body'),
-            'author_id'    => session()->get('user_id'),
+            'author_id'    => session()->get('id') ?? session()->get('user_id'),
             'status'       => 'Published',
             'published_at' => date('Y-m-d H:i:s')
         ];
         
-        $cmsModel->insert($data);
-        return redirect()->to(base_url('admin/cms'))->with('success', 'Blog post published successfully!');
+        if (!empty($id)) {
+            $cmsModel->update($id, $data);
+            $message = 'Content item updated successfully!';
+        } else {
+            $cmsModel->insert($data);
+            $message = 'New content published successfully!';
+        }
+        
+        return redirect()->to(base_url('admin/cms'))->with('success', $message);
     }
 }
