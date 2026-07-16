@@ -15,7 +15,20 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title><?= esc($title ?? 'HuniKita - Real Estate Platform') ?></title>
+    
+    <?php 
+        $seoModel = new \App\Models\SeoModel();
+        $globalSeo = $seoModel->where('target_page', 'Homepage')->first();
+        
+        // If a specific controller passed a $title, use it. Otherwise, fallback to the DB SEO settings.
+        $metaTitle = $title ?? $globalSeo['meta_title'] ?? 'HuniKita - Real Estate Platform';
+        $metaDesc = $globalSeo['meta_description'] ?? 'Discover the most exclusive real estate listings. Buy, sell, and rent properties with trusted verified agents.';
+        $keywords = $globalSeo['focus_keywords'] ?? 'real estate, buy house, verified agents, property listing';
+    ?>
+    <title><?= esc($metaTitle) ?></title>
+    <meta name="description" content="<?= esc($metaDesc) ?>">
+    <meta name="keywords" content="<?= esc($keywords) ?>">
+    
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
@@ -133,7 +146,6 @@
                     </div>
                 </div>
 
-                <!-- User Profile Dropdown -->
                 <div x-data="{ open: false }" class="relative ml-2">
                     <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors">
                         <?= esc($initial) ?>
@@ -145,7 +157,6 @@
                             <p class="font-caption text-caption text-on-surface-variant truncate"><?= esc($email) ?></p>
                         </div>
                         
-                        <!-- NEW: My Profile Link (Accessible to both Users and Admins) -->
                         <a href="<?= base_url($roleId == 1 ? 'user/profile' : 'admin/profile') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[18px]">person</span>
                             <span class="font-body-sm text-body-sm">My Profile</span>

@@ -6,9 +6,10 @@ class SeoModel extends Model
 {
     protected $table = 'seo_settings';
     protected $primaryKey = 'id';
+    protected $returnType = 'array';
     protected $allowedFields = ['target_page', 'meta_title', 'meta_description', 'focus_keywords'];
     
     protected $useTimestamps = true;
-    protected $createdField  = ''; 
+    protected $createdField  = 'created_at'; 
     protected $updatedField  = 'updated_at';
 }

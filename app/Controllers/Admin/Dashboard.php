@@ -16,14 +16,21 @@ class Dashboard extends BaseController
         $userModel = new UserModel();
         $propertyModel = new PropertyModel();
 
-        // These stats are safe for everyone to see
         $data['totalUsers'] = $userModel->countAllResults();
         $data['activeProperties'] = $propertyModel->where('approval_status', 'Published')->countAllResults();
         
+        // Prepare arrays for the Chart.js Graphic
+        $chartLabels = ['Active Users', 'Published Properties'];
+        $chartValues = [$data['totalUsers'], $data['activeProperties']];
+
         // --- ADMIN ONLY DATA (ROLE 4) ---
         if ($roleId == 4) {
             $data['pendingProperties'] = $propertyModel->where('approval_status', 'Pending Review')->countAllResults();
             
+            // Add pending to chart
+            $chartLabels[] = 'Pending Properties';
+            $chartValues[] = $data['pendingProperties'];
+
             $agentVerifModel = new AgentVerificationModel();
             $paymentModel = new OfflinePaymentModel();
             $subscriptionModel = new SubscriptionModel();
@@ -33,7 +40,6 @@ class Dashboard extends BaseController
 
             $verifications = [];
 
-            // Map Agent Verifications (Safely casted to array to prevent object errors)
             foreach ($pendingAgents as $agent) {
                 $agentArr = (array) $agent;
                 $user = (array) $userModel->find($agentArr['user_id']);
@@ -53,7 +59,6 @@ class Dashboard extends BaseController
                 }
             }
 
-            // Map Offline Payments (Safely casted to array)
             foreach ($pendingPayments as $payment) {
                 $paymentArr = (array) $payment;
                 $sub = (array) $subscriptionModel->find($paymentArr['subscription_id']);
@@ -76,16 +81,17 @@ class Dashboard extends BaseController
                 }
             }
 
-            // Sort by Newest First and limit to 5 items
             usort($verifications, function($a, $b) {
                 return strtotime($b['date']) - strtotime($a['date']);
             });
             
             $data['verifications'] = array_slice($verifications, 0, 5);
-
-            // Update total "Pending Tasks"
             $data['pendingTasks'] = $data['pendingProperties'] + count($verifications); 
         }
+
+        // Pass Chart Data to View
+        $data['chartLabels'] = json_encode($chartLabels);
+        $data['chartValues'] = json_encode($chartValues);
 
         return view('admin/dashboard', $data);
     }

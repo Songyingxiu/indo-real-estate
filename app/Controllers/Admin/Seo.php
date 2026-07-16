@@ -16,6 +16,8 @@ class Seo extends BaseController {
     }
 
     public function saveSettings() {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+
         $seoModel = new SeoModel();
         
         $data = [

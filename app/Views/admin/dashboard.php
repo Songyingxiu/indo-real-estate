@@ -1,6 +1,8 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <div class="mb-stack-lg mt-4">
     <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
     <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace.</p>
@@ -56,6 +58,32 @@
         </div>
     <?php endif; ?>
 
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-bold text-on-surface mb-4">Platform Growth Metrics</h3>
+        <div class="relative h-[300px] w-full">
+            <canvas id="platformAnalyticsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-6 flex flex-col gap-3">
+        <h3 class="text-lg font-bold text-on-surface mb-2">Quick Actions</h3>
+        <a href="<?= base_url('admin/properties/create') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-primary">add_box</span>
+            <span class="font-medium text-sm text-on-surface">Add New Property</span>
+        </a>
+        <a href="<?= base_url('admin/users') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-primary">person_add</span>
+            <span class="font-medium text-sm text-on-surface">Manage Users</span>
+        </a>
+        <a href="<?= base_url('admin/seo') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-primary">search_insights</span>
+            <span class="font-medium text-sm text-on-surface">Configure SEO</span>
+        </a>
+    </div>
 </div>
 
 <?php if(session()->get('role_id') == 4): ?>
@@ -125,5 +153,50 @@
         </div>
     </div>
 <?php endif; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('platformAnalyticsChart').getContext('2d');
+    
+    const labels = <?= $chartLabels ?>;
+    const dataValues = <?= $chartValues ?>;
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Platform Data Count',
+                data: dataValues,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)', // Blue
+                    'rgba(16, 185, 129, 0.7)', // Green
+                    'rgba(245, 158, 11, 0.7)'  // Orange
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)'
+                ],
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 } // Prevent decimals in counts
+                }
+            }
+        }
+    });
+});
+</script>
 
 <?= $this->endSection() ?>

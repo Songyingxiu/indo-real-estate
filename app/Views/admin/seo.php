@@ -39,10 +39,10 @@
         <h3 class="text-lg font-semibold text-on-surface mb-4">Search Engine Preview</h3>
         <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-6 shadow-sm">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center font-bold text-primary">E</div>
+                <div class="w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center font-bold text-primary">H</div>
                 <div>
-                    <div class="text-sm text-on-surface font-semibold">EstateAdmin Pro</div>
-                    <div class="text-xs text-on-surface-variant">https://www.estateadmin.com</div>
+                    <div class="text-sm text-on-surface font-semibold">HuniKita Platform</div>
+                    <div class="text-xs text-on-surface-variant">https://www.hunikita.com</div>
                 </div>
             </div>
             <h4 class="text-[#1a0dab] text-xl font-medium cursor-pointer hover:underline truncate" x-text="metaTitle || 'Please enter a title'"></h4>
