@@ -6,6 +6,9 @@ class CmsModel extends Model
 {
     protected $table = 'cms_posts';
     protected $primaryKey = 'id';
+    
+    protected $returnType = 'object'; 
+    
     protected $allowedFields = ['title', 'slug', 'category', 'content_body', 'author_id', 'status', 'published_at'];
     
     protected $useTimestamps = true; 

@@ -1,7 +1,6 @@
 <?php namespace App\Controllers;
 
 use App\Models\CmsModel;
-use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Cms extends BaseController
 {
@@ -9,18 +8,19 @@ class Cms extends BaseController
     {
         $cmsModel = new CmsModel();
         
-        // Find the published post matching the slug
+        // 1. Try to find the published post in the database
         $post = $cmsModel->where('slug', $slug)
                          ->where('status', 'Published')
                          ->first();
         
-        if (!$post) {
-            throw PageNotFoundException::forPageNotFound("The page '{$slug}' could not be located on our servers.");
-        }
+        // 2. Format a fallback title (e.g., 'about-us' becomes 'About Us')
+        $title = ucwords(str_replace('-', ' ', $slug));
         
-        $data['title']     = $post->title . ' - HuniKita';
+        // 3. Pass the data to the view
+        $data['title']     = ($post ? $post->title : $title) . ' - HuniKita';
+        $data['pageTitle'] = $post ? $post->title : $title;
         $data['slug']      = $slug;
-        $data['post']      = $post;
+        $data['post']      = $post; 
         
         return view('front/cms/page', $data);
     }
