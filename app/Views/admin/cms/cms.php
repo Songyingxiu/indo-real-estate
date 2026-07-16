@@ -91,6 +91,8 @@
                             <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                                 <option value="Blog">Blog Post / News</option>
                                 <option value="Page">Static Info Page</option>
+                                <option value="Tips">Tips & Guides</option>
+                                <option value="Announcement">Announcement</option>
                             </select>
                         </div>
                     </div>

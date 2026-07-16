@@ -5,14 +5,29 @@ use App\Models\PropertyTypeModel;
 use App\Models\PropertyImageModel;
 use App\Models\CityModel;
 use App\Models\StateModel;
+use App\Models\CmsModel;
 
 class Home extends BaseController
 {
     public function index()
     {
         $propertyModel = new PropertyModel();
+        $cmsModel = new CmsModel();
         
+        // 1. POPULAR LISTINGS (Randomized to look active and diverse)
         $data['featuredProperties'] = $propertyModel
+            ->asObject() 
+            ->select('properties.*, property_types.name as type_name, property_images.image_path')
+            ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->where('properties.status', 'Active')
+            ->where('properties.approval_status', 'Published')
+            ->orderBy('RAND()') 
+            ->limit(6)
+            ->find();
+
+        // 2. NEWEST LISTINGS (Strictly ordered by newest created date)
+        $data['newestProperties'] = $propertyModel
             ->asObject() 
             ->select('properties.*, property_types.name as type_name, property_images.image_path')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
@@ -21,6 +36,14 @@ class Home extends BaseController
             ->where('properties.approval_status', 'Published')
             ->orderBy('properties.created_date', 'DESC')
             ->limit(6)
+            ->find();
+
+        // 3. TIPS & GUIDES (Fetches the 3 most recent published tips)
+        $data['tips'] = $cmsModel
+            ->where('category', 'Tips')
+            ->where('status', 'Published')
+            ->orderBy('published_at', 'DESC')
+            ->limit(3)
             ->find();
 
         $data['title'] = 'HuniKita - Real Estate Platform';
@@ -98,12 +121,10 @@ class Home extends BaseController
         return view('front/properties/details', $data);
     }
 
-    // --- July 16 Task: Auto-Suggest API Endpoint ---
     public function suggest()
     {
         $query = $this->request->getGet('q');
 
-        // Only search if the user has typed at least 2 characters
         if (empty($query) || strlen($query) < 2) {
             return $this->response->setJSON([]);
         }
@@ -132,7 +153,7 @@ class Home extends BaseController
             ];
         }
 
-        // 3. Search Published Properties (By Title or Area Name)
+        // 3. Search Published Properties
         $properties = $propertyModel->asObject()
             ->groupStart()
                 ->like('title', $query)
@@ -150,7 +171,6 @@ class Home extends BaseController
             ];
         }
 
-        // Return standard JSON payload
         return $this->response->setJSON($results);
     }
 }
