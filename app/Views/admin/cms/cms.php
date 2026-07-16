@@ -1,7 +1,6 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Upgraded Alpine.js state instance handling full CRUD contexts -->
 <div x-data="{ showEditor: false, postId: '', postTitle: '', postCategory: 'Blog', postBody: '' }">
     <div class="flex justify-between items-center mt-4 mb-6">
         <div>
@@ -32,19 +31,19 @@
                     <?php if (!empty($posts)): ?>
                         <?php foreach ($posts as $post): ?>
                             <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
-                                <td class="p-4 font-medium text-on-surface"><?= esc($post['title']) ?></td>
+                                <td class="p-4 font-medium text-on-surface"><?= esc($post->title) ?></td>
                                 <td class="p-4">
-                                    <span class="px-2 py-1 rounded text-xs font-semibold <?= $post['category'] === 'Page' ? 'bg-secondary-container text-on-secondary-container' : 'bg-tertiary-container text-on-tertiary-container' ?>">
-                                        <?= esc($post['category']) ?>
+                                    <span class="px-2 py-1 rounded text-xs font-semibold <?= $post->category === 'Page' ? 'bg-secondary-container text-on-secondary-container' : 'bg-tertiary-container text-on-tertiary-container' ?>">
+                                        <?= esc($post->category) ?>
                                     </span>
                                 </td>
-                                <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($post['published_at'])) ?></td>
+                                <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($post->published_at)) ?></td>
                                 <td class="p-4 text-right">
                                     <button @click="showEditor = true; 
-                                                    postId = '<?= $post['id'] ?>'; 
-                                                    postTitle = '<?= esc($post['title'], 'js') ?>'; 
-                                                    postCategory = '<?= esc($post['category'], 'js') ?>'; 
-                                                    postBody = '<?= esc($post['content_body'], 'js') ?>';" 
+                                                    postId = '<?= $post->id ?>'; 
+                                                    postTitle = '<?= esc($post->title, 'js') ?>'; 
+                                                    postCategory = '<?= esc($post->category, 'js') ?>'; 
+                                                    postBody = '<?= esc($post->content_body, 'js') ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
                                         </td>
                             </tr>
