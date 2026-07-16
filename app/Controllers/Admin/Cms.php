@@ -1,27 +1,45 @@
-<?php namespace App\Controllers;
+<?php namespace App\Controllers\Admin;
 
+use App\Controllers\BaseController;
 use App\Models\CmsModel;
 
-class Cms extends BaseController
-{
-    public function page($slug)
-    {
+class Cms extends BaseController {
+    
+    public function index() {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+        
         $cmsModel = new CmsModel();
+        // Fetch all pages and blog posts from the database, newest first
+        $data['posts'] = $cmsModel->orderBy('created_at', 'DESC')->findAll();
         
-        // 1. Try to find the published post in the database
-        $post = $cmsModel->where('slug', $slug)
-                         ->where('status', 'Published')
-                         ->first();
+        return view('admin/cms/cms', $data);
+    }
+
+    public function savePost() {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+
+        $cmsModel = new CmsModel();
+        $id = $this->request->getPost('id');
+        $title = $this->request->getPost('title');
         
-        // 2. Format a fallback title (e.g., 'about-us' becomes 'About Us')
-        $title = ucwords(str_replace('-', ' ', $slug));
+        $data = [
+            'title'        => $title,
+            'slug'         => strtolower(url_title($title)),
+            'category'     => $this->request->getPost('category'),
+            'content_body' => $this->request->getPost('content_body'),
+            'author_id'    => session()->get('id') ?? session()->get('user_id'),
+            'status'       => 'Published',
+            'published_at' => date('Y-m-d H:i:s')
+        ];
         
-        // 3. Pass the data to the view
-        $data['title']     = ($post ? $post->title : $title) . ' - HuniKita';
-        $data['pageTitle'] = $post ? $post->title : $title;
-        $data['slug']      = $slug;
-        $data['post']      = $post; // This will be null if not found in the DB
+        if (!empty($id)) {
+            $cmsModel->update($id, $data);
+            $message = 'Content item updated successfully!';
+        } else {
+            $cmsModel->insert($data);
+            $message = 'New content published successfully!';
+        }
         
-        return view('front/cms/page', $data);
+        return redirect()->to(base_url('admin/cms'))->with('success', $message);
     }
 }
