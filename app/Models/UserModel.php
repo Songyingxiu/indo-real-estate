@@ -15,14 +15,15 @@ class UserModel extends Model
     protected $useSoftDeletes   = true;
 
     // Registration form
-   protected $allowedFields    = [
+    protected $allowedFields    = [
         'role_id', 
         'first_name', 
         'last_name', 
         'email', 
         'phone_number', 
         'password', 
-        'status'
+        'status',
+        'remember_token'
     ];
 
     // Dates
