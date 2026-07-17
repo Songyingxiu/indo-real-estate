@@ -25,21 +25,32 @@
   --color-secondary: #735c00;
   --color-secondary-container: #fed65b;
   --color-on-secondary-container: #745c00;
+
+  /* Semantic Colors */
+  --color-error: #ba1a1a;
+  --color-success: #0d652d;
 }
 
 /* Deep Slate Dark Mode */
 .dark {
   --color-background: #0f172a;
   --color-surface: #1e293b;
-  --color-surface-bright: #1e293b;
+  --color-surface-bright: #334155;
   --color-surface-lowest: #1e293b;
-  --color-surface-low: #334155;
-  --color-surface-container: #475569;
-  --color-surface-container-high: #64748b;
-  --color-on-surface: #f8fafc;
-  --color-on-surface-variant: #cbd5e1;
-  --color-outline: #94a3b8;
-  --color-outline-variant: #475569;
+  --color-surface-low: #0f172a;
+  --color-surface-container: #334155;
+  --color-surface-container-high: #475569;
+
+  /* Boosted Contrast */
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #e2e8f0;
+  --color-outline: #64748b;
+  --color-outline-variant: #334155;
+
+  /* Lighter Semantic Colors for Dark Mode */
+  --color-error: #ffb4ab;
+  --color-success: #6dd58c;
+
   --color-primary: #adc7f7;
   --color-on-primary: #002045;
   --color-primary-container: #001b3c;
