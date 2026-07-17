@@ -35,7 +35,8 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'adminAuth'     => \App\Filters\AdminFilter::class,
-        'userAuth'      => \App\Filters\UserFilter::class, 
+        'userAuth'      => \App\Filters\UserFilter::class,
+        'autoLogin'     => \App\Filters\AutoLoginFilter::class, 
     ];
 
     /**
@@ -74,6 +75,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+            'autoLogin',
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',

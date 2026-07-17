@@ -66,8 +66,19 @@ class Auth extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Your account is currently suspended. Please contact support.');
             }
 
+            // --- NEW: REMEMBER ME LOGIC ---
+            helper('cookie');
+            if ($this->request->getPost('remember')) {
+                // Generate a secure random token
+                $token = bin2hex(random_bytes(32));
+                // Update the user's row in the database with the token
+                $userModel->update($user['id'], ['remember_token' => $token]);
+                // Set a cookie in their browser that expires in 30 days
+                set_cookie('remember_token', $token, 30 * 24 * 60 * 60);
+            }
+
             $sessionData = [
-                'id'         => $user['id'], // Added standard 'id'
+                'id'         => $user['id'],
                 'user_id'    => $user['id'],
                 'role_id'    => $user['role_id'],
                 'first_name' => $user['first_name'],
@@ -77,12 +88,9 @@ class Auth extends BaseController
             ];
             session()->set($sessionData);
 
-            // Dynamic Redirect Based on Role
             if ($user['role_id'] == 1) {
-                // Role 1 (Buyer) goes to Front Homepage
                 return redirect()->to(base_url('/'));
             } else {
-                // Roles 2, 3, 4 go to Admin Dashboard
                 return redirect()->to(base_url('admin/dashboard'));
             }
             
@@ -93,6 +101,17 @@ class Auth extends BaseController
 
     public function logout()
     {
+        // --- NEW: WIPE COOKIE LOGIC ---
+        helper('cookie');
+        $token = get_cookie('remember_token');
+        if ($token) {
+            $userModel = new UserModel();
+            // Clear the token from the database
+            $userModel->where('remember_token', $token)->set(['remember_token' => null])->update();
+            // Delete the cookie from the browser
+            delete_cookie('remember_token');
+        }
+
         session()->destroy();
         return redirect()->to(base_url('login'))->with('success', 'You have been logged out successfully.');
     }
