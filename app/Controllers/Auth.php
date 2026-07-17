@@ -22,7 +22,11 @@ class Auth extends BaseController
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Registration failed. Please check your inputs and ensure the email is unique.');
+            // --- NEW: Fetch exact validation errors ---
+            $errors = $this->validator->getErrors();
+            $errorMessage = 'Please fix the following errors:<br> • ' . implode('<br> • ', $errors);
+            
+            return redirect()->back()->withInput()->with('error', $errorMessage);
         }
 
         $plaintextPassword = $this->request->getPost('password');
@@ -66,14 +70,11 @@ class Auth extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Your account is currently suspended. Please contact support.');
             }
 
-            // --- NEW: REMEMBER ME LOGIC ---
+            // REMEMBER ME LOGIC
             helper('cookie');
             if ($this->request->getPost('remember')) {
-                // Generate a secure random token
                 $token = bin2hex(random_bytes(32));
-                // Update the user's row in the database with the token
                 $userModel->update($user['id'], ['remember_token' => $token]);
-                // Set a cookie in their browser that expires in 30 days
                 set_cookie('remember_token', $token, 30 * 24 * 60 * 60);
             }
 
@@ -101,14 +102,12 @@ class Auth extends BaseController
 
     public function logout()
     {
-        // --- NEW: WIPE COOKIE LOGIC ---
+        // WIPE COOKIE LOGIC
         helper('cookie');
         $token = get_cookie('remember_token');
         if ($token) {
             $userModel = new UserModel();
-            // Clear the token from the database
             $userModel->where('remember_token', $token)->set(['remember_token' => null])->update();
-            // Delete the cookie from the browser
             delete_cookie('remember_token');
         }
 
