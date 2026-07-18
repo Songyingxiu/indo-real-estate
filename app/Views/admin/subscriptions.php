@@ -1,7 +1,8 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<div x-data="{ showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '' }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
+<!-- Added new Alpine variables for the manage modal -->
+<div x-data="{ showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '' }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
     
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
@@ -85,10 +86,14 @@
                                         </button>
                                     </form>
                                 <?php else: ?>
-                                    <a href="<?= base_url('admin/subscriptions/manage/' . $sub->id) ?>" 
-                                       class="inline-block text-center border border-primary text-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
+                                    <!-- Changed back to a button to trigger the new Alpine Modal -->
+                                    <button @click="showManageModal = true;
+                                                    manageSubId = '<?= $sub->id ?>';
+                                                    manageUserName = '<?= esc(addslashes($sub->first_name . ' ' . $sub->last_name)) ?>';
+                                                    managePlanName = '<?= esc(addslashes($sub->plan_name)) ?>';"
+                                            type="button" class="inline-block text-center border border-primary text-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
                                         Manage
-                                    </a>
+                                    </button>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -100,9 +105,9 @@
         </div>
     </div>
 
+    <!-- 1. Receipt Modal -->
     <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showModal = false" x-show="showModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
-            
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <div>
                     <h2 class="text-lg font-bold text-on-surface">Payment Receipt</h2>
@@ -112,7 +117,6 @@
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-
             <div class="p-6 bg-surface-container-low flex flex-col justify-center items-center min-h-[300px] max-h-[60vh] overflow-y-auto">
                 <template x-if="receiptUrl && !receiptUrl.endsWith('/')">
                     <img :src="receiptUrl" alt="Receipt Preview" class="max-w-full rounded border border-outline-variant shadow-sm" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center text-outline-variant\'><span class=\'material-symbols-outlined text-[48px] mb-2\'>broken_image</span><p>Image file not found on server.</p></div>';">
@@ -124,13 +128,38 @@
                     </div>
                 </template>
             </div>
-
             <div class="px-6 py-4 border-t border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <div class="flex items-center gap-2 text-sm text-on-surface-variant">
                     <span class="material-symbols-outlined text-[18px]">call</span>
                     <span x-text="phoneNum"></span>
                 </div>
                 <button type="button" @click="showModal = false" class="px-6 py-2 border border-outline-variant text-on-surface rounded font-semibold hover:bg-surface-container transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Manage Subscription Modal -->
+    <div x-show="showManageModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showManageModal = false" x-show="showManageModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <div>
+                    <h2 class="text-lg font-bold text-on-surface">Manage Subscription</h2>
+                    <p class="text-sm text-on-surface-variant mt-1">User: <span class="font-bold text-primary" x-text="manageUserName"></span></p>
+                </div>
+                <button @click="showManageModal = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6 bg-surface flex flex-col gap-4">
+                <p class="text-sm text-on-surface">What would you like to do with the <span class="font-bold" x-text="managePlanName"></span> subscription for this user?</p>
+
+                <!-- Action: Revoke Subscription -->
+                <!-- Alpine binds the action URL dynamically based on the clicked user's ID -->
+                <form :action="'<?= base_url('admin/subscriptions/revoke/') ?>' + manageSubId" method="POST" onsubmit="return confirm('Are you sure you want to revoke this subscription? The user will lose access immediately.');">
+                    <button type="submit" class="w-full flex items-center justify-center gap-2 bg-error text-on-error px-4 py-2 rounded font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">cancel</span> Revoke Subscription
+                    </button>
+                </form>
             </div>
         </div>
     </div>

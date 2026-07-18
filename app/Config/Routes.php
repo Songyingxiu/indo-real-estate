@@ -58,6 +58,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     // Subscriptions Management (User Approvals)
     $routes->get('subscriptions', 'Subscriptions::index');
     $routes->post('subscriptions/activate/(:num)', 'Subscriptions::activate/$1');
+    $routes->post('admin/subscriptions/revoke/(:num)', 'Admin\Subscriptions::revoke/$1');
     
     // Agent/Owner Subscription Upgrade Routes
     $routes->get('pricing', 'Subscription::pricing');
