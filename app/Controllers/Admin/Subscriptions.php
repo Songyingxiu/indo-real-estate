@@ -2,7 +2,7 @@
 
 use App\Controllers\BaseController;
 use App\Models\SubscriptionModel;
-use App\Models\OfflinePaymentModel; // NEW: Added this to update the payment status
+use App\Models\OfflinePaymentModel;
 
 class Subscriptions extends BaseController 
 {
@@ -12,7 +12,7 @@ class Subscriptions extends BaseController
         
         $model = new SubscriptionModel();
         
-        // UPGRADED: Joined the offline_payments table to get the receipt image and invoice details
+        // Joined the offline_payments table to get the receipt image and invoice details
         $data['subscriptions'] = $model->select('subscriptions.*, users.first_name, users.last_name, subscription_plans.name as plan_name, subscription_plans.price, offline_payments.payment_proof, offline_payments.invoice_number, offline_payments.phone_number')
                                        ->join('users', 'users.id = subscriptions.user_id', 'left')
                                        ->join('subscription_plans', 'subscription_plans.id = subscriptions.plan_id', 'left')
@@ -30,7 +30,7 @@ class Subscriptions extends BaseController
         $subModel = new SubscriptionModel();
         $paymentModel = new OfflinePaymentModel();
         
-        // UPGRADED: Set the subscription to Active and define the 1-year validity period
+        // Set the subscription to Active and define the 1-year validity period
         $subModel->update($id, [
             'status'     => 'Active',
             'sub_status' => 'Active',
@@ -44,5 +44,22 @@ class Subscriptions extends BaseController
                      ->update();
         
         return redirect()->to(base_url('admin/subscriptions'))->with('success', 'Payment verified! The user subscription is now active for 1 year.');
+    }
+
+    public function manage($id)
+    {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+        
+        $subModel = new SubscriptionModel();
+        $subscription = $subModel->find($id);
+        
+        if (!$subscription) {
+            return redirect()->to(base_url('admin/subscriptions'))->with('error', 'Subscription record not found.');
+        }
+
+        $data['subscription'] = $subscription;
+        
+        // Load the view for managing the active subscription
+        return view('admin/subscription_manage', $data);
     }
 }

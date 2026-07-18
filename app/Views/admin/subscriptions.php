@@ -10,6 +10,13 @@
         </div>
     <?php endif; ?>
 
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="bg-[#ffdad6] text-[#410002] p-4 rounded mb-6 border border-[#ffb4ab] flex items-center gap-2">
+            <span class="material-symbols-outlined">error</span>
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
+
     <div class="mb-stack-lg">
         <h2 class="font-headline-lg text-headline-lg text-primary mb-unit">Subscription Management</h2>
         <p class="font-body-md text-body-md text-on-surface-variant">Verify manual bank transfers and activate user upgrade packages.</p>
@@ -78,9 +85,10 @@
                                         </button>
                                     </form>
                                 <?php else: ?>
-                                    <button class="text-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-fixed transition-colors" disabled>
+                                    <a href="<?= base_url('admin/subscriptions/manage/' . $sub->id) ?>" 
+                                       class="inline-block text-center border border-primary text-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
                                         Manage
-                                    </button>
+                                    </a>
                                 <?php endif; ?>
                             </td>
                         </tr>
