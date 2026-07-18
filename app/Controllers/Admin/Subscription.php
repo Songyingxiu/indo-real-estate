@@ -87,7 +87,7 @@ class Subscription extends BaseController
             'phone_number'    => $this->request->getPost('phone_number'),
             'invoice_number'  => $this->request->getPost('invoice_number'),
             'payment_proof'   => $newName,
-            'approval_status' => 'Pending Verification',
+            'approval_status' => 'Pending',
             'status'          => 'Active'
         ]);
 

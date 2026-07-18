@@ -75,14 +75,38 @@
                 <input type="tel" name="phone_number" required placeholder="e.g. 081234567890" value="<?= esc(session()->get('phone_number')) ?>" class="w-full border border-outline-variant rounded px-3 py-2 text-sm focus:border-primary focus:ring-1 bg-white outline-none">
             </div>
 
-            <div>
+            <!-- Alpine.js Component for Upload Box -->
+            <div x-data="{ fileName: '', fileUrl: '' }">
                 <label class="block text-sm font-semibold text-on-surface mb-2">Upload Transfer Receipt <span class="text-error">*</span></label>
-                <div class="border-2 border-dashed border-outline-variant rounded-lg p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer relative bg-surface">
-                    <span class="material-symbols-outlined text-[36px] text-primary mb-2">cloud_upload</span>
-                    <p class="text-sm font-semibold text-on-surface">Click to upload or drag and drop</p>
-                    <p class="text-xs text-on-surface-variant mt-1">PNG, JPG up to 5MB</p>
-                    <input type="file" name="payment_proof" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                </div>
+                
+                <label for="payment_proof" 
+                       class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors duration-200"
+                       :class="fileName ? 'border-success bg-success/5' : 'border-outline-variant hover:bg-surface-container-low bg-surface'">
+                    
+                    <!-- Default State -->
+                    <div x-show="!fileName" class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <span class="material-symbols-outlined text-[36px] text-primary mb-2">cloud_upload</span>
+                        <p class="text-sm font-semibold text-on-surface">Click to upload or drag and drop</p>
+                        <p class="text-xs text-on-surface-variant mt-1">PNG, JPG up to 5MB</p>
+                    </div>
+
+                    <!-- Uploaded State -->
+                    <div x-show="fileName" class="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4" style="display: none;">
+                        <span class="material-symbols-outlined text-[36px] text-success mb-2">check_circle</span>
+                        <p class="text-sm font-bold text-success mb-1 truncate w-full" x-text="fileName"></p>
+                        <p class="text-xs text-on-surface-variant">File attached and ready to submit</p>
+                    </div>
+
+                    <input id="payment_proof" name="payment_proof" type="file" accept="image/*" required class="hidden"
+                           @change="fileName = $event.target.files[0].name; fileUrl = URL.createObjectURL($event.target.files[0])">
+                </label>
+
+                <!-- Image Preview Thumbnail -->
+                <template x-if="fileUrl">
+                    <div class="mt-4 flex justify-center">
+                        <img :src="fileUrl" class="max-h-40 rounded border border-outline-variant shadow-sm object-contain" />
+                    </div>
+                </template>
             </div>
 
             <div class="pt-4 mt-2 border-t border-outline-variant">
