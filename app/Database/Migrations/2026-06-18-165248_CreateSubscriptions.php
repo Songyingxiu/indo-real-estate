@@ -7,7 +7,7 @@ class CreateSubscriptions extends Migration {
             'id'            => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
             'user_id'       => ['type' => 'INT', 'constraint' => 11],
             'plan_id'       => ['type' => 'INT', 'constraint' => 11],
-            'sub_status'    => ['type' => 'ENUM', 'constraint' => ['Active', 'Expired'], 'default' => 'Active'],
+            'sub_status'    => ['type' => 'ENUM', 'constraint' => ['Active', 'Pending', 'Expired'], 'default' => 'Pending'],
             'start_date'    => ['type' => 'DATE'],
             'end_date'      => ['type' => 'DATE'],
             'status'        => ['type' => 'ENUM', 'constraint' => ['Active', 'Inactive'], 'default' => 'Active'],
