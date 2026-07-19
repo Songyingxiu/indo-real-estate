@@ -1,8 +1,8 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Added new Alpine variables for the manage modal -->
-<div x-data="{ showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '' }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
+<!-- Added manageSubStatus to Alpine data -->
+<div x-data="{ showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '', manageSubStatus: '' }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
     
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
@@ -68,7 +68,8 @@
                             </td>
 
                             <td class="py-4 px-4">
-                                <?php if($sub->status == 'Pending'): ?>
+                                <!-- FIXED: Now checking sub_status instead of status -->
+                                <?php if($sub->sub_status == 'Pending'): ?>
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-error-container text-on-error-container font-label-md text-caption">
                                         <span class="material-symbols-outlined text-[14px]">pending_actions</span> Pending
                                     </span>
@@ -79,22 +80,15 @@
                                 <?php endif; ?>
                             </td>
                             <td class="py-4 px-4 text-right">
-                                <?php if($sub->status == 'Pending'): ?>
-                                    <form action="<?= base_url('admin/subscriptions/activate/' . $sub->id) ?>" method="POST" onsubmit="return confirm('Activate this subscription for 1 year?');">
-                                        <button type="submit" class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
-                                            Activate
-                                        </button>
-                                    </form>
-                                <?php else: ?>
-                                    <!-- Changed back to a button to trigger the new Alpine Modal -->
-                                    <button @click="showManageModal = true;
-                                                    manageSubId = '<?= $sub->id ?>';
-                                                    manageUserName = '<?= esc(addslashes($sub->first_name . ' ' . $sub->last_name)) ?>';
-                                                    managePlanName = '<?= esc(addslashes($sub->plan_name)) ?>';"
-                                            type="button" class="inline-block text-center border border-primary text-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
-                                        Manage
-                                    </button>
-                                <?php endif; ?>
+                                <!-- UNIFIED MANAGE BUTTON: Passes all data to the modal, including sub_status -->
+                                <button @click="showManageModal = true;
+                                                manageSubId = '<?= $sub->id ?>';
+                                                manageUserName = '<?= esc(addslashes($sub->first_name . ' ' . $sub->last_name)) ?>';
+                                                managePlanName = '<?= esc(addslashes($sub->plan_name)) ?>';
+                                                manageSubStatus = '<?= esc(addslashes($sub->sub_status)) ?>';"
+                                        type="button" class="inline-block text-center border border-primary text-primary px-4 py-2 rounded font-label-md text-label-md hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
+                                    Manage
+                                </button>
                             </td>
                         </tr>
                     <?php endforeach; else: ?>
@@ -107,6 +101,7 @@
 
     <!-- 1. Receipt Modal -->
     <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <!-- ... (Receipt modal code remains exactly the same) ... -->
         <div @click.outside="showModal = false" x-show="showModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <div>
@@ -138,7 +133,7 @@
         </div>
     </div>
 
-    <!-- 2. Manage Subscription Modal -->
+    <!-- 2. Manage Subscription Modal (Smart Modal) -->
     <div x-show="showManageModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showManageModal = false" x-show="showManageModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -153,13 +148,23 @@
             <div class="p-6 bg-surface flex flex-col gap-4">
                 <p class="text-sm text-on-surface">What would you like to do with the <span class="font-bold" x-text="managePlanName"></span> subscription for this user?</p>
 
-                <!-- Action: Revoke Subscription -->
-                <!-- Alpine binds the action URL dynamically based on the clicked user's ID -->
-                <form :action="'<?= base_url('admin/subscriptions/revoke/') ?>' + manageSubId" method="POST" onsubmit="return confirm('Are you sure you want to revoke this subscription? The user will lose access immediately.');">
-                    <button type="submit" class="w-full flex items-center justify-center gap-2 bg-error text-on-error px-4 py-2 rounded font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">cancel</span> Revoke Subscription
-                    </button>
-                </form>
+                <!-- Show ACTIVATE button if sub_status is Pending -->
+                <template x-if="manageSubStatus === 'Pending'">
+                    <form :action="'<?= base_url('admin/subscriptions/activate/') ?>' + manageSubId" method="POST" onsubmit="return confirm('Activate this subscription for 1 year?');">
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
+                            <span class="material-symbols-outlined text-[18px]">check_circle</span> Activate Subscription
+                        </button>
+                    </form>
+                </template>
+
+                <!-- Show REVOKE button if sub_status is already Active -->
+                <template x-if="manageSubStatus === 'Active'">
+                    <form :action="'<?= base_url('admin/subscriptions/revoke/') ?>' + manageSubId" method="POST" onsubmit="return confirm('Are you sure you want to revoke this subscription? The user will lose access immediately.');">
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-error text-on-error px-4 py-2 rounded font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">cancel</span> Revoke Subscription
+                        </button>
+                    </form>
+                </template>
             </div>
         </div>
     </div>
