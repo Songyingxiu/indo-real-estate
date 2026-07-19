@@ -1,8 +1,12 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Added manageSubStatus to Alpine data -->
-<div x-data="{ showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '', manageSubStatus: '' }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
+<!-- Added Confirmation Modal variables to Alpine data -->
+<div x-data="{ 
+        showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', 
+        showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '', manageSubStatus: '',
+        showConfirmModal: false, confirmTitle: '', confirmMessage: '', confirmUrl: '', confirmActionTheme: 'primary' 
+    }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
     
     <?php if (session()->getFlashdata('success')) : ?>
         <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
@@ -68,7 +72,6 @@
                             </td>
 
                             <td class="py-4 px-4">
-                                <!-- FIXED: Now checking sub_status instead of status -->
                                 <?php if($sub->sub_status == 'Pending'): ?>
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-error-container text-on-error-container font-label-md text-caption">
                                         <span class="material-symbols-outlined text-[14px]">pending_actions</span> Pending
@@ -80,7 +83,6 @@
                                 <?php endif; ?>
                             </td>
                             <td class="py-4 px-4 text-right">
-                                <!-- UNIFIED MANAGE BUTTON: Passes all data to the modal, including sub_status -->
                                 <button @click="showManageModal = true;
                                                 manageSubId = '<?= $sub->id ?>';
                                                 manageUserName = '<?= esc(addslashes($sub->first_name . ' ' . $sub->last_name)) ?>';
@@ -101,7 +103,6 @@
 
     <!-- 1. Receipt Modal -->
     <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
-        <!-- ... (Receipt modal code remains exactly the same) ... -->
         <div @click.outside="showModal = false" x-show="showModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <div>
@@ -133,7 +134,7 @@
         </div>
     </div>
 
-    <!-- 2. Manage Subscription Modal (Smart Modal) -->
+    <!-- 2. Manage Subscription Modal (Triggers Confirmation) -->
     <div x-show="showManageModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showManageModal = false" x-show="showManageModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -148,24 +149,61 @@
             <div class="p-6 bg-surface flex flex-col gap-4">
                 <p class="text-sm text-on-surface">What would you like to do with the <span class="font-bold" x-text="managePlanName"></span> subscription for this user?</p>
 
-                <!-- Show ACTIVATE button if sub_status is Pending -->
+                <!-- Activate Button -->
                 <template x-if="manageSubStatus === 'Pending'">
-                    <form :action="'<?= base_url('admin/subscriptions/activate/') ?>' + manageSubId" method="POST" onsubmit="return confirm('Activate this subscription for 1 year?');">
-                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
-                            <span class="material-symbols-outlined text-[18px]">check_circle</span> Activate Subscription
-                        </button>
-                    </form>
+                    <button type="button" @click="
+                        showConfirmModal = true;
+                        confirmTitle = 'Activate Subscription';
+                        confirmMessage = 'Are you sure you want to activate this subscription for 1 year?';
+                        confirmUrl = '<?= base_url('admin/subscriptions/activate/') ?>' + manageSubId;
+                        confirmActionTheme = 'primary';
+                    " class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span> Activate Subscription
+                    </button>
                 </template>
 
-                <!-- Show REVOKE button if sub_status is already Active -->
+                <!-- Revoke Button -->
                 <template x-if="manageSubStatus === 'Active'">
-                    <form :action="'<?= base_url('admin/subscriptions/revoke/') ?>' + manageSubId" method="POST" onsubmit="return confirm('Are you sure you want to revoke this subscription? The user will lose access immediately.');">
-                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-error text-on-error px-4 py-2 rounded font-label-md text-label-md hover:bg-error-container hover:text-on-error-container transition-colors">
-                            <span class="material-symbols-outlined text-[18px]">cancel</span> Revoke Subscription
-                        </button>
-                    </form>
+                    <button type="button" @click="
+                        showConfirmModal = true;
+                        confirmTitle = 'Revoke Subscription';
+                        confirmMessage = 'Are you sure you want to revoke this subscription? The user will lose access immediately.';
+                        confirmUrl = '<?= base_url('admin/subscriptions/revoke/') ?>' + manageSubId;
+                        confirmActionTheme = 'error';
+                    " class="w-full flex items-center justify-center gap-2 bg-error text-on-error px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
+                        <span class="material-symbols-outlined text-[18px]">cancel</span> Revoke Subscription
+                    </button>
                 </template>
             </div>
+        </div>
+    </div>
+
+    <!-- 3. Custom Confirmation Modal (Replaces browser confirm) -->
+    <div x-show="showConfirmModal" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center bg-[#1a1c1e]/80 backdrop-blur-sm p-4">
+        <div @click.outside="showConfirmModal = false" x-show="showConfirmModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden text-center">
+            
+            <!-- Icon & Message Content -->
+            <div class="p-6">
+                <div class="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-4"
+                     :class="confirmActionTheme === 'error' ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container'">
+                    <span class="material-symbols-outlined text-[24px]" x-text="confirmActionTheme === 'error' ? 'warning' : 'info'"></span>
+                </div>
+                <h2 class="text-lg font-bold text-on-surface mb-2" x-text="confirmTitle"></h2>
+                <p class="text-sm text-on-surface-variant" x-text="confirmMessage"></p>
+            </div>
+            
+            <!-- Actions -->
+            <div class="px-6 py-4 bg-surface-container-lowest flex gap-3 justify-end border-t border-outline-variant">
+                <button type="button" @click="showConfirmModal = false" class="px-4 py-2 border border-outline-variant text-on-surface rounded font-label-md text-label-md hover:bg-surface-container transition">Cancel</button>
+                
+                <!-- The actual form submission -->
+                <form :action="confirmUrl" method="POST" class="m-0">
+                    <button type="submit" class="px-4 py-2 rounded font-label-md text-label-md text-white transition h-full"
+                            :class="confirmActionTheme === 'error' ? 'bg-error hover:bg-error/90' : 'bg-primary hover:bg-primary/90'"
+                            x-text="confirmTitle.split(' ')[0]"></button>
+                </form>
+            </div>
+            
         </div>
     </div>
 
