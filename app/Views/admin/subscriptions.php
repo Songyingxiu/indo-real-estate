@@ -60,7 +60,7 @@
                             <td class="py-4 px-4">
                                 <?php if(!empty($sub->payment_proof)): ?>
                                     <button @click="showModal = true; 
-                                                    receiptUrl = '<?= base_url('uploads/payments/' . $sub->payment_proof) ?>'; 
+                                                    receiptUrl = '<?= esc($sub->payment_proof) ?>'; 
                                                     invoiceNum = '<?= esc($sub->invoice_number) ?>'; 
                                                     phoneNum = '<?= esc($sub->phone_number) ?>';" 
                                             type="button" class="flex items-center gap-1 text-primary border border-outline-variant px-3 py-1.5 rounded hover:bg-surface-container transition-colors font-label-md text-label-md">

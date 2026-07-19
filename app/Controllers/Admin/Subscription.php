@@ -4,6 +4,8 @@ use App\Controllers\BaseController;
 use App\Models\SubscriptionPlanModel;
 use App\Models\SubscriptionModel;
 use App\Models\OfflinePaymentModel;
+use Cloudinary\Configuration\Configuration;
+use Cloudinary\Api\Upload\UploadApi;
 
 class Subscription extends BaseController
 {
@@ -78,15 +80,31 @@ class Subscription extends BaseController
         }
 
         $proofFile = $this->request->getFile('payment_proof');
-        $newName = $proofFile->getRandomName();
-        $proofFile->move(FCPATH . 'uploads/payments', $newName);
+        
+        // 1. Initialize Cloudinary
+        Configuration::instance(getenv('CLOUDINARY_URL'));
+        $uploadApi = new UploadApi();
 
+        try {
+            // 2. Upload to Cloudinary
+            $response = $uploadApi->upload($proofFile->getTempName(), [
+                'folder' => 'hunikita_receipts', 
+            ]);
+            
+            // 3. Get the secure cloud URL
+            $secureUrl = $response['secure_url'];
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to upload image to cloud storage. Please try again.');
+        }
+
+        // 4. Save the Cloudinary URL to TiDB
         $paymentModel = new OfflinePaymentModel();
         $paymentModel->insert([
             'subscription_id' => $this->request->getPost('subscription_id'),
             'phone_number'    => $this->request->getPost('phone_number'),
             'invoice_number'  => $this->request->getPost('invoice_number'),
-            'payment_proof'   => $newName,
+            'payment_proof'   => $secureUrl, 
             'approval_status' => 'Pending',
             'status'          => 'Active'
         ]);
