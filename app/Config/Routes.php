@@ -62,7 +62,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     
     // Agent/Owner Subscription Upgrade Routes
     $routes->get('pricing', 'Subscription::pricing');
-    $routes->post('subscription/checkout', 'Subscription::checkout');
+    $routes->match(['get', 'post'], 'subscription/checkout', 'Subscription::checkout');
     $routes->post('subscription/upload-proof', 'Subscription::uploadProof');
 
     // Master Data & Configuration
