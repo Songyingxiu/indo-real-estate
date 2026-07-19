@@ -4,8 +4,7 @@ use App\Controllers\BaseController;
 use App\Models\SubscriptionPlanModel;
 use App\Models\SubscriptionModel;
 use App\Models\OfflinePaymentModel;
-use Cloudinary\Configuration\Configuration;
-use Cloudinary\Api\Upload\UploadApi;
+use Cloudinary\Cloudinary;
 
 class Subscription extends BaseController
 {
@@ -21,8 +20,11 @@ class Subscription extends BaseController
 
     public function checkout()
     {
-        $planId = $this->request->getPost('plan_id');
+        // Fallback to session to prevent redirect loops if validation fails on the next step
+        $planId = $this->request->getPost('plan_id') ?? session()->get('checkout_plan_id');
         if (!$planId) return redirect()->to(base_url('admin/pricing'));
+
+        session()->set('checkout_plan_id', $planId);
 
         $planModel = new SubscriptionPlanModel();
         $plan = $planModel->find($planId);
@@ -40,6 +42,7 @@ class Subscription extends BaseController
                 'end_date'   => date('Y-m-d H:i:s', strtotime('+1 year')),
                 'status'     => 'Active'
             ]);
+            session()->remove('checkout_plan_id');
             return redirect()->to(base_url('admin/dashboard'))->with('success', 'Free plan activated successfully!');
         }
 
@@ -70,24 +73,31 @@ class Subscription extends BaseController
 
     public function uploadProof()
     {
+        // Replaced 'is_image' with 'ext_in' to avoid dependency on finfo extension
         $rules = [
             'phone_number'  => 'required|min_length[8]',
-            'payment_proof' => 'uploaded[payment_proof]|is_image[payment_proof]|max_size[payment_proof,5120]'
+            'payment_proof' => 'uploaded[payment_proof]|ext_in[payment_proof,png,jpg,jpeg]|max_size[payment_proof,5120]'
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->with('error', 'Please upload a valid image file and provide your phone number.');
+            $errorMsg = $this->validator->getError('payment_proof') ?: 'Please upload a valid image file and provide your phone number.';
+            return redirect()->back()->withInput()->with('error', $errorMsg);
         }
 
         $proofFile = $this->request->getFile('payment_proof');
         
-        // 1. Initialize Cloudinary
-        Configuration::instance(getenv('CLOUDINARY_URL'));
-        $uploadApi = new UploadApi();
+        // 1. Initialize Cloudinary using env() for CI4 compatibility
+        $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+        
+        if (empty($cloudinaryUrl)) {
+            return redirect()->back()->with('error', 'Cloudinary configuration is missing from environment variables.');
+        }
 
         try {
+            $cloudinary = new Cloudinary($cloudinaryUrl);
+            
             // 2. Upload to Cloudinary
-            $response = $uploadApi->upload($proofFile->getTempName(), [
+            $response = $cloudinary->uploadApi()->upload($proofFile->getTempName(), [
                 'folder' => 'hunikita_receipts', 
             ]);
             
@@ -95,12 +105,12 @@ class Subscription extends BaseController
             $secureUrl = $response['secure_url'];
             
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to upload image to cloud storage. Please try again.');
+            return redirect()->back()->with('error', 'Cloudinary Error: ' . $e->getMessage());
         }
 
         // 4. Save the Cloudinary URL to TiDB
         $paymentModel = new OfflinePaymentModel();
-        $paymentModel->insert([
+        $inserted = $paymentModel->insert([
             'subscription_id' => $this->request->getPost('subscription_id'),
             'phone_number'    => $this->request->getPost('phone_number'),
             'invoice_number'  => $this->request->getPost('invoice_number'),
@@ -109,6 +119,13 @@ class Subscription extends BaseController
             'status'          => 'Active'
         ]);
 
+        if (!$inserted) {
+            return redirect()->back()->with('error', 'Database error: Failed to save payment record.');
+        }
+
+        // Clear the session state to prevent checkout loops
+        session()->remove('checkout_plan_id');
+        
         return redirect()->to(base_url('admin/pricing'))->with('success', 'Payment proof uploaded! Our team will verify it shortly and activate your package.');
     }
 }
