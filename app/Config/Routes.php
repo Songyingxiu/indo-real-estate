@@ -29,6 +29,7 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->post('update-profile', 'User::updateProfile');
     $routes->post('update-password', 'User::updatePassword');
     $routes->post('upload-agent-docs', 'User::uploadAgentDocs');
+    $routes->get('saved-properties', 'User::savedProperties');
 });
 
 // Admin Dashboard Routes (Protected by AdminFilter)

@@ -3,6 +3,7 @@
 use App\Models\LeadModel;
 use App\Models\UserModel;
 use App\Models\AgentVerificationModel;
+use App\Models\SavedPropertyModel; // Added for Saved Properties
 
 class User extends BaseController
 {
@@ -143,5 +144,29 @@ class User extends BaseController
         }
 
         return redirect()->back()->with('error', 'KTP document is required for verification.');
+    }
+
+    // NEW METHOD: Handle fetching the saved properties
+    public function savedProperties()
+    {
+        if (!session()->get('id')) return redirect()->to(base_url('login'));
+
+        $savedModel = new SavedPropertyModel();
+        
+        $data['title'] = 'My Saved Properties - HuniKita';
+        
+        // Fetch properties joined with their types and primary images
+        $data['properties'] = $savedModel
+            ->select('properties.*, property_types.name as type_name, property_images.image_path, saved_properties.created_at as saved_at')
+            ->join('properties', 'properties.id = saved_properties.property_id', 'inner')
+            ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->where('saved_properties.user_id', session()->get('id'))
+            ->orderBy('saved_properties.created_at', 'DESC')
+            ->paginate(9);
+
+        $data['pager'] = $savedModel->pager;
+
+        return view('front/user/saved_properties', $data);
     }
 }

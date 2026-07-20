@@ -106,6 +106,11 @@
 
             <?php if($isLoggedIn): ?>
                 
+                <!-- NEW: Saved Properties Icon -->
+                <a href="<?= base_url('user/saved-properties') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Saved Properties">
+                    <span class="material-symbols-outlined">favorite</span>
+                </a>
+
                 <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/leads') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Inbox">
                     <span class="material-symbols-outlined">mail</span>
                     <?php if ($unreadCount > 0): ?>
