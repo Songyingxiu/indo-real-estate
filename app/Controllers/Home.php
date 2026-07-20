@@ -6,6 +6,7 @@ use App\Models\PropertyImageModel;
 use App\Models\CityModel;
 use App\Models\StateModel;
 use App\Models\CmsModel;
+use App\Models\SavedPropertyModel;
 
 class Home extends BaseController
 {
@@ -14,7 +15,7 @@ class Home extends BaseController
         $propertyModel = new PropertyModel();
         $cmsModel = new CmsModel();
         
-        // 1. POPULAR LISTINGS (Randomized to look active and diverse)
+        // 1. POPULAR LISTINGS
         $data['featuredProperties'] = $propertyModel
             ->asObject() 
             ->select('properties.*, property_types.name as type_name, property_images.image_path')
@@ -26,7 +27,7 @@ class Home extends BaseController
             ->limit(6)
             ->find();
 
-        // 2. NEWEST LISTINGS (Strictly ordered by newest created date)
+        // 2. NEWEST LISTINGS
         $data['newestProperties'] = $propertyModel
             ->asObject() 
             ->select('properties.*, property_types.name as type_name, property_images.image_path')
@@ -38,7 +39,7 @@ class Home extends BaseController
             ->limit(6)
             ->find();
 
-        // 3. TIPS & GUIDES (Fetches the 3 most recent published tips)
+        // 3. TIPS & GUIDES
         $data['tips'] = $cmsModel
             ->where('category', 'Tips')
             ->where('status', 'Published')
@@ -114,8 +115,18 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
+        // Check if current user has saved this property
+        $isSaved = false;
+        $userId = session()->get('id');
+        if ($userId) {
+            $savedModel = new SavedPropertyModel();
+            $check = $savedModel->where('user_id', $userId)->where('property_id', $id)->first();
+            if ($check) $isSaved = true;
+        }
+
         $data['images'] = $imageModel->asObject()->where('property_id', $id)->findAll();
         $data['property'] = $property;
+        $data['isSaved'] = $isSaved; // Pass variable to view
         $data['title'] = $property->title . ' - HuniKita';
         
         return view('front/properties/details', $data);
@@ -172,5 +183,36 @@ class Home extends BaseController
         }
 
         return $this->response->setJSON($results);
+    }
+
+    // METHOD TO HANDLE AJAX SAVE/UNSAVE
+    public function toggleSaveProperty()
+    {
+        $userId = session()->get('id');
+        if (!$userId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized'])->setStatusCode(401);
+        }
+
+        $json = $this->request->getJSON();
+        $propertyId = $json->property_id ?? null;
+
+        if (!$propertyId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid property ID'])->setStatusCode(400);
+        }
+
+        $savedModel = new SavedPropertyModel();
+        $existing = $savedModel->where('user_id', $userId)->where('property_id', $propertyId)->first();
+
+        if ($existing) {
+            $savedModel->delete($existing->id);
+            return $this->response->setJSON(['status' => 'success', 'action' => 'removed']);
+        } else {
+            $savedModel->insert([
+                'user_id' => $userId, 
+                'property_id' => $propertyId, 
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            return $this->response->setJSON(['status' => 'success', 'action' => 'added']);
+        }
     }
 }

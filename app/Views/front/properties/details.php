@@ -1,6 +1,8 @@
 <?= $this->include('front/layout/header') ?>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- CSRF Token for AJAX requests -->
+<meta name="<?= csrf_token() ?>" content="<?= csrf_hash() ?>">
 
 <div id="photoGallery" class="fixed inset-0 z-[100] hidden bg-black/95 flex-col items-center justify-center p-4">
     <button onclick="closeGallery()" class="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2">
@@ -56,7 +58,15 @@
                             <span class="bg-secondary-fixed text-on-secondary-fixed-variant px-2 py-1 rounded text-[12px] font-bold"><?= esc($property->listing_type) ?></span>
                             <span class="text-on-surface-variant text-[12px] flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">schedule</span> Just Listed</span>
                         </div>
-                        <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface mb-2"><?= esc($property->title) ?></h1>
+                        <div class="flex items-center gap-4">
+                            <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface mb-2"><?= esc($property->title) ?></h1>
+                            <!-- NEW SAVE BUTTON -->
+                            <button onclick="toggleSaveProperty(<?= esc($property->id) ?>)" id="savePropertyBtn" class="flex items-center justify-center w-12 h-12 rounded-full border border-outline-variant hover:bg-surface-container transition-colors shadow-sm bg-surface">
+                                <span class="material-symbols-outlined <?= $isSaved ? 'text-error' : 'text-on-surface-variant' ?>" id="savePropertyIcon" style="<?= $isSaved ? 'font-variation-settings: \'FILL\' 1;' : '' ?>">
+                                    favorite
+                                </span>
+                            </button>
+                        </div>
                         <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
                             <span class="material-symbols-outlined mr-2">location_on</span>
                             <?= esc($property->address_line_1 ?? $property->area_name) ?>
@@ -193,5 +203,45 @@
         document.body.style.overflow = 'auto';
         document.getElementById('photoGallery').classList.add('hidden');
         document.getElementById('photoGallery').classList.remove('flex');
+    }
+
+    // NEW AJAX FUNCTION TO TOGGLE SAVED PROPERTY
+    function toggleSaveProperty(propertyId) {
+        const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
+        const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
+        
+        fetch('<?= base_url('property/toggle-save') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                [csrfName]: csrfHash // Optional depending on CI4 CSRF setup
+            },
+            body: JSON.stringify({ property_id: propertyId })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                window.location.href = '<?= base_url('login') ?>';
+                throw new Error('Unauthorized');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                const icon = document.getElementById('savePropertyIcon');
+                if (data.action === 'added') {
+                    icon.classList.remove('text-on-surface-variant');
+                    icon.classList.add('text-error');
+                    icon.style.fontVariationSettings = "'FILL' 1";
+                } else {
+                    icon.classList.remove('text-error');
+                    icon.classList.add('text-on-surface-variant');
+                    icon.style.fontVariationSettings = "'FILL' 0";
+                }
+            } else {
+                alert(data.message || 'An error occurred.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
 </script>
