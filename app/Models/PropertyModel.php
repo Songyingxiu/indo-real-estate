@@ -28,10 +28,20 @@ class PropertyModel extends Model
     protected $updatedField  = 'modified_date';
 
     // --- Custom Search Engine Logic ---
-    public function searchProperties($keyword = null, $listingType = null)
+    public function searchProperties($keyword = null, $listingType = null, $types = [], $lat = null, $lng = null, $radius = null)
     {
         $builder = $this->builder();
-        $builder->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path');
+        
+        // Base selections
+        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path';
+
+        // Apply Haversine formula if coordinates and radius are provided
+        if ($lat && $lng && $radius) {
+            $haversine = "(6371 * acos(cos(radians($lat)) * cos(radians(properties.latitude)) * cos(radians(properties.longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(properties.latitude))))";
+            $selects .= ", {$haversine} AS distance";
+        }
+
+        $builder->select($selects);
         $builder->join('property_types', 'property_types.id = properties.property_type_id', 'left');
         $builder->join('users', 'users.id = properties.owner_id', 'left');
         $builder->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left');
@@ -50,7 +60,17 @@ class PropertyModel extends Model
             $builder->where('properties.listing_type', $listingType);
         }
 
-        $builder->orderBy('properties.created_date', 'DESC');
+        if (!empty($types) && is_array($types)) {
+            $builder->whereIn('properties.property_type_id', $types);
+        }
+
+        // Apply radius filter and ordering
+        if ($lat && $lng && $radius) {
+            $builder->having('distance <=', (float)$radius);
+            $builder->orderBy('distance', 'ASC'); // Closest first
+        } else {
+            $builder->orderBy('properties.created_date', 'DESC'); // Newest first
+        }
 
         return $this;
     }

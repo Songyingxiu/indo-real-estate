@@ -10,6 +10,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');            
 $routes->get('search', 'Home::search');
 $routes->get('api/suggest', 'Home::suggest');
+$routes->post('search/save', 'Home::saveSearch');
 $routes->get('property/(:num)', 'Home::detail/$1');
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 $routes->post('contact/submit-lead', 'Contact::submitLead');

@@ -7,6 +7,7 @@ use App\Models\CityModel;
 use App\Models\StateModel;
 use App\Models\CmsModel;
 use App\Models\SavedPropertyModel;
+use App\Models\SavedSearchModel;
 
 class Home extends BaseController
 {
@@ -58,39 +59,27 @@ class Home extends BaseController
         
         $data['propertyTypes'] = $typeModel->asObject()->where('status', 'Active')->findAll();
 
+        // Retrieve all GET parameters including new radius fields
         $keyword     = $this->request->getGet('q');
-        $types       = $this->request->getGet('type');
+        $types       = $this->request->getGet('type') ?? [];
         $listingType = $this->request->getGet('listing_type');
+        $lat         = $this->request->getGet('lat');
+        $lng         = $this->request->getGet('lng');
+        $radius      = $this->request->getGet('radius');
 
-        $builder = $propertyModel
-            ->asObject() 
-            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path')
-            ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
-            ->join('users', 'users.id = properties.owner_id', 'left')
-            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
-            ->where('properties.status', 'Active')
-            ->where('properties.approval_status', 'Published');
+        // Execute custom search through the PropertyModel
+        $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius);
 
-        if (!empty($keyword)) {
-            $builder->groupStart()
-                    ->like('properties.title', $keyword)
-                    ->orLike('properties.area_name', $keyword)
-                    ->groupEnd();
-        }
-
-        if (!empty($types) && is_array($types)) {
-            $builder->whereIn('properties.property_type_id', $types);
-        }
-
-        if (!empty($listingType)) {
-            $builder->where('properties.listing_type', $listingType);
-        }
-
-        $data['properties'] = $builder->paginate(9);
+        $data['properties'] = $propertyModel->paginate(9);
         $data['pager']      = $propertyModel->pager;
         $data['total']      = $propertyModel->pager->getTotal(); 
+        
+        // Pass parameters back to view to keep filters active
         $data['keyword']    = $keyword;
         $data['listingType']= $listingType;
+        $data['lat']        = $lat;
+        $data['lng']        = $lng;
+        $data['radius']     = $radius;
         
         $data['title'] = 'Search Properties - HuniKita';
         return view('front/properties/search', $data);
@@ -214,5 +203,26 @@ class Home extends BaseController
             ]);
             return $this->response->setJSON(['status' => 'success', 'action' => 'added']);
         }
+    }
+
+    // SAVE SEARCH PARAMETERS
+    public function saveSearch()
+    {
+        $userId = session()->get('id');
+        if (!$userId) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized'])->setStatusCode(401);
+        }
+
+        $json = $this->request->getJSON();
+        
+        $savedSearchModel = new SavedSearchModel();
+        $savedSearchModel->insert([
+            'user_id'    => $userId,
+            'name'       => $json->name ?? 'Saved Search ' . date('M d, Y'),
+            'filters'    => json_encode($json->filters ?? []),
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Search parameters saved successfully.']);
     }
 }
