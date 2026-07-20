@@ -2,17 +2,38 @@
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\SubscriptionModel;
+use App\Models\SubscriptionPlanModel;
 
 class Profile extends BaseController 
 {
     public function index() 
     {
         // Make sure they are logged in
-        if (session()->get('user_id') == null) return redirect()->to(base_url('login'));
+        $userId = session()->get('user_id');
+        if (!$userId) return redirect()->to(base_url('login'));
         
         $userModel = new UserModel();
         // Fetch the freshest data straight from the database
-        $data['user'] = $userModel->find(session()->get('user_id'));
+        $data['user'] = $userModel->find($userId);
+        
+        // Fetch Subscription Data
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        
+        // Get the most recent active subscription for this user
+        $activeSub = $subModel->where('user_id', $userId)
+                              ->where('sub_status', 'Active')
+                              ->orderBy('id', 'DESC')
+                              ->first();
+                              
+        $data['activeSubscription'] = $activeSub;
+        $data['activePlan'] = null;
+        
+        // If they have an active subscription, fetch the plan details (like name and price)
+        if ($activeSub) {
+            $data['activePlan'] = $planModel->find($activeSub->plan_id);
+        }
         
         return view('admin/profile', $data);
     }

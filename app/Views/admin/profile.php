@@ -70,6 +70,55 @@
                 </div>
             </div>
 
+            <!-- NEW SUBSCRIPTION WIDGET START -->
+            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">card_membership</span> Subscription Status
+                </h3>
+                
+                <?php if (isset($activeSubscription) && $activeSubscription && isset($activePlan)): ?>
+                    <div class="bg-primary-container text-on-primary-container p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <p class="text-sm font-semibold opacity-80 mb-1">Current Plan</p>
+                            <h4 class="text-2xl font-bold"><?= esc($activePlan->name ?? 'Premium Plan') ?></h4>
+                        </div>
+                        <div class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">verified</span> 
+                            <?= esc($activeSubscription->sub_status) ?>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined">play_circle</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-on-surface-variant">Start Date</p>
+                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->start_date)) ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-error">
+                                <span class="material-symbols-outlined">event_busy</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-on-surface-variant">Expiration Date</p>
+                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->end_date)) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="flex flex-col items-center justify-center py-6 text-center">
+                        <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">inventory_2</span>
+                        <p class="text-on-surface font-medium text-lg mb-1">No Active Plan</p>
+                        <p class="text-on-surface-variant text-sm mb-5">You do not have an active subscription package.</p>
+                        <a href="<?= base_url('admin/pricing') ?>" class="px-5 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">View Pricing Plans</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <!-- NEW SUBSCRIPTION WIDGET END -->
+
             <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">shield_lock</span> Security Settings
@@ -132,6 +181,7 @@
         </div>
     </div>
 
+    <!-- Modals (Edit Profile & Password) Remain Unchanged Below -->
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showEditModal = false" x-show="showEditModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
