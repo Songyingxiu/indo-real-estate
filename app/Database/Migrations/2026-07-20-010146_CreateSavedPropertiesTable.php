@@ -16,12 +16,10 @@ class CreateSavedPropertiesTable extends Migration
             'user_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned'   => true,
             ],
             'property_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
-                'unsigned'   => true,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -29,7 +27,7 @@ class CreateSavedPropertiesTable extends Migration
         ]);
         
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey(['user_id', 'property_id']); // Prevent duplicate saves
+        $this->forge->addUniqueKey(['user_id', 'property_id']);
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('property_id', 'properties', 'id', 'CASCADE', 'CASCADE');
         
