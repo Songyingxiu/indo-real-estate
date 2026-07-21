@@ -1,6 +1,6 @@
-<?= $this->include('admin/layout/header') ?>
-<?= $this->include('admin/layout/sidebar') ?>
+<?= $this->extend('admin/layout/master') ?>
 
+<?= $this->section('content') ?>
 <main class="md:ml-64 p-6 bg-background min-h-screen">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-on-background">Advertisement Management</h1>
@@ -60,3 +60,4 @@
         </table>
     </div>
 </main>
+<?= $this->endSection() ?>

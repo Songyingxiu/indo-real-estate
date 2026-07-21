@@ -1,6 +1,6 @@
-<?= $this->include('admin/layout/header') ?>
-<?= $this->include('admin/layout/sidebar') ?>
+<?= $this->extend('admin/layout/master') ?>
 
+<?= $this->section('content') ?>
 <main class="md:ml-64 p-6 bg-background min-h-screen">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-on-background"><?= isset($ad) ? 'Edit Advertisement' : 'Create Advertisement' ?></h1>
@@ -77,3 +77,4 @@
         </form>
     </div>
 </main>
+<?= $this->endSection() ?>
