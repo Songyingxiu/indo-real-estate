@@ -41,6 +41,25 @@
         </div>
     </section>
 
+    <!-- Advertisement Banner Section -->
+    <?php if (!empty($banners)): ?>
+        <div class="w-full max-w-7xl mx-auto px-4 mt-8 mb-2">
+            <div class="flex overflow-x-auto gap-4 snap-x pb-4 custom-scrollbar">
+                <?php foreach ($banners as $banner): ?>
+                    <div class="min-w-full md:min-w-[50%] lg:min-w-[33%] snap-center rounded-xl overflow-hidden shadow-md bg-surface border border-outline-variant">
+                        <?php if (!empty($banner->target_url)): ?>
+                            <a href="<?= esc($banner->target_url) ?>" target="_blank" rel="noopener noreferrer" class="block w-full h-full">
+                                <img src="<?= base_url(esc($banner->image_path)) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300">
+                            </a>
+                        <?php else: ?>
+                            <img src="<?= base_url(esc($banner->image_path)) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover">
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="flex justify-between items-end mb-8">
             <div>

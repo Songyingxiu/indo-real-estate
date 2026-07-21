@@ -35,7 +35,7 @@ class Advertisements extends BaseController
 
     public function save()
     {
-        $adsModel = new AdsModel();
+        $adsModel = new \App\Models\AdsModel();
         $id = $this->request->getPost('id');
 
         $validationRule = [
@@ -44,7 +44,6 @@ class Advertisements extends BaseController
             'status'     => 'required|in_list[Active,Inactive]',
         ];
 
-        // Only require image if it's a new record
         if (!$id) {
             $validationRule['image'] = 'uploaded[image]|is_image[image]|mime_in[image,image/jpg,image/jpeg,image/png,image/gif]';
         }
@@ -64,8 +63,13 @@ class Advertisements extends BaseController
 
         $image = $this->request->getFile('image');
         if ($image && $image->isValid() && !$image->hasMoved()) {
+            $uploadPath = FCPATH . 'uploads/ads';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
             $newName = $image->getRandomName();
-            $image->move(FCPATH . 'uploads/ads', $newName);
+            $image->move($uploadPath, $newName);
             $data['image_path'] = 'uploads/ads/' . $newName;
         }
 
@@ -79,7 +83,6 @@ class Advertisements extends BaseController
 
         return redirect()->to(base_url('admin/advertisements'))->with('success', $message);
     }
-
     public function delete($id)
     {
         $adsModel = new AdsModel();

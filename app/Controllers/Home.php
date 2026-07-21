@@ -8,6 +8,7 @@ use App\Models\StateModel;
 use App\Models\CmsModel;
 use App\Models\SavedPropertyModel;
 use App\Models\SavedSearchModel;
+use App\Models\AdsModel;
 
 class Home extends BaseController
 {
@@ -15,6 +16,22 @@ class Home extends BaseController
     {
         $propertyModel = new PropertyModel();
         $cmsModel = new CmsModel();
+        $adsModel = new AdsModel();
+        
+        $today = date('Y-m-d');
+        
+        // Fetch ads for the home banner that are Active and within the date range
+        $data['banners'] = $adsModel->where('placement', 'home_banner')
+            ->where('status', 'Active')
+            ->groupStart()
+                ->where('start_date <=', $today)
+                ->orWhere('start_date IS NULL')
+            ->groupEnd()
+            ->groupStart()
+                ->where('end_date >=', $today)
+                ->orWhere('end_date IS NULL')
+            ->groupEnd()
+            ->findAll();
         
         // 1. POPULAR LISTINGS
         $data['featuredProperties'] = $propertyModel
