@@ -111,11 +111,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('seo/save', 'Seo::saveSettings');
 
     // Adviertisments
-    $routes->get('advertisements', 'Admin\Advertisements::index');
-    $routes->get('advertisements/create', 'Admin\Advertisements::create');
-    $routes->post('advertisements/save', 'Admin\Advertisements::save');
-    $routes->get('advertisements/edit/(:num)', 'Admin\Advertisements::edit/$1');
-    $routes->get('advertisements/delete/(:num)', 'Admin\Advertisements::delete/$1');
+    $routes->get('advertisements', 'Advertisements::index');
+    $routes->get('advertisements/create', 'Advertisements::create');
+    $routes->post('advertisements/save', 'Advertisements::save');
+    $routes->get('advertisements/edit/(:num)', 'Advertisements::edit/$1');
+    $routes->get('advertisements/delete/(:num)', 'Advertisements::delete/$1');
 
     // Reports and Support
     $routes->get('reports/export', 'Reports::export');
