@@ -1,7 +1,9 @@
 <?= $this->extend('admin/layout/master') ?>
 
 <?= $this->section('content') ?>
-<div class="w-full px-6 py-8">
+<!-- Initialize Alpine.js state for the modal -->
+<div x-data="{ isModalOpen: false, formAction: '', templateName: '' }" class="w-full px-6 py-8">
+    
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="text-2xl font-bold text-on-background">Email Templates</h1>
@@ -16,6 +18,13 @@
         <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 shadow-sm flex items-center gap-2">
             <span class="material-symbols-outlined">check_circle</span>
             <?= esc(session()->getFlashdata('success')) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 shadow-sm flex items-center gap-2">
+            <span class="material-symbols-outlined">error</span>
+            <?= esc(session()->getFlashdata('error')) ?>
         </div>
     <?php endif; ?>
 
@@ -54,9 +63,10 @@
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                         
-                                        <a href="<?= base_url('admin/email-templates/test/' . $template->id) ?>" class="text-secondary hover:text-secondary-container p-1 rounded transition-colors" title="Send Test Email">
+                                        <!-- Test Email Modal Trigger via Alpine.js -->
+                                        <button type="button" @click="isModalOpen = true; formAction = '<?= base_url('admin/email-templates/test/' . $template->id) ?>'; templateName = '<?= esc($template->name, 'js') ?>'" class="text-secondary hover:text-secondary-container p-1 rounded transition-colors" title="Send Test Email">
                                             <span class="material-symbols-outlined text-[20px]">send</span>
-                                        </a>
+                                        </button>
 
                                         <a href="<?= base_url('admin/email-templates/edit/' . $template->id) ?>" class="text-primary hover:text-primary-container p-1 rounded transition-colors" title="Edit">
                                             <span class="material-symbols-outlined text-[20px]">edit</span>
@@ -79,5 +89,37 @@
             </table>
         </div>
     </div>
+
+    <!-- Send Test Email Modal -->
+    <div x-show="isModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
+        <div @click.outside="isModalOpen = false" class="bg-surface rounded-xl shadow-lg w-full max-w-md mx-4 overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h3 class="text-lg font-bold text-on-background">Send Test Email</h3>
+                <button @click="isModalOpen = false" class="text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form :action="formAction" method="POST" class="p-6">
+                <?= csrf_field() ?>
+                <p class="text-sm text-on-surface-variant mb-4">
+                    Send a preview of <strong class="text-on-surface" x-text="templateName"></strong>. Dynamic variables will be replaced with dummy data.
+                </p>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Recipient Email Address</label>
+                    <input type="email" name="test_email" required class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="Enter test email address...">
+                </div>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" @click="isModalOpen = false" class="px-4 py-2 text-sm font-medium border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium bg-primary text-on-primary rounded-lg hover:opacity-90 shadow-sm transition-opacity flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">send</span> Send Preview
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
 </div>
 <?= $this->endSection() ?>

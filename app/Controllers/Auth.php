@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\SubscriptionModel;
 
 class Auth extends BaseController
 {
@@ -22,7 +23,6 @@ class Auth extends BaseController
         ];
 
         if (! $this->validate($rules)) {
-            // --- NEW: Fetch exact validation errors ---
             $errors = $this->validator->getErrors();
             $errorMessage = 'Please fix the following errors:<br> • ' . implode('<br> • ', $errors);
             
@@ -78,10 +78,18 @@ class Auth extends BaseController
                 set_cookie('remember_token', $token, 30 * 24 * 60 * 60);
             }
 
+            $subModel = new SubscriptionModel();
+            $activeSub = $subModel->where('user_id', $user['id'])
+                                  ->where('status', 'Active')
+                                  ->orderBy('id', 'DESC')
+                                  ->first();
+            $planId = $activeSub ? $activeSub->plan_id : 1; 
+
             $sessionData = [
                 'id'         => $user['id'],
                 'user_id'    => $user['id'],
                 'role_id'    => $user['role_id'],
+                'plan_id'    => $planId,
                 'first_name' => $user['first_name'],
                 'last_name'  => $user['last_name'],
                 'email'      => $user['email'],
@@ -102,7 +110,6 @@ class Auth extends BaseController
 
     public function logout()
     {
-        // WIPE COOKIE LOGIC
         helper('cookie');
         $token = get_cookie('remember_token');
         if ($token) {

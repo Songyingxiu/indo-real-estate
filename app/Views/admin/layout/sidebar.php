@@ -55,6 +55,23 @@
             </a>
         <?php endif; ?>
 
+        <?php 
+            // Premium Tools Access Logic: Admins (4) OR Owners/Agents (2, 3) with Plan IDs 2 or 3
+            $planId = session()->get('plan_id') ?? 1;
+            $canAccessTemplates = ($role == 4) || (in_array($role, [2, 3]) && in_array($planId, [2, 3]));
+        ?>
+
+        <?php if($canAccessTemplates): ?>
+            <div class="px-6 py-3 mt-4">
+                <p class="text-[11px] font-bold text-outline uppercase tracking-wider">Premium Tools</p>
+            </div>
+            
+            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/email-templates') ?>">
+                <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'icon-fill' : '' ?>">mail</span>
+                <span class="font-label-md text-label-md">Email Templates</span>
+            </a>
+        <?php endif; ?>
+
         <?php if($role == 4): ?>
             
             <div class="px-6 py-3 mt-4">
@@ -89,12 +106,6 @@
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/advertisements') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/advertisements') ?>">
                 <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/advertisements') === 0) ? 'icon-fill' : '' ?>">campaign</span>
                 <span class="font-label-md text-label-md">Ad Management</span>
-            </a>
-
-            <!-- ADDED: Email Templates Link -->
-            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/email-templates') ?>">
-                <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'icon-fill' : '' ?>">mail</span>
-                <span class="font-label-md text-label-md">Email Templates</span>
             </a>
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/cms')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/cms') ?>">

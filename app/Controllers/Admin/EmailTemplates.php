@@ -5,8 +5,25 @@ use App\Models\EmailTemplateModel;
 
 class EmailTemplates extends BaseController
 {
+    /**
+     * Reusable check to ensure only Admins OR Premium Owners/Agents can access.
+     */
+    private function _hasAccess()
+    {
+        $role = session()->get('role_id');
+        $planId = session()->get('plan_id') ?? 1;
+        
+        // Return true if Admin (4) OR (Owner/Agent AND plan is Basic/Enterprise)
+        if ($role == 4) return true;
+        if (in_array($role, [2, 3]) && in_array($planId, [2, 3])) return true;
+        
+        return false;
+    }
+
     public function index()
     {
+        if (!$this->_hasAccess()) return redirect()->to(base_url('admin/dashboard'))->with('error', 'Please upgrade your plan to access Email Templates.');
+
         $templateModel = new EmailTemplateModel();
         $data['templates'] = $templateModel->orderBy('name', 'ASC')->findAll();
         $data['title'] = 'Email Templates - HuniKita Admin';
@@ -16,12 +33,16 @@ class EmailTemplates extends BaseController
 
     public function create()
     {
+        if (!$this->_hasAccess()) return redirect()->to(base_url('admin/dashboard'))->with('error', 'Please upgrade your plan to access Email Templates.');
+
         $data['title'] = 'Create Email Template - HuniKita Admin';
         return view('admin/email_templates/form', $data);
     }
 
     public function edit($id)
     {
+        if (!$this->_hasAccess()) return redirect()->to(base_url('admin/dashboard'))->with('error', 'Please upgrade your plan to access Email Templates.');
+
         $templateModel = new EmailTemplateModel();
         $data['template'] = $templateModel->find($id);
         
@@ -35,6 +56,8 @@ class EmailTemplates extends BaseController
 
     public function save()
     {
+        if (!$this->_hasAccess()) return redirect()->to(base_url('admin/dashboard'))->with('error', 'Unauthorized.');
+
         $templateModel = new EmailTemplateModel();
         $id = $this->request->getPost('id');
 
@@ -70,6 +93,8 @@ class EmailTemplates extends BaseController
 
     public function delete($id)
     {
+        if (!$this->_hasAccess()) return redirect()->to(base_url('admin/dashboard'))->with('error', 'Unauthorized.');
+
         $templateModel = new EmailTemplateModel();
         
         if ($templateModel->find($id)) {
@@ -82,6 +107,8 @@ class EmailTemplates extends BaseController
 
     public function sendTest($id)
     {
+        if (!$this->_hasAccess()) return redirect()->to(base_url('admin/dashboard'))->with('error', 'Unauthorized.');
+
         $templateModel = new EmailTemplateModel();
         $template = $templateModel->find($id);
         
@@ -89,8 +116,11 @@ class EmailTemplates extends BaseController
             return redirect()->to(base_url('admin/email-templates'))->with('error', 'Template not found.');
         }
 
-        // Get the logged-in admin's email to send the test to
-        $adminEmail = session()->get('email') ?? 'test@example.com'; 
+        // --- Fetch the specific email from the POST request (via Alpine modal) ---
+        $targetEmail = $this->request->getPost('test_email');
+        if (!$targetEmail || !filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->back()->with('error', 'Please provide a valid email address.');
+        }
 
         // Automatically generate dummy data based on the variables they saved
         $search = [];
@@ -102,7 +132,6 @@ class EmailTemplates extends BaseController
                 $var = trim($var);
                 if (!empty($var)) {
                     $search[] = $var;
-                    // Creates a dummy string like "Test_user_name" for {user_name}
                     $replace[] = 'Test_' . trim($var, '{}'); 
                 }
             }
@@ -114,13 +143,13 @@ class EmailTemplates extends BaseController
 
         // Send the email
         $email = \Config\Services::email();
-        $email->setTo($adminEmail);
+        $email->setTo($targetEmail);
         $email->setSubject('[TEST PREVIEW] ' . $subject);
         $email->setMessage($body);
         $email->setMailType('html'); 
 
         if ($email->send()) {
-            return redirect()->to(base_url('admin/email-templates'))->with('success', 'Test email successfully sent to ' . $adminEmail);
+            return redirect()->to(base_url('admin/email-templates'))->with('success', 'Test email successfully sent to ' . esc($targetEmail));
         } else {
             // Log the error if SMTP fails
             log_message('error', $email->printDebugger(['headers']));

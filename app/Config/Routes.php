@@ -124,7 +124,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('email-templates/save', 'EmailTemplates::save');
     $routes->get('email-templates/edit/(:num)', 'EmailTemplates::edit/$1');
     $routes->get('email-templates/delete/(:num)', 'EmailTemplates::delete/$1');
-    $routes->get('email-templates/test/(:num)', 'EmailTemplates::sendTest/$1');
+    $routes->post('email-templates/test/(:num)', 'EmailTemplates::sendTest/$1');
 
     // Reports and Support
     $routes->get('reports/export', 'Reports::export');
