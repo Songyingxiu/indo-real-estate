@@ -79,4 +79,52 @@ class EmailTemplates extends BaseController
 
         return redirect()->to(base_url('admin/email-templates'))->with('error', 'Template not found.');
     }
+
+    public function sendTest($id)
+    {
+        $templateModel = new EmailTemplateModel();
+        $template = $templateModel->find($id);
+        
+        if (!$template) {
+            return redirect()->to(base_url('admin/email-templates'))->with('error', 'Template not found.');
+        }
+
+        // Get the logged-in admin's email to send the test to
+        $adminEmail = session()->get('email') ?? 'test@example.com'; 
+
+        // Automatically generate dummy data based on the variables they saved
+        $search = [];
+        $replace = [];
+        
+        if (!empty($template->variables)) {
+            $variablesList = explode(',', $template->variables);
+            foreach ($variablesList as $var) {
+                $var = trim($var);
+                if (!empty($var)) {
+                    $search[] = $var;
+                    // Creates a dummy string like "Test_user_name" for {user_name}
+                    $replace[] = 'Test_' . trim($var, '{}'); 
+                }
+            }
+        }
+
+        // Replace placeholders
+        $subject = str_replace($search, $replace, $template->subject);
+        $body    = str_replace($search, $replace, $template->body);
+
+        // Send the email
+        $email = \Config\Services::email();
+        $email->setTo($adminEmail);
+        $email->setSubject('[TEST PREVIEW] ' . $subject);
+        $email->setMessage($body);
+        $email->setMailType('html'); 
+
+        if ($email->send()) {
+            return redirect()->to(base_url('admin/email-templates'))->with('success', 'Test email successfully sent to ' . $adminEmail);
+        } else {
+            // Log the error if SMTP fails
+            log_message('error', $email->printDebugger(['headers']));
+            return redirect()->to(base_url('admin/email-templates'))->with('error', 'Failed to send test email. Check your SMTP settings.');
+        }
+    }
 }

@@ -53,6 +53,11 @@
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        
+                                        <a href="<?= base_url('admin/email-templates/test/' . $template->id) ?>" class="text-secondary hover:text-secondary-container p-1 rounded transition-colors" title="Send Test Email">
+                                            <span class="material-symbols-outlined text-[20px]">send</span>
+                                        </a>
+
                                         <a href="<?= base_url('admin/email-templates/edit/' . $template->id) ?>" class="text-primary hover:text-primary-container p-1 rounded transition-colors" title="Edit">
                                             <span class="material-symbols-outlined text-[20px]">edit</span>
                                         </a>
