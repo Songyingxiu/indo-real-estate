@@ -111,12 +111,19 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('seo', 'Seo::index');
     $routes->post('seo/save', 'Seo::saveSettings');
 
-    // Adviertisments
+    // Advertisements
     $routes->get('advertisements', 'Advertisements::index');
     $routes->get('advertisements/create', 'Advertisements::create');
     $routes->post('advertisements/save', 'Advertisements::save');
     $routes->get('advertisements/edit/(:num)', 'Advertisements::edit/$1');
     $routes->get('advertisements/delete/(:num)', 'Advertisements::delete/$1');
+
+    // Email Templates
+    $routes->get('email-templates', 'EmailTemplates::index');
+    $routes->get('email-templates/create', 'EmailTemplates::create');
+    $routes->post('email-templates/save', 'EmailTemplates::save');
+    $routes->get('email-templates/edit/(:num)', 'EmailTemplates::edit/$1');
+    $routes->get('email-templates/delete/(:num)', 'EmailTemplates::delete/$1');
 
     // Reports and Support
     $routes->get('reports/export', 'Reports::export');

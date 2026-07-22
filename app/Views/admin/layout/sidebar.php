@@ -86,10 +86,15 @@
                 <span class="font-label-md text-label-md">Master Data</span>
             </a>
 
-            <!-- ADDED: Advertisement Management Link -->
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/advertisements') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/advertisements') ?>">
                 <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/advertisements') === 0) ? 'icon-fill' : '' ?>">campaign</span>
                 <span class="font-label-md text-label-md">Ad Management</span>
+            </a>
+
+            <!-- ADDED: Email Templates Link -->
+            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/email-templates') ?>">
+                <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'icon-fill' : '' ?>">mail</span>
+                <span class="font-label-md text-label-md">Email Templates</span>
             </a>
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/cms')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/cms') ?>">
