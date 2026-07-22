@@ -14,7 +14,8 @@ $routes->post('search/save', 'Home::saveSearch');
 $routes->get('property/(:num)', 'Home::detail/$1');
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 $routes->post('contact/submit-lead', 'Contact::submitLead');
-$routes->get('page/(:segment)', 'Cms::page/$1');      
+$routes->get('page/(:segment)', 'Cms::page/$1');
+$routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');

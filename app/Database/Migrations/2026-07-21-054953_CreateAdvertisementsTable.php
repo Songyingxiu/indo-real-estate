@@ -21,11 +21,6 @@ class CreateAdvertisementsTable extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
             ],
-            'target_url' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => true,
-            ],
             'placement' => [
                 'type'       => 'ENUM',
                 'constraint' => ['home_banner', 'sidebar', 'property_list'],

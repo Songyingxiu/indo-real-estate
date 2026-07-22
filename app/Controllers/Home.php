@@ -69,6 +69,22 @@ class Home extends BaseController
         return view('front/home', $data);
     }
 
+    public function promo($id)
+    {
+        $adsModel = new AdsModel();
+        
+        $promo = $adsModel->find($id);
+
+        if (!$promo || $promo->status !== 'Active') {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Advertisement not found or inactive.");
+        }
+
+        $data['promo'] = $promo;
+        $data['title'] = $promo->title . ' - HuniKita';
+        
+        return view('front/promo_detail', $data);
+    }
+
     public function search()
     {
         $propertyModel = new PropertyModel();

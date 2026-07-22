@@ -9,7 +9,7 @@ class AdsModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'object';
     
-    protected $allowedFields    = ['title', 'image_path', 'target_url', 'placement', 'status', 'start_date', 'end_date'];
+    protected $allowedFields    = ['title', 'image_path', 'description', 'placement', 'status', 'start_date', 'end_date'];
     
     protected $useTimestamps    = true;
     protected $createdField     = 'created_at';

@@ -39,9 +39,10 @@ class Advertisements extends BaseController
         $id = $this->request->getPost('id');
 
         $validationRule = [
-            'title'      => 'required|min_length[3]',
-            'placement'  => 'required|in_list[home_banner,sidebar,property_list]',
-            'status'     => 'required|in_list[Active,Inactive]',
+            'title'       => 'required|min_length[3]',
+            'description' => 'required|min_length[10]', // Added description validation
+            'placement'   => 'required|in_list[home_banner,sidebar,property_list]',
+            'status'      => 'required|in_list[Active,Inactive]',
         ];
 
         if (!$id) {
@@ -53,12 +54,12 @@ class Advertisements extends BaseController
         }
 
         $data = [
-            'title'      => $this->request->getPost('title'),
-            'target_url' => $this->request->getPost('target_url'),
-            'placement'  => $this->request->getPost('placement'),
-            'status'     => $this->request->getPost('status'),
-            'start_date' => $this->request->getPost('start_date') ?: null,
-            'end_date'   => $this->request->getPost('end_date') ?: null,
+            'title'       => $this->request->getPost('title'),
+            'description' => $this->request->getPost('description'), // Replaced target_url
+            'placement'   => $this->request->getPost('placement'),
+            'status'      => $this->request->getPost('status'),
+            'start_date'  => $this->request->getPost('start_date') ?: null,
+            'end_date'    => $this->request->getPost('end_date') ?: null,
         ];
 
         $image = $this->request->getFile('image');
@@ -83,6 +84,7 @@ class Advertisements extends BaseController
 
         return redirect()->to(base_url('admin/advertisements'))->with('success', $message);
     }
+
     public function delete($id)
     {
         $adsModel = new AdsModel();

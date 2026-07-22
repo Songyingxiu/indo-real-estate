@@ -26,12 +26,12 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title</label>
-                    <input type="text" name="title" value="<?= old('title', isset($ad) ? $ad->title : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Summer Sale Banner" required>
+                    <input type="text" name="title" value="<?= old('title', isset($ad) ? $ad->title : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Summer Sale" required>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Target URL (Link)</label>
-                    <input type="url" name="target_url" value="<?= old('target_url', isset($ad) ? $ad->target_url : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="https://example.com/promo">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Description</label>
+                    <textarea name="description" rows="4" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter the full advertisement details here..." required><?= old('description', isset($ad) ? $ad->description : '') ?></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
