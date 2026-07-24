@@ -159,7 +159,6 @@ class Subscription extends BaseController
             'plan'         => $plan,
         ];
 
-        // Renders from app/Views/subscription/invoice.php
-        return view('subscription/invoice', $data); 
+        return view('admin/subscription/invoice', $data); 
     }
 }
