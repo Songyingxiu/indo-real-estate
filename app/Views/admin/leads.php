@@ -16,7 +16,8 @@ if (!empty($leads)) {
 }
 ?>
 
-<div class="pb-12 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8" x-data="{ 
+<!-- FIX: Replaced max-w-[1280px] and mx-auto with w-full min-w-0 to prevent layout blowout -->
+<div class="pb-12 w-full min-w-0 px-4 sm:px-6" x-data="{ 
     showStatusModal: false, editId: '', currentStatus: '', buyerName: '', selectedStatus: '',
     showModal: false, modalName: '', modalEmail: '', modalPhone: '', modalMessage: '', modalProp: '', modalDate: '',
     
@@ -69,8 +70,10 @@ if (!empty($leads)) {
         </div>
     <?php endif; ?>
 
-    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm overflow-hidden">
-        <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar min-h-[500px]">
+    <!-- FIX: Added w-full min-w-0 overflow-hidden to strictly contain the flex track -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 sm:p-6 shadow-sm w-full min-w-0 overflow-hidden">
+        <!-- FIX: Added w-full and ensured horizontal scrolling stays strictly inside this div -->
+        <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar min-h-[500px] w-full">
             
             <!-- NEW COLUMN -->
             <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
