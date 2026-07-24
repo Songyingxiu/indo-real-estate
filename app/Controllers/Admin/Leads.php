@@ -7,7 +7,6 @@ class Leads extends BaseController
     public function index() 
     {
         $roleId = session()->get('role_id');
-        
         $userId = session()->get('user_id'); 
         
         // Allow Admins(4), Agents(3), and Owners(2)
@@ -60,7 +59,6 @@ class Leads extends BaseController
     public function updateStatus($id)
     {
         $roleId = session()->get('role_id');
-        
         $userId = session()->get('user_id');
 
         // Only Admins (4) and Agents (3) should update lead status. Owners just view.
@@ -74,8 +72,26 @@ class Leads extends BaseController
             return redirect()->to(base_url('admin/leads'))->with('error', 'Unauthorized access. You do not own this lead.');
         }
 
+        // --- STATE MACHINE LOGIC ---
+        $allowedTransitions = [
+            'New'         => ['New', 'Contacted', 'Lost'],
+            'Contacted'   => ['Contacted', 'Follow Up', 'Qualified', 'Lost'],
+            'Follow Up'   => ['Follow Up', 'Qualified', 'Lost'],
+            'Qualified'   => ['Qualified', 'Negotiation', 'Lost'],
+            'Negotiation' => ['Negotiation', 'Won', 'Lost'],
+            'Won'         => ['Won'],   // Terminal state
+            'Lost'        => ['Lost']   // Terminal state
+        ];
+
+        $currentStatus = $lead->lead_status;
+        $newStatus = $this->request->getPost('lead_status');
+
+        if (!in_array($newStatus, $allowedTransitions[$currentStatus] ?? [])) {
+            return redirect()->to(base_url('admin/leads'))->with('error', "Invalid workflow transition from {$currentStatus} to {$newStatus}.");
+        }
+
         $model->update($id, [
-            'lead_status' => $this->request->getPost('lead_status')
+            'lead_status' => $newStatus
         ]);
         
         return redirect()->to(base_url('admin/leads'))->with('success', 'Lead status updated successfully.');

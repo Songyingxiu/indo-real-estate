@@ -2,25 +2,25 @@
 <?= $this->section('content') ?>
 
 <?php
-// Group leads into Kanban columns
-$colNew = []; $colContacted = []; $colQualified = []; $colNegotiation = []; $colClosed = [];
+// Group leads into exact pipeline Kanban columns
+$colNew = []; $colContacted = []; $colFollowUp = []; $colQualified = []; $colNegotiation = []; $colClosed = [];
 if (!empty($leads)) {
     foreach ($leads as $lead) {
         if ($lead->lead_status == 'New') $colNew[] = $lead;
         elseif ($lead->lead_status == 'Contacted') $colContacted[] = $lead;
-        elseif (in_array($lead->lead_status, ['Follow Up', 'Qualified'])) $colQualified[] = $lead;
+        elseif ($lead->lead_status == 'Follow Up') $colFollowUp[] = $lead;
+        elseif ($lead->lead_status == 'Qualified') $colQualified[] = $lead;
         elseif ($lead->lead_status == 'Negotiation') $colNegotiation[] = $lead;
-        else $colClosed[] = $lead;
+        else $colClosed[] = $lead; // Groups Won and Lost together visually
     }
 }
 ?>
 
 <div class="pb-12 max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8" x-data="{ 
-    showStatusModal: false, editId: '', currentStatus: '', buyerName: '',
-    showDeleteModal: false, deleteUrl: '',
+    showStatusModal: false, editId: '', currentStatus: '', buyerName: '', selectedStatus: '',
     showModal: false, modalName: '', modalEmail: '', modalPhone: '', modalMessage: '', modalProp: '', modalDate: '',
     
-    // Live WhatsApp Link Generator (Formats 08xxx to 628xxx dynamically)
+    // Live WhatsApp Link Generator
     get waLink() {
         let phone = this.modalPhone.replace(/\D/g, '');
         if (phone.startsWith('0')) {
@@ -33,6 +33,20 @@ if (!empty($leads)) {
     // Live Email Mailto Link Generator
     get emailLink() {
         return 'mailto:' + this.modalEmail + '?subject=' + encodeURIComponent('Tanggapan Inkuiri Properti HuniKita: ' + this.modalProp);
+    },
+
+    // State Machine Form Logic
+    getAllowedStatuses() {
+        const transitions = {
+            'New': ['New', 'Contacted', 'Lost'],
+            'Contacted': ['Contacted', 'Follow Up', 'Qualified', 'Lost'],
+            'Follow Up': ['Follow Up', 'Qualified', 'Lost'],
+            'Qualified': ['Qualified', 'Negotiation', 'Lost'],
+            'Negotiation': ['Negotiation', 'Won', 'Lost'],
+            'Won': ['Won'],
+            'Lost': ['Lost']
+        };
+        return transitions[this.currentStatus] || [this.currentStatus];
     }
 }">
 
@@ -77,7 +91,7 @@ if (!empty($leads)) {
                                 <div class="flex gap-1">
                                     <button type="button" @click="showModal = true; modalName = '<?= esc(addslashes($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last))) ?>'; modalEmail = '<?= esc(addslashes($lead->email ?? $lead->buyer_email)) ?>'; modalPhone = '<?= esc(addslashes($lead->phone ?? '')) ?>'; modalMessage = '<?= esc(addslashes($lead->message ?? 'No message provided.')) ?>'; modalProp = '<?= esc(addslashes($lead->property_title ?? 'Unknown Property')) ?>'; modalDate = '<?= date('M d, Y h:i A', strtotime($lead->created_date)) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">mail</button>
                                     <?php if(in_array(session()->get('role_id'), [3, 4])): ?>
-                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
+                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; selectedStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -106,7 +120,36 @@ if (!empty($leads)) {
                                 <div class="flex gap-1">
                                     <button type="button" @click="showModal = true; modalName = '<?= esc(addslashes($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last))) ?>'; modalEmail = '<?= esc(addslashes($lead->email ?? $lead->buyer_email)) ?>'; modalPhone = '<?= esc(addslashes($lead->phone ?? '')) ?>'; modalMessage = '<?= esc(addslashes($lead->message ?? 'No message provided.')) ?>'; modalProp = '<?= esc(addslashes($lead->property_title ?? 'Unknown Property')) ?>'; modalDate = '<?= date('M d, Y h:i A', strtotime($lead->created_date)) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">mail</button>
                                     <?php if(in_array(session()->get('role_id'), [3, 4])): ?>
-                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
+                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; selectedStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div class="flex items-center justify-center h-full border-2 border-dashed border-outline-variant/50 rounded bg-surface/50">
+                            <span class="font-caption text-[12px] text-outline font-semibold">Drop leads here</span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- FOLLOW UP COLUMN -->
+            <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Follow Up</h3>
+                    <span class="bg-surface-container-highest text-on-surface-variant text-xs px-2 py-1 rounded-full font-bold"><?= count($colFollowUp) ?></span>
+                </div>
+                <div class="space-y-3 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                    <?php if(!empty($colFollowUp)): foreach($colFollowUp as $lead): ?>
+                        <div class="bg-surface border border-outline-variant rounded p-3 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="font-label-md text-[14px] font-bold text-on-background mb-1"><?= esc($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last)) ?: 'Guest' ?></div>
+                            <div class="font-caption text-[12px] text-on-surface-variant mb-2 line-clamp-1">Inquiry: <?= esc($lead->property_title) ?></div>
+                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-surface-variant">
+                                <span class="text-[10px] text-outline font-semibold bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded"><?= esc($lead->lead_status) ?></span>
+                                <div class="flex gap-1">
+                                    <button type="button" @click="showModal = true; modalName = '<?= esc(addslashes($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last))) ?>'; modalEmail = '<?= esc(addslashes($lead->email ?? $lead->buyer_email)) ?>'; modalPhone = '<?= esc(addslashes($lead->phone ?? '')) ?>'; modalMessage = '<?= esc(addslashes($lead->message ?? 'No message provided.')) ?>'; modalProp = '<?= esc(addslashes($lead->property_title ?? 'Unknown Property')) ?>'; modalDate = '<?= date('M d, Y h:i A', strtotime($lead->created_date)) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">mail</button>
+                                    <?php if(in_array(session()->get('role_id'), [3, 4])): ?>
+                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; selectedStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -122,7 +165,7 @@ if (!empty($leads)) {
             <!-- QUALIFIED COLUMN -->
             <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px]">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Qualified / Follow Up</h3>
+                    <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Qualified</h3>
                     <span class="bg-surface-container-highest text-on-surface-variant text-xs px-2 py-1 rounded-full font-bold"><?= count($colQualified) ?></span>
                 </div>
                 <div class="space-y-3 overflow-y-auto flex-1 pr-1 custom-scrollbar">
@@ -135,7 +178,7 @@ if (!empty($leads)) {
                                 <div class="flex gap-1">
                                     <button type="button" @click="showModal = true; modalName = '<?= esc(addslashes($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last))) ?>'; modalEmail = '<?= esc(addslashes($lead->email ?? $lead->buyer_email)) ?>'; modalPhone = '<?= esc(addslashes($lead->phone ?? '')) ?>'; modalMessage = '<?= esc(addslashes($lead->message ?? 'No message provided.')) ?>'; modalProp = '<?= esc(addslashes($lead->property_title ?? 'Unknown Property')) ?>'; modalDate = '<?= date('M d, Y h:i A', strtotime($lead->created_date)) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">mail</button>
                                     <?php if(in_array(session()->get('role_id'), [3, 4])): ?>
-                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
+                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; selectedStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -164,7 +207,7 @@ if (!empty($leads)) {
                                 <div class="flex gap-1">
                                     <button type="button" @click="showModal = true; modalName = '<?= esc(addslashes($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last))) ?>'; modalEmail = '<?= esc(addslashes($lead->email ?? $lead->buyer_email)) ?>'; modalPhone = '<?= esc(addslashes($lead->phone ?? '')) ?>'; modalMessage = '<?= esc(addslashes($lead->message ?? 'No message provided.')) ?>'; modalProp = '<?= esc(addslashes($lead->property_title ?? 'Unknown Property')) ?>'; modalDate = '<?= date('M d, Y h:i A', strtotime($lead->created_date)) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">mail</button>
                                     <?php if(in_array(session()->get('role_id'), [3, 4])): ?>
-                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
+                                        <button @click="showStatusModal = true; editId = <?= $lead->id ?>; currentStatus = '<?= esc($lead->lead_status) ?>'; selectedStatus = '<?= esc($lead->lead_status) ?>'; buyerName = '<?= esc(addslashes(($lead->buyer_first ?? '') . ' ' . ($lead->buyer_last ?? 'Guest'))) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">rule</button>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -172,6 +215,37 @@ if (!empty($leads)) {
                     <?php endforeach; else: ?>
                         <div class="flex items-center justify-center h-full border-2 border-dashed border-outline-variant/50 rounded bg-surface/50">
                             <span class="font-caption text-[12px] text-outline font-semibold">Drop leads here</span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- CLOSED (WON/LOST) COLUMN -->
+            <div class="flex-shrink-0 w-72 bg-surface-container-low rounded-lg p-4 flex flex-col h-[600px] opacity-75">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-label-md text-[14px] font-bold text-on-surface-variant">Closed Deals</h3>
+                    <span class="bg-surface-container-highest text-on-surface-variant text-xs px-2 py-1 rounded-full font-bold"><?= count($colClosed) ?></span>
+                </div>
+                <div class="space-y-3 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                    <?php if(!empty($colClosed)): foreach($colClosed as $lead): ?>
+                        <div class="bg-surface border border-outline-variant rounded p-3 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="font-label-md text-[14px] font-bold text-on-background mb-1"><?= esc($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last)) ?: 'Guest' ?></div>
+                            <div class="font-caption text-[12px] text-on-surface-variant mb-2 line-clamp-1">Inquiry: <?= esc($lead->property_title) ?></div>
+                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-surface-variant">
+                                <?php if($lead->lead_status == 'Won'): ?>
+                                    <span class="text-[10px] text-green-800 font-semibold bg-green-100 border border-green-200 px-2 py-0.5 rounded">Won</span>
+                                <?php else: ?>
+                                    <span class="text-[10px] text-red-800 font-semibold bg-red-100 border border-red-200 px-2 py-0.5 rounded">Lost</span>
+                                <?php endif; ?>
+                                
+                                <div class="flex gap-1">
+                                    <button type="button" @click="showModal = true; modalName = '<?= esc(addslashes($lead->name ?? ($lead->buyer_first . ' ' . $lead->buyer_last))) ?>'; modalEmail = '<?= esc(addslashes($lead->email ?? $lead->buyer_email)) ?>'; modalPhone = '<?= esc(addslashes($lead->phone ?? '')) ?>'; modalMessage = '<?= esc(addslashes($lead->message ?? 'No message provided.')) ?>'; modalProp = '<?= esc(addslashes($lead->property_title ?? 'Unknown Property')) ?>'; modalDate = '<?= date('M d, Y h:i A', strtotime($lead->created_date)) ?>';" class="material-symbols-outlined text-[18px] text-outline hover:text-primary transition-colors">mail</button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div class="flex items-center justify-center h-full border-2 border-dashed border-outline-variant/50 rounded bg-surface/50">
+                            <span class="font-caption text-[12px] text-outline font-semibold">No closed deals</span>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -217,18 +291,15 @@ if (!empty($leads)) {
                 </div>
             </div>
             
-            <!-- FOOTER WITH COMMUNICATE ACTION BUTTONS -->
             <div class="px-6 py-4 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-3 bg-surface-container-lowest">
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <!-- Dynamic WhatsApp Link -->
                     <a :href="waLink" target="_blank" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded font-semibold hover:opacity-90 transition-all text-sm shadow-sm">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-11.09c.307-.074.524-.303.659-.541.21-.37.408-.752.597-1.137.078-.16.035-.306-.02-.45-.094-.246-.192-.489-.286-.735-.146-.382-.289-.766-.435-1.149-.115-.303-.357-.492-.684-.504-.26-.01-.522-.005-.783-.005-.319.001-.572.138-.724.417-.26.478-.492.97-.704 1.472-.375.89-.582 1.83-.586 2.787-.009 2.192.983 4.157 2.457 5.688.196.203.418.388.643.562 1.905 1.481 4.192 2.193 6.587 2.106 1.009-.036 1.97-.272 2.883-.703.541-.256.974-.636 1.229-1.173.308-.648.56-1.325.748-2.022.069-.257-.038-.475-.25-.611-.456-.293-.923-.571-1.396-.84-.265-.15-.515-.126-.74.075-.245.22-.475.457-.71.688-.232.228-.487.279-.781.145-.522-.239-1.007-.542-1.458-.897-.56-.441-1.048-.948-1.47-1.523-.192-.26-.178-.508.043-.746.223-.241.457-.472.684-.71.246-.26.246-.531.026-.807z"/>
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.455L0 24zm6.59-11.09c.307-.074.524-.303.659-.541.21-.37.408-.752.597-1.137.078-.16.035-.306-.02-.45-.094-.246-.192-.489-.286-.735-.146-.382-.289-.766-.435-1.149-.115-.303-.357-.492-.684-.504-.26-.01-.522-.005-.783-.005-.319.001-.572.138-.724.417-.26.478-.492.97-.704 1.472-.375.89-.582 1.83-.586 2.787-.009 2.192.983 4.157 2.457 5.688.196.203.418.388.643.562 1.905 1.481 4.192 2.193 6.587 2.106 1.009-.036 1.97-.272 2.883-.703.541-.256.974-.636 1.229-1.173.308-.648.56-1.325.748-2.022.069-.257-.038-.475-.25-.611-.456-.293-.923-.571-1.396-.84-.265-.15-.515-.126-.74.075-.245.22-.475-.71.688-.232.228-.487.279-.781.145-.522-.239-1.007-.542-1.458-.897-.56-.441-1.048-.948-1.47-1.523-.192-.26-.178-.508.043-.746.223-.241.457-.472.684-.71.246-.26.246-.531.026-.807z"/>
                         </svg>
                         WhatsApp
                     </a>
                     
-                    <!-- Dynamic Mailto Link -->
                     <a :href="emailLink" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface rounded font-semibold border border-outline-variant hover:bg-surface-container-highest transition-all text-sm shadow-sm">
                         <span class="material-symbols-outlined text-[18px]">mail</span>
                         Email
@@ -239,7 +310,7 @@ if (!empty($leads)) {
         </div>
     </div>
 
-    <!-- UPDATE STATUS MODAL -->
+    <!-- UPDATE STATUS MODAL (STATE MACHINE ENFORCED) -->
     <div x-show="showStatusModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showStatusModal = false" x-show="showStatusModal" class="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -249,16 +320,15 @@ if (!empty($leads)) {
             <form :action="'<?= base_url('admin/leads/update-status/') ?>' + editId" method="POST">
                 <div class="p-6">
                     <p class="text-sm text-on-surface-variant mb-4">Updating inquiry from <span class="font-bold text-on-surface" x-text="buyerName"></span>.</p>
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Current Status</label>
-                    <select name="lead_status" x-model="currentStatus" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none cursor-pointer">
-                        <option value="New">New</option>
-                        <option value="Contacted">Contacted</option>
-                        <option value="Follow Up">Follow Up</option>
-                        <option value="Qualified">Qualified</option>
-                        <option value="Negotiation">Negotiation</option>
-                        <option value="Won">Won</option>
-                        <option value="Lost">Lost</option>
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Advance Pipeline To:</label>
+                    
+                    <!-- Dynamically loops only through the ALLOWED statuses -->
+                    <select name="lead_status" x-model="selectedStatus" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none cursor-pointer">
+                        <template x-for="status in getAllowedStatuses()" :key="status">
+                            <option :value="status" x-text="status"></option>
+                        </template>
                     </select>
+
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
                     <button type="button" @click="showStatusModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
