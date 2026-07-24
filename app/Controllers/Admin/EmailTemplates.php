@@ -148,12 +148,18 @@ class EmailTemplates extends BaseController
         $email->setMessage($body);
         $email->setMailType('html'); 
 
-        if ($email->send()) {
-            return redirect()->to(base_url('admin/email-templates'))->with('success', 'Test email successfully sent to ' . esc($targetEmail));
-        } else {
-            // Log the error if SMTP fails
-            log_message('error', $email->printDebugger(['headers']));
-            return redirect()->to(base_url('admin/email-templates'))->with('error', 'Failed to send test email. Check your SMTP settings.');
+        try {
+            if ($email->send()) {
+                return redirect()->to(base_url('admin/email-templates'))->with('success', 'Test email successfully sent to ' . esc($targetEmail));
+            } else {
+                // Log the error if SMTP fails gracefully
+                log_message('error', $email->printDebugger(['headers']));
+                return redirect()->to(base_url('admin/email-templates'))->with('error', 'Failed to send test email. Check your SMTP settings.');
+            }
+        } catch (\Exception $e) {
+            // Catch fatal SMTP exceptions to prevent application crashes
+            log_message('error', 'Email Exception: ' . $e->getMessage());
+            return redirect()->to(base_url('admin/email-templates'))->with('error', 'An error occurred while sending the email. Please check system logs.');
         }
     }
 }
