@@ -73,7 +73,6 @@ class Subscription extends BaseController
 
     public function uploadProof()
     {
-        // Replaced 'is_image' with 'ext_in' to avoid dependency on finfo extension
         $rules = [
             'phone_number'  => 'required|min_length[8]',
             'payment_proof' => 'uploaded[payment_proof]|ext_in[payment_proof,png,jpg,jpeg]|max_size[payment_proof,5120]'
@@ -86,7 +85,7 @@ class Subscription extends BaseController
 
         $proofFile = $this->request->getFile('payment_proof');
         
-        // 1. Initialize Cloudinary using env() for CI4 compatibility
+        // 1. Initialize Cloudinary using env()
         $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
         
         if (empty($cloudinaryUrl)) {
@@ -108,7 +107,7 @@ class Subscription extends BaseController
             return redirect()->back()->with('error', 'Cloudinary Error: ' . $e->getMessage());
         }
 
-        // 4. Save the Cloudinary URL to TiDB
+        // 4. Save the Cloudinary URL to Database
         $paymentModel = new OfflinePaymentModel();
         $inserted = $paymentModel->insert([
             'subscription_id' => $this->request->getPost('subscription_id'),
@@ -123,9 +122,44 @@ class Subscription extends BaseController
             return redirect()->back()->with('error', 'Database error: Failed to save payment record.');
         }
 
+        $paymentId = $paymentModel->getInsertID();
+
         // Clear the session state to prevent checkout loops
         session()->remove('checkout_plan_id');
         
-        return redirect()->to(base_url('admin/pricing'))->with('success', 'Payment proof uploaded! Our team will verify it shortly and activate your package.');
+        // Redirect directly to the newly generated invoice
+        return redirect()->to(base_url("admin/subscription/invoice/{$paymentId}"))->with('success', 'Payment proof uploaded! Your invoice has been generated and is pending verification.');
+    }
+
+    public function invoice($paymentId)
+    {
+        $paymentModel = new OfflinePaymentModel();
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+
+        $payment = $paymentModel->find($paymentId);
+        
+        if (!$payment) {
+            return redirect()->to(base_url('admin/pricing'))->with('error', 'Invoice not found.');
+        }
+
+        $subscription = $subModel->find($payment->subscription_id);
+        
+        // Security check: ensure the user viewing the invoice owns it (unless they are an admin)
+        if (session()->get('role_id') != 4 && $subscription->user_id != session()->get('user_id')) {
+            return redirect()->to(base_url('admin/dashboard'))->with('error', 'Unauthorized access to invoice.');
+        }
+
+        $plan = $planModel->find($subscription->plan_id);
+
+        $data = [
+            'title'        => 'Invoice ' . $payment->invoice_number,
+            'payment'      => $payment,
+            'subscription' => $subscription,
+            'plan'         => $plan,
+        ];
+
+        // Renders from app/Views/subscription/invoice.php
+        return view('subscription/invoice', $data); 
     }
 }

@@ -68,6 +68,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('pricing', 'Subscription::pricing');
     $routes->match(['get', 'post'], 'subscription/checkout', 'Subscription::checkout');
     $routes->post('subscription/upload-proof', 'Subscription::uploadProof');
+    $routes->get('subscription/invoice/(:num)', 'Subscription::invoice/$1');
 
     // Master Data & Configuration
     $routes->get('master-data', 'MasterData::index');
