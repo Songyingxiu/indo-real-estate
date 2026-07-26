@@ -50,10 +50,10 @@ class Subscriptions extends BaseController
         
         $subModel = new SubscriptionModel();
         
-        // Terminate the subscription immediately
+        // Terminate the subscription immediately using accepted ENUM values
         $subModel->update($id, [
             'status'     => 'Inactive',
-            'sub_status' => 'Revoked',
+            'sub_status' => 'Expired',
             'end_date'   => date('Y-m-d H:i:s') 
         ]);
         
