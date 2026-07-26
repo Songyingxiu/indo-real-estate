@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// HTML5 Geolocation for Radius Search
+// Geolocation for Radius Search
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
