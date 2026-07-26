@@ -20,9 +20,21 @@ class Subscription extends BaseController
 
     public function checkout()
     {
-        // Fallback to session to prevent redirect loops if validation fails on the next step
         $planId = $this->request->getPost('plan_id') ?? session()->get('checkout_plan_id');
         if (!$planId) return redirect()->to(base_url('admin/pricing'));
+
+        // --- GATEKEEPER: Prevent Duplicate Subscriptions ---
+        $subModel = new SubscriptionModel();
+        $existingSub = $subModel->where('user_id', session()->get('id'))
+                                ->whereIn('sub_status', ['Active', 'Pending'])
+                                ->first();
+        
+        if ($existingSub) {
+            session()->remove('checkout_plan_id');
+            $statusText = (isset($existingSub->sub_status) ? $existingSub->sub_status : $existingSub['sub_status']) == 'Pending' ? 'a pending payment awaiting verification' : 'an active subscription';
+            return redirect()->to(base_url('admin/dashboard'))->with('error', "You already have $statusText. You can only subscribe to one plan per year.");
+        }
+        // ---------------------------------------------------
 
         session()->set('checkout_plan_id', $planId);
 
@@ -33,7 +45,6 @@ class Subscription extends BaseController
 
         // If it's a Free plan, auto-activate it
         if ($plan->price == 0) {
-            $subModel = new SubscriptionModel();
             $subModel->insert([
                 'user_id'    => session()->get('id'),
                 'plan_id'    => $plan->id,
@@ -50,7 +61,6 @@ class Subscription extends BaseController
         $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5));
         
         // Create Pending Subscription
-        $subModel = new SubscriptionModel();
         $subModel->insert([
             'user_id'    => session()->get('id'),
             'plan_id'    => $plan->id,

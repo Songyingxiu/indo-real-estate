@@ -73,12 +73,16 @@
 
                             <td class="py-4 px-4">
                                 <?php if($sub->sub_status == 'Pending'): ?>
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-error-container text-on-error-container font-label-md text-caption">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#fff8e1] text-[#b45309] font-label-md text-caption">
                                         <span class="material-symbols-outlined text-[14px]">pending_actions</span> Pending
                                     </span>
-                                <?php else: ?>
+                                <?php elseif($sub->sub_status == 'Active'): ?>
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-tertiary-container text-on-tertiary-container font-label-md text-caption">
                                         <span class="material-symbols-outlined text-[14px]">check_circle</span> Active
+                                    </span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-error text-on-error font-label-md text-caption">
+                                        <span class="material-symbols-outlined text-[14px]">block</span> Revoked
                                     </span>
                                 <?php endif; ?>
                             </td>
@@ -147,7 +151,19 @@
                 </button>
             </div>
             <div class="p-6 bg-surface flex flex-col gap-4">
-                <p class="text-sm text-on-surface">What would you like to do with the <span class="font-bold" x-text="managePlanName"></span> subscription for this user?</p>
+                
+                <!-- Display if already Revoked/Expired -->
+                <template x-if="manageSubStatus === 'Expired'">
+                    <div class="text-center py-4 bg-surface-container-low text-on-surface border border-outline-variant rounded">
+                        <span class="material-symbols-outlined text-error text-[32px] mb-2">block</span>
+                        <p class="font-bold">Subscription is Revoked</p>
+                        <p class="text-sm text-on-surface-variant mt-1">No further actions can be taken on this record.</p>
+                    </div>
+                </template>
+
+                <template x-if="manageSubStatus !== 'Expired'">
+                    <p class="text-sm text-on-surface">What would you like to do with the <span class="font-bold" x-text="managePlanName"></span> subscription for this user?</p>
+                </template>
 
                 <!-- Activate Button -->
                 <template x-if="manageSubStatus === 'Pending'">
