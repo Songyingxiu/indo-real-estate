@@ -146,14 +146,14 @@
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Nearby Properties</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <?php foreach(array_slice($nearbyProperties, 0, 4) as $np): ?>
-                        <a href="<?= base_url('property/' . $np->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
+                        <a href="<?= base_url('property/' . $np['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
-                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np->title) ?></span>
-                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np->tax_price, 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np->distance, 1) ?> km away</span>
+                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np['title']) ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np['tax_price'], 0, ',', '.') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np['distance'], 1) ?> km away</span>
                             </div>
                         </a>
                     <?php endforeach; ?>
