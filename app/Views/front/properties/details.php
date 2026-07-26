@@ -10,7 +10,7 @@
     </button>
     <div class="w-full max-w-5xl overflow-y-auto max-h-screen flex flex-col gap-6 custom-scrollbar p-4 md:p-8">
         <?php if(!empty($images)): foreach($images as $img): ?>
-            <img src="<?= base_url(esc($img->image_path)) ?>" class="w-full h-auto rounded-lg shadow-2xl object-cover">
+            <img src="<?= esc($img->image_path) ?>" class="w-full h-auto rounded-lg shadow-2xl object-cover">
         <?php endforeach; else: ?>
             <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80" class="w-full h-auto rounded-lg shadow-2xl">
         <?php endif; ?>
@@ -27,9 +27,9 @@
     </nav>
 
     <?php 
-        $mainImg = !empty($images[0]) ? base_url(esc($images[0]->image_path)) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';
-        $img1 = !empty($images[1]) ? base_url(esc($images[1]->image_path)) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
-        $img2 = !empty($images[2]) ? base_url(esc($images[2]->image_path)) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';
+        $mainImg = !empty($images[0]) ? esc($images[0]->image_path) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';
+        $img1 = !empty($images[1]) ? esc($images[1]->image_path) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
+        $img2 = !empty($images[2]) ? esc($images[2]->image_path) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';
     ?>
 
     <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 mb-8 rounded overflow-hidden h-[500px]">
