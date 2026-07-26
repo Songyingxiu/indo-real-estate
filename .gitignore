@@ -124,3 +124,12 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+
+# Python virtual environments & cache
+scripts/venv/
+scripts/__pycache__/
+*.pyc
+
+# Raw scraped JSON seed files (optional, if they are very large)
+writable/uploads/*.json
