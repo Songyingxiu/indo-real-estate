@@ -94,7 +94,7 @@
                         <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">straighten</span>
                         </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->usable_area) ?> Sqm</p>
+                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->total_area) ?> Sqm</p>
                     </div>
                 </div>
             </section>
