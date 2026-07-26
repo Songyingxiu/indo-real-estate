@@ -10,6 +10,7 @@ use App\Models\SavedPropertyModel;
 use App\Models\SavedSearchModel;
 use App\Models\AdsModel;
 use App\Models\ZipcodeModel;
+use App\Models\PoiModel;
 
 class Home extends BaseController
 {
@@ -116,6 +117,7 @@ class Home extends BaseController
     {
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
+        $poiModel = new PoiModel();
         
         $property = $propertyModel
             ->asObject()
@@ -144,26 +146,92 @@ class Home extends BaseController
         $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
         
+        // Geospatial & Recommendation Data
+        $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
+        $data['similarType'] = $propertyModel->getSimilarProperties('property_type_id', $property->property_type_id, $property->id);
+        
+        $minPrice = $property->tax_price * 0.8;
+        $maxPrice = $property->tax_price * 1.2;
+        $data['similarPrice'] = $propertyModel->where('tax_price >=', $minPrice)->where('tax_price <=', $maxPrice)->where('id !=', $property->id)->limit(5)->find();
+        
+        $data['nearbyPOIs'] = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
+        
         return view('front/properties/details', $data);
     }
 
-    // PLACEHOLDERS
+    // LOCATION LANDING PAGES
     public function province($provinceSlug)
     {
-        echo "<h1>Province Landing Page: " . esc($provinceSlug) . "</h1>";
+        $stateModel = new StateModel();
+        $propertyModel = new PropertyModel();
+
+        $state = $stateModel->where("LOWER(REPLACE(name, ' ', '-'))", $provinceSlug)->first();
+        if (!$state) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Province not found");
+
+        $data['state'] = $state;
+        $data['cityStats'] = $propertyModel->getCityStatsByState($state->id);
+        
+        $propertyModel->select('properties.*, property_images.image_path')
+                      ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+                      ->where('state_id', $state->id)
+                      ->where('status', 'Active')
+                      ->where('approval_status', 'Published');
+                      
+        $data['properties'] = $propertyModel->paginate(20);
+        $data['pager'] = $propertyModel->pager;
+        $data['title'] = $state->name . ' Real Estate - HuniKita';
+
+        return view('front/properties/state', $data);
     }
 
     public function city($citySlug, $provinceSlug)
     {
-        echo "<h1>City Landing Page: " . esc($citySlug) . " (" . esc($provinceSlug) . ")</h1>";
+        $cityModel = new CityModel();
+        $propertyModel = new PropertyModel();
+
+        $city = $cityModel->where("LOWER(REPLACE(name, ' ', '-'))", $citySlug)->first();
+        if (!$city) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("City not found");
+
+        $data['city'] = $city;
+        $data['markers'] = $propertyModel->getMapMarkers(['city_id' => $city->id]);
+        
+        $propertyModel->select('properties.*, property_images.image_path')
+                      ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+                      ->where('city_id', $city->id)
+                      ->where('status', 'Active')
+                      ->where('approval_status', 'Published');
+
+        $data['properties'] = $propertyModel->paginate(20);
+        $data['pager'] = $propertyModel->pager;
+        $data['title'] = 'Properties in ' . $city->name . ' - HuniKita';
+
+        return view('front/properties/city', $data);
     }
 
     public function zipcode($zipcode)
     {
-        echo "<h1>Zipcode Landing Page: " . esc($zipcode) . "</h1>";
+        $zipcodeModel = new ZipcodeModel();
+        $propertyModel = new PropertyModel();
+
+        $zip = $zipcodeModel->where('zipcode', $zipcode)->first();
+        if (!$zip) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Zipcode not found");
+
+        $data['zipcode'] = $zip;
+        $data['markers'] = $propertyModel->getMapMarkers(['zipcode_id' => $zip->id]);
+        
+        $propertyModel->select('properties.*, property_images.image_path')
+                      ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+                      ->where('zipcode_id', $zip->id)
+                      ->where('status', 'Active')
+                      ->where('approval_status', 'Published');
+
+        $data['properties'] = $propertyModel->paginate(20);
+        $data['pager'] = $propertyModel->pager;
+        $data['title'] = 'Properties in ' . $zip->zipcode . ' - HuniKita';
+
+        return view('front/properties/zipcode', $data);
     }
 
-    // RESTRUCTURED AUTOCOMPLETE ENGINE
     public function suggest()
     {
         helper('url');

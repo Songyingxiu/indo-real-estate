@@ -74,4 +74,60 @@ class PropertyModel extends Model
 
         return $this;
     }
+
+    // State Page Stats
+    public function getCityStatsByState($stateId)
+    {
+        return $this->db->table('properties')
+            ->select('cities.name as city_name, COUNT(properties.id) as property_count, AVG(properties.tax_price) as avg_price')
+            ->join('cities', 'cities.id = properties.city_id')
+            ->where('properties.state_id', $stateId)
+            ->where('properties.status', 'Active')
+            ->where('properties.approval_status', 'Published')
+            ->groupBy('cities.id')
+            ->get()->getResult();
+    }
+
+    // Map Markers
+    public function getMapMarkers($conditions = [], $limit = 150)
+    {
+        $builder = $this->select('id, title, tax_price, latitude, longitude, listing_type')
+                        ->where('status', 'Active')
+                        ->where('approval_status', 'Published')
+                        ->where('latitude IS NOT NULL')
+                        ->where('longitude IS NOT NULL');
+
+        foreach ($conditions as $key => $val) {
+            $builder->where($key, $val);
+        }
+
+        return $builder->limit($limit)->find();
+    }
+
+    // Detail Page Algorithms
+    public function getNearbyProperties($lat, $lng, $excludeId, $limit = 5)
+    {
+        if (!$lat || !$lng) return [];
+        $haversine = "(6371 * acos(cos(radians($lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(latitude))))";
+        
+        return $this->select("*, {$haversine} AS distance")
+            ->where('id !=', $excludeId)
+            ->where('status', 'Active')
+            ->where('approval_status', 'Published')
+            ->having('distance <=', 10) 
+            ->orderBy('distance', 'ASC')
+            ->limit($limit)
+            ->find();
+    }
+
+    public function getSimilarProperties($field, $value, $excludeId, $limit = 5)
+    {
+        return $this->where($field, $value)
+            ->where('id !=', $excludeId)
+            ->where('status', 'Active')
+            ->where('approval_status', 'Published')
+            ->orderBy('created_date', 'DESC')
+            ->limit($limit)
+            ->find();
+    }
 }
