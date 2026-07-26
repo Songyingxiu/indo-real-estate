@@ -11,6 +11,7 @@ use App\Models\SavedSearchModel;
 use App\Models\AdsModel;
 use App\Models\ZipcodeModel;
 use App\Models\PoiModel;
+use CodeIgniter\I18n\Time;
 
 class Home extends BaseController
 {
@@ -20,17 +21,22 @@ class Home extends BaseController
         $cmsModel = new CmsModel();
         $adsModel = new AdsModel();
         
-        $today = date('Y-m-d');
+        // Force the timezone to WIB
+        $today = Time::now('Asia/Jakarta')->toDateString();
         
         $data['banners'] = $adsModel->where('placement', 'home_banner')
             ->where('status', 'Active')
             ->groupStart()
                 ->where('start_date <=', $today)
-                ->orWhere('start_date IS NULL')
+                ->orWhere('start_date', null)
+                ->orWhere('start_date', '0000-00-00')
+                ->orWhere('start_date', '')
             ->groupEnd()
             ->groupStart()
                 ->where('end_date >=', $today)
-                ->orWhere('end_date IS NULL')
+                ->orWhere('end_date', null)
+                ->orWhere('end_date', '0000-00-00')
+                ->orWhere('end_date', '')
             ->groupEnd()
             ->findAll();
         
