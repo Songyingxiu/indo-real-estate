@@ -60,7 +60,7 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface mb-2"><?= esc($property->title) ?></h1>
-                            <!-- NEW SAVE BUTTON -->
+                            <!-- SAVE BUTTON -->
                             <button onclick="toggleSaveProperty(<?= esc($property->id) ?>)" id="savePropertyBtn" class="flex items-center justify-center w-12 h-12 rounded-full border border-outline-variant hover:bg-surface-container transition-colors shadow-sm bg-surface">
                                 <span class="material-symbols-outlined <?= $isSaved ? 'text-error' : 'text-on-surface-variant' ?>" id="savePropertyIcon" style="<?= $isSaved ? 'font-variation-settings: \'FILL\' 1;' : '' ?>">
                                     favorite
@@ -112,6 +112,97 @@
                     <div id="propertyMap" class="w-full h-full"></div>
                 </div>
             </section>
+
+            <!-- NEARBY LOCATIONS (POIs) -->
+            <?php if(!empty($nearbyPOIs)): ?>
+            <section class="mt-4">
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Nearby Locations</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <?php foreach($nearbyPOIs as $poi): ?>
+                        <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded flex items-center gap-4">
+                            <div class="bg-primary/10 p-2 rounded-full text-primary">
+                                <span class="material-symbols-outlined">
+                                    <?= strtolower($poi->category) == 'school' || strtolower($poi->category) == 'college' ? 'school' : 
+                                       (strtolower($poi->category) == 'hospital' ? 'local_hospital' : 
+                                       (strtolower($poi->category) == 'mall' ? 'shopping_bag' : 'place')) ?>
+                                </span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-[14px] text-on-surface"><?= esc($poi->name) ?></p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold uppercase"><?= esc($poi->category) ?></span>
+                                    <span class="text-[12px] text-on-surface-variant font-medium"><?= number_format($poi->distance, 2) ?> km away</span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+            <?php endif; ?>
+
+            <!-- NEARBY PROPERTIES -->
+            <?php if(!empty($nearbyProperties)): ?>
+            <section class="mt-8 border-t border-outline-variant pt-8">
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Nearby Properties</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <?php foreach(array_slice($nearbyProperties, 0, 4) as $np): ?>
+                        <a href="<?= base_url('property/' . $np->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
+                            <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
+                                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np->title) ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np->tax_price, 0, ',', '.') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np->distance, 1) ?> km away</span>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+            <?php endif; ?>
+
+            <!-- SIMILAR TYPE DATA -->
+            <?php if(!empty($similarType)): ?>
+            <section class="mt-8 border-t border-outline-variant pt-8">
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Similar Property Types</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <?php foreach(array_slice($similarType, 0, 4) as $st): ?>
+                        <a href="<?= base_url('property/' . $st['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
+                            <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
+                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st['title']) ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($st['tax_price'], 0, ',', '.') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st['bed']) ?> Bed • <?= esc($st['bath']) ?> Bath</span>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+            <?php endif; ?>
+
+            <!-- SAME PRICE RANGE -->
+            <?php if(!empty($similarPrice)): ?>
+            <section class="mt-8 border-t border-outline-variant pt-8">
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">In The Same Price Range</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <?php foreach(array_slice($similarPrice, 0, 4) as $sp): ?>
+                        <a href="<?= base_url('property/' . $sp['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
+                            <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
+                                <img src="https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($sp['title']) ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($sp['tax_price'], 0, ',', '.') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1 line-clamp-1"><?= esc($sp['area_name']) ?></span>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+            <?php endif; ?>
+
         </div>
 
         <div class="lg:col-span-4">
@@ -205,7 +296,7 @@
         document.getElementById('photoGallery').classList.remove('flex');
     }
 
-    // NEW AJAX FUNCTION TO TOGGLE SAVED PROPERTY
+    // AJAX FUNCTION TO TOGGLE SAVED PROPERTY
     function toggleSaveProperty(propertyId) {
         const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
         const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
@@ -215,7 +306,7 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                [csrfName]: csrfHash // Optional depending on CI4 CSRF setup
+                [csrfName]: csrfHash
             },
             body: JSON.stringify({ property_id: propertyId })
         })
