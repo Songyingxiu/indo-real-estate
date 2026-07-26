@@ -17,12 +17,16 @@ $routes->post('contact/submit-lead', 'Contact::submitLead');
 $routes->get('page/(:segment)', 'Cms::page/$1');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
+// SEO-Friendly Location Routes
+$routes->get('property/province/(:segment)', 'Home::province/$1');
+$routes->get('property/city/(:segment)/(:segment)', 'Home::city/$1/$2');
+$routes->get('property/zipcode/(:num)', 'Home::zipcode/$1');
+
 // Authentication Routes
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
 $routes->post('register', 'Auth::attemptRegister');
 $routes->get('logout', 'Auth::logout');
-
 
 // User Routes
 $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
@@ -80,6 +84,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/store-feature', 'MasterData::storeFeature'); 
     $routes->post('master-data/store-plan', 'MasterData::storePlan');
     $routes->post('master-data/store-zipcode', 'MasterData::storeZipcode'); 
+    $routes->post('master-data/store-poi', 'MasterData::storePoi'); 
     
     // Delete
     $routes->post('master-data/delete-type/(:num)', 'MasterData::deleteType/$1'); 
@@ -88,6 +93,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/delete-feature/(:num)', 'MasterData::deleteFeature/$1');
     $routes->post('master-data/delete-plan/(:num)', 'MasterData::deletePlan/$1');
     $routes->post('master-data/delete-zipcode/(:num)', 'MasterData::deleteZipcode/$1');
+    $routes->post('master-data/delete-poi/(:num)', 'MasterData::deletePoi/$1');
     
     // Update
     $routes->post('master-data/update-type/(:num)', 'MasterData::updateType/$1');

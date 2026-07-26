@@ -185,9 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             `;
                             
                             div.addEventListener('click', () => {
-                                searchInput.value = item.text;
-                                suggestDropdown.classList.add('hidden');
-                                document.getElementById('filterForm').submit();
+                                if (item.url) {
+                                    window.location.href = item.url;
+                                }
                             });
                             suggestDropdown.appendChild(div);
                         });

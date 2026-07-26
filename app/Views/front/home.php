@@ -93,7 +93,7 @@
                             <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property['total_area']) ?> m²</div>
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area) ?> m²</div>
                             </div>
                         </div>
                     </article>
@@ -137,7 +137,7 @@
                                 <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                     <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                     <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                    <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property['total_area']) ?> m²</div>
+                                    <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area) ?> m²</div>
                                 </div>
                             </div>
                         </article>
@@ -230,9 +230,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             `;
                             
                             div.addEventListener('click', () => {
-                                searchInput.value = item.text;
-                                suggestDropdown.classList.add('hidden');
-                                searchInput.closest('form').submit();
+                                if (item.url) {
+                                    window.location.href = item.url;
+                                }
                             });
                             suggestDropdown.appendChild(div);
                         });
