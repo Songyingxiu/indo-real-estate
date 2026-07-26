@@ -9,6 +9,7 @@ use App\Models\CmsModel;
 use App\Models\SavedPropertyModel;
 use App\Models\SavedSearchModel;
 use App\Models\AdsModel;
+use App\Models\ZipcodeModel;
 
 class Home extends BaseController
 {
@@ -20,7 +21,6 @@ class Home extends BaseController
         
         $today = date('Y-m-d');
         
-        // Fetch ads for the home banner that are Active and within the date range
         $data['banners'] = $adsModel->where('placement', 'home_banner')
             ->where('status', 'Active')
             ->groupStart()
@@ -33,7 +33,6 @@ class Home extends BaseController
             ->groupEnd()
             ->findAll();
         
-        // 1. POPULAR LISTINGS
         $data['featuredProperties'] = $propertyModel
             ->asObject() 
             ->select('properties.*, property_types.name as type_name, property_images.image_path')
@@ -45,7 +44,6 @@ class Home extends BaseController
             ->limit(6)
             ->find();
 
-        // 2. NEWEST LISTINGS
         $data['newestProperties'] = $propertyModel
             ->asObject() 
             ->select('properties.*, property_types.name as type_name, property_images.image_path')
@@ -57,7 +55,6 @@ class Home extends BaseController
             ->limit(6)
             ->find();
 
-        // 3. TIPS & GUIDES
         $data['tips'] = $cmsModel
             ->where('category', 'Tips')
             ->where('status', 'Published')
@@ -92,7 +89,6 @@ class Home extends BaseController
         
         $data['propertyTypes'] = $typeModel->asObject()->where('status', 'Active')->findAll();
 
-        // Retrieve all GET parameters including new radius fields
         $keyword     = $this->request->getGet('q');
         $types       = $this->request->getGet('type') ?? [];
         $listingType = $this->request->getGet('listing_type');
@@ -100,14 +96,12 @@ class Home extends BaseController
         $lng         = $this->request->getGet('lng');
         $radius      = $this->request->getGet('radius');
 
-        // Execute custom search through the PropertyModel
         $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius);
 
         $data['properties'] = $propertyModel->paginate(9);
         $data['pager']      = $propertyModel->pager;
         $data['total']      = $propertyModel->pager->getTotal(); 
         
-        // Pass parameters back to view to keep filters active
         $data['keyword']    = $keyword;
         $data['listingType']= $listingType;
         $data['lat']        = $lat;
@@ -137,7 +131,6 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
-        // Check if current user has saved this property
         $isSaved = false;
         $userId = session()->get('id');
         if ($userId) {
@@ -148,14 +141,32 @@ class Home extends BaseController
 
         $data['images'] = $imageModel->asObject()->where('property_id', $id)->findAll();
         $data['property'] = $property;
-        $data['isSaved'] = $isSaved; // Pass variable to view
+        $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
         
         return view('front/properties/details', $data);
     }
 
+    // PLACEHOLDERS
+    public function province($provinceSlug)
+    {
+        echo "<h1>Province Landing Page: " . esc($provinceSlug) . "</h1>";
+    }
+
+    public function city($citySlug, $provinceSlug)
+    {
+        echo "<h1>City Landing Page: " . esc($citySlug) . " (" . esc($provinceSlug) . ")</h1>";
+    }
+
+    public function zipcode($zipcode)
+    {
+        echo "<h1>Zipcode Landing Page: " . esc($zipcode) . "</h1>";
+    }
+
+    // RESTRUCTURED AUTOCOMPLETE ENGINE
     public function suggest()
     {
+        helper('url');
         $query = $this->request->getGet('q');
 
         if (empty($query) || strlen($query) < 2) {
@@ -164,29 +175,51 @@ class Home extends BaseController
 
         $cityModel = new CityModel();
         $stateModel = new StateModel();
+        $zipcodeModel = new ZipcodeModel();
         $propertyModel = new PropertyModel();
 
         $results = [];
 
-        // 1. Search Active Cities
-        $cities = $cityModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
-        foreach ($cities as $city) {
-            $results[] = [
-                'text' => $city->name,
-                'category' => 'Location'
-            ];
-        }
-
-        // 2. Search Active Regions/States
+        // 1. Search Active Regions/States
         $states = $stateModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($states as $state) {
+            $slug = url_title(strtolower($state->name), '-', true);
             $results[] = [
                 'text' => $state->name,
-                'category' => 'Region'
+                'category' => 'Region',
+                'url' => base_url("property/province/{$slug}")
             ];
         }
 
-        // 3. Search Published Properties
+        // 2. Search Active Cities
+        $cities = $cityModel->select('cities.*, states.name as state_name')
+            ->join('states', 'states.id = cities.state_id', 'left')
+            ->like('cities.name', $query)
+            ->where('cities.status', 'Active')
+            ->limit(3)
+            ->find();
+            
+        foreach ($cities as $city) {
+            $citySlug = url_title(strtolower($city->name), '-', true);
+            $stateSlug = url_title(strtolower($city->state_name ?? 'unknown'), '-', true);
+            $results[] = [
+                'text' => $city->name . ', ' . $city->state_name,
+                'category' => 'Location',
+                'url' => base_url("property/city/{$citySlug}/{$stateSlug}")
+            ];
+        }
+
+        // 3. Search Zipcodes
+        $zipcodes = $zipcodeModel->like('zipcode', $query)->where('status', 'Active')->limit(3)->find();
+        foreach ($zipcodes as $zip) {
+            $results[] = [
+                'text' => $zip->zipcode,
+                'category' => 'Zip Code',
+                'url' => base_url("property/zipcode/{$zip->zipcode}")
+            ];
+        }
+
+        // 4. Search Published Properties
         $properties = $propertyModel->asObject()
             ->groupStart()
                 ->like('title', $query)
@@ -200,14 +233,14 @@ class Home extends BaseController
         foreach ($properties as $prop) {
             $results[] = [
                 'text' => $prop->title,
-                'category' => 'Property Listing'
+                'category' => 'Property Listing',
+                'url' => base_url("property/{$prop->id}")
             ];
         }
 
         return $this->response->setJSON($results);
     }
 
-    // METHOD TO HANDLE AJAX SAVE/UNSAVE
     public function toggleSaveProperty()
     {
         $userId = session()->get('id');
@@ -238,7 +271,6 @@ class Home extends BaseController
         }
     }
 
-    // SAVE SEARCH PARAMETERS
     public function saveSearch()
     {
         $userId = session()->get('id');

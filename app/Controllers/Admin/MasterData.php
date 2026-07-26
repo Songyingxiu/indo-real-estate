@@ -7,6 +7,7 @@ use App\Models\StateModel;
 use App\Models\FeatureModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\ZipcodeModel;
+use App\Models\PoiModel;
 
 class MasterData extends BaseController
 {
@@ -103,6 +104,20 @@ class MasterData extends BaseController
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Subscription Plan created!');
     }
+
+    // POI Creation
+    public function storePoi()
+    {
+        $model = new PoiModel();
+        $model->insert([
+            'name'      => $this->request->getPost('name'),
+            'category'  => $this->request->getPost('category'),
+            'latitude'  => $this->request->getPost('latitude'),
+            'longitude' => $this->request->getPost('longitude'),
+            'status'    => 'Active'
+        ]);
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Point of Interest added!');
+    }
     
     // --- DELETE METHODS ---
 
@@ -112,6 +127,9 @@ class MasterData extends BaseController
     public function deleteFeature($id) { (new FeatureModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature removed.'); }
     public function deletePlan($id) { (new SubscriptionPlanModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Plan removed.'); }
     public function deleteZipcode($id) { (new ZipcodeModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Zipcode removed.'); }
+    
+    // POI Deletion
+    public function deletePoi($id) { (new PoiModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Point of Interest removed.'); }
 
     // --- UPDATE METHODS ---
 
