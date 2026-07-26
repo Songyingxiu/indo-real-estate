@@ -92,7 +92,7 @@
                     <?php if(!empty($properties)): foreach($properties as $property): ?>
                         <article class="bg-surface border border-outline-variant rounded-b-lg rounded-t-xl overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300 flex flex-col">
                             <a href="<?= base_url('property/' . $property['id']) ?>" class="relative h-48 w-full bg-surface-container-highest block group">
-                                <?php $imgSrc = !empty($property['image_path']) ? base_url(esc($property['image_path'])) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
+                                <?php $imgSrc = !empty($property['image_path']) ? esc($property['image_path']) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
                                 <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $imgSrc ?>"/>
                                 
                                 <div class="absolute top-3 left-3 bg-tertiary-container text-on-tertiary font-label-md text-[12px] px-2 py-1 rounded flex items-center gap-1 shadow-sm">

@@ -48,7 +48,7 @@
                 <?php foreach ($banners as $banner): ?>
                     <div class="min-w-full md:min-w-[50%] lg:min-w-[33%] snap-center rounded-xl overflow-hidden shadow-md bg-surface border border-outline-variant group">
                         <a href="<?= base_url('promo/' . $banner->id) ?>" class="block w-full h-full relative">
-                            <img src="<?= base_url(esc($banner->image_path)) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="<?= esc($banner->image_path) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                                 <h3 class="text-white font-bold text-lg drop-shadow-md"><?= esc($banner->title) ?></h3>
                             </div>
@@ -75,7 +75,7 @@
                 <?php foreach ($featuredProperties as $property): ?>
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
-                            <?php $imgSrc = !empty($property->image_path) ? base_url(esc($property->image_path)) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
+                            <?php $imgSrc = !empty($property->image_path) ? esc($property->image_path) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
                             <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
                             <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                 <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
@@ -119,7 +119,7 @@
                         <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                             <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
                                 <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">New</div>
-                                <?php $imgSrc = !empty($property->image_path) ? base_url(esc($property->image_path)) : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'; ?>
+                                <?php $imgSrc = !empty($property->image_path) ? esc($property->image_path) : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'; ?>
                                 <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
                                 <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                     <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
