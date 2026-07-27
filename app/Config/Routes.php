@@ -16,6 +16,7 @@ $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 $routes->post('contact/submit-lead', 'Contact::submitLead');
 $routes->get('page/(:segment)', 'Cms::page/$1');
 $routes->get('faq', 'Cms::faq');
+$routes->get('news', 'Cms::blog');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // SEO-Friendly Location Routes
