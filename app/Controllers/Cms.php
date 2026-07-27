@@ -1,59 +1,39 @@
-<?php namespace App\Controllers\Admin;
+<?php namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\CmsModel;
 
 class Cms extends BaseController
 {
-    public function index()
+    public function page($slug)
     {
         $cmsModel = new CmsModel();
-        $data['posts'] = $cmsModel->orderBy('created_at', 'DESC')->findAll();
         
-        return view('admin/cms/cms', $data);
+        $post = $cmsModel->where('slug', $slug)
+                         ->where('status', 'Published')
+                         ->first();
+        
+        $title = ucwords(str_replace('-', ' ', $slug));
+        
+        $data['title']     = ($post ? $post->title : $title) . ' - HuniKita';
+        $data['pageTitle'] = $post ? $post->title : $title;
+        $data['slug']      = $slug;
+        $data['post']      = $post; 
+        
+        return view('front/cms/page', $data);
     }
 
-    public function savePost()
+    public function faq()
     {
         $cmsModel = new CmsModel();
         
-        $id = $this->request->getPost('id');
-        $title = $this->request->getPost('title');
+        $data['faqs'] = $cmsModel->where('category', 'FAQ')
+                                 ->where('status', 'Published')
+                                 ->orderBy('published_at', 'ASC')
+                                 ->findAll();
+                                 
+        $data['title'] = 'Frequently Asked Questions - HuniKita';
         
-        $data = [
-            'title'        => $title,
-            'slug'         => url_title(strtolower($title), '-', true),
-            'category'     => $this->request->getPost('category'),
-            'content_body' => $this->request->getPost('content_body'),
-            'status'       => 'Published',
-            'author_id'    => session()->get('id')
-        ];
-
-        if ($id) {
-            $cmsModel->update($id, $data);
-            $message = 'Content updated successfully.';
-        } else {
-            $data['published_at'] = date('Y-m-d H:i:s');
-            $cmsModel->insert($data);
-            $message = 'Content published successfully.';
-        }
-
-        return redirect()->to('admin/cms')->with('success', $message);
-    }
-
-    // THIS IS THE MISSING METHOD THAT FIXES THE 404 ERROR
-    public function delete($id)
-    {
-        $cmsModel = new CmsModel();
-        
-        $post = $cmsModel->find($id);
-        
-        if (!$post) {
-            return redirect()->to('admin/cms')->with('error', 'Content not found.');
-        }
-
-        $cmsModel->delete($id);
-        
-        return redirect()->to('admin/cms')->with('success', 'Content deleted successfully.');
+        return view('front/cms/faq', $data);
     }
 }

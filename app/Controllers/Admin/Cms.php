@@ -3,43 +3,56 @@
 use App\Controllers\BaseController;
 use App\Models\CmsModel;
 
-class Cms extends BaseController {
-    
-    public function index() {
-        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
-        
+class Cms extends BaseController
+{
+    public function index()
+    {
         $cmsModel = new CmsModel();
-        // Fetch all pages and blog posts from the database, newest first
         $data['posts'] = $cmsModel->orderBy('created_at', 'DESC')->findAll();
         
         return view('admin/cms/cms', $data);
     }
 
-    public function savePost() {
-        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
-
+    public function savePost()
+    {
         $cmsModel = new CmsModel();
+        
         $id = $this->request->getPost('id');
         $title = $this->request->getPost('title');
         
         $data = [
             'title'        => $title,
-            'slug'         => strtolower(url_title($title)),
+            'slug'         => url_title(strtolower($title), '-', true),
             'category'     => $this->request->getPost('category'),
             'content_body' => $this->request->getPost('content_body'),
-            'author_id'    => session()->get('id') ?? session()->get('user_id'),
             'status'       => 'Published',
-            'published_at' => date('Y-m-d H:i:s')
+            'author_id'    => session()->get('id')
         ];
-        
-        if (!empty($id)) {
+
+        if ($id) {
             $cmsModel->update($id, $data);
-            $message = 'Content item updated successfully!';
+            $message = 'Content updated successfully.';
         } else {
+            $data['published_at'] = date('Y-m-d H:i:s');
             $cmsModel->insert($data);
-            $message = 'New content published successfully!';
+            $message = 'Content published successfully.';
         }
+
+        return redirect()->to('admin/cms')->with('success', $message);
+    }
+
+    public function delete($id)
+    {
+        $cmsModel = new CmsModel();
         
-        return redirect()->to(base_url('admin/cms'))->with('success', $message);
+        $post = $cmsModel->find($id);
+        
+        if (!$post) {
+            return redirect()->to('admin/cms')->with('error', 'Content not found.');
+        }
+
+        $cmsModel->delete($id);
+        
+        return redirect()->to('admin/cms')->with('success', 'Content deleted successfully.');
     }
 }
