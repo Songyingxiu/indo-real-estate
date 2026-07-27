@@ -1,7 +1,8 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<div x-data="{ showEditor: false, postId: '', postTitle: '', postCategory: 'Blog', postBody: '' }">
+<!-- Added showDeleteModal and deleteUrl to the Alpine state -->
+<div x-data="{ showEditor: false, postId: '', postTitle: '', postCategory: 'Blog', postBody: '', showDeleteModal: false, deleteUrl: '' }">
     <div class="flex justify-between items-center mt-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-on-surface">Content Management</h1>
@@ -12,7 +13,7 @@
         </button>
     </div>
 
-    <!-- NEW SUCCESS NOTIFICATION DESIGN -->
+    <!-- SUCCESS NOTIFICATION -->
     <?php if (session()->getFlashdata('success')) : ?>
         <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
              class="flex items-center justify-between bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded shadow-sm mb-6">
@@ -26,7 +27,7 @@
         </div>
     <?php endif; ?>
 
-    <!-- NEW ERROR NOTIFICATION DESIGN -->
+    <!-- ERROR NOTIFICATION -->
     <?php if (session()->getFlashdata('error')) : ?>
         <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
              class="flex items-center justify-between bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm mb-6">
@@ -70,9 +71,10 @@
                                                     postBody = '<?= esc($post->content_body, 'js') ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
                                     
-                                    <form action="<?= base_url('admin/cms/delete/' . $post->id) ?>" method="POST" class="inline m-0 p-0" onsubmit="return confirm('Are you sure you want to delete this content? This action cannot be undone.');">
-                                        <button type="submit" class="text-red-600 hover:underline font-medium">Delete</button>
-                                    </form>
+                                    <!-- UPDATED DELETE BUTTON: Now triggers the custom modal -->
+                                    <button type="button" 
+                                            @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/cms/delete/' . $post->id) ?>';" 
+                                            class="text-red-600 hover:underline font-medium">Delete</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -83,6 +85,36 @@
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- CUSTOM DELETE CONFIRMATION MODAL -->
+    <div x-show="showDeleteModal" 
+         style="display: none;"
+         class="fixed inset-0 z-[110] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        
+        <div @click.outside="showDeleteModal = false" 
+             x-show="showDeleteModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            
+            <div class="px-6 py-4 border-b border-outline-variant flex items-center gap-3 bg-red-50">
+                <span class="material-symbols-outlined text-red-600">warning</span>
+                <h2 class="text-lg font-bold text-red-800">Confirm Deletion</h2>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-on-surface-variant font-medium text-center">Are you sure you want to delete this content? <br><span class="text-red-600 font-bold">This action cannot be undone.</span></p>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                <button type="button" @click="showDeleteModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                <form :action="deleteUrl" method="POST" class="m-0 p-0">
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded font-semibold hover:bg-red-700 transition shadow-sm">Yes, Delete</button>
+                </form>
+            </div>
         </div>
     </div>
 
