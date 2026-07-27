@@ -1,41 +1,59 @@
-<?php namespace App\Controllers;
+<?php namespace App\Controllers\Admin;
 
+use App\Controllers\BaseController;
 use App\Models\CmsModel;
 
 class Cms extends BaseController
 {
-    public function page($slug)
+    public function index()
     {
         $cmsModel = new CmsModel();
+        $data['posts'] = $cmsModel->orderBy('created_at', 'DESC')->findAll();
         
-        // 1. Try to find the published post in the database
-        $post = $cmsModel->where('slug', $slug)
-                         ->where('status', 'Published')
-                         ->first();
-        
-        // 2. Format a fallback title (e.g., 'about-us' becomes 'About Us')
-        $title = ucwords(str_replace('-', ' ', $slug));
-        
-        // 3. Pass the data to the view
-        $data['title']     = ($post ? $post->title : $title) . ' - HuniKita';
-        $data['pageTitle'] = $post ? $post->title : $title;
-        $data['slug']      = $slug;
-        $data['post']      = $post; 
-        
-        return view('front/cms/page', $data);
+        return view('admin/cms/cms', $data);
     }
 
-    public function faq()
+    public function savePost()
     {
         $cmsModel = new CmsModel();
         
-        $data['faqs'] = $cmsModel->where('category', 'FAQ')
-                                 ->where('status', 'Published')
-                                 ->orderBy('published_at', 'ASC')
-                                 ->findAll();
-                                 
-        $data['title'] = 'Frequently Asked Questions - HuniKita';
+        $id = $this->request->getPost('id');
+        $title = $this->request->getPost('title');
         
-        return view('front/cms/faq', $data);
+        $data = [
+            'title'        => $title,
+            'slug'         => url_title(strtolower($title), '-', true),
+            'category'     => $this->request->getPost('category'),
+            'content_body' => $this->request->getPost('content_body'),
+            'status'       => 'Published',
+            'author_id'    => session()->get('id')
+        ];
+
+        if ($id) {
+            $cmsModel->update($id, $data);
+            $message = 'Content updated successfully.';
+        } else {
+            $data['published_at'] = date('Y-m-d H:i:s');
+            $cmsModel->insert($data);
+            $message = 'Content published successfully.';
+        }
+
+        return redirect()->to('admin/cms')->with('success', $message);
+    }
+
+    // THIS IS THE MISSING METHOD THAT FIXES THE 404 ERROR
+    public function delete($id)
+    {
+        $cmsModel = new CmsModel();
+        
+        $post = $cmsModel->find($id);
+        
+        if (!$post) {
+            return redirect()->to('admin/cms')->with('error', 'Content not found.');
+        }
+
+        $cmsModel->delete($id);
+        
+        return redirect()->to('admin/cms')->with('success', 'Content deleted successfully.');
     }
 }
