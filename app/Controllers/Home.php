@@ -263,7 +263,7 @@ class Home extends BaseController
             $results[] = [
                 'text' => $state->name,
                 'category' => 'Region',
-                'url' => base_url("property/province/{$slug}")
+                'url' => base_url("properties/province/{$slug}")
             ];
         }
 
@@ -281,7 +281,7 @@ class Home extends BaseController
             $results[] = [
                 'text' => $city->name . ', ' . $city->state_name,
                 'category' => 'Location',
-                'url' => base_url("property/city/{$citySlug}/{$stateSlug}")
+                'url' => base_url("properties/city/{$citySlug}/{$stateSlug}")
             ];
         }
 
@@ -291,7 +291,7 @@ class Home extends BaseController
             $results[] = [
                 'text' => $zip->zipcode,
                 'category' => 'Zip Code',
-                'url' => base_url("property/zipcode/{$zip->zipcode}")
+                'url' => base_url("properties/zipcode/{$zip->zipcode}")
             ];
         }
 
@@ -310,7 +310,7 @@ class Home extends BaseController
             $results[] = [
                 'text' => $prop->title,
                 'category' => 'Property Listing',
-                'url' => base_url("property/{$prop->id}")
+                'url' => base_url("properties/{$prop->id}")
             ];
         }
 
