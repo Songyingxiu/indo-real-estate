@@ -26,10 +26,12 @@
     <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6">Available Properties</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <?php if(!empty($properties)): foreach($properties as $property): ?>
-            <!-- You can include a partial here, or reuse the property card HTML from search.php -->
             <article class="bg-surface border border-outline-variant rounded overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-                <a href="<?= base_url('property/' . $property['id']) ?>" class="h-48 bg-surface-container-high block">
-                    <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover" src="<?= esc($property['image_path'] ?? 'https://via.placeholder.com/400x300') ?>"/>
+                <a href="<?= base_url('property/' . $property['id']) ?>" class="h-48 bg-surface-container-high block relative">
+                    <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover" src="<?= esc($property['image_path'] ?? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80') ?>"/>
+                    <div class="absolute top-2 left-2 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded uppercase">
+                        <?= esc($property['listing_type']) ?>
+                    </div>
                 </a>
                 <div class="p-4 flex flex-col flex-1">
                     <a href="<?= base_url('property/' . $property['id']) ?>" class="font-bold text-[16px] text-on-surface hover:text-primary line-clamp-2"><?= esc($property['title']) ?></a>

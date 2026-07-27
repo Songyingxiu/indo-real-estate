@@ -18,9 +18,9 @@ $routes->get('page/(:segment)', 'Cms::page/$1');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // SEO-Friendly Location Routes
-$routes->get('property/province/(:segment)', 'Home::province/$1');
-$routes->get('property/city/(:segment)/(:segment)', 'Home::city/$1/$2');
-$routes->get('property/zipcode/(:num)', 'Home::zipcode/$1');
+$routes->get('property/province/(:segment)', 'Property::province/$1');
+$routes->get('property/city/(:segment)/(:segment)', 'Property::city/$1/$2');
+$routes->get('property/zipcode/(:num)', 'Property::zipcode/$1');
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');
