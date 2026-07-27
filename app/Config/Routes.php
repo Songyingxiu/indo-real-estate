@@ -15,6 +15,7 @@ $routes->get('property/(:num)', 'Home::detail/$1');
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 $routes->post('contact/submit-lead', 'Contact::submitLead');
 $routes->get('page/(:segment)', 'Cms::page/$1');
+$routes->get('faq', 'Cms::faq');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // SEO-Friendly Location Routes
@@ -115,6 +116,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     // System Settings & Content
     $routes->get('cms', 'Cms::index');
     $routes->post('cms/save', 'Cms::savePost');
+    $routes->post('cms/delete/(:num)', 'Cms::delete/$1');
     $routes->get('seo', 'Seo::index');
     $routes->post('seo/save', 'Seo::saveSettings');
 

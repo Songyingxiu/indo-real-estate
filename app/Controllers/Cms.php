@@ -24,4 +24,18 @@ class Cms extends BaseController
         
         return view('front/cms/page', $data);
     }
+
+    public function faq()
+    {
+        $cmsModel = new CmsModel();
+        
+        $data['faqs'] = $cmsModel->where('category', 'FAQ')
+                                 ->where('status', 'Published')
+                                 ->orderBy('published_at', 'ASC')
+                                 ->findAll();
+                                 
+        $data['title'] = 'Frequently Asked Questions - HuniKita';
+        
+        return view('front/cms/faq', $data);
+    }
 }

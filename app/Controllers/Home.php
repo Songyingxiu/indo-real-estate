@@ -69,6 +69,13 @@ class Home extends BaseController
             ->limit(3)
             ->find();
 
+        // Fetching FAQs from the CMS table
+        $data['faqs'] = $cmsModel
+            ->where('category', 'FAQ')
+            ->where('status', 'Published')
+            ->orderBy('published_at', 'ASC')
+            ->find();
+
         $data['title'] = 'HuniKita - Real Estate Platform';
 
         
