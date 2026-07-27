@@ -26,11 +26,12 @@ class Property extends BaseController
 
         $propertyModel = new PropertyModel();
         
-        // Note: Your properties table doesn't have state_id, so we join cities to filter by state
+        // FIX: Pass the condition as a raw string so CI4's query builder doesn't 
+        // rewrite 'cities.state_id' into 'properties.state_id' during pagination.
         $properties = $propertyModel->select('properties.*, property_images.image_path')
             ->join('cities', 'cities.id = properties.city_id')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
-            ->where('cities.state_id', $state->id)
+            ->where("cities.state_id = " . (int)$state->id) 
             ->paginate(20);
 
         $data = [
