@@ -93,6 +93,7 @@
             <a class="font-body-md text-[16px] text-primary hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Rent') ?>">Rent</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/about-us') ?>">About Us</a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('news') ?>">News & Updates</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>">Privacy</a>
         </nav>
         

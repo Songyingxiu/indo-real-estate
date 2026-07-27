@@ -36,4 +36,19 @@ class Cms extends BaseController
         
         return view('front/cms/faq', $data);
     }
+
+    public function blog()
+    {
+        $cmsModel = new CmsModel();
+        
+        // Fetch posts that are meant for the feed, ordered by newest first
+        $data['posts'] = $cmsModel->whereIn('category', ['Blog', 'Announcement', 'Tips'])
+                                  ->where('status', 'Published')
+                                  ->orderBy('published_at', 'DESC')
+                                  ->findAll();
+                                 
+        $data['title'] = 'News & Updates - HuniKita';
+        
+        return view('front/cms/blog', $data);
+    }
 }
