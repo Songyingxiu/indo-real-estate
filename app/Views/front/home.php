@@ -159,7 +159,7 @@
         </div>
     </section>
 
-    <!-- NEW FAQ MODULE -->
+    <!-- FAQ MODULE -->
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="mb-10 text-center max-w-2xl mx-auto">
             <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-3">Frequently Asked Questions</h2>
