@@ -265,12 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 } else {
                                     const slug = createSlug(item.text);
                                     if (item.category === 'Province' || item.category === 'State') {
-                                        targetUrl = `<?= base_url('property/province') ?>/${slug}`;
+                                        targetUrl = `<?= base_url('properties/province') ?>/${slug}`;
                                     } else if (item.category === 'City' || item.category === 'Location') {
                                         const stateSlug = item.parent_text ? createSlug(item.parent_text) : 'indonesia';
-                                        targetUrl = `<?= base_url('property/city') ?>/${slug}/${stateSlug}`;
+                                        targetUrl = `<?= base_url('properties/city') ?>/${slug}/${stateSlug}`;
                                     } else if (item.category === 'Zipcode') {
-                                        targetUrl = `<?= base_url('property/zipcode') ?>/${item.text}`;
+                                        targetUrl = `<?= base_url('properties/zipcode') ?>/${item.text}`;
                                     } else {
                                         targetUrl = `<?= base_url('search') ?>?q=${encodeURIComponent(item.text)}`;
                                     }
