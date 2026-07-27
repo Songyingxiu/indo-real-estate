@@ -12,8 +12,32 @@
         </button>
     </div>
 
+    <!-- NEW SUCCESS NOTIFICATION DESIGN -->
     <?php if (session()->getFlashdata('success')) : ?>
-        <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm shadow-sm"><?= session()->getFlashdata('success') ?></div>
+        <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
+             class="flex items-center justify-between bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded shadow-sm mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <p class="font-semibold text-sm"><?= session()->getFlashdata('success') ?></p>
+            </div>
+            <button @click="show = false" class="text-green-600 hover:text-green-800 focus:outline-none">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- NEW ERROR NOTIFICATION DESIGN -->
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
+             class="flex items-center justify-between bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600">error</span>
+                <p class="font-semibold text-sm"><?= session()->getFlashdata('error') ?></p>
+            </div>
+            <button @click="show = false" class="text-red-600 hover:text-red-800 focus:outline-none">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
     <?php endif; ?>
 
     <div class="bg-surface border border-outline-variant rounded-lg overflow-hidden shadow-sm">
