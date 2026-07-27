@@ -70,6 +70,10 @@ class Home extends BaseController
             ->find();
 
         $data['title'] = 'HuniKita - Real Estate Platform';
+        
+        // Debug line added
+        dd($data['banners']);
+        
         return view('front/home', $data);
     }
 
