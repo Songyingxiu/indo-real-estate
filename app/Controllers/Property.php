@@ -26,8 +26,6 @@ class Property extends BaseController
 
         $propertyModel = new PropertyModel();
         
-        // FIX: Pass the condition as a raw string so CI4's query builder doesn't 
-        // rewrite 'cities.state_id' into 'properties.state_id' during pagination.
         $properties = $propertyModel->select('properties.*, property_images.image_path')
             ->join('cities', 'cities.id = properties.city_id')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
@@ -41,7 +39,7 @@ class Property extends BaseController
             'pager' => $propertyModel->pager
         ];
 
-        return view('front/property/state', $data);
+        return view('front/properties/state', $data);
     }
 
     public function city($slug, $stateSlug)
@@ -76,7 +74,7 @@ class Property extends BaseController
             'pager' => $propertyModel->pager
         ];
 
-        return view('front/property/city', $data);
+        return view('front/properties/city', $data);
     }
 
     public function zipcode($zipcode)
@@ -107,6 +105,6 @@ class Property extends BaseController
             'pager' => $propertyModel->pager
         ];
 
-        return view('front/property/zipcode', $data);
+        return view('front/properties/zipcode', $data);
     }
 }
