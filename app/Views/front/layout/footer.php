@@ -11,6 +11,7 @@
             <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('page/about-us') ?>">About Us</a>
             <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('page/contact-us') ?>">Contact</a>
             <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('search') ?>">Properties</a>
+            <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('faq') ?>">FAQ</a>
         </div>
         <div class="flex flex-col gap-3">
             <h4 class="font-label-md text-[14px] font-bold">Legal</h4>

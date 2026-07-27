@@ -5,7 +5,7 @@
     <div class="flex justify-between items-center mt-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-on-surface">Content Management</h1>
-            <p class="text-on-surface-variant">Manage platform news, blog posts, and static legal/informational pages.</p>
+            <p class="text-on-surface-variant">Manage platform news, blog posts, FAQs, and static legal/informational pages.</p>
         </div>
         <button @click="showEditor = true; postId = ''; postTitle = ''; postCategory = 'Blog'; postBody = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
             <span class="material-symbols-outlined text-[18px]">add</span> New Content
@@ -38,14 +38,18 @@
                                     </span>
                                 </td>
                                 <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($post->published_at)) ?></td>
-                                <td class="p-4 text-right">
+                                <td class="p-4 text-right flex justify-end gap-3 items-center">
                                     <button @click="showEditor = true; 
                                                     postId = '<?= $post->id ?>'; 
                                                     postTitle = '<?= esc($post->title, 'js') ?>'; 
                                                     postCategory = '<?= esc($post->category, 'js') ?>'; 
                                                     postBody = '<?= esc($post->content_body, 'js') ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
-                                        </td>
+                                    
+                                    <form action="<?= base_url('admin/cms/delete/' . $post->id) ?>" method="POST" class="inline m-0 p-0" onsubmit="return confirm('Are you sure you want to delete this content? This action cannot be undone.');">
+                                        <button type="submit" class="text-red-600 hover:underline font-medium">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -93,6 +97,7 @@
                                 <option value="Page">Static Info Page</option>
                                 <option value="Tips">Tips & Guides</option>
                                 <option value="Announcement">Announcement</option>
+                                <option value="FAQ">FAQ</option>
                             </select>
                         </div>
                     </div>
