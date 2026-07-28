@@ -280,9 +280,43 @@
     document.addEventListener('DOMContentLoaded', function() {
         var lat = <?= esc($property->latitude ?? -6.200000) ?>;
         var lng = <?= esc($property->longitude ?? 106.816666) ?>;
-        var map = L.map('propertyMap').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
-        L.marker([lat, lng]).addTo(map).bindPopup('<b><?= esc($property->title) ?></b>').openPopup();
+        
+        // Initialize Map
+        var map = L.map('propertyMap').setView([lat, lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+            attribution: '&copy; OpenStreetMap' 
+        }).addTo(map);
+
+        // Define a custom red icon for the main property
+        var homeIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Add Main Property Marker
+        L.marker([lat, lng], {icon: homeIcon})
+            .addTo(map)
+            .bindPopup('<b><?= esc(addslashes($property->title)) ?></b><br>Property Location')
+            .openPopup();
+
+        // Dynamically plot all POIs from the database
+        <?php if(!empty($nearbyPOIs)): ?>
+            <?php foreach($nearbyPOIs as $poi): ?>
+                var poiLat = <?= esc($poi->latitude) ?>;
+                var poiLng = <?= esc($poi->longitude) ?>;
+                
+                L.marker([poiLat, poiLng])
+                    .addTo(map)
+                    .bindPopup(
+                        '<b><?= esc(addslashes($poi->name)) ?></b><br>' + 
+                        '<?= esc($poi->category) ?> - <?= number_format($poi->distance, 2) ?> km away'
+                    );
+            <?php endforeach; ?>
+        <?php endif; ?>
     });
 
     function openGallery() {

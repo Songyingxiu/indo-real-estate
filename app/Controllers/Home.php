@@ -78,7 +78,6 @@ class Home extends BaseController
 
         $data['title'] = 'HuniKita - Real Estate Platform';
 
-        
         return view('front/home', $data);
     }
 
@@ -162,14 +161,20 @@ class Home extends BaseController
         $data['title'] = $property->title . ' - HuniKita';
         
         // Geospatial & Recommendation Data
-        $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
+        $data['nearbyProperties'] = [];
+        $data['nearbyPOIs'] = [];
+
+        // Safeguard: Only run geographic queries if the property has coordinates
+        if (!empty($property->latitude) && !empty($property->longitude)) {
+            $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
+            $data['nearbyPOIs'] = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
+        }
+
         $data['similarType'] = $propertyModel->getSimilarProperties('property_type_id', $property->property_type_id, $property->id);
         
         $minPrice = $property->tax_price * 0.8;
         $maxPrice = $property->tax_price * 1.2;
         $data['similarPrice'] = $propertyModel->where('tax_price >=', $minPrice)->where('tax_price <=', $maxPrice)->where('id !=', $property->id)->limit(5)->find();
-        
-        $data['nearbyPOIs'] = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
         
         return view('front/properties/details', $data);
     }
