@@ -5,6 +5,12 @@ use App\Models\CmsModel;
 
 class Cms extends BaseController
 {
+    public function __construct()
+    {
+        // Load the text helper to enable word_limiter() in views
+        helper('text');
+    }
+
     public function page($slug)
     {
         $cmsModel = new CmsModel();
