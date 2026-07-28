@@ -302,7 +302,7 @@
                 headers: { 
                     'Content-Type': 'application/json', 
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
                 },
                 body: JSON.stringify(data)
             })
