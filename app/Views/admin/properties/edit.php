@@ -9,7 +9,7 @@
             <h3 class="font-headline-md text-lg font-semibold mb-4">Property Details</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
-                stateId: '<?= esc($property['state_id']) ?>', 
+                stateId: '<?= esc($property['state_id'] ?? '') ?>', 
                 cities: [], 
                 isLoading: false,
                 init() {
