@@ -1,6 +1,10 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
+<!-- Leaflet Map Dependencies -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?> }">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Create New Listing</h2>
     
@@ -96,6 +100,15 @@
                     <label class="block font-semibold mb-2">Address *</label>
                     <input type="text" name="address_line_1" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                     
+                    <!-- Interactive Map for Pinpointing -->
+                    <div class="mt-4">
+                        <label class="block font-semibold mb-2">Pinpoint on Map *</label>
+                        <p class="text-xs text-on-surface-variant mb-2">Drag the marker to the exact location of the property.</p>
+                        <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
+                        <input type="hidden" name="latitude" id="propertyLat" required>
+                        <input type="hidden" name="longitude" id="propertyLng" required>
+                    </div>
+
                     <!-- POI Button Integration -->
                     <div class="mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between">
                         <div>
@@ -250,7 +263,31 @@
         </div>
     </div>
 
+    <!-- INITIALIZE LEAFLET MAP & AJAX -->
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Defaulting to East Jakarta coordinates
+            const defaultLat = -6.2250;
+            const defaultLng = 106.9004;
+
+            const map = L.map('propertyMap').setView([defaultLat, defaultLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+            document.getElementById('propertyLat').value = defaultLat;
+            document.getElementById('propertyLng').value = defaultLng;
+
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                document.getElementById('propertyLat').value = position.lat;
+                document.getElementById('propertyLng').value = position.lng;
+            });
+        });
+
         function submitAgentPoi() {
             const data = {
                 name: document.getElementById('agentPoiName').value,
@@ -275,7 +312,7 @@
                 if (data.status === 'success') {
                     alertBox.classList.add('bg-[#d3e3fd]', 'text-[#041e49]');
                     alertBox.innerText = data.message;
-                    setTimeout(() => window.location.reload(), 1500); // Reloads to update remaining POI count
+                    setTimeout(() => window.location.reload(), 1500); 
                 } else {
                     alertBox.classList.add('bg-[#ffdad6]', 'text-[#410002]');
                     alertBox.innerText = data.message;
