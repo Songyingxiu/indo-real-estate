@@ -261,13 +261,15 @@
             const savedLat = <?= !empty($property['latitude']) ? esc($property['latitude']) : '-6.2250' ?>;
             const savedLng = <?= !empty($property['longitude']) ? esc($property['longitude']) : '106.9004' ?>;
 
-            const map = L.map('propertyMap').setView([savedLat, savedLng], 15);
+            const map = L.map('propertyMap').setView([savedLat, savedLng], 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
+            // 1. Primary Property Marker (Blue & Draggable)
             const marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
+            marker.bindPopup("<b>Target Property</b><br>Drag to adjust location.").openPopup();
             
             document.getElementById('propertyLat').value = savedLat;
             document.getElementById('propertyLng').value = savedLng;
@@ -276,6 +278,27 @@
                 const position = marker.getLatLng();
                 document.getElementById('propertyLat').value = position.lat;
                 document.getElementById('propertyLng').value = position.lng;
+            });
+
+            // 2. Plot Global POIs (Green & Static)
+            const poiData = <?= json_encode($pois ?? []) ?>;
+            
+            // Custom Green Marker for POIs to distinguish them from the property
+            const poiIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            poiData.forEach(poi => {
+                if (poi.latitude && poi.longitude) {
+                    L.marker([poi.latitude, poi.longitude], { icon: poiIcon })
+                     .addTo(map)
+                     .bindPopup(`<div class="text-center"><b>${poi.name}</b><br><span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${poi.category}</span></div>`);
+                }
             });
         });
 

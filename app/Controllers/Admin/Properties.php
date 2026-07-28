@@ -67,6 +67,9 @@ class Properties extends BaseController
         $data['maxPois']     = $maxPois;
         $data['poisCreated'] = $poisCreated;
         
+        // Fetch all active POIs to display on the map
+        $data['pois'] = $poiModel->where('status', 'Active')->findAll();
+        
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
         
@@ -209,6 +212,9 @@ class Properties extends BaseController
 
         $data['maxPois']     = $maxPois;
         $data['poisCreated'] = $poisCreated;
+        
+        // Fetch all active POIs to display on the map
+        $data['pois'] = $poiModel->where('status', 'Active')->findAll();
 
         $data['property'] = $property;
         $data['propertyTypes'] = (new PropertyTypeModel())->findAll();
