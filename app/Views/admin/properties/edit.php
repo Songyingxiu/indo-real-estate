@@ -90,7 +90,7 @@
                     <!-- Interactive Map for Pinpointing -->
                     <div class="mt-4">
                         <label class="block font-semibold mb-2">Pinpoint on Map *</label>
-                        <p class="text-xs text-on-surface-variant mb-2">Drag the marker to the exact location of the property.</p>
+                        <p class="text-xs text-on-surface-variant mb-2">Drag the marker or click anywhere on the map to set the exact property location.</p>
                         <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
                         <input type="hidden" name="latitude" id="propertyLat" value="<?= esc($property['latitude'] ?? '') ?>" required>
                         <input type="hidden" name="longitude" id="propertyLng" value="<?= esc($property['longitude'] ?? '') ?>" required>
@@ -219,7 +219,7 @@
     </div>
 
     <!-- AGENT AJAX POI MODAL -->
-    <div x-data="{ showAgentPoiModal: false }" @open-poi-modal.window="showAgentPoiModal = true">
+    <div x-data="{ showAgentPoiModal: false }" @open-poi-modal.window="showAgentPoiModal = true" @close-poi-modal.window="showAgentPoiModal = false">
         <div x-show="showAgentPoiModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
             <div @click.outside="showAgentPoiModal = false" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
                 <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -256,16 +256,22 @@
 
     <!-- INITIALIZE LEAFLET MAP & AJAX -->
     <script>
+        let map;
+        let poiIcon;
+
         document.addEventListener("DOMContentLoaded", function() {
             // Using existing property coordinates, otherwise default to East Jakarta
             const savedLat = <?= !empty($property['latitude']) ? esc($property['latitude']) : '-6.2250' ?>;
             const savedLng = <?= !empty($property['longitude']) ? esc($property['longitude']) : '106.9004' ?>;
 
-            const map = L.map('propertyMap').setView([savedLat, savedLng], 14);
+            map = L.map('propertyMap').setView([savedLat, savedLng], 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
+
+            // Fix visual glitch where tiles don't load completely
+            setTimeout(() => { map.invalidateSize(); }, 250);
 
             // 1. Primary Property Marker (Blue & Draggable)
             const marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
@@ -274,17 +280,25 @@
             document.getElementById('propertyLat').value = savedLat;
             document.getElementById('propertyLng').value = savedLng;
 
+            // Update coords on Drag
             marker.on('dragend', function(e) {
                 const position = marker.getLatLng();
                 document.getElementById('propertyLat').value = position.lat;
                 document.getElementById('propertyLng').value = position.lng;
             });
 
+            // Update coords on Map Click (Easier than dragging across town)
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                document.getElementById('propertyLat').value = e.latlng.lat;
+                document.getElementById('propertyLng').value = e.latlng.lng;
+            });
+
             // 2. Plot Global POIs (Green & Static)
             const poiData = <?= json_encode($pois ?? []) ?>;
             
             // Custom Green Marker for POIs to distinguish them from the property
-            const poiIcon = L.icon({
+            poiIcon = L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                 iconSize: [25, 41],
@@ -323,10 +337,34 @@
             .then(res => res.json())
             .then(data => {
                 alertBox.classList.remove('hidden', 'bg-[#ffdad6]', 'text-[#410002]', 'bg-[#d3e3fd]', 'text-[#041e49]');
+                
                 if (data.status === 'success') {
                     alertBox.classList.add('bg-[#d3e3fd]', 'text-[#041e49]');
                     alertBox.innerText = data.message;
-                    setTimeout(() => window.location.reload(), 1500); 
+                    
+                    // Immediately plot the new green marker on the map without refreshing
+                    const newLat = parseFloat(document.getElementById('agentPoiLat').value);
+                    const newLng = parseFloat(document.getElementById('agentPoiLng').value);
+                    const newName = document.getElementById('agentPoiName').value;
+                    const newCat = document.getElementById('agentPoiCategory').value;
+
+                    if (!isNaN(newLat) && !isNaN(newLng) && map && poiIcon) {
+                        L.marker([newLat, newLng], { icon: poiIcon })
+                         .addTo(map)
+                         .bindPopup(`<div class="text-center"><b>${newName}</b><br><span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${newCat}</span></div>`);
+                    }
+
+                    // Clear the form fields for the next POI
+                    document.getElementById('agentPoiName').value = '';
+                    document.getElementById('agentPoiLat').value = '';
+                    document.getElementById('agentPoiLng').value = '';
+
+                    // Close the modal silently
+                    setTimeout(() => { 
+                        window.dispatchEvent(new CustomEvent('close-poi-modal')); 
+                        alertBox.classList.add('hidden'); // Reset alert for next time
+                    }, 1200); 
+
                 } else {
                     alertBox.classList.add('bg-[#ffdad6]', 'text-[#410002]');
                     alertBox.innerText = data.message;
