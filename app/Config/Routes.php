@@ -65,6 +65,16 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('moderation', 'Moderation::index');
     $routes->post('moderation/update-status/(:num)', 'Moderation::updateStatus/$1');
 
+    // POI
+    $routes->group('poi', ['namespace' => 'App\Controllers\Admin'], function($routes) {
+        $routes->get('/', 'Poi::index');
+        $routes->get('create', 'Poi::create');
+        $routes->post('store', 'Poi::store');
+        $routes->get('edit/(:num)', 'Poi::edit/$1');
+        $routes->post('update/(:num)', 'Poi::update/$1');
+        $routes->get('delete/(:num)', 'Poi::delete/$1'); 
+    });
+
     // Subscriptions Management (User Approvals)
     $routes->get('subscriptions', 'Subscriptions::index');
     $routes->post('subscriptions/activate/(:num)', 'Subscriptions::activate/$1');
