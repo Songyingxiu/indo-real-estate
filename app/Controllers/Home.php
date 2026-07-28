@@ -11,6 +11,7 @@ use App\Models\SavedSearchModel;
 use App\Models\AdsModel;
 use App\Models\ZipcodeModel;
 use App\Models\PoiModel;
+use App\Models\UserModel;
 use CodeIgniter\I18n\Time;
 
 class Home extends BaseController
@@ -132,7 +133,7 @@ class Home extends BaseController
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
         $poiModel = new PoiModel();
-        $adsModel = new AdsModel(); // Added for Ad placement
+        $adsModel = new AdsModel();
         
         $property = $propertyModel
             ->asObject()
@@ -148,6 +149,29 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
+        // Calculate how many POIs this property owner is allowed to display
+        $subModel = new \App\Models\SubscriptionModel();
+        $planModel = new \App\Models\SubscriptionPlanModel();
+        $userModel = new \App\Models\UserModel();
+
+        $activeSub = $subModel->where('user_id', $property->owner_id)->where('sub_status', 'Active')->first();
+        $maxPois = 0;
+        
+        if ($activeSub) {
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+            }
+        }
+
+        $owner = $userModel->find($property->owner_id);
+        $ownerRole = is_array($owner) ? ($owner['role_id'] ?? null) : ($owner->role_id ?? null);
+        
+        if ($ownerRole == 4) { // Admins get unlimited display
+            $maxPois = 9999;
+        }
+
         $isSaved = false;
         $userId = session()->get('id');
         if ($userId) {
@@ -160,8 +184,7 @@ class Home extends BaseController
         $data['property'] = $property;
         $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
-        
-        // --- PHASE 2: PROPERTY FEATURES MATRIX ---
+
         // Fetch features and group them by category for the detail view
         $db = \Config\Database::connect();
         $featuresRaw = $db->table('property_feature_map pfm')
@@ -178,7 +201,6 @@ class Home extends BaseController
         }
         $data['propertyFeatures'] = $categorizedFeatures;
 
-        // --- PHASE 2: AD PLACEMENT ---
         // Fetch specific ads meant for the detail page sidebar/content
         $today = Time::now('Asia/Jakarta')->toDateString();
         $data['detailAds'] = $adsModel->where('placement', 'property_detail')
@@ -201,7 +223,10 @@ class Home extends BaseController
         // Safeguard: Only run geographic queries if the property has coordinates
         if (!empty($property->latitude) && !empty($property->longitude)) {
             $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
-            $data['nearbyPOIs'] = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
+            
+            // Fetch all, but strictly enforce the owner's subscription POI limit
+            $allNearbyPOIs = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
+            $data['nearbyPOIs'] = array_slice($allNearbyPOIs, 0, $maxPois);
         }
 
         $data['similarType'] = $propertyModel->getSimilarProperties('property_type_id', $property->property_type_id, $property->id);
