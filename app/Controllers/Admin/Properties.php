@@ -69,6 +69,9 @@ class Properties extends BaseController
         
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
+        
+        // Note: For Phase 2 Categorized Features matrix, ensure you run the SQL commands
+        // to create feature_categories and property_feature_map, then you can update this to fetch categories.
         $data['features'] = $featureModel->where('status', 'Active')->findAll();
         
         return view('admin/properties/create', $data);
@@ -208,7 +211,17 @@ class Properties extends BaseController
         $data['property'] = $property;
         $data['propertyTypes'] = (new PropertyTypeModel())->findAll();
         $data['states'] = (new StateModel())->where('status', 'Active')->findAll();
-        $data['cities'] = (new CityModel())->where('state_id', $property['state_id'])->findAll();
+        
+        // 1. Safely extract the state_id whether $property is an array or an object
+        $stateId = is_array($property) ? ($property['state_id'] ?? null) : ($property->state_id ?? null);
+
+        // 2. Only fetch cities if a state_id actually exists, otherwise return an empty array
+        if ($stateId) {
+            $data['cities'] = (new CityModel())->where('state_id', $stateId)->findAll();
+        } else {
+            $data['cities'] = [];
+        }
+
         $data['features'] = (new FeatureModel())->where('status', 'Active')->findAll();
         
         $propertyFeatureModel = new PropertyFeatureModel();
