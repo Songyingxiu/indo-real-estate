@@ -70,8 +70,6 @@ class Properties extends BaseController
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
         
-        // Note: For Phase 2 Categorized Features matrix, ensure you run the SQL commands
-        // to create feature_categories and property_feature_map, then you can update this to fetch categories.
         $data['features'] = $featureModel->where('status', 'Active')->findAll();
         
         return view('admin/properties/create', $data);
@@ -87,7 +85,9 @@ class Properties extends BaseController
             'tax_price'        => 'required|numeric',
             'address_line_1'   => 'required',
             'latitude'         => 'required|numeric',
-            'longitude'        => 'required|numeric'
+            'longitude'        => 'required|numeric',
+            'property_images'  => 'uploaded[property_images]|is_image[property_images]',
+            'shm_document'     => 'uploaded[shm_document]|ext_in[shm_document,pdf,jpg,jpeg,png]|max_size[shm_document,5120]'
         ];
 
         if (!$this->validate($rules)) {
@@ -172,7 +172,6 @@ class Properties extends BaseController
     {
         $propertyModel = new PropertyModel();
         
-        // Support array return type from find()
         $propertyData = $propertyModel->find($id);
         if (!$propertyData) {
             return redirect()->to(base_url('admin/properties'))->with('error', 'Property not found.');
@@ -184,7 +183,6 @@ class Properties extends BaseController
             return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
         }
 
-        // POI Subscription Limits Check
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
         $poiModel = new PoiModel();
@@ -216,10 +214,8 @@ class Properties extends BaseController
         $data['propertyTypes'] = (new PropertyTypeModel())->findAll();
         $data['states'] = (new StateModel())->where('status', 'Active')->findAll();
         
-        // 1. Safely extract the state_id whether $property is an array or an object
         $stateId = is_array($property) ? ($property['state_id'] ?? null) : ($property->state_id ?? null);
 
-        // 2. Only fetch cities if a state_id actually exists, otherwise return an empty array
         if ($stateId) {
             $data['cities'] = (new CityModel())->where('state_id', $stateId)->findAll();
         } else {
@@ -231,7 +227,6 @@ class Properties extends BaseController
         $propertyFeatureModel = new PropertyFeatureModel();
         $currentFeatures = $propertyFeatureModel->where('property_id', $id)->findAll();
         
-        // Handle array of objects or array of arrays
         $featureIds = [];
         foreach ($currentFeatures as $cf) {
             $featureIds[] = is_array($cf) ? $cf['feature_id'] : $cf->feature_id;

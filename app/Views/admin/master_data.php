@@ -19,16 +19,9 @@
         </div>
     </div>
 
-    <?php if (session()->getFlashdata('success')) : ?>
-        <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-6 border border-[#a8c7fa] flex items-center gap-2">
-            <span class="material-symbols-outlined">check_circle</span>
-            <?= session()->getFlashdata('success') ?>
-        </div>
-    <?php endif; ?>
-
     <div class="flex flex-col gap-8 mt-4">
         
-        <!-- ==================== SUBSCRIPTION PACKAGES MODULE ==================== -->
+        <!-- SUBSCRIPTION PACKAGES MODULE -->
         <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200">
             <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg flex justify-between items-center">
                 <h2 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
@@ -53,7 +46,7 @@
                         <?php if(!empty($plans)): ?>
                             <?php foreach($plans as $plan): ?>
                                 <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                    <td class="py-3 px-6 font-label-md font-bold text-primary"><?= esc($plan->code ?? 'N/A') ?></td>
+                                    <td class="py-3 px-6 font-label-md font-bold text-primary"><?= esc($plan->code ?? $plan->package_code ?? 'N/A') ?></td>
                                     <td class="py-3 px-6 font-body-md text-on-surface">
                                         <span class="font-semibold block"><?= esc($plan->name) ?></span>
                                         <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block"><?= esc($plan->description ?? 'No description') ?></span>
@@ -66,7 +59,7 @@
                                     </td>
                                     <td class="py-3 px-6 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? '')) ?>'; editPlanName = '<?= esc(addslashes($plan->name)) ?>'; editPlanDesc = '<?= esc(addslashes($plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanPoi = <?= $plan->max_pois ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->direct_email_inquiry ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? $plan->package_code ?? '')) ?>'; editPlanName = '<?= esc(addslashes($plan->name)) ?>'; editPlanDesc = '<?= esc(addslashes($plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanPoi = <?= $plan->max_pois ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->allow_direct_email ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </button>
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-plan/' . $plan->id) ?>'; deleteMessage = 'Are you sure you want to permanently delete this package?';" class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
@@ -89,7 +82,7 @@
             </div>
         </section>
 
-        <!-- ==================== LOCATION TAXONOMIES OVERVIEW (3 COLUMNS) ==================== -->
+        <!--  LOCATION TAXONOMIES OVERVIEW (3 COLUMNS)  -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- Regions / States Module -->
@@ -298,7 +291,7 @@
             </section>
         </div>
 
-        <!-- ==================== POINTS OF INTEREST MODULE ==================== -->
+        <!-- POINTS OF INTEREST MODULE -->
         <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200">
             <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg flex justify-between items-center">
                 <h2 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
@@ -414,7 +407,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold mb-1">Description</label>
-                        <textarea name="description" rows="2" placeholder="List details separated by commas..." class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                        <textarea name="description" rows="2" required placeholder="List details separated by commas..." class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">Price (IDR)</label>
@@ -433,14 +426,15 @@
                         <input type="number" name="max_pois" value="0" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
                     <div class="flex flex-col gap-2 pt-4">
-                        <label class="flex items-center gap-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
                             <input type="hidden" name="allow_messages" value="0">
-                            <input type="checkbox" name="allow_messages" value="1" class="rounded border-outline-variant text-primary focus:ring-primary"> 
+                            <input type="checkbox" name="allow_messages" value="1" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4"> 
                             <span class="text-sm font-medium">Allow In-App Message System</span>
                         </label>
-                        <label class="flex items-center gap-2">
-                            <input type="hidden" name="direct_email_inquiry" value="0"><input type="checkbox" name="direct_email_inquiry" value="1" class="rounded border-outline-variant text-primary focus:ring-primary"> 
-                            <span class="text-sm">Forward Lead Alerts Direct to Email</span>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="hidden" name="direct_email_inquiry" value="0">
+                            <input type="checkbox" name="direct_email_inquiry" value="1" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4"> 
+                            <span class="text-sm font-medium">Forward Lead Alerts Direct to Email</span>
                         </label>
                     </div>
                 </div>
@@ -471,7 +465,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold mb-1">Description</label>
-                        <textarea name="description" x-model="editPlanDesc" rows="2" class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                        <textarea name="description" x-model="editPlanDesc" required rows="2" class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">Price (IDR)</label>
@@ -490,14 +484,14 @@
                         <input type="number" name="max_pois" x-model="editPlanPoi" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
                     <div class="flex flex-col gap-2 pt-4">
-                        <label class="flex items-center gap-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
                             <input type="hidden" name="allow_messages" value="0">
-                            <input type="checkbox" name="allow_messages" value="1" :checked="editPlanMsg == 1" class="rounded border-outline-variant text-primary focus:ring-primary"> 
+                            <input type="checkbox" name="allow_messages" value="1" :checked="editPlanMsg == 1" @change="editPlanMsg = $event.target.checked ? 1 : 0" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4"> 
                             <span class="text-sm font-medium">Allow In-App Message System</span>
                         </label>
-                        <label class="flex items-center gap-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
                             <input type="hidden" name="direct_email_inquiry" value="0">
-                            <input type="checkbox" name="direct_email_inquiry" value="1" :checked="editPlanEmail == 1" class="rounded border-outline-variant text-primary focus:ring-primary"> 
+                            <input type="checkbox" name="direct_email_inquiry" value="1" :checked="editPlanEmail == 1" @change="editPlanEmail = $event.target.checked ? 1 : 0" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4"> 
                             <span class="text-sm font-medium">Forward Lead Alerts Direct to Email</span>
                         </label>
                     </div>
