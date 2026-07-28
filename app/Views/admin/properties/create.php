@@ -103,9 +103,9 @@
                             <p class="text-xs text-on-surface-variant">Missing a school or hospital? Add it to the map for buyers.</p>
                         </div>
                         <?php 
-                            $poiRemaining = $maxPois - $poisCreated; 
+                            $poiRemaining = ($maxPois ?? 0) - ($poisCreated ?? 0); 
                         ?>
-                        <?php if ($maxPois > 0): ?>
+                        <?php if (isset($maxPois) && $maxPois > 0): ?>
                             <?php if ($poiRemaining > 0 || session()->get('role_id') == 4): ?>
                                 <button type="button" @click="$dispatch('open-poi-modal')" class="px-4 py-2 bg-secondary text-on-secondary rounded text-sm font-bold hover:opacity-90 transition flex items-center gap-2">
                                     <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
@@ -259,16 +259,13 @@
                 longitude: document.getElementById('agentPoiLng').value
             };
             const alertBox = document.getElementById('poiAlertMessage');
-            
-            const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
-            const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
 
             fetch('<?= base_url('agent/poi/store-ajax') ?>', { 
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json', 
                     'X-Requested-With': 'XMLHttpRequest',
-                    [csrfName]: csrfHash
+                    'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
                 },
                 body: JSON.stringify(data)
             })
@@ -288,7 +285,7 @@
                 console.error(err);
                 alertBox.classList.remove('hidden');
                 alertBox.classList.add('bg-[#ffdad6]', 'text-[#410002]');
-                alertBox.innerText = 'An error occurred while saving the POI.';
+                alertBox.innerText = 'An error occurred while saving the POI. Check your network tab for CSRF or Route errors.';
             });
         }
     </script>
