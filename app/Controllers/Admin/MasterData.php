@@ -102,6 +102,7 @@ class MasterData extends BaseController
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
+            'max_pois'           => $this->request->getPost('max_pois'),
             'allow_messages'     => $this->request->getPost('allow_messages'),
             'allow_direct_email' => $this->request->getPost('direct_email_inquiry'),
             'status'             => 'Active'
@@ -118,7 +119,8 @@ class MasterData extends BaseController
             'category'  => $this->request->getPost('category'),
             'latitude'  => $this->request->getPost('latitude'),
             'longitude' => $this->request->getPost('longitude'),
-            'status'    => 'Active'
+            'status'    => 'Active',
+            'added_by'  => session()->get('user_id') ?? session()->get('id')
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Point of Interest added!');
     }
@@ -164,6 +166,7 @@ class MasterData extends BaseController
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
+            'max_pois'           => $this->request->getPost('max_pois'),
             'allow_messages'     => $this->request->getPost('allow_messages'),
             'allow_direct_email' => $this->request->getPost('direct_email_inquiry')
         ]);

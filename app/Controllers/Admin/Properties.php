@@ -9,6 +9,9 @@ use App\Models\CityModel;
 use App\Models\FeatureModel;
 use App\Models\PropertyFeatureModel;
 use App\Models\PropertyVerificationModel;
+use App\Models\SubscriptionModel;
+use App\Models\SubscriptionPlanModel;
+use App\Models\PoiModel;
 
 class Properties extends BaseController
 {
@@ -32,6 +35,37 @@ class Properties extends BaseController
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
         $featureModel = new FeatureModel(); 
+        
+        // POI Subscription Limits Check
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        $poiModel = new PoiModel();
+        
+        $userId = session()->get('user_id');
+        $roleId = session()->get('role_id');
+
+        $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
+        
+        $maxPois = 0;
+        if ($activeSub) {
+            // Support both object and array return types
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+            }
+        }
+
+        // Admins always have unlimited POIs
+        if ($roleId == 4) {
+            $maxPois = 9999;
+        }
+
+        // Count how many POIs this specific user has added
+        $poisCreated = $poiModel->where('added_by', $userId)->countAllResults();
+
+        $data['maxPois']     = $maxPois;
+        $data['poisCreated'] = $poisCreated;
         
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
@@ -130,11 +164,46 @@ class Properties extends BaseController
     public function edit($id)
     {
         $propertyModel = new PropertyModel();
-        $property = $propertyModel->find($id);
-
-        if (!$property || (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id'))) {
-            return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access or property not found.');
+        
+        // Support array return type from find()
+        $propertyData = $propertyModel->find($id);
+        if (!$propertyData) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'Property not found.');
         }
+        
+        $property = is_object($propertyData) ? (array) $propertyData : $propertyData;
+
+        if (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id')) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
+        }
+
+        // POI Subscription Limits Check
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        $poiModel = new PoiModel();
+        
+        $userId = session()->get('user_id');
+        $roleId = session()->get('role_id');
+
+        $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
+        
+        $maxPois = 0;
+        if ($activeSub) {
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+            }
+        }
+
+        if ($roleId == 4) {
+            $maxPois = 9999;
+        }
+
+        $poisCreated = $poiModel->where('added_by', $userId)->countAllResults();
+
+        $data['maxPois']     = $maxPois;
+        $data['poisCreated'] = $poisCreated;
 
         $data['property'] = $property;
         $data['propertyTypes'] = (new PropertyTypeModel())->findAll();
@@ -144,7 +213,13 @@ class Properties extends BaseController
         
         $propertyFeatureModel = new PropertyFeatureModel();
         $currentFeatures = $propertyFeatureModel->where('property_id', $id)->findAll();
-        $data['selectedFeatureIds'] = array_column($currentFeatures, 'feature_id');
+        
+        // Handle array of objects or array of arrays
+        $featureIds = [];
+        foreach ($currentFeatures as $cf) {
+            $featureIds[] = is_array($cf) ? $cf['feature_id'] : $cf->feature_id;
+        }
+        $data['selectedFeatureIds'] = $featureIds;
 
         return view('admin/properties/edit', $data);
     }
@@ -152,9 +227,15 @@ class Properties extends BaseController
     public function update($id)
     {
         $propertyModel = new PropertyModel();
-        $property = $propertyModel->find($id);
+        $propertyData = $propertyModel->find($id);
 
-        if (!$property || (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id'))) {
+        if (!$propertyData) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'Property not found.');
+        }
+
+        $property = is_object($propertyData) ? (array) $propertyData : $propertyData;
+
+        if (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id')) {
             return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
         }
 

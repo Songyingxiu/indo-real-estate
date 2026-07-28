@@ -40,6 +40,11 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->get('saved-properties', 'User::savedProperties');
 });
 
+// Agent AJAX Routes
+$routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'userAuth'], static function ($routes) {
+    $routes->post('poi/store-ajax', 'PoiAjax::store');
+});
+
 // Admin Dashboard Routes (Protected by AdminFilter)
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
 
