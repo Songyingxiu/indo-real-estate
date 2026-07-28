@@ -14,9 +14,14 @@
             <h3 class="font-headline-md text-lg font-semibold mb-4">Property Details</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
-                stateId: '', 
+                stateId: '<?= old('state_id', '') ?>', 
                 cities: [], 
                 isLoading: false,
+                init() {
+                    if (this.stateId) {
+                        this.fetchCities();
+                    }
+                },
                 fetchCities() {
                     if (!this.stateId) {
                         this.cities = [];
@@ -42,16 +47,16 @@
                 
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Property Title *</label>
-                    <input type="text" name="title" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="text" name="title" value="<?= old('title') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
                 <div>
                     <label class="block font-semibold mb-2">Property Type *</label>
                     <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                        <option value="" disabled selected>Select a type...</option>
+                        <option value="" disabled <?= old('property_type_id') ? '' : 'selected' ?>>Select a type...</option>
                         <?php if (!empty($propertyTypes)): ?>
                             <?php foreach ($propertyTypes as $type): ?>
-                                <option value="<?= esc($type->id) ?>"><?= esc($type->type_name ?? $type->name) ?></option>
+                                <option value="<?= esc($type->id) ?>" <?= old('property_type_id') == $type->id ? 'selected' : '' ?>><?= esc($type->type_name ?? $type->name) ?></option>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <option value="" disabled>No property types found</option>
@@ -62,7 +67,7 @@
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
                     <select name="state_id" id="state_id" x-model="stateId" @change="fetchCities()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                        <option value="" disabled selected>Select a region...</option>
+                        <option value="" disabled <?= old('state_id') ? '' : 'selected' ?>>Select a region...</option>
                         <?php if (!empty($states)): ?>
                             <?php foreach ($states as $state): ?>
                                 <option value="<?= esc($state->id) ?>"><?= esc($state->region_name ?? $state->name) ?></option>
@@ -78,7 +83,7 @@
                     <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
                         <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
                         <template x-for="city in cities" :key="city.id">
-                            <option :value="city.id" x-text="city.city_name || city.name"></option>
+                            <option :value="city.id" :selected="city.id == '<?= old('city_id') ?>'" x-text="city.city_name || city.name"></option>
                         </template>
                     </select>
                 </div>
@@ -86,27 +91,27 @@
                 <div>
                     <label class="block font-semibold mb-2">Listing Type *</label>
                     <select name="listing_type" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                        <option value="Sale">For Sale</option>
-                        <option value="Rent">For Rent</option>
+                        <option value="Sale" <?= old('listing_type') == 'Sale' ? 'selected' : '' ?>>For Sale</option>
+                        <option value="Rent" <?= old('listing_type') == 'Rent' ? 'selected' : '' ?>>For Rent</option>
                     </select>
                 </div>
                 
                 <div>
                     <label class="block font-semibold mb-2">Asking Price (IDR) *</label>
-                    <input type="number" name="tax_price" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="number" name="tax_price" value="<?= old('tax_price') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
                 
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Address *</label>
-                    <input type="text" name="address_line_1" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="text" name="address_line_1" value="<?= old('address_line_1') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                     
                     <!-- Interactive Map for Pinpointing -->
                     <div class="mt-4">
                         <label class="block font-semibold mb-2">Pinpoint on Map *</label>
                         <p class="text-xs text-on-surface-variant mb-2">Drag the marker to the exact location of the property.</p>
                         <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
-                        <input type="hidden" name="latitude" id="propertyLat" required>
-                        <input type="hidden" name="longitude" id="propertyLng" required>
+                        <input type="hidden" name="latitude" id="propertyLat" value="<?= old('latitude') ?>" required>
+                        <input type="hidden" name="longitude" id="propertyLng" value="<?= old('longitude') ?>" required>
                     </div>
 
                     <!-- POI Button Integration -->
@@ -141,15 +146,15 @@
                 
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Description</label>
-                    <textarea name="description" rows="4" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded"></textarea>
+                    <textarea name="description" rows="4" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded"><?= old('description') ?></textarea>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <div><label class="block text-xs mb-1 font-semibold">Beds</label><input type="number" name="bed" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 3"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Baths</label><input type="number" name="bath" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 2"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Land (m2)</label><input type="number" name="total_land_area" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 150"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Building (m2)</label><input type="number" name="usable_area" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 120"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Beds</label><input type="number" name="bed" value="<?= old('bed') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 3"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Baths</label><input type="number" name="bath" value="<?= old('bath') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 2"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Land (m2)</label><input type="number" name="total_land_area" value="<?= old('total_land_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 150"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Building (m2)</label><input type="number" name="usable_area" value="<?= old('usable_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. 120"></div>
             </div>
         </div>
 
@@ -157,6 +162,9 @@
             <h3 class="font-headline-md text-lg font-semibold mb-2">Features & Amenities</h3>
             <p class="text-sm text-on-surface-variant mb-4">Select the premium amenities included with this property.</p>
             
+            <?php 
+                $oldFeatures = old('features') ?? []; 
+            ?>
             <?php if (!empty($categorizedFeatures)): ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <?php foreach ($categorizedFeatures as $category => $features): ?>
@@ -168,7 +176,7 @@
                             <div class="flex flex-col gap-2">
                                 <?php foreach ($features as $feature): ?>
                                     <label class="flex items-center gap-3 cursor-pointer hover:bg-surface-bright p-1.5 rounded transition-colors">
-                                        <input type="checkbox" name="features[]" value="<?= esc($feature->id ?? $feature->feature_id) ?>" class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
+                                        <input type="checkbox" name="features[]" value="<?= esc($feature->id ?? $feature->feature_id) ?>" <?= in_array(esc($feature->id ?? $feature->feature_id), $oldFeatures) ? 'checked' : '' ?> class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
                                         <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
                                     </label>
                                 <?php endforeach; ?>
@@ -185,12 +193,12 @@
             <h3 class="font-headline-md text-lg font-semibold mb-4">Media & Legal Verification</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-2">Photos (Max 5)</label>
-                    <input type="file" name="property_images[]" multiple accept="image/*" class="w-full p-2 border rounded bg-surface">
+                    <label class="block font-semibold mb-2">Photos (Max 5) *</label>
+                    <input type="file" name="property_images[]" required multiple accept="image/*" class="w-full p-2 border rounded bg-surface">
                 </div>
                 <div>
-                    <label class="block font-semibold mb-2">SHM Document</label>
-                    <input type="file" name="shm_document" accept=".pdf,.jpg" class="w-full p-2 border rounded bg-surface">
+                    <label class="block font-semibold mb-2">SHM Document *</label>
+                    <input type="file" name="shm_document" required accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded bg-surface">
                 </div>
             </div>
         </div>
@@ -266,9 +274,12 @@
     <!-- INITIALIZE LEAFLET MAP & AJAX -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Defaulting to East Jakarta coordinates
-            const defaultLat = -6.2250;
-            const defaultLng = 106.9004;
+            // Respect old validation coordinates if present
+            const oldLat = <?= old('latitude') ? esc(old('latitude')) : 'null' ?>;
+            const oldLng = <?= old('longitude') ? esc(old('longitude')) : 'null' ?>;
+            
+            const defaultLat = oldLat !== null ? oldLat : -6.2250;
+            const defaultLng = oldLng !== null ? oldLng : 106.9004;
 
             const map = L.map('propertyMap').setView([defaultLat, defaultLng], 13);
 

@@ -26,8 +26,37 @@
     
     <?= $this->include('admin/layout/sidebar') ?>
 
-    <div class="flex-1 md:ml-64 min-h-screen flex flex-col">
+    <div class="flex-1 md:ml-64 min-h-screen flex flex-col relative">
         <?= $this->include('admin/layout/header') ?>
+
+        <!-- GLOBAL BEAUTIFUL TOAST ALERTS -->
+        <div class="fixed top-20 right-8 z-[999] flex flex-col gap-3 pointer-events-none">
+            <?php if (session()->getFlashdata('success')) : ?>
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" 
+                     x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     class="bg-surface-container-lowest border-l-4 border-primary shadow-xl rounded p-4 flex items-start gap-3 pointer-events-auto max-w-sm">
+                    <span class="material-symbols-outlined text-primary">check_circle</span>
+                    <div>
+                        <h4 class="font-bold text-sm text-on-surface">Success</h4>
+                        <p class="text-xs text-on-surface-variant mt-0.5"><?= session()->getFlashdata('success') ?></p>
+                    </div>
+                    <button @click="show = false" class="ml-auto text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">close</span></button>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)" 
+                     x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     class="bg-surface-container-lowest border-l-4 border-error shadow-xl rounded p-4 flex items-start gap-3 pointer-events-auto max-w-sm">
+                    <span class="material-symbols-outlined text-error">error</span>
+                    <div>
+                        <h4 class="font-bold text-sm text-on-surface">Action Failed</h4>
+                        <p class="text-xs text-on-surface-variant mt-0.5"><?= session()->getFlashdata('error') ?></p>
+                    </div>
+                    <button @click="show = false" class="ml-auto text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">close</span></button>
+                </div>
+            <?php endif; ?>
+        </div>
 
         <main class="flex-1 p-margin-mobile md:p-margin-desktop w-full max-w-container-max mx-auto overflow-y-auto">
             <?= $this->renderSection('content') ?>
