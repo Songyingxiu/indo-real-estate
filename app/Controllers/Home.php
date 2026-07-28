@@ -132,6 +132,7 @@ class Home extends BaseController
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
         $poiModel = new PoiModel();
+        $adsModel = new AdsModel(); // Added for Ad placement
         
         $property = $propertyModel
             ->asObject()
@@ -160,6 +161,39 @@ class Home extends BaseController
         $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
         
+        // --- PHASE 2: PROPERTY FEATURES MATRIX ---
+        // Fetch features and group them by category for the detail view
+        $db = \Config\Database::connect();
+        $featuresRaw = $db->table('property_feature_map pfm')
+            ->select('f.name as feature_name, fc.name as category_name')
+            ->join('features f', 'f.id = pfm.feature_id')
+            ->join('feature_categories fc', 'fc.id = f.category_id', 'left')
+            ->where('pfm.property_id', $id)
+            ->get()->getResult();
+
+        $categorizedFeatures = [];
+        foreach ($featuresRaw as $f) {
+            $catName = !empty($f->category_name) ? $f->category_name : 'General Amenities';
+            $categorizedFeatures[$catName][] = $f->feature_name;
+        }
+        $data['propertyFeatures'] = $categorizedFeatures;
+
+        // --- PHASE 2: AD PLACEMENT ---
+        // Fetch specific ads meant for the detail page sidebar/content
+        $today = Time::now('Asia/Jakarta')->toDateString();
+        $data['detailAds'] = $adsModel->where('placement', 'property_detail')
+            ->where('status', 'Active')
+            ->groupStart()
+                ->where('start_date <=', $today)
+                ->orWhere('start_date', null)
+            ->groupEnd()
+            ->groupStart()
+                ->where('end_date >=', $today)
+                ->orWhere('end_date', null)
+            ->groupEnd()
+            ->limit(2)
+            ->findAll();
+
         // Geospatial & Recommendation Data
         $data['nearbyProperties'] = [];
         $data['nearbyPOIs'] = [];

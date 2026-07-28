@@ -113,6 +113,41 @@
                 </div>
             </section>
 
+            <!-- PHASE 2: PROPERTY FEATURES MATRIX -->
+            <?php if(!empty($propertyFeatures)): ?>
+            <section class="mt-8">
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Property Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+                    <?php foreach($propertyFeatures as $category => $features): ?>
+                        <div>
+                            <h3 class="font-bold text-on-surface flex items-center gap-2 mb-3 border-b border-outline-variant pb-2">
+                                <span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>
+                                <?= esc($category) ?>
+                            </h3>
+                            <ul class="space-y-2">
+                                <?php foreach($features as $feature): ?>
+                                    <li class="text-[14px] text-on-surface-variant flex items-start gap-2">
+                                        <span class="material-symbols-outlined text-[16px] mt-0.5 text-outline">done</span>
+                                        <?= esc($feature) ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+            <?php endif; ?>
+
+            <!-- PHASE 2: MIDDLE AD PLACEMENT -->
+            <?php if(!empty($detailAds[0])): ?>
+            <div class="w-full h-[90px] md:h-[120px] my-6 rounded overflow-hidden shadow-sm relative group cursor-pointer border border-outline-variant">
+                <a href="<?= esc($detailAds[0]->target_url) ?>" target="_blank" class="block w-full h-full">
+                    <img src="<?= base_url('uploads/ads/' . $detailAds[0]->image) ?>" class="w-full h-full object-cover">
+                    <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">Advertisement</span>
+                </a>
+            </div>
+            <?php endif; ?>
+
             <!-- NEARBY LOCATIONS (POIs) -->
             <?php if(!empty($nearbyPOIs)): ?>
             <section class="mt-4">
@@ -222,6 +257,46 @@
                     </div>
                 <?php endif; ?>
 
+                <!-- PHASE 2: MORTGAGE CALCULATOR WIDGET -->
+                <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm" x-data="mortgageCalculator()">
+                    <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">calculate</span>
+                        Estimated Payment
+                    </h3>
+                    
+                    <div class="mb-6 text-center">
+                        <span class="text-[12px] text-on-surface-variant font-medium">Monthly Total</span>
+                        <div class="font-headline-lg text-[28px] font-bold text-primary" x-text="'Rp ' + formatRupiah(monthlyPayment)"></div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Home Price (Rp)</label>
+                            <input type="text" x-model="homePrice" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded outline-none" readonly>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Down Payment (%)</label>
+                                <input type="number" x-model="dpPercent" @input="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Interest Rate (%)</label>
+                                <input type="number" step="0.1" x-model="interestRate" @input="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none focus:border-primary">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Loan Term (Years)</label>
+                            <select x-model="loanTerm" @change="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none cursor-pointer focus:border-primary">
+                                <option value="10">10 Years</option>
+                                <option value="15">15 Years</option>
+                                <option value="20">20 Years</option>
+                                <option value="30">30 Years</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AGENT CONTACT FORM -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-outline-variant">
                         <div class="relative">
@@ -369,4 +444,38 @@
         })
         .catch(error => console.error('Error:', error));
     }
+</script>
+
+<!-- PHASE 2: Mortgage Calculator Alpine Component -->
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('mortgageCalculator', () => ({
+            homePriceRaw: <?= esc($property->tax_price ?? 0) ?>,
+            homePrice: '<?= number_format($property->tax_price ?? 0, 0, ',', '.') ?>',
+            dpPercent: 20,
+            interestRate: 6.5,
+            loanTerm: 20,
+            monthlyPayment: 0,
+            
+            init() {
+                this.calculate();
+            },
+            
+            calculate() {
+                let p = this.homePriceRaw - (this.homePriceRaw * (this.dpPercent / 100)); // Principal
+                let r = (this.interestRate / 100) / 12; // Monthly Interest Rate
+                let n = this.loanTerm * 12; // Total Months
+                
+                if (r === 0) {
+                    this.monthlyPayment = p / n;
+                } else {
+                    this.monthlyPayment = p * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+                }
+            },
+            
+            formatRupiah(number) {
+                return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(number);
+            }
+        }))
+    });
 </script>

@@ -144,18 +144,28 @@
             <h3 class="font-headline-md text-lg font-semibold mb-2">Features & Amenities</h3>
             <p class="text-sm text-on-surface-variant mb-4">Select the premium amenities included with this property.</p>
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <?php if (!empty($features)): ?>
-                    <?php foreach ($features as $feature): ?>
-                        <label class="flex items-center gap-2 cursor-pointer hover:bg-surface-bright p-2 rounded transition-colors">
-                            <input type="checkbox" name="features[]" value="<?= esc($feature->id) ?>" class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
-                            <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
-                        </label>
+            <?php if (!empty($categorizedFeatures)): ?>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <?php foreach ($categorizedFeatures as $category => $features): ?>
+                        <div class="bg-surface-container-lowest p-4 border border-outline-variant rounded-lg">
+                            <h4 class="font-bold text-on-surface mb-3 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px] text-primary">category</span>
+                                <?= esc($category) ?>
+                            </h4>
+                            <div class="flex flex-col gap-2">
+                                <?php foreach ($features as $feature): ?>
+                                    <label class="flex items-center gap-3 cursor-pointer hover:bg-surface-bright p-1.5 rounded transition-colors">
+                                        <input type="checkbox" name="features[]" value="<?= esc($feature->id ?? $feature->feature_id) ?>" class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
+                                        <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <p class="text-sm text-on-surface-variant col-span-full">No additional features have been set up in Master Data.</p>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php else: ?>
+                <p class="text-sm text-on-surface-variant col-span-full bg-surface-container-lowest p-4 rounded border border-outline-variant">No additional features have been set up in Master Data.</p>
+            <?php endif; ?>
         </div>
 
         <div class="border-t border-outline-variant pt-6">
