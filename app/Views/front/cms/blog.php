@@ -25,9 +25,8 @@
                             <?= esc($post->title) ?>
                         </h2>
                         
-                        <!-- Strip HTML tags to create a clean text excerpt -->
                         <p class="text-on-surface-variant text-sm mb-6 line-clamp-3">
-                            <?= word_limiter(strip_tags(htmlspecialchars_decode($post->content_body)), 20) ?>
+                            <?= word_limiter(strip_tags(htmlspecialchars_decode($post->content_body ?? '')), 20) ?>
                         </p>
                         
                         <div class="mt-auto pt-4 border-t border-outline-variant">
