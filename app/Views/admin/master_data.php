@@ -8,7 +8,7 @@
     showEditCityModal: false, editCityId: '', editCityName: '', editCityStateId: '',
     showEditZipcodeModal: false, editZipcodeId: '', editZipcodeVal: '', editZipcodeCityId: '',
     showCreatePlanModal: false, showEditPlanModal: false,
-    editPlanId: '', editPlanCode: '', editPlanName: '', editPlanDesc: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanMsg: 0, editPlanEmail: 0,
+    editPlanId: '', editPlanCode: '', editPlanName: '', editPlanDesc: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanPoi: 0, editPlanMsg: 0, editPlanEmail: 0,
     showCreatePoiModal: false
 }">
     
@@ -45,7 +45,7 @@
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Code</th>
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Package Name</th>
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Price</th>
-                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Limits (Props/Agents)</th>
+                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Limits (Props/Agents/POIs)</th>
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant text-right">Actions</th>
                         </tr>
                     </thead>
@@ -59,13 +59,14 @@
                                         <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block"><?= esc($plan->description ?? 'No description') ?></span>
                                     </td>
                                     <td class="py-3 px-6 font-body-md text-on-surface">Rp <?= number_format($plan->price, 0, ',', '.') ?></td>
-                                    <td class="py-3 px-6 text-on-surface-variant text-sm">
-                                        <span class="bg-surface-container-high px-2 py-1 rounded mr-1"><?= esc($plan->max_properties ?? 1) ?> Props</span>
+                                    <td class="py-3 px-6 text-on-surface-variant text-sm flex gap-1 flex-wrap">
+                                        <span class="bg-surface-container-high px-2 py-1 rounded"><?= esc($plan->max_properties ?? 1) ?> Props</span>
                                         <span class="bg-surface-container-high px-2 py-1 rounded"><?= esc($plan->max_agents ?? 0) ?> Sub-Agents</span>
+                                        <span class="bg-primary-container text-on-primary-container px-2 py-1 rounded font-semibold"><?= esc($plan->max_pois ?? 0) ?> POIs</span>
                                     </td>
                                     <td class="py-3 px-6 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? '')) ?>'; editPlanName = '<?= esc(addslashes($plan->name)) ?>'; editPlanDesc = '<?= esc(addslashes($plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->direct_email_inquiry ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? '')) ?>'; editPlanName = '<?= esc(addslashes($plan->name)) ?>'; editPlanDesc = '<?= esc(addslashes($plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanPoi = <?= $plan->max_pois ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->direct_email_inquiry ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </button>
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-plan/' . $plan->id) ?>'; deleteMessage = 'Are you sure you want to permanently delete this package?';" class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
@@ -82,7 +83,7 @@
                 </table>
             </div>
             <div class="p-4 border-t border-outline-variant">
-                <?php if ($pager) : ?>
+                <?php if (isset($pager)) : ?>
                     <?= $pager->links('plans', 'tailwind_pagination') ?>
                 <?php endif ?>
             </div>
@@ -122,7 +123,7 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?php if ($pager) : ?>
+                    <?php if (isset($pager)) : ?>
                         <?= $pager->links('states', 'tailwind_pagination') ?>
                     <?php endif ?>
                 </div>
@@ -168,7 +169,7 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?php if ($pager) : ?>
+                    <?php if (isset($pager)) : ?>
                         <?= $pager->links('cities', 'tailwind_pagination') ?>
                     <?php endif ?>
                 </div>
@@ -214,7 +215,7 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?php if ($pager) : ?>
+                    <?php if (isset($pager)) : ?>
                         <?= $pager->links('zipcodes', 'tailwind_pagination') ?>
                     <?php endif ?>
                 </div>
@@ -255,7 +256,7 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?php if ($pager) : ?>
+                    <?php if (isset($pager)) : ?>
                         <?= $pager->links('types', 'tailwind_pagination') ?>
                     <?php endif ?>
                 </div>
@@ -290,7 +291,7 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?php if ($pager) : ?>
+                    <?php if (isset($pager)) : ?>
                         <?= $pager->links('features', 'tailwind_pagination') ?>
                     <?php endif ?>
                 </div>
@@ -343,7 +344,7 @@
                 </table>
             </div>
             <div class="p-4 border-t border-outline-variant">
-                <?php if ($pager) : ?>
+                <?php if (isset($pager)) : ?>
                     <?= $pager->links('pois', 'tailwind_pagination') ?>
                 <?php endif ?>
             </div>
@@ -427,6 +428,10 @@
                         <label class="block text-sm font-semibold mb-1">Max Sub-Agents Allowed</label>
                         <input type="number" name="max_agents" value="0" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Max Custom POIs Allowed</label>
+                        <input type="number" name="max_pois" value="0" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                    </div>
                     <div class="flex flex-col gap-2 pt-4">
                         <label class="flex items-center gap-2">
                             <input type="hidden" name="allow_messages" value="0">
@@ -479,6 +484,10 @@
                     <div>
                         <label class="block text-sm font-semibold mb-1">Max Sub-Agents</label>
                         <input type="number" name="max_agents" x-model="editPlanAgent" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Max Custom POIs</label>
+                        <input type="number" name="max_pois" x-model="editPlanPoi" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
                     <div class="flex flex-col gap-2 pt-4">
                         <label class="flex items-center gap-2">
