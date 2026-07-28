@@ -23,6 +23,7 @@ class MasterData extends BaseController
         $featureModel = new FeatureModel(); 
         $planModel = new SubscriptionPlanModel();
         $zipcodeModel = new ZipcodeModel();
+        $poiModel = new PoiModel();
 
         $data['propertyTypes'] = $propertyTypeModel->orderBy('id', 'DESC')->paginate(5, 'types');
         
@@ -37,6 +38,9 @@ class MasterData extends BaseController
         $data['states'] = $stateModel->orderBy('id', 'DESC')->paginate(5, 'states');
         $data['features'] = $featureModel->orderBy('id', 'DESC')->paginate(5, 'features');
         $data['plans'] = $planModel->orderBy('price', 'ASC')->paginate(10, 'plans');
+        
+        // Fetch POIs
+        $data['pois'] = $poiModel->orderBy('id', 'DESC')->paginate(5, 'pois');
 
         $data['pager'] = $propertyTypeModel->pager;
 

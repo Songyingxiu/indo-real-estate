@@ -8,7 +8,8 @@
     showEditCityModal: false, editCityId: '', editCityName: '', editCityStateId: '',
     showEditZipcodeModal: false, editZipcodeId: '', editZipcodeVal: '', editZipcodeCityId: '',
     showCreatePlanModal: false, showEditPlanModal: false,
-    editPlanId: '', editPlanCode: '', editPlanName: '', editPlanDesc: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanMsg: 0, editPlanEmail: 0
+    editPlanId: '', editPlanCode: '', editPlanName: '', editPlanDesc: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanMsg: 0, editPlanEmail: 0,
+    showCreatePoiModal: false
 }">
     
     <div class="mb-stack-lg mt-4 flex justify-between items-end">
@@ -81,7 +82,9 @@
                 </table>
             </div>
             <div class="p-4 border-t border-outline-variant">
-                <?= $pager->links('plans', 'tailwind_pagination') ?>
+                <?php if ($pager) : ?>
+                    <?= $pager->links('plans', 'tailwind_pagination') ?>
+                <?php endif ?>
             </div>
         </section>
 
@@ -119,7 +122,9 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?= $pager->links('states', 'tailwind_pagination') ?>
+                    <?php if ($pager) : ?>
+                        <?= $pager->links('states', 'tailwind_pagination') ?>
+                    <?php endif ?>
                 </div>
             </section>
 
@@ -163,7 +168,9 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?= $pager->links('cities', 'tailwind_pagination') ?>
+                    <?php if ($pager) : ?>
+                        <?= $pager->links('cities', 'tailwind_pagination') ?>
+                    <?php endif ?>
                 </div>
             </section>
 
@@ -248,7 +255,9 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?= $pager->links('types', 'tailwind_pagination') ?>
+                    <?php if ($pager) : ?>
+                        <?= $pager->links('types', 'tailwind_pagination') ?>
+                    <?php endif ?>
                 </div>
             </section>
 
@@ -281,11 +290,108 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-outline-variant">
-                    <?= $pager->links('features', 'tailwind_pagination') ?>
+                    <?php if ($pager) : ?>
+                        <?= $pager->links('features', 'tailwind_pagination') ?>
+                    <?php endif ?>
                 </div>
             </section>
         </div>
 
+        <!-- ==================== POINTS OF INTEREST MODULE ==================== -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200">
+            <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg flex justify-between items-center">
+                <h2 class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">location_on</span> Points of Interest (POI)
+                </h2>
+                <button @click="showCreatePoiModal = true" class="px-4 py-2 bg-primary text-on-primary rounded font-label-md text-label-md hover:bg-primary-container transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[18px]">add</span> Add POI
+                </button>
+            </div>
+            <div class="flex-1 overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface border-b border-outline-variant">
+                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Name</th>
+                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Category</th>
+                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Coordinates</th>
+                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(!empty($pois)): ?>
+                            <?php foreach($pois as $poi): ?>
+                                <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
+                                    <td class="py-3 px-6 font-body-md font-semibold text-on-surface"><?= esc($poi->name) ?></td>
+                                    <td class="py-3 px-6 font-body-md text-on-surface-variant">
+                                        <span class="bg-surface-container-high px-2 py-1 rounded text-xs"><?= esc($poi->category) ?></span>
+                                    </td>
+                                    <td class="py-3 px-6 text-on-surface-variant text-sm">
+                                        <span class="block">Lat: <?= esc($poi->latitude) ?></span>
+                                        <span class="block">Lng: <?= esc($poi->longitude) ?></span>
+                                    </td>
+                                    <td class="py-3 px-6 text-right">
+                                        <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-poi/' . $poi->id) ?>'; deleteMessage = 'Are you sure you want to delete this Point of Interest?';" class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="4" class="py-6 text-center text-outline">No points of interest found.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-outline-variant">
+                <?php if ($pager) : ?>
+                    <?= $pager->links('pois', 'tailwind_pagination') ?>
+                <?php endif ?>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- CREATE POI MODAL -->
+    <div x-show="showCreatePoiModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showCreatePoiModal = false" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Add Point of Interest</h2>
+                <button type="button" @click="showCreatePoiModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form action="<?= base_url('admin/master-data/store-poi') ?>" method="POST" class="overflow-y-auto custom-scrollbar">
+                <div class="p-6 flex flex-col gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Name</label>
+                        <input type="text" name="name" placeholder="e.g. Jakarta International School" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Category</label>
+                        <select name="category" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface cursor-pointer">
+                            <option value="" disabled selected>Select Category...</option>
+                            <option value="School">School</option>
+                            <option value="Station">Station</option>
+                            <option value="Hospital">Hospital</option>
+                            <option value="Mall">Mall</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Latitude</label>
+                            <input type="number" step="any" name="latitude" placeholder="-6.2088" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Longitude</label>
+                            <input type="number" step="any" name="longitude" placeholder="106.8456" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showCreatePoiModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition-colors">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition-all">Save POI</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- CREATE PACKAGE (PLAN) MODAL -->
