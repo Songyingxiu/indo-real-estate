@@ -85,7 +85,9 @@ class Properties extends BaseController
             'state_id'         => 'required|numeric',
             'city_id'          => 'required|numeric',
             'tax_price'        => 'required|numeric',
-            'address_line_1'   => 'required'
+            'address_line_1'   => 'required',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric'
         ];
 
         if (!$this->validate($rules)) {
@@ -109,6 +111,8 @@ class Properties extends BaseController
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'latitude'         => $this->request->getPost('latitude'),
+            'longitude'        => $this->request->getPost('longitude'),
             'owner_id'         => session()->get('user_id'),
             'approval_status'  => 'Draft',
             'status'           => 'Active',
@@ -258,7 +262,9 @@ class Properties extends BaseController
             'state_id'         => 'required|numeric',
             'city_id'          => 'required|numeric',
             'tax_price'        => 'required|numeric',
-            'address_line_1'   => 'required'
+            'address_line_1'   => 'required',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric'
         ];
 
         if (!$this->validate($rules)) {
@@ -278,6 +284,8 @@ class Properties extends BaseController
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'latitude'         => $this->request->getPost('latitude'),
+            'longitude'        => $this->request->getPost('longitude'),
             'approval_status'  => 'Draft' 
         ];
 

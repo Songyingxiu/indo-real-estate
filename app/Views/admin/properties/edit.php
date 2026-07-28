@@ -1,5 +1,10 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
+
+<!-- Leaflet Map Dependencies -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?> }">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Edit Property Listing</h2>
 
@@ -13,7 +18,6 @@
                 cities: [], 
                 isLoading: false,
                 init() {
-                    // Pre-load cities if editing an existing state
                     if(this.stateId) { this.fetchCities(this.stateId); }
                 },
                 fetchCities() {
@@ -83,6 +87,15 @@
                     <label class="block font-semibold mb-2">Address *</label>
                     <input type="text" name="address_line_1" value="<?= esc($property['address_line_1']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                     
+                    <!-- Interactive Map for Pinpointing -->
+                    <div class="mt-4">
+                        <label class="block font-semibold mb-2">Pinpoint on Map *</label>
+                        <p class="text-xs text-on-surface-variant mb-2">Drag the marker to the exact location of the property.</p>
+                        <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
+                        <input type="hidden" name="latitude" id="propertyLat" value="<?= esc($property['latitude'] ?? '') ?>" required>
+                        <input type="hidden" name="longitude" id="propertyLng" value="<?= esc($property['longitude'] ?? '') ?>" required>
+                    </div>
+
                     <!-- Phase 2: POI Button Integration -->
                     <div class="mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between">
                         <div>
@@ -131,7 +144,6 @@
             <h3 class="font-headline-md text-lg font-semibold mb-2">Features & Amenities</h3>
             <p class="text-sm text-on-surface-variant mb-4">Select the premium amenities included with this property.</p>
             
-            <!-- Phase 2: Categorized Features with Fallback -->
             <?php if (!empty($categorizedFeatures)): ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <?php foreach ($categorizedFeatures as $category => $catFeatures): ?>
@@ -152,7 +164,6 @@
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <!-- Fallback if the controller isn't passing categorizedFeatures yet -->
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <?php if (!empty($features)): ?>
                         <?php foreach ($features as $feature): ?>
@@ -243,7 +254,31 @@
         </div>
     </div>
 
+    <!-- INITIALIZE LEAFLET MAP & AJAX -->
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Using existing property coordinates, otherwise default to East Jakarta
+            const savedLat = <?= !empty($property['latitude']) ? esc($property['latitude']) : '-6.2250' ?>;
+            const savedLng = <?= !empty($property['longitude']) ? esc($property['longitude']) : '106.9004' ?>;
+
+            const map = L.map('propertyMap').setView([savedLat, savedLng], 15);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
+            
+            document.getElementById('propertyLat').value = savedLat;
+            document.getElementById('propertyLng').value = savedLng;
+
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                document.getElementById('propertyLat').value = position.lat;
+                document.getElementById('propertyLng').value = position.lng;
+            });
+        });
+
         function submitAgentPoi() {
             const data = {
                 name: document.getElementById('agentPoiName').value,
@@ -253,7 +288,6 @@
             };
             const alertBox = document.getElementById('poiAlertMessage');
 
-            // Phase 2 Fix: Safely inject CodeIgniter's CSRF token directly using PHP
             fetch('<?= base_url('agent/poi/store-ajax') ?>', { 
                 method: 'POST',
                 headers: { 
