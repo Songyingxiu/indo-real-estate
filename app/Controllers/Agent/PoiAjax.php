@@ -27,10 +27,23 @@ class PoiAjax extends BaseController
             ])->setStatusCode(400);
         }
 
+        // Backend Security: Check if this POI already exists globally to avoid duplicates
+        $poiModel = new PoiModel();
+        $existingPoi = $poiModel->where('name', $json->name)
+            ->where('latitude', $json->latitude)
+            ->where('longitude', $json->longitude)
+            ->first();
+
+        if ($existingPoi) {
+            return $this->response->setJSON([
+                'status' => 'success', 
+                'message' => 'Existing Point of Interest linked successfully!'
+            ]);
+        }
+
         // Backend Security: Check user subscription limits again before inserting
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
-        $poiModel = new PoiModel();
         
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
         $maxPois = 0;
@@ -67,7 +80,7 @@ class PoiAjax extends BaseController
 
         return $this->response->setJSON([
             'status' => 'success', 
-            'message' => 'Point of Interest added successfully! Map will refresh.'
+            'message' => 'Point of Interest added successfully!'
         ]);
     }
 }

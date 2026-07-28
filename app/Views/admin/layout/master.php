@@ -34,7 +34,7 @@
             <?php if (session()->getFlashdata('success')) : ?>
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" 
                      x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0 translate-x-8"
-                     class="toast-alert bg-surface-container-lowest border-l-4 border-primary shadow-2xl rounded-lg p-4 flex items-start gap-4 max-w-md w-full min-w-[320px]">
+                     class="toast-alert bg-white dark:bg-gray-800 border-l-4 border-primary shadow-2xl rounded-lg p-4 flex items-start gap-4 max-w-md w-full min-w-[320px]">
                     
                     <div class="text-primary mt-0.5 flex-shrink-0">
                         <span class="material-symbols-outlined">check_circle</span>
@@ -54,7 +54,7 @@
             <?php if (session()->getFlashdata('error')) : ?>
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 7000)" 
                      x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0 translate-x-8"
-                     class="toast-alert bg-surface-container-lowest border-l-4 border-error shadow-2xl rounded-lg p-4 flex items-start gap-4 max-w-md w-full min-w-[320px]">
+                     class="toast-alert bg-white dark:bg-gray-800 border-l-4 border-error shadow-2xl rounded-lg p-4 flex items-start gap-4 max-w-md w-full min-w-[320px]">
                     
                     <div class="text-error mt-0.5 flex-shrink-0">
                         <span class="material-symbols-outlined">error</span>
