@@ -41,7 +41,7 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
 });
 
 // Agent AJAX Routes
-$routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'userAuth'], static function ($routes) {
+$routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'adminAuth'], static function ($routes) {
     $routes->post('poi/store-ajax', 'PoiAjax::store');
 });
 
