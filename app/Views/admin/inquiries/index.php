@@ -16,8 +16,11 @@
         
         <!-- Left Panel: Threads List -->
         <div class="w-1/3 border-r border-outline-variant flex flex-col bg-surface-container-lowest">
-            <div class="p-4 border-b border-outline-variant bg-surface-container-low font-bold text-on-surface">
+            <div class="p-4 border-b border-outline-variant bg-surface-container-low font-bold text-on-surface flex justify-between items-center">
                 Active Conversations
+                <?php if(!$canReply): ?>
+                    <span class="bg-surface-container-highest text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider text-on-surface-variant">Read Only</span>
+                <?php endif; ?>
             </div>
             <div class="flex-1 overflow-y-auto custom-scrollbar">
                 <?php if (!empty($threads)): ?>
@@ -32,7 +35,7 @@
                             </div>
                             <div class="text-primary font-semibold text-[13px] truncate mb-2" x-text="thread.property_title"></div>
                             
-                            <!-- Status Dropdown (Stops click propagation to thread loader) -->
+                            <!-- Status Dropdown -->
                             <select @click.stop @change="updateThreadStatus(thread.inquiry_id, $event.target.value)" class="w-full px-2 py-1 rounded bg-surface border border-outline-variant text-[12px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
                                 <option value="Pending" :selected="thread.status == 'Pending'">Pending</option>
                                 <option value="In Discussion" :selected="thread.status == 'In Discussion'">In Discussion</option>
@@ -54,7 +57,6 @@
         <!-- Right Panel: Chat Area -->
         <div class="w-2/3 flex flex-col bg-surface relative">
             
-            <!-- Empty State -->
             <template x-if="!activeThread">
                 <div class="flex-1 flex flex-col items-center justify-center opacity-40">
                     <span class="material-symbols-outlined text-[64px] mb-4">forum</span>
@@ -62,7 +64,6 @@
                 </div>
             </template>
 
-            <!-- Chat Thread -->
             <template x-if="activeThread">
                 <div class="flex flex-col h-full w-full">
                     <!-- Chat Header -->
@@ -73,9 +74,14 @@
                                 <span class="material-symbols-outlined text-[14px]">link</span> <span x-text="activeThread.property_title"></span>
                             </a>
                         </div>
-                        <a :href="'mailto:' + activeThread.email" class="bg-surface-container-high px-3 py-1.5 rounded text-[13px] font-bold text-on-surface flex items-center gap-2 hover:bg-outline-variant/30 transition-colors">
-                            <span class="material-symbols-outlined text-[16px]">mail</span> Email Client
-                        </a>
+                        <div class="flex gap-2">
+                            <a :href="'https://wa.me/' + (activeThread.phone_number || '').replace(/[^0-9]/g, '')" target="_blank" class="bg-surface-container-high px-3 py-1.5 rounded text-[13px] font-bold text-on-surface flex items-center gap-2 hover:bg-outline-variant/30 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">call</span> Direct Chat
+                            </a>
+                            <a :href="'mailto:' + activeThread.email" class="bg-surface-container-high px-3 py-1.5 rounded text-[13px] font-bold text-on-surface flex items-center gap-2 hover:bg-outline-variant/30 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">mail</span> Email Client
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Messages Window -->
@@ -95,12 +101,14 @@
                     <!-- Input Area with Subscription Gate -->
                     <div class="p-4 border-t border-outline-variant bg-surface-container-lowest relative">
                         
-                        <!-- Subscription Overlay Block -->
                         <?php if(!$canReply): ?>
                             <div class="absolute inset-0 bg-surface/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center border-t border-outline-variant">
-                                <span class="material-symbols-outlined text-primary mb-1">lock</span>
-                                <p class="text-[14px] font-bold text-on-surface mb-2">Live Chat is a Premium Feature</p>
-                                <a href="<?= base_url('admin/pricing') ?>" class="bg-primary text-on-primary px-4 py-1.5 rounded text-[12px] font-bold hover:opacity-90">Upgrade Plan to Reply</a>
+                                <div class="bg-surface border border-outline-variant p-4 rounded-lg shadow-lg text-center max-w-sm">
+                                    <span class="material-symbols-outlined text-primary mb-2 text-3xl">lock</span>
+                                    <p class="text-[15px] font-bold text-on-surface mb-1">Live Chat is a Premium Feature</p>
+                                    <p class="text-[13px] text-on-surface-variant mb-4">Please contact the buyer directly via Email or Phone, or upgrade your plan to reply in real-time.</p>
+                                    <a href="<?= base_url('admin/pricing') ?>" class="inline-block bg-primary text-on-primary px-5 py-2 rounded text-[13px] font-bold hover:opacity-90 shadow-sm">Upgrade Plan</a>
+                                </div>
                             </div>
                         <?php endif; ?>
 
@@ -124,7 +132,7 @@
             threads: initThreads,
             activeThread: null,
             messages: [],
-            myId: <?= session()->get('id') ?>,
+            myId: <?= session()->get('id') ?? session()->get('user_id') ?? 0 ?>,
             replyText: '',
             isLoading: false,
 
@@ -166,8 +174,10 @@
                     if(data.status === 'success') {
                         this.messages.push(data.message_data);
                         this.replyText = '';
-                        this.activeThread.status = 'Replied'; // Update local thread status
+                        this.activeThread.status = 'Replied'; 
                         setTimeout(this.scrollToBottom, 100);
+                    } else if (data.status === 'error') {
+                        alert(data.message || 'An error occurred.');
                     }
                 }).catch(() => this.isLoading = false);
             },

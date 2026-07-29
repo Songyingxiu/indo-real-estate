@@ -4,24 +4,21 @@ use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
+use App\Models\AgentVerificationModel;
 
 class Profile extends BaseController 
 {
     public function index() 
     {
-        // Make sure they are logged in
         $userId = session()->get('user_id');
         if (!$userId) return redirect()->to(base_url('login'));
         
         $userModel = new UserModel();
-        // Fetch the freshest data straight from the database
         $data['user'] = $userModel->find($userId);
         
-        // Fetch Subscription Data
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
         
-        // Get the most recent active subscription for this user
         $activeSub = $subModel->where('user_id', $userId)
                               ->where('sub_status', 'Active')
                               ->orderBy('id', 'DESC')
@@ -30,10 +27,13 @@ class Profile extends BaseController
         $data['activeSubscription'] = $activeSub;
         $data['activePlan'] = null;
         
-        // If they have an active subscription, fetch the plan details (like name and price)
         if ($activeSub) {
             $data['activePlan'] = $planModel->find($activeSub->plan_id);
         }
+
+        // Fetch Agent Verification Status
+        $agentVerifyModel = new AgentVerificationModel();
+        $data['agentVerification'] = $agentVerifyModel->where('user_id', $userId)->orderBy('id', 'DESC')->first();
         
         return view('admin/profile', $data);
     }
@@ -52,7 +52,6 @@ class Profile extends BaseController
             'email'        => $this->request->getPost('email')
         ]);
 
-        // Update the active session variables so the header updates instantly
         session()->set([
             'first_name' => $this->request->getPost('first_name'),
             'last_name'  => $this->request->getPost('last_name'),
@@ -71,12 +70,10 @@ class Profile extends BaseController
         $newPassword = $this->request->getPost('new_password');
         $confirmPassword = $this->request->getPost('confirm_password');
 
-        // Security Check 1: Do the new passwords match?
         if ($newPassword !== $confirmPassword) {
             return redirect()->to(base_url('admin/profile'))->with('error', 'New passwords do not match.');
         }
 
-        // Security Check 2: Is the new password long enough?
         if (strlen($newPassword) < 8) {
             return redirect()->to(base_url('admin/profile'))->with('error', 'Password must be at least 8 characters long.');
         }
@@ -84,12 +81,10 @@ class Profile extends BaseController
         $userModel = new UserModel();
         $user = $userModel->find($userId);
 
-        // Security Check 3: Is their current password correct?
         if (!password_verify($currentPassword, $user['password'])) {
             return redirect()->to(base_url('admin/profile'))->with('error', 'Current password is incorrect.');
         }
 
-        // Hash the new password and save it
         $userModel->update($userId, [
             'password' => password_hash($newPassword, PASSWORD_DEFAULT)
         ]);

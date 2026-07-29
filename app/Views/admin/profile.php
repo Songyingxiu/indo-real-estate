@@ -14,6 +14,12 @@
             <?= session()->getFlashdata('success') ?>
         </div>
     <?php endif; ?>
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="bg-error-container text-on-error-container p-4 rounded mb-6 border border-error flex items-center gap-2">
+            <span class="material-symbols-outlined">warning</span>
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -70,7 +76,7 @@
                 </div>
             </div>
 
-            <!-- NEW SUBSCRIPTION WIDGET START -->
+            <!-- SUBSCRIPTION WIDGET -->
             <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">card_membership</span> Subscription Status
@@ -80,11 +86,11 @@
                     <div class="bg-primary-container text-on-primary-container p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div>
                             <p class="text-sm font-semibold opacity-80 mb-1">Current Plan</p>
-                            <h4 class="text-2xl font-bold"><?= esc($activePlan->name ?? 'Premium Plan') ?></h4>
+                            <h4 class="text-2xl font-bold"><?= esc($activePlan['name'] ?? $activePlan->name ?? 'Premium Plan') ?></h4>
                         </div>
                         <div class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
                             <span class="material-symbols-outlined text-[16px]">verified</span> 
-                            <?= esc($activeSubscription->sub_status) ?>
+                            <?= esc($activeSubscription['sub_status'] ?? $activeSubscription->sub_status) ?>
                         </div>
                     </div>
 
@@ -95,7 +101,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-on-surface-variant">Start Date</p>
-                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->start_date)) ?></p>
+                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription['start_date'] ?? $activeSubscription->start_date)) ?></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -104,7 +110,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-on-surface-variant">Expiration Date</p>
-                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->end_date)) ?></p>
+                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription['end_date'] ?? $activeSubscription->end_date)) ?></p>
                             </div>
                         </div>
                     </div>
@@ -117,7 +123,41 @@
                     </div>
                 <?php endif; ?>
             </div>
-            <!-- NEW SUBSCRIPTION WIDGET END -->
+
+            <!-- AGENT VERIFICATION WIDGET -->
+            <?php if ($user['role_id'] != 4 && $user['role_id'] != 1): // Only for Agents and Owners ?>
+                <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">verified_user</span> Identity Verification
+                    </h3>
+
+                    <?php if (isset($agentVerification) && $agentVerification): ?>
+                        <div class="flex items-center gap-4 p-4 rounded-lg <?= $agentVerification['approval_status'] == 'Verified' ? 'bg-[#d3e3fd] border border-[#a8c7fa]' : ($agentVerification['approval_status'] == 'Rejected' ? 'bg-[#ffdad6] border border-[#ffb4ab]' : 'bg-[#fef7e0] border border-[#ffe082]') ?>">
+                            <span class="material-symbols-outlined text-3xl <?= $agentVerification['approval_status'] == 'Verified' ? 'text-primary' : ($agentVerification['approval_status'] == 'Rejected' ? 'text-error' : 'text-[#b06000]') ?>">
+                                <?= $agentVerification['approval_status'] == 'Verified' ? 'check_circle' : ($agentVerification['approval_status'] == 'Rejected' ? 'cancel' : 'hourglass_empty') ?>
+                            </span>
+                            <div>
+                                <p class="font-bold text-on-surface">Status: <?= esc($agentVerification['approval_status']) ?></p>
+                                <p class="text-sm text-on-surface-variant">
+                                    <?= $agentVerification['approval_status'] == 'Verified' ? 'You are fully verified and can post properties.' : 'Your identity documents are currently under review.' ?>
+                                </p>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="bg-surface-container-lowest p-4 border border-outline-variant rounded-lg">
+                            <p class="text-sm text-on-surface-variant mb-4">To post listings on HuniKita, you must first verify your identity. Please upload a clear photo of your KTP.</p>
+                            
+                            <form action="<?= base_url('user/upload-agent-docs') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-on-surface mb-1">KTP Document *</label>
+                                    <input type="file" name="ktp_document" accept="image/*,.pdf" required class="w-full p-2 border border-outline-variant rounded bg-surface text-sm">
+                                </div>
+                                <button type="submit" class="px-5 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">Submit for Verification</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
             <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
@@ -181,7 +221,7 @@
         </div>
     </div>
 
-    <!-- Modals (Edit Profile & Password) Remain Unchanged Below -->
+    <!-- Modals (Edit Profile & Password) -->
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showEditModal = false" x-show="showEditModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
