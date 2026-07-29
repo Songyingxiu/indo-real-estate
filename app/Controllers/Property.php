@@ -3,6 +3,7 @@
 use App\Models\PropertyModel;
 use App\Models\CityModel;
 use App\Models\StateModel;
+use App\Models\InquiryModel;
 
 class Property extends BaseController
 {
@@ -10,13 +11,11 @@ class Property extends BaseController
     {
         $db = \Config\Database::connect();
         
-        // Convert slug back to State Name (e.g., 'jawa-barat' -> 'Jawa Barat')
         $stateName = ucwords(str_replace('-', ' ', $slug));
         $state = $db->table('states')->where('name', $stateName)->get()->getRow();
         
         if (!$state) return redirect()->to('/');
 
-        // Get City Stats (Count & Average Price)
         $cityStats = $db->table('cities c')
             ->select('c.name as city_name, COUNT(p.id) as property_count, AVG(p.tax_price) as avg_price')
             ->join('properties p', 'p.city_id = c.id', 'left')
@@ -53,13 +52,11 @@ class Property extends BaseController
 
         $propertyModel = new PropertyModel();
         
-        // Paginated list (Default 20 per page)
         $properties = $propertyModel->select('properties.*, property_images.image_path')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('city_id', $city['id'])
             ->paginate(20);
 
-        // Fetch exactly up to 150 properties for the map view
         $markers = $db->table('properties')
             ->select('id, title, tax_price, latitude, longitude')
             ->where('city_id', $city['id'])
@@ -106,5 +103,28 @@ class Property extends BaseController
         ];
 
         return view('front/properties/zipcode', $data);
+    }
+
+    public function submitInquiry()
+    {
+        $inquiryModel = new InquiryModel();
+        
+        // Compile the submitted form data into a readable message thread block
+        $compiledMessage = "Inquiry Type: " . $this->request->getPost('source') . "\n";
+        $compiledMessage .= "Name: " . $this->request->getPost('name') . "\n";
+        $compiledMessage .= "Phone: " . $this->request->getPost('phone') . "\n";
+        $compiledMessage .= "Email: " . $this->request->getPost('email') . "\n\n";
+        $compiledMessage .= "Message:\n" . $this->request->getPost('message');
+
+        $data = [
+            'property_id' => $this->request->getPost('property_id'),
+            'sender_id'   => session()->get('id'),
+            'receiver_id' => $this->request->getPost('agent_id'),
+            'message'     => $compiledMessage,
+            'status'      => 'Pending'
+        ];
+
+        $inquiryModel->insert($data);
+        return redirect()->back()->with('success', 'Your inquiry has been sent successfully! You can track it in your inbox.');
     }
 }

@@ -13,7 +13,9 @@ $routes->get('api/suggest', 'Home::suggest');
 $routes->post('search/save', 'Home::saveSearch');
 $routes->get('property/(:num)', 'Home::detail/$1');
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
-$routes->post('contact/submit-lead', 'Contact::submitLead');
+
+$routes->post('property/submit-inquiry', 'Property::submitInquiry');
+
 $routes->get('page/(:segment)', 'Cms::page/$1');
 $routes->get('faq', 'Cms::faq');
 $routes->get('news', 'Cms::blog');
@@ -32,7 +34,8 @@ $routes->get('logout', 'Auth::logout');
 
 // User Routes
 $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
-    $routes->get('inbox', 'User::inbox');
+    $routes->get('inbox', 'Inquiry::index');
+    
     $routes->get('profile', 'User::profile');
     $routes->post('update-profile', 'User::updateProfile');
     $routes->post('update-password', 'User::updatePassword');
@@ -65,6 +68,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('properties/edit/(:num)', 'Properties::edit/$1');
     $routes->post('properties/update/(:num)', 'Properties::update/$1');
     $routes->get('properties/get-cities/(:any)', 'Properties::getCities/$1');
+    
+    // Property Status AJAX Update
+    $routes->post('properties/update-status/(:num)', 'Properties::updateStatus/$1');
     
     // Property Moderation & State Machine
     $routes->get('moderation', 'Moderation::index');
@@ -118,8 +124,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
     $routes->post('master-data/update-plan/(:num)', 'MasterData::updatePlan/$1');
     $routes->post('master-data/update-zipcode/(:num)', 'MasterData::updateZipcode/$1');
-
-    // Lead & Verification Management
+    $routes->get('inquiries', 'Inquiries::index');
+    $routes->post('inquiries/update-status/(:num)', 'Inquiries::updateStatus/$1');
+    
+    // Legacy Lead routes kept temporarily just in case you haven't dropped the leads table
     $routes->get('leads', 'Leads::index');       
     $routes->post('leads/update-status/(:num)', 'Leads::updateStatus/$1');
     $routes->post('leads/delete/(:num)', 'Leads::delete/$1');        

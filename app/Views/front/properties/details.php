@@ -325,7 +325,7 @@
                     </div>
 
                     <?php if(session()->get('id')): ?>
-                        <form action="<?= base_url('contact/submit-lead') ?>" method="POST" class="flex flex-col gap-3">
+                        <form action="<?= base_url('property/submit-inquiry') ?>" method="POST" class="flex flex-col gap-3">
                             <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
                             <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
                             

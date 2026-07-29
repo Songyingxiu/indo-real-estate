@@ -35,35 +35,35 @@
                         </tr>
                     </thead>
                     <tbody class="font-body-md text-[14px] text-on-surface">
-                        <?php if(!empty($leads)): foreach($leads as $lead): ?>
+                        <?php if(!empty($inquiries)): foreach($inquiries as $inq): ?>
                             <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors group cursor-pointer">
                                 <td class="py-4 px-6">
                                     <div class="flex items-center gap-4">
                                         <div class="flex flex-col">
-                                            <a href="<?= base_url('property/' . $lead->property_id) ?>" class="font-semibold text-primary hover:underline text-[16px]">
-                                                <?= esc($lead->property_title ?? 'Unknown Property') ?>
+                                            <a href="<?= base_url('property/' . $inq->property_id) ?>" class="font-semibold text-primary hover:underline text-[16px]">
+                                                <?= esc($inq->property_title ?? 'Unknown Property') ?>
                                             </a>
-                                            <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($lead->address_line_1) ?></span>
+                                            <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($inq->address_line_1) ?></span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="py-4 px-6 text-on-surface-variant max-w-xs truncate">
-                                    <?= esc($lead->message) ?>
+                                    <?= nl2br(esc($inq->message)) ?>
                                 </td>
                                 <td class="py-4 px-6 text-on-surface-variant font-medium">
-                                    <?= date('M d, Y', strtotime($lead->created_date)) ?>
+                                    <?= date('M d, Y', strtotime($inq->created_at)) ?>
                                 </td>
                                 <td class="py-4 px-6 text-right">
                                     <?php 
-                                        $statusColor = 'bg-surface-container-high text-on-surface-variant border border-outline-variant'; // Default
-                                        if ($lead->lead_status == 'New') $statusColor = 'bg-primary-container text-white';
-                                        if (in_array($lead->lead_status, ['Contacted', 'Follow Up'])) $statusColor = 'bg-secondary-container text-on-secondary-container';
-                                        if (in_array($lead->lead_status, ['Qualified', 'Negotiation'])) $statusColor = 'bg-[#fef7e0] text-[#31302b] border border-[#eaddb9]';
-                                        if ($lead->lead_status == 'Won') $statusColor = 'bg-[#d3e3fd] text-[#041e49] border border-[#a8c7fa]';
-                                        if ($lead->lead_status == 'Lost') $statusColor = 'bg-error-container text-error border border-error/20';
+                                        $statusColor = 'bg-surface-container-high text-on-surface-variant border border-outline-variant'; 
+                                        if ($inq->status == 'Pending') $statusColor = 'bg-primary-container text-white';
+                                        if (in_array($inq->status, ['In Discussion', 'Negotiating'])) $statusColor = 'bg-[#fef7e0] text-[#31302b] border border-[#eaddb9]';
+                                        if ($inq->status == 'Under Contract') $statusColor = 'bg-secondary-container text-on-secondary-container';
+                                        if ($inq->status == 'Closed') $statusColor = 'bg-[#d3e3fd] text-[#041e49] border border-[#a8c7fa]';
+                                        if ($inq->status == 'Cancelled') $statusColor = 'bg-error-container text-error border border-error/20';
                                     ?>
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-bold <?= $statusColor ?>">
-                                        <?= esc($lead->lead_status ?? 'Sent') ?>
+                                        <?= esc($inq->status ?? 'Sent') ?>
                                     </span>
                                 </td>
                             </tr>

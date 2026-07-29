@@ -111,7 +111,7 @@
                     <span class="material-symbols-outlined">favorite</span>
                 </a>
 
-                <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/leads') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Inbox">
+                <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/inquiries') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Inbox">
                     <span class="material-symbols-outlined">mail</span>
                     <?php if ($unreadCount > 0): ?>
                         <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
@@ -137,12 +137,12 @@
                                 </div>
                             <?php else: ?>
                                 <?php foreach ($notifications as $notif): ?>
-                                    <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/leads') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
+                                    <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/inquiries') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
                                         <p class="font-label-md text-[13px] text-on-surface font-bold truncate">
                                             <?= esc($notif->property_title) ?>
                                         </p>
                                         <p class="font-caption text-caption text-on-surface-variant">
-                                            <?= $roleId == 1 ? 'Status updated to: ' . esc($notif->lead_status) : 'New inquiry received.' ?>
+                                            <?= $roleId == 1 ? 'Status updated to: ' . esc($notif->status ?? $notif->lead_status) : 'New inquiry received.' ?>
                                         </p>
                                     </a>
                                 <?php endforeach; ?>
