@@ -143,7 +143,10 @@
             <?php if(!empty($detailAds[0])): ?>
             <div class="w-full h-[90px] md:h-[120px] my-6 rounded overflow-hidden shadow-sm relative group cursor-pointer border border-outline-variant">
                 <a href="<?= esc($detailAds[0]->target_url) ?>" target="_blank" class="block w-full h-full">
-                    <img src="<?= base_url('uploads/ads/' . $detailAds[0]->image) ?>" class="w-full h-full object-cover">
+                    <?php 
+                        $adSrc = str_starts_with($detailAds[0]->image, 'http') ? esc($detailAds[0]->image) : base_url('uploads/ads/' . $detailAds[0]->image);
+                    ?>
+                    <img src="<?= $adSrc ?>" class="w-full h-full object-cover">
                     <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">Advertisement</span>
                 </a>
             </div>
@@ -184,7 +187,10 @@
                     <?php foreach(array_slice($nearbyProperties, 0, 4) as $np): ?>
                         <a href="<?= base_url('property/' . $np['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
-                                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                <?php 
+                                    $npImg = !empty($np['image_path']) ? (str_starts_with($np['image_path'], 'http') ? esc($np['image_path']) : base_url(esc($np['image_path']))) : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'; 
+                                ?>
+                                <img src="<?= $npImg ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np['title']) ?></span>
@@ -205,7 +211,10 @@
                     <?php foreach(array_slice($similarType, 0, 4) as $st): ?>
                         <a href="<?= base_url('property/' . $st['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
-                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                <?php 
+                                    $stImg = !empty($st['image_path']) ? (str_starts_with($st['image_path'], 'http') ? esc($st['image_path']) : base_url(esc($st['image_path']))) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80'; 
+                                ?>
+                                <img src="<?= $stImg ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st['title']) ?></span>
@@ -226,7 +235,10 @@
                     <?php foreach(array_slice($similarPrice, 0, 4) as $sp): ?>
                         <a href="<?= base_url('property/' . $sp['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
-                                <img src="https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                <?php 
+                                    $spImg = !empty($sp['image_path']) ? (str_starts_with($sp['image_path'], 'http') ? esc($sp['image_path']) : base_url(esc($sp['image_path']))) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80'; 
+                                ?>
+                                <img src="<?= $spImg ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($sp['title']) ?></span>

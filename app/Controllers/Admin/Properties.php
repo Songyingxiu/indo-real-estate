@@ -12,6 +12,7 @@ use App\Models\PropertyVerificationModel;
 use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\PoiModel;
+use Cloudinary\Cloudinary;
 
 class Properties extends BaseController
 {
@@ -48,7 +49,6 @@ class Properties extends BaseController
         
         $maxPois = 0;
         if ($activeSub) {
-            // Support both object and array return types
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
@@ -97,6 +97,12 @@ class Properties extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+        if (empty($cloudinaryUrl)) {
+            return redirect()->back()->withInput()->with('error', 'Cloudinary configuration is missing.');
+        }
+        $cloudinary = new Cloudinary($cloudinaryUrl);
+
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
         $propertyFeatureModel = new PropertyFeatureModel(); 
@@ -140,12 +146,14 @@ class Properties extends BaseController
                 $isFirst = true;
                 foreach ($imagefile['property_images'] as $img) {
                     if ($img->isValid() && ! $img->hasMoved()) {
-                        $newName = $img->getRandomName();
-                        $img->move(FCPATH . 'uploads/properties', $newName);
+                        // Upload to Cloudinary
+                        $response = $cloudinary->uploadApi()->upload($img->getTempName(), [
+                            'folder' => 'hunikita_properties',
+                        ]);
                         
                         $imageModel->insert([
                             'property_id' => $propertyId,
-                            'image_path'  => 'uploads/properties/' . $newName,
+                            'image_path'  => $response['secure_url'],
                             'is_primary'  => $isFirst ? 1 : 0 
                         ]);
                         $isFirst = false;
@@ -156,13 +164,15 @@ class Properties extends BaseController
 
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
-            $shmName = $shmFile->getRandomName();
-            $shmFile->move(FCPATH . 'uploads/documents', $shmName);
+            // Upload to Cloudinary
+            $response = $cloudinary->uploadApi()->upload($shmFile->getTempName(), [
+                'folder' => 'hunikita_documents',
+            ]);
 
             $propVerifyModel = new PropertyVerificationModel();
             $propVerifyModel->insert([
                 'property_id' => $propertyId,
-                'ownership_certificate' => $shmName,
+                'ownership_certificate' => $response['secure_url'],
                 'approval_status' => 'Pending Verification',
                 'status' => 'Active'
             ]);
@@ -308,17 +318,23 @@ class Properties extends BaseController
 
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
-            $shmName = $shmFile->getRandomName();
-            $shmFile->move(FCPATH . 'uploads/documents', $shmName);
-            
-            $propVerifyModel = new PropertyVerificationModel();
-            $propVerifyModel->where('property_id', $id)->delete();
-            $propVerifyModel->insert([
-                'property_id' => $id,
-                'ownership_certificate' => $shmName,
-                'approval_status' => 'Pending Verification',
-                'status' => 'Active'
-            ]);
+            // Upload to Cloudinary
+            $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+            if (!empty($cloudinaryUrl)) {
+                $cloudinary = new Cloudinary($cloudinaryUrl);
+                $response = $cloudinary->uploadApi()->upload($shmFile->getTempName(), [
+                    'folder' => 'hunikita_documents',
+                ]);
+                
+                $propVerifyModel = new PropertyVerificationModel();
+                $propVerifyModel->where('property_id', $id)->delete();
+                $propVerifyModel->insert([
+                    'property_id' => $id,
+                    'ownership_certificate' => $response['secure_url'], // Save secure URL
+                    'approval_status' => 'Pending Verification',
+                    'status' => 'Active'
+                ]);
+            }
         }
 
         return redirect()->to(base_url('admin/properties'))->with('success', 'Property updated and reset to Draft.');
