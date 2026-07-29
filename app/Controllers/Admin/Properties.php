@@ -9,6 +9,7 @@ use App\Models\CityModel;
 use App\Models\FeatureModel;
 use App\Models\PropertyFeatureModel;
 use App\Models\PropertyVerificationModel;
+use App\Models\AgentVerificationModel;
 use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\PoiModel;
@@ -33,6 +34,17 @@ class Properties extends BaseController
 
     public function create()
     {
+        $userId = session()->get('user_id');
+        $roleId = session()->get('role_id');
+
+        // Check if agent is verified
+        $agentVerifyModel = new AgentVerificationModel();
+        $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
+        
+        if ($roleId != 4 && !$isVerified) {
+            return redirect()->to(base_url('admin/profile'))->with('error', 'You must verify your identity before posting a property listing.');
+        }
+
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
         $featureModel = new FeatureModel(); 
@@ -40,9 +52,6 @@ class Properties extends BaseController
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
         $poiModel = new PoiModel();
-        
-        $userId = session()->get('user_id');
-        $roleId = session()->get('role_id');
 
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
         
@@ -74,6 +83,17 @@ class Properties extends BaseController
 
     public function store()
     {
+        $userId = session()->get('user_id');
+        $roleId = session()->get('role_id');
+
+        // Check if agent is verified before processing store
+        $agentVerifyModel = new AgentVerificationModel();
+        $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
+        
+        if ($roleId != 4 && !$isVerified) {
+            return redirect()->to(base_url('admin/profile'))->with('error', 'You must verify your identity before posting a property listing.');
+        }
+
         $rules = [
             'title'            => 'required|min_length[5]|max_length[255]',
             'property_type_id' => 'required|numeric',
