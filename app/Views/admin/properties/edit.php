@@ -126,7 +126,7 @@
                         <input type="hidden" name="longitude" id="propertyLng" value="<?= esc($property['longitude'] ?? '') ?>" required>
                     </div>
 
-                    <!-- Phase 2: POI Button Integration -->
+                    <!-- POI Button Integration -->
                     <div class="mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between">
                         <div>
                             <h4 class="font-bold text-sm text-on-surface">Enhance Local Map</h4>

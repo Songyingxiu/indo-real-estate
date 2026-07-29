@@ -131,4 +131,9 @@ class PropertyModel extends Model
             ->limit($limit)
             ->find();
     }
+
+    public function updatePropertyStatus($id, $status)
+    {
+        return $this->update($id, ['status' => $status]);
+    }
 }

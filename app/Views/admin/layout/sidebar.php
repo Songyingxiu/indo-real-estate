@@ -42,9 +42,9 @@
             <span class="font-label-md text-label-md">My Listings</span>
         </a>
         
-        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/leads')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/leads') ?>">
-            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/leads')) ? 'icon-fill' : '' ?>">leaderboard</span>
-            <span class="font-label-md text-label-md">Lead Management</span>
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/inquiries')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/inquiries') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('admin/inquiries')) ? 'icon-fill' : '' ?>">forum</span>
+            <span class="font-label-md text-label-md">Inquiries Inbox</span>
         </a>
 
         <!-- HIDDEN FROM ADMIN (ROLE 4) -->
