@@ -127,7 +127,12 @@
                                         <?= esc($task['submitter']) ?>
                                     </div>
                                 </td>
-                                <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($task['date'])) ?></td>
+                                <td class="p-4 text-on-surface-variant">
+                                    <?php 
+                                        $dateVal = $task['date'] ?? $task['created_at'] ?? $task['created_date'] ?? null;
+                                        echo !empty($dateVal) ? date('M d, Y', strtotime($dateVal)) : 'N/A';
+                                    ?>
+                                </td>
                                 <td class="p-4">
                                     <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold">
                                         <?= esc($task['status']) ?>
