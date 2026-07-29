@@ -9,6 +9,9 @@ use App\Models\CityModel;
 use App\Models\FeatureModel;
 use App\Models\PropertyFeatureModel;
 use App\Models\PropertyVerificationModel;
+use App\Models\SubscriptionModel;
+use App\Models\SubscriptionPlanModel;
+use App\Models\PoiModel;
 
 class Properties extends BaseController
 {
@@ -33,8 +36,43 @@ class Properties extends BaseController
         $stateModel = new StateModel();
         $featureModel = new FeatureModel(); 
         
+        // POI Subscription Limits Check
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        $poiModel = new PoiModel();
+        
+        $userId = session()->get('user_id');
+        $roleId = session()->get('role_id');
+
+        $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
+        
+        $maxPois = 0;
+        if ($activeSub) {
+            // Support both object and array return types
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+            }
+        }
+
+        // Admins always have unlimited POIs
+        if ($roleId == 4) {
+            $maxPois = 9999;
+        }
+
+        // Count how many POIs this specific user has added
+        $poisCreated = $poiModel->where('added_by', $userId)->countAllResults();
+
+        $data['maxPois']     = $maxPois;
+        $data['poisCreated'] = $poisCreated;
+        
+        // Fetch all active POIs to display on the map
+        $data['pois'] = $poiModel->where('status', 'Active')->findAll();
+        
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
+        
         $data['features'] = $featureModel->where('status', 'Active')->findAll();
         
         return view('admin/properties/create', $data);
@@ -48,7 +86,11 @@ class Properties extends BaseController
             'state_id'         => 'required|numeric',
             'city_id'          => 'required|numeric',
             'tax_price'        => 'required|numeric',
-            'address_line_1'   => 'required'
+            'address_line_1'   => 'required',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric',
+            'property_images'  => 'uploaded[property_images]|is_image[property_images]',
+            'shm_document'     => 'uploaded[shm_document]|ext_in[shm_document,pdf,jpg,jpeg,png]|max_size[shm_document,5120]'
         ];
 
         if (!$this->validate($rules)) {
@@ -72,6 +114,8 @@ class Properties extends BaseController
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'latitude'         => $this->request->getPost('latitude'),
+            'longitude'        => $this->request->getPost('longitude'),
             'owner_id'         => session()->get('user_id'),
             'approval_status'  => 'Draft',
             'status'           => 'Active',
@@ -130,21 +174,70 @@ class Properties extends BaseController
     public function edit($id)
     {
         $propertyModel = new PropertyModel();
-        $property = $propertyModel->find($id);
-
-        if (!$property || (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id'))) {
-            return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access or property not found.');
+        
+        $propertyData = $propertyModel->find($id);
+        if (!$propertyData) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'Property not found.');
         }
+        
+        $property = is_object($propertyData) ? (array) $propertyData : $propertyData;
+
+        if (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id')) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
+        }
+
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        $poiModel = new PoiModel();
+        
+        $userId = session()->get('user_id');
+        $roleId = session()->get('role_id');
+
+        $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
+        
+        $maxPois = 0;
+        if ($activeSub) {
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+            }
+        }
+
+        if ($roleId == 4) {
+            $maxPois = 9999;
+        }
+
+        $poisCreated = $poiModel->where('added_by', $userId)->countAllResults();
+
+        $data['maxPois']     = $maxPois;
+        $data['poisCreated'] = $poisCreated;
+        
+        // Fetch all active POIs to display on the map
+        $data['pois'] = $poiModel->where('status', 'Active')->findAll();
 
         $data['property'] = $property;
         $data['propertyTypes'] = (new PropertyTypeModel())->findAll();
         $data['states'] = (new StateModel())->where('status', 'Active')->findAll();
-        $data['cities'] = (new CityModel())->where('state_id', $property['state_id'])->findAll();
+        
+        $stateId = is_array($property) ? ($property['state_id'] ?? null) : ($property->state_id ?? null);
+
+        if ($stateId) {
+            $data['cities'] = (new CityModel())->where('state_id', $stateId)->findAll();
+        } else {
+            $data['cities'] = [];
+        }
+
         $data['features'] = (new FeatureModel())->where('status', 'Active')->findAll();
         
         $propertyFeatureModel = new PropertyFeatureModel();
         $currentFeatures = $propertyFeatureModel->where('property_id', $id)->findAll();
-        $data['selectedFeatureIds'] = array_column($currentFeatures, 'feature_id');
+        
+        $featureIds = [];
+        foreach ($currentFeatures as $cf) {
+            $featureIds[] = is_array($cf) ? $cf['feature_id'] : $cf->feature_id;
+        }
+        $data['selectedFeatureIds'] = $featureIds;
 
         return view('admin/properties/edit', $data);
     }
@@ -152,9 +245,15 @@ class Properties extends BaseController
     public function update($id)
     {
         $propertyModel = new PropertyModel();
-        $property = $propertyModel->find($id);
+        $propertyData = $propertyModel->find($id);
 
-        if (!$property || (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id'))) {
+        if (!$propertyData) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'Property not found.');
+        }
+
+        $property = is_object($propertyData) ? (array) $propertyData : $propertyData;
+
+        if (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id')) {
             return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
         }
 
@@ -164,7 +263,9 @@ class Properties extends BaseController
             'state_id'         => 'required|numeric',
             'city_id'          => 'required|numeric',
             'tax_price'        => 'required|numeric',
-            'address_line_1'   => 'required'
+            'address_line_1'   => 'required',
+            'latitude'         => 'required|numeric',
+            'longitude'        => 'required|numeric'
         ];
 
         if (!$this->validate($rules)) {
@@ -184,6 +285,8 @@ class Properties extends BaseController
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'latitude'         => $this->request->getPost('latitude'),
+            'longitude'        => $this->request->getPost('longitude'),
             'approval_status'  => 'Draft' 
         ];
 

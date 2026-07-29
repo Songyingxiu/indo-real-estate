@@ -1,19 +1,44 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<div x-data="{ showEditor: false, postId: '', postTitle: '', postCategory: 'Blog', postBody: '' }">
+<!-- Added showDeleteModal and deleteUrl to the Alpine state -->
+<div x-data="{ showEditor: false, postId: '', postTitle: '', postCategory: 'Blog', postBody: '', showDeleteModal: false, deleteUrl: '' }">
     <div class="flex justify-between items-center mt-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-on-surface">Content Management</h1>
-            <p class="text-on-surface-variant">Manage platform news, blog posts, and static legal/informational pages.</p>
+            <p class="text-on-surface-variant">Manage platform news, blog posts, FAQs, and static legal/informational pages.</p>
         </div>
         <button @click="showEditor = true; postId = ''; postTitle = ''; postCategory = 'Blog'; postBody = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
             <span class="material-symbols-outlined text-[18px]">add</span> New Content
         </button>
     </div>
 
+    <!-- SUCCESS NOTIFICATION -->
     <?php if (session()->getFlashdata('success')) : ?>
-        <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm shadow-sm"><?= session()->getFlashdata('success') ?></div>
+        <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
+             class="flex items-center justify-between bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded shadow-sm mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <p class="font-semibold text-sm"><?= session()->getFlashdata('success') ?></p>
+            </div>
+            <button @click="show = false" class="text-green-600 hover:text-green-800 focus:outline-none">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ERROR NOTIFICATION -->
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
+             class="flex items-center justify-between bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600">error</span>
+                <p class="font-semibold text-sm"><?= session()->getFlashdata('error') ?></p>
+            </div>
+            <button @click="show = false" class="text-red-600 hover:text-red-800 focus:outline-none">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
     <?php endif; ?>
 
     <div class="bg-surface border border-outline-variant rounded-lg overflow-hidden shadow-sm">
@@ -38,14 +63,19 @@
                                     </span>
                                 </td>
                                 <td class="p-4 text-on-surface-variant"><?= date('M d, Y', strtotime($post->published_at)) ?></td>
-                                <td class="p-4 text-right">
+                                <td class="p-4 text-right flex justify-end gap-3 items-center">
                                     <button @click="showEditor = true; 
                                                     postId = '<?= $post->id ?>'; 
                                                     postTitle = '<?= esc($post->title, 'js') ?>'; 
                                                     postCategory = '<?= esc($post->category, 'js') ?>'; 
                                                     postBody = '<?= esc($post->content_body, 'js') ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
-                                        </td>
+                                    
+                                    <!-- UPDATED DELETE BUTTON: Now triggers the custom modal -->
+                                    <button type="button" 
+                                            @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/cms/delete/' . $post->id) ?>';" 
+                                            class="text-red-600 hover:underline font-medium">Delete</button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -55,6 +85,36 @@
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- CUSTOM DELETE CONFIRMATION MODAL -->
+    <div x-show="showDeleteModal" 
+         style="display: none;"
+         class="fixed inset-0 z-[110] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        
+        <div @click.outside="showDeleteModal = false" 
+             x-show="showDeleteModal"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            
+            <div class="px-6 py-4 border-b border-outline-variant flex items-center gap-3 bg-red-50">
+                <span class="material-symbols-outlined text-red-600">warning</span>
+                <h2 class="text-lg font-bold text-red-800">Confirm Deletion</h2>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-on-surface-variant font-medium text-center">Are you sure you want to delete this content? <br><span class="text-red-600 font-bold">This action cannot be undone.</span></p>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                <button type="button" @click="showDeleteModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                <form :action="deleteUrl" method="POST" class="m-0 p-0">
+                    <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded font-semibold hover:bg-red-700 transition shadow-sm">Yes, Delete</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -93,6 +153,7 @@
                                 <option value="Page">Static Info Page</option>
                                 <option value="Tips">Tips & Guides</option>
                                 <option value="Announcement">Announcement</option>
+                                <option value="FAQ">FAQ</option>
                             </select>
                         </div>
                     </div>

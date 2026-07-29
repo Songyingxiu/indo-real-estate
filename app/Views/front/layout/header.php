@@ -93,6 +93,7 @@
             <a class="font-body-md text-[16px] text-primary hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Rent') ?>">Rent</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/about-us') ?>">About Us</a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('news') ?>">News & Updates</a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>">Privacy</a>
         </nav>
         
@@ -106,7 +107,6 @@
 
             <?php if($isLoggedIn): ?>
                 
-                <!-- NEW: Saved Properties Icon -->
                 <a href="<?= base_url('user/saved-properties') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Saved Properties">
                     <span class="material-symbols-outlined">favorite</span>
                 </a>
@@ -194,3 +194,8 @@
         </button>
     </div>
 </header>
+
+<?= $this->renderSection('content') ?>
+
+</body>
+</html>

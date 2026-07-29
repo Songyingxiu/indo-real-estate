@@ -11,6 +11,7 @@ use App\Models\SavedSearchModel;
 use App\Models\AdsModel;
 use App\Models\ZipcodeModel;
 use App\Models\PoiModel;
+use App\Models\UserModel;
 use CodeIgniter\I18n\Time;
 
 class Home extends BaseController
@@ -69,9 +70,15 @@ class Home extends BaseController
             ->limit(3)
             ->find();
 
+        // Fetching FAQs from the CMS table
+        $data['faqs'] = $cmsModel
+            ->where('category', 'FAQ')
+            ->where('status', 'Published')
+            ->orderBy('published_at', 'ASC')
+            ->find();
+
         $data['title'] = 'HuniKita - Real Estate Platform';
 
-        
         return view('front/home', $data);
     }
 
@@ -126,6 +133,7 @@ class Home extends BaseController
         $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
         $poiModel = new PoiModel();
+        $adsModel = new AdsModel();
         
         $property = $propertyModel
             ->asObject()
@@ -141,6 +149,29 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
+        // Calculate how many POIs this property owner is allowed to display
+        $subModel = new \App\Models\SubscriptionModel();
+        $planModel = new \App\Models\SubscriptionPlanModel();
+        $userModel = new \App\Models\UserModel();
+
+        $activeSub = $subModel->where('user_id', $property->owner_id)->where('sub_status', 'Active')->first();
+        $maxPois = 0;
+        
+        if ($activeSub) {
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+            }
+        }
+
+        $owner = $userModel->find($property->owner_id);
+        $ownerRole = is_array($owner) ? ($owner['role_id'] ?? null) : ($owner->role_id ?? null);
+        
+        if ($ownerRole == 4) { // Admins get unlimited display
+            $maxPois = 9999;
+        }
+
         $isSaved = false;
         $userId = session()->get('id');
         if ($userId) {
@@ -153,16 +184,56 @@ class Home extends BaseController
         $data['property'] = $property;
         $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
-        
+
+        // Fetch features and group them by category for the detail view
+        $db = \Config\Database::connect();
+        $featuresRaw = $db->table('property_feature_map pfm')
+            ->select('f.name as feature_name, fc.name as category_name')
+            ->join('features f', 'f.id = pfm.feature_id')
+            ->join('feature_categories fc', 'fc.id = f.category_id', 'left')
+            ->where('pfm.property_id', $id)
+            ->get()->getResult();
+
+        $categorizedFeatures = [];
+        foreach ($featuresRaw as $f) {
+            $catName = !empty($f->category_name) ? $f->category_name : 'General Amenities';
+            $categorizedFeatures[$catName][] = $f->feature_name;
+        }
+        $data['propertyFeatures'] = $categorizedFeatures;
+
+        // Fetch specific ads meant for the detail page sidebar/content
+        $today = Time::now('Asia/Jakarta')->toDateString();
+        $data['detailAds'] = $adsModel->where('placement', 'property_detail')
+            ->where('status', 'Active')
+            ->groupStart()
+                ->where('start_date <=', $today)
+                ->orWhere('start_date', null)
+            ->groupEnd()
+            ->groupStart()
+                ->where('end_date >=', $today)
+                ->orWhere('end_date', null)
+            ->groupEnd()
+            ->limit(2)
+            ->findAll();
+
         // Geospatial & Recommendation Data
-        $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
+        $data['nearbyProperties'] = [];
+        $data['nearbyPOIs'] = [];
+
+        // Safeguard: Only run geographic queries if the property has coordinates
+        if (!empty($property->latitude) && !empty($property->longitude)) {
+            $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
+            
+            // Fetch all, but strictly enforce the owner's subscription POI limit
+            $allNearbyPOIs = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
+            $data['nearbyPOIs'] = array_slice($allNearbyPOIs, 0, $maxPois);
+        }
+
         $data['similarType'] = $propertyModel->getSimilarProperties('property_type_id', $property->property_type_id, $property->id);
         
         $minPrice = $property->tax_price * 0.8;
         $maxPrice = $property->tax_price * 1.2;
         $data['similarPrice'] = $propertyModel->where('tax_price >=', $minPrice)->where('tax_price <=', $maxPrice)->where('id !=', $property->id)->limit(5)->find();
-        
-        $data['nearbyPOIs'] = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
         
         return view('front/properties/details', $data);
     }
