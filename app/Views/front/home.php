@@ -3,6 +3,28 @@
 <!-- Add Swiper JS CSS for the Carousel -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
 
+<style>
+    /* Customizing Swiper Navigation Colors */
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+        font-size: 24px !important;
+        font-weight: bold;
+    }
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: var(--color-primary, #0d6efd); /* Adjust fallback color if needed */
+        background-color: rgba(255, 255, 255, 0.8);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .swiper-button-next:hover,
+    .swiper-button-prev:hover {
+        background-color: #ffffff;
+    }
+</style>
+
 <main class="flex-grow">
     <section class="relative w-full h-[600px] flex items-center justify-center bg-surface-container-highest">
         <div class="absolute inset-0 z-0">
@@ -109,7 +131,7 @@
 
     <!-- NEWLY LISTED - SWIPER CAROUSEL UPDATE -->
     <section class="bg-surface-container-lowest py-16 border-y border-outline-variant/50">
-        <div class="max-w-[1280px] mx-auto px-4 md:px-10">
+        <div class="max-w-[1280px] mx-auto px-4 md:px-10 relative">
             <div class="flex justify-between items-end mb-8">
                 <div>
                     <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2">Newly Listed</h2>
@@ -117,7 +139,8 @@
                 </div>
             </div>
 
-            <div class="swiper newlyListedSwiper !pb-12">
+            <!-- Swiper Container -->
+            <div class="swiper newlyListedSwiper !pb-14 !pt-2">
                 <div class="swiper-wrapper">
                     <?php if (!empty($newestProperties)): ?>
                         <?php foreach ($newestProperties as $property): ?>
@@ -153,9 +176,15 @@
                         <p class="w-full text-center text-on-surface-variant py-10">No new properties currently available.</p>
                     <?php endif; ?>
                 </div>
-                <!-- Pagination -->
+                
+                <!-- Pagination & Navigation Elements -->
                 <div class="swiper-pagination"></div>
             </div>
+            
+            <!-- Navigation Arrows (positioned outside the hidden overflow) -->
+            <div class="swiper-button-prev -left-5 md:-left-6 hidden md:flex"></div>
+            <div class="swiper-button-next -right-5 md:-right-6 hidden md:flex"></div>
+            
         </div>
     </section>
 
@@ -196,14 +225,20 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Initialize Swiper for Newly Listed
+    // Initialize Swiper for Newly Listed with Navigation and Pagination
     const swiper = new Swiper('.newlyListedSwiper', {
         slidesPerView: 1,
         spaceBetween: 24,
         pagination: {
             el: '.swiper-pagination',
             clickable: true,
+            dynamicBullets: true,
         },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        grabCursor: true, // Show grab cursor for better UX
         breakpoints: {
             768: {
                 slidesPerView: 2,
