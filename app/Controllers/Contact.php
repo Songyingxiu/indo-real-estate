@@ -1,6 +1,6 @@
 <?php namespace App\Controllers;
 
-use App\Models\LeadModel;
+use App\Models\InquiryModel;
 
 class Contact extends BaseController
 {
@@ -21,24 +21,24 @@ class Contact extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Spam Protection: Please ensure all fields are filled out correctly (e.g. valid phone number, message must be > 10 characters).');
+            return redirect()->back()->withInput()->with('error', 'Spam Protection: Please ensure all fields are filled out correctly.');
         }
 
-        // 3. Save to Database
-        $leadModel = new LeadModel();
+        // 3. Save to Database using the new Threaded Inquiry System
+        $inquiryModel = new InquiryModel();
         
-        $leadModel->insert([
+        $source = $this->request->getPost('source');
+        $originalMessage = $this->request->getPost('message');
+        
+        // Append the inquiry source to the message for the agent's context
+        $formattedMessage = "Inquiry Type: " . $source . "\n\n" . $originalMessage;
+        
+        $inquiryModel->insert([
             'property_id' => $this->request->getPost('property_id'),
-            'buyer_id'    => session()->get('id'),
-            'agent_id'    => $this->request->getPost('agent_id'),
-            'name'        => $this->request->getPost('name'),
-            'phone'       => $this->request->getPost('phone'),
-            'email'       => $this->request->getPost('email'),
-            'message'     => $this->request->getPost('message'),
-            'source'      => $this->request->getPost('source'), 
-            'lead_status' => 'New',
-            'status'      => 'Active',
-            'is_read'     => 0
+            'sender_id'   => session()->get('id'),
+            'receiver_id' => $this->request->getPost('agent_id'),
+            'message'     => $formattedMessage,
+            'status'      => 'Pending'
         ]);
 
         return redirect()->back()->with('success', 'Your inquiry has been securely sent to the agent!');

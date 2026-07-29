@@ -3,7 +3,7 @@
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\PropertyModel;
-use App\Models\LeadModel;
+use App\Models\InquiryModel;
 
 class Reports extends BaseController 
 {
@@ -13,12 +13,12 @@ class Reports extends BaseController
 
         $userModel = new UserModel();
         $propertyModel = new PropertyModel();
-        $leadModel = new LeadModel();
+        $inquiryModel = new InquiryModel();
 
         // Gather quick stats from existing tables
         $totalUsers = $userModel->countAllResults();
         $totalProperties = $propertyModel->countAllResults();
-        $totalLeads = $leadModel->countAllResults();
+        $totalInquiries = $inquiryModel->countAllResults();
 
         // Setup CSV headers for download
         $filename = 'System_Overview_Report_' . date('Ymd_His') . '.csv';
@@ -34,7 +34,7 @@ class Reports extends BaseController
         fputcsv($file, ['Metric', 'Total Count']);
         fputcsv($file, ['Registered Users', $totalUsers]);
         fputcsv($file, ['Property Listings', $totalProperties]);
-        fputcsv($file, ['Buyer Leads Generated', $totalLeads]);
+        fputcsv($file, ['Buyer Inquiries Generated', $totalInquiries]);
         
         fclose($file);
         exit; // Stop execution so no HTML is rendered into the CSV

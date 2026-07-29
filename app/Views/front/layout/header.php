@@ -142,7 +142,7 @@
                                             <?= esc($notif->property_title) ?>
                                         </p>
                                         <p class="font-caption text-caption text-on-surface-variant">
-                                            <?= $roleId == 1 ? 'Status updated to: ' . esc($notif->status ?? $notif->lead_status) : 'New inquiry received.' ?>
+                                            <?= $roleId == 1 ? 'Status updated to: ' . esc($notif->status) : 'New inquiry received.' ?>
                                         </p>
                                     </a>
                                 <?php endforeach; ?>
