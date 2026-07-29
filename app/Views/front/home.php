@@ -12,7 +12,7 @@
     }
     .swiper-button-next,
     .swiper-button-prev {
-        color: var(--color-primary, #0d6efd); /* Adjust fallback color if needed */
+        color: var(--color-primary, #0d6efd); 
         background-color: rgba(255, 255, 255, 0.8);
         width: 44px;
         height: 44px;
@@ -73,8 +73,12 @@
                 <?php foreach ($banners as $banner): ?>
                     <div class="min-w-full md:min-w-[50%] lg:min-w-[33%] snap-center rounded-xl overflow-hidden shadow-md bg-surface border border-outline-variant group">
                         <a href="<?= base_url('promo/' . $banner->id) ?>" class="block w-full h-full relative">
-                            <!-- FIX: Removed the duplicate 'uploads/ads/' string -->
-                            <img src="<?= base_url(esc($banner->image_path)) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <?php 
+                                // FIX: Check both column naming conventions defensively 
+                                $adImg = $banner->image_path ?? $banner->image ?? '';
+                                $adSrc = str_starts_with($adImg, 'http') ? esc($adImg) : base_url('uploads/ads/' . esc($adImg)); 
+                            ?>
+                            <img src="<?= $adSrc ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                                 <h3 class="text-white font-bold text-lg drop-shadow-md"><?= esc($banner->title) ?></h3>
                             </div>
@@ -119,12 +123,14 @@
                                 </a>
                             </h3>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name) ?>
+                                <!-- FIX: Area mapping fallback -->
+                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                             </p>
                             <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area) ?> m²</div>
+                                <!-- FIX: Area mapping fallback -->
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
                             </div>
                         </div>
                     </article>
@@ -172,12 +178,14 @@
                                             </a>
                                         </h3>
                                         <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name) ?>
+                                            <!-- FIX: Area mapping fallback -->
+                                            <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                                         </p>
                                         <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area) ?> m²</div>
+                                            <!-- FIX: Area mapping fallback -->
+                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
                                         </div>
                                     </div>
                                 </article>
@@ -188,11 +196,9 @@
                     <?php endif; ?>
                 </div>
                 
-                <!-- Pagination & Navigation Elements -->
                 <div class="swiper-pagination"></div>
             </div>
             
-            <!-- Navigation Arrows (positioned outside the hidden overflow) -->
             <div class="swiper-button-prev -left-5 md:-left-6 hidden md:flex"></div>
             <div class="swiper-button-next -right-5 md:-right-6 hidden md:flex"></div>
             
@@ -230,13 +236,10 @@
 
 </main>
 
-<!-- Swiper JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Initialize Swiper for Newly Listed with Navigation and Pagination
     const swiper = new Swiper('.newlyListedSwiper', {
         slidesPerView: 1,
         spaceBetween: 24,
@@ -260,14 +263,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Search Autocomplete Logic Update
     const searchInput = document.getElementById('searchInput');
     const suggestDropdown = document.getElementById('suggestDropdown');
     let timeout = null;
 
     if (!searchInput || !suggestDropdown) return;
 
-    // Helper function to create SEO friendly slugs
     const createSlug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
     searchInput.addEventListener('input', function() {
@@ -301,11 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span class="text-[10px] bg-surface-container px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">${item.category}</span>
                             `;
                             
-                            // Advanced Routing Based on Mentor Feedback
                             div.addEventListener('click', () => {
                                 let targetUrl = '';
-                                
-                                // Prefer API-provided URL if available, otherwise construct the SEO slug
                                 if (item.url) {
                                     targetUrl = item.url;
                                 } else {
@@ -321,7 +319,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         targetUrl = `<?= base_url('search') ?>?q=${encodeURIComponent(item.text)}`;
                                     }
                                 }
-                                
                                 window.location.href = targetUrl;
                             });
                             
