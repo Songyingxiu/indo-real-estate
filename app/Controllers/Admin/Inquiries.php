@@ -2,6 +2,8 @@
 
 use App\Controllers\BaseController;
 use App\Models\InquiryModel;
+use App\Models\SubscriptionModel;
+use App\Models\SubscriptionPlanModel;
 
 class Inquiries extends BaseController
 {
@@ -19,8 +21,33 @@ class Inquiries extends BaseController
             ->findAll();
 
         $role = session()->get('role_id');
-        $planId = session()->get('plan_id') ?? 1;
-        $canReply = ($role == 4) || in_array($planId, [2, 3]);
+        $canReply = false;
+
+        // DB Driven Real-Time Plan Validation
+        if ($role == 4) {
+            $canReply = true;
+        } else {
+            $subModel = new SubscriptionModel();
+            $planModel = new SubscriptionPlanModel();
+            
+            $activeSub = $subModel->where('user_id', $userId)
+                                  ->where('sub_status', 'Active')
+                                  ->orderBy('id', 'DESC')
+                                  ->first();
+                                  
+            if ($activeSub) {
+                $planId = is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id'];
+                $plan = $planModel->find($planId);
+                if ($plan) {
+                    $planName = strtolower(is_object($plan) ? $plan->name : $plan['name']);
+                    
+                    // Allow reply only if plan name does NOT contain 'free' or 'basic'
+                    if (strpos($planName, 'free') === false && strpos($planName, 'basic') === false) {
+                        $canReply = true;
+                    }
+                }
+            }
+        }
 
         $data = [
             'threads'  => $threads,
@@ -59,10 +86,36 @@ class Inquiries extends BaseController
 
     public function reply()
     {
-        // Enforce Server-Side Plan Restrictions
+        $userId = session()->get('id') ?? session()->get('user_id');
         $role = session()->get('role_id');
-        $planId = session()->get('plan_id') ?? 1;
-        if ($role != 4 && !in_array($planId, [2, 3])) {
+        $canReply = false;
+
+        // DB Driven Real-Time Plan Validation (Backend Security Check)
+        if ($role == 4) {
+            $canReply = true;
+        } else {
+            $subModel = new SubscriptionModel();
+            $planModel = new SubscriptionPlanModel();
+            
+            $activeSub = $subModel->where('user_id', $userId)
+                                  ->where('sub_status', 'Active')
+                                  ->orderBy('id', 'DESC')
+                                  ->first();
+                                  
+            if ($activeSub) {
+                $planId = is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id'];
+                $plan = $planModel->find($planId);
+                if ($plan) {
+                    $planName = strtolower(is_object($plan) ? $plan->name : $plan['name']);
+                    
+                    if (strpos($planName, 'free') === false && strpos($planName, 'basic') === false) {
+                        $canReply = true;
+                    }
+                }
+            }
+        }
+
+        if (!$canReply) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Your current subscription plan does not support Live Chat.']);
         }
 
@@ -72,7 +125,7 @@ class Inquiries extends BaseController
         $data = [
             'parent_id'   => $json->parent_id,
             'property_id' => $json->property_id,
-            'sender_id'   => session()->get('id') ?? session()->get('user_id'),
+            'sender_id'   => $userId,
             'receiver_id' => $json->receiver_id,
             'message'     => $json->message,
             'status'      => 'Replied'
