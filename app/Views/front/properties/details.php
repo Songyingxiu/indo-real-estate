@@ -115,7 +115,7 @@
                 </div>
             </section>
 
-            <!-- PROPERTY FEATURES MATRIX -->
+            <!-- PHASE 2: PROPERTY FEATURES MATRIX -->
             <?php if(!empty($propertyFeatures)): ?>
             <section class="mt-8">
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Property Details</h2>
@@ -140,7 +140,7 @@
             </section>
             <?php endif; ?>
 
-            <!-- MIDDLE AD PLACEMENT -->
+            <!-- PHASE 2: MIDDLE AD PLACEMENT -->
             <?php if(!empty($detailAds[0])): ?>
             <div class="w-full h-[90px] md:h-[120px] my-6 rounded overflow-hidden shadow-sm relative group cursor-pointer border border-outline-variant">
                 <a href="<?= esc($detailAds[0]->target_url) ?>" target="_blank" class="block w-full h-full">
@@ -259,7 +259,7 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- MORTGAGE CALCULATOR WIDGET -->
+                <!-- PHASE 2: MORTGAGE CALCULATOR WIDGET -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm" x-data="mortgageCalculator()">
                     <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">calculate</span>
@@ -448,7 +448,7 @@
     }
 </script>
 
-<!-- Mortgage Calculator Alpine Component -->
+<!-- PHASE 2: Mortgage Calculator Alpine Component -->
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('mortgageCalculator', () => ({

@@ -23,22 +23,35 @@ class Subscription extends BaseController
         $planId = $this->request->getPost('plan_id') ?? session()->get('checkout_plan_id');
         if (!$planId) return redirect()->to(base_url('admin/pricing'));
 
-        // --- GATEKEEPER: Prevent Duplicate Subscriptions ---
+        // --- GATEKEEPER UPDATE: Allow Upgrades and Replace Pending ---
         $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        
         $existingSub = $subModel->where('user_id', session()->get('id'))
                                 ->whereIn('sub_status', ['Active', 'Pending'])
                                 ->first();
         
         if ($existingSub) {
-            session()->remove('checkout_plan_id');
-            $statusText = (isset($existingSub->sub_status) ? $existingSub->sub_status : $existingSub['sub_status']) == 'Pending' ? 'a pending payment awaiting verification' : 'an active subscription';
-            return redirect()->to(base_url('admin/dashboard'))->with('error', "You already have $statusText. You can only subscribe to one plan per year.");
+            $existingStatus = is_array($existingSub) ? $existingSub['sub_status'] : $existingSub->sub_status;
+            $existingPlanId = is_array($existingSub) ? $existingSub['plan_id'] : $existingSub->plan_id;
+            $existingSubId  = is_array($existingSub) ? $existingSub['id'] : $existingSub->id;
+            
+            $existingPlan = $planModel->find($existingPlanId);
+
+            if ($existingStatus == 'Pending') {
+                // Delete the old abandoned checkout attempt so they can try again
+                $subModel->delete($existingSubId);
+            } elseif ($existingPlan && $existingPlan->price == 0) {
+                // They are on a free plan, allow them to checkout an upgrade by updating old sub status
+                $subModel->update($existingSubId, ['sub_status' => 'Upgraded', 'status' => 'Inactive']);
+            } else {
+                session()->remove('checkout_plan_id');
+                return redirect()->to(base_url('admin/dashboard'))->with('error', "You already have an active paid subscription.");
+            }
         }
         // ---------------------------------------------------
 
         session()->set('checkout_plan_id', $planId);
-
-        $planModel = new SubscriptionPlanModel();
         $plan = $planModel->find($planId);
 
         if (!$plan) return redirect()->to(base_url('admin/pricing'))->with('error', 'Plan not found.');
@@ -137,8 +150,8 @@ class Subscription extends BaseController
         // Clear the session state to prevent checkout loops
         session()->remove('checkout_plan_id');
         
-        // Redirect directly to the newly generated invoice
-        return redirect()->to(base_url("admin/subscription/invoice/{$paymentId}"))->with('success', 'Payment proof uploaded! Your invoice has been generated and is pending verification.');
+        // Redirect directly to the dashboard per user request instead of invoice
+        return redirect()->to(base_url("admin/dashboard"))->with('success', 'Payment proof uploaded! Your plan is pending verification.');
     }
 
     public function invoice($paymentId)

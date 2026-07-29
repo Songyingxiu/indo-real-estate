@@ -15,6 +15,8 @@ $routes->get('property/(:num)', 'Home::detail/$1');
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 $routes->post('contact/submit-lead', 'Contact::submitLead');
 $routes->get('page/(:segment)', 'Cms::page/$1');
+$routes->get('faq', 'Cms::faq');
+$routes->get('news', 'Cms::blog');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // SEO-Friendly Location Routes
@@ -36,6 +38,11 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->post('update-password', 'User::updatePassword');
     $routes->post('upload-agent-docs', 'User::uploadAgentDocs');
     $routes->get('saved-properties', 'User::savedProperties');
+});
+
+// Agent AJAX Routes
+$routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'adminAuth'], static function ($routes) {
+    $routes->post('poi/store-ajax', 'PoiAjax::store');
 });
 
 // Admin Dashboard Routes (Protected by AdminFilter)
@@ -62,6 +69,16 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     // Property Moderation & State Machine
     $routes->get('moderation', 'Moderation::index');
     $routes->post('moderation/update-status/(:num)', 'Moderation::updateStatus/$1');
+
+    // POI
+    $routes->group('poi', ['namespace' => 'App\Controllers\Admin'], function($routes) {
+        $routes->get('/', 'Poi::index');
+        $routes->get('create', 'Poi::create');
+        $routes->post('store', 'Poi::store');
+        $routes->get('edit/(:num)', 'Poi::edit/$1');
+        $routes->post('update/(:num)', 'Poi::update/$1');
+        $routes->get('delete/(:num)', 'Poi::delete/$1'); 
+    });
 
     // Subscriptions Management (User Approvals)
     $routes->get('subscriptions', 'Subscriptions::index');
@@ -115,6 +132,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     // System Settings & Content
     $routes->get('cms', 'Cms::index');
     $routes->post('cms/save', 'Cms::savePost');
+    $routes->post('cms/delete/(:num)', 'Cms::delete/$1');
     $routes->get('seo', 'Seo::index');
     $routes->post('seo/save', 'Seo::saveSettings');
 
