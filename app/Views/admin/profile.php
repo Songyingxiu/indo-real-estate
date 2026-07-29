@@ -147,7 +147,8 @@
                         <div class="bg-surface-container-lowest p-4 border border-outline-variant rounded-lg">
                             <p class="text-sm text-on-surface-variant mb-4">To post listings on HuniKita, you must first verify your identity. Please upload a clear photo of your KTP.</p>
                             
-                            <form action="<?= base_url('user/upload-agent-docs') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="<?= base_url('admin/profile/upload-docs') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                <?= csrf_field() ?>
                                 <div>
                                     <label class="block text-sm font-semibold text-on-surface mb-1">KTP Document *</label>
                                     <input type="file" name="ktp_document" accept="image/*,.pdf" required class="w-full p-2 border border-outline-variant rounded bg-surface text-sm">
