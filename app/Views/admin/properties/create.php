@@ -245,7 +245,7 @@
             <h3 class="font-headline-md text-lg font-semibold mb-4">Media & Legal Verification</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-2">Photos (Max 5) *</label>
+                    <label class="block font-semibold mb-2">Photos *</label>
                     <input type="file" name="property_images[]" required multiple accept="image/*" class="w-full p-2 border rounded bg-surface">
                 </div>
                 <div>
