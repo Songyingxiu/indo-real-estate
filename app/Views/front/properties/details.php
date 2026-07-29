@@ -69,7 +69,7 @@
                         </div>
                         <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
                             <span class="material-symbols-outlined mr-2">location_on</span>
-                            <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location') ?>
+                            <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location') ?><?= !empty($property->zip_code) ? ', ' . esc($property->zip_code) : '' ?>
                         </p>
                     </div>
                     <div class="text-left md:text-right">
@@ -238,7 +238,6 @@
                                     $rawSp = $sp['image_path'] ?? $sp['image'] ?? '';
                                     $spImg = !empty($rawSp) ? (str_starts_with($rawSp, 'http') ? esc($rawSp) : base_url(esc($rawSp))) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80'; 
                                 ?>
-                                <!-- FIX: Added onerror fallback here -->
                                 <img src="<?= $spImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">

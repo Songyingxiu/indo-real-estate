@@ -15,19 +15,29 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
                 stateId: '<?= old('state_id', '') ?>', 
+                cityId: '<?= old('city_id', '') ?>',
                 cities: [], 
+                zipcodes: [],
                 isLoading: false,
+                isZipLoading: false,
                 init() {
                     if (this.stateId) {
                         this.fetchCities();
+                    }
+                    if (this.cityId) {
+                        this.fetchZipcodes();
                     }
                 },
                 fetchCities() {
                     if (!this.stateId) {
                         this.cities = [];
+                        this.cityId = '';
+                        this.zipcodes = [];
                         return;
                     }
                     this.isLoading = true;
+                    this.cityId = '';
+                    this.zipcodes = [];
                     fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
@@ -41,6 +51,27 @@
                             console.error('AJAX Error:', error);
                             this.cities = [];
                             this.isLoading = false;
+                        });
+                },
+                fetchZipcodes() {
+                    if (!this.cityId) {
+                        this.zipcodes = [];
+                        return;
+                    }
+                    this.isZipLoading = true;
+                    fetch('<?= base_url('admin/properties/get-zipcodes/') ?>' + this.cityId)
+                        .then(response => {
+                            if(!response.ok) throw new Error('Server returned an error.');
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.zipcodes = data;
+                            this.isZipLoading = false;
+                        })
+                        .catch(error => {
+                            console.error('AJAX Error:', error);
+                            this.zipcodes = [];
+                            this.isZipLoading = false;
                         });
                 }
             }">
@@ -80,10 +111,20 @@
 
                 <div>
                     <label class="block font-semibold mb-2">City *</label>
-                    <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
+                    <select name="city_id" x-model="cityId" @change="fetchZipcodes()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
                         <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" :selected="city.id == '<?= old('city_id') ?>'" x-text="city.city_name || city.name"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Zip Code</label>
+                    <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="zipcodes.length === 0 || isZipLoading">
+                        <option value="" disabled selected x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                        <template x-for="zip in zipcodes" :key="zip.id">
+                            <option :value="zip.id" :selected="zip.id == '<?= old('zipcode_id') ?>'" x-text="zip.zip_code || zip.code"></option>
                         </template>
                     </select>
                 </div>
@@ -185,7 +226,18 @@
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <p class="text-sm text-on-surface-variant col-span-full bg-surface-container-lowest p-4 rounded border border-outline-variant">No additional features have been set up in Master Data.</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <?php if (!empty($features)): ?>
+                        <?php foreach ($features as $feature): ?>
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-surface-bright p-2 rounded transition-colors">
+                                <input type="checkbox" name="features[]" value="<?= esc($feature->id) ?>" <?= in_array($feature->id, $oldFeatures) ? 'checked' : '' ?> class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
+                                <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="text-sm text-on-surface-variant col-span-full bg-surface-container-lowest p-4 rounded border border-outline-variant">No additional features have been set up in Master Data.</p>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -277,7 +329,6 @@
         let poiIcon;
 
         document.addEventListener("DOMContentLoaded", function() {
-            // Respect old validation coordinates if present
             const oldLat = <?= old('latitude') ? esc(old('latitude')) : 'null' ?>;
             const oldLng = <?= old('longitude') ? esc(old('longitude')) : 'null' ?>;
             
@@ -290,34 +341,28 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            // Fix visual glitch where tiles don't load completely
             setTimeout(() => { map.invalidateSize(); }, 250);
 
-            // 1. Primary Property Marker (Blue & Draggable)
             const marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
             marker.bindPopup("<b>Target Property</b><br>Drag to adjust location.").openPopup();
 
             document.getElementById('propertyLat').value = defaultLat;
             document.getElementById('propertyLng').value = defaultLng;
 
-            // Update coords on Drag
             marker.on('dragend', function(e) {
                 const position = marker.getLatLng();
                 document.getElementById('propertyLat').value = position.lat;
                 document.getElementById('propertyLng').value = position.lng;
             });
 
-            // Update coords on Map Click (Easier than dragging across town)
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 document.getElementById('propertyLat').value = e.latlng.lat;
                 document.getElementById('propertyLng').value = e.latlng.lng;
             });
 
-            // 2. Plot Global POIs (Green & Static)
             const poiData = <?= json_encode($pois ?? []) ?>;
             
-            // Custom Green Marker for POIs to distinguish them from the property
             poiIcon = L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -362,7 +407,6 @@
                     alertBox.classList.add('bg-[#d3e3fd]', 'text-[#041e49]');
                     alertBox.innerText = data.message;
                     
-                    // Immediately plot the new green marker on the map without refreshing
                     const newLat = parseFloat(document.getElementById('agentPoiLat').value);
                     const newLng = parseFloat(document.getElementById('agentPoiLng').value);
                     const newName = document.getElementById('agentPoiName').value;
@@ -374,15 +418,13 @@
                          .bindPopup(`<div class="text-center"><b>${newName}</b><br><span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${newCat}</span></div>`);
                     }
 
-                    // Clear the form fields for the next POI
                     document.getElementById('agentPoiName').value = '';
                     document.getElementById('agentPoiLat').value = '';
                     document.getElementById('agentPoiLng').value = '';
 
-                    // Close the modal silently
                     setTimeout(() => { 
                         window.dispatchEvent(new CustomEvent('close-poi-modal')); 
-                        alertBox.classList.add('hidden'); // Reset alert for next time
+                        alertBox.classList.add('hidden'); 
                     }, 1200); 
 
                 } else {

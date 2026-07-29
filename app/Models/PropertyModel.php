@@ -32,8 +32,8 @@ class PropertyModel extends Model
     {
         $builder = $this->builder();
         
-        // Base selections
-        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path';
+        // Base selections with zipcodes.zip_code added
+        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path, zipcodes.zip_code';
 
         // Apply Haversine formula if coordinates and radius are provided
         if ($lat && $lng && $radius) {
@@ -45,6 +45,7 @@ class PropertyModel extends Model
         $builder->join('property_types', 'property_types.id = properties.property_type_id', 'left');
         $builder->join('users', 'users.id = properties.owner_id', 'left');
         $builder->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left');
+        $builder->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left');
         
         $builder->where('properties.status', 'Active');
         $builder->where('properties.approval_status', 'Published');

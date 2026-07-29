@@ -15,14 +15,20 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
                 stateId: '<?= esc($property['state_id'] ?? '') ?>', 
+                cityId: '<?= esc($property['city_id'] ?? '') ?>',
                 cities: [], 
+                zipcodes: [],
                 isLoading: false,
+                isZipLoading: false,
                 init() {
-                    if(this.stateId) { this.fetchCities(this.stateId); }
+                    if(this.stateId) { this.fetchCities(); }
+                    if(this.cityId) { this.fetchZipcodes(); }
                 },
                 fetchCities() {
                     if (!this.stateId) {
                         this.cities = [];
+                        this.cityId = '';
+                        this.zipcodes = [];
                         return;
                     }
                     this.isLoading = true;
@@ -33,6 +39,20 @@
                             this.isLoading = false;
                         })
                         .catch(error => { this.cities = []; this.isLoading = false; });
+                },
+                fetchZipcodes() {
+                    if (!this.cityId) {
+                        this.zipcodes = [];
+                        return;
+                    }
+                    this.isZipLoading = true;
+                    fetch('<?= base_url('admin/properties/get-zipcodes/') ?>' + this.cityId)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.zipcodes = data;
+                            this.isZipLoading = false;
+                        })
+                        .catch(error => { this.zipcodes = []; this.isZipLoading = false; });
                 }
             }">
                 
@@ -54,7 +74,7 @@
 
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
-                    <select name="state_id" x-model="stateId" @change="fetchCities()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <select name="state_id" x-model="stateId" @change="fetchCities(); cityId=''; zipcodes=[];" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <?php foreach ($states as $state): ?>
                             <option value="<?= esc($state->id) ?>"><?= esc($state->region_name ?? $state->name) ?></option>
                         <?php endforeach; ?>
@@ -63,9 +83,19 @@
 
                 <div>
                     <label class="block font-semibold mb-2">City *</label>
-                    <select name="city_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
+                    <select name="city_id" x-model="cityId" @change="fetchZipcodes()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
                         <template x-for="city in cities" :key="city.id">
-                            <option :value="city.id" :selected="city.id == <?= esc($property['city_id'] ?? '') ?>" x-text="city.city_name || city.name"></option>
+                            <option :value="city.id" :selected="city.id == <?= esc($property['city_id'] ?? "''") ?>" x-text="city.city_name || city.name"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Zip Code</label>
+                    <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="zipcodes.length === 0 || isZipLoading">
+                        <option value="" disabled x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                        <template x-for="zip in zipcodes" :key="zip.id">
+                            <option :value="zip.id" :selected="zip.id == <?= esc($property['zipcode_id'] ?? "''") ?>" x-text="zip.zip_code || zip.code"></option>
                         </template>
                     </select>
                 </div>
@@ -260,7 +290,6 @@
         let poiIcon;
 
         document.addEventListener("DOMContentLoaded", function() {
-            // Using existing property coordinates, otherwise default to East Jakarta
             const savedLat = <?= !empty($property['latitude']) ? esc($property['latitude']) : '-6.2250' ?>;
             const savedLng = <?= !empty($property['longitude']) ? esc($property['longitude']) : '106.9004' ?>;
 
@@ -270,34 +299,28 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            // Fix visual glitch where tiles don't load completely
             setTimeout(() => { map.invalidateSize(); }, 250);
 
-            // 1. Primary Property Marker (Blue & Draggable)
             const marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
             marker.bindPopup("<b>Target Property</b><br>Drag to adjust location.").openPopup();
             
             document.getElementById('propertyLat').value = savedLat;
             document.getElementById('propertyLng').value = savedLng;
 
-            // Update coords on Drag
             marker.on('dragend', function(e) {
                 const position = marker.getLatLng();
                 document.getElementById('propertyLat').value = position.lat;
                 document.getElementById('propertyLng').value = position.lng;
             });
 
-            // Update coords on Map Click (Easier than dragging across town)
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 document.getElementById('propertyLat').value = e.latlng.lat;
                 document.getElementById('propertyLng').value = e.latlng.lng;
             });
 
-            // 2. Plot Global POIs (Green & Static)
             const poiData = <?= json_encode($pois ?? []) ?>;
             
-            // Custom Green Marker for POIs to distinguish them from the property
             poiIcon = L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -342,7 +365,6 @@
                     alertBox.classList.add('bg-[#d3e3fd]', 'text-[#041e49]');
                     alertBox.innerText = data.message;
                     
-                    // Immediately plot the new green marker on the map without refreshing
                     const newLat = parseFloat(document.getElementById('agentPoiLat').value);
                     const newLng = parseFloat(document.getElementById('agentPoiLng').value);
                     const newName = document.getElementById('agentPoiName').value;
@@ -354,15 +376,13 @@
                          .bindPopup(`<div class="text-center"><b>${newName}</b><br><span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${newCat}</span></div>`);
                     }
 
-                    // Clear the form fields for the next POI
                     document.getElementById('agentPoiName').value = '';
                     document.getElementById('agentPoiLat').value = '';
                     document.getElementById('agentPoiLng').value = '';
 
-                    // Close the modal silently
                     setTimeout(() => { 
                         window.dispatchEvent(new CustomEvent('close-poi-modal')); 
-                        alertBox.classList.add('hidden'); // Reset alert for next time
+                        alertBox.classList.add('hidden'); 
                     }, 1200); 
 
                 } else {
