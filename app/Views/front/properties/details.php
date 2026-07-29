@@ -10,7 +10,8 @@
     </button>
     <div class="w-full max-w-5xl overflow-y-auto max-h-screen flex flex-col gap-6 custom-scrollbar p-4 md:p-8">
         <?php if(!empty($images)): foreach($images as $img): ?>
-            <img src="<?= esc($img->image_path) ?>" class="w-full h-auto rounded-lg shadow-2xl object-cover">
+            <!-- Wrap with base_url() -->
+            <img src="<?= base_url(esc($img->image_path)) ?>" class="w-full h-auto rounded-lg shadow-2xl object-cover">
         <?php endforeach; else: ?>
             <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80" class="w-full h-auto rounded-lg shadow-2xl">
         <?php endif; ?>
@@ -27,9 +28,10 @@
     </nav>
 
     <?php 
-        $mainImg = !empty($images[0]) ? esc($images[0]->image_path) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';
-        $img1 = !empty($images[1]) ? esc($images[1]->image_path) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
-        $img2 = !empty($images[2]) ? esc($images[2]->image_path) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';
+        // Wrap with base_url()
+        $mainImg = !empty($images[0]) ? base_url(esc($images[0]->image_path)) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';
+        $img1 = !empty($images[1]) ? base_url(esc($images[1]->image_path)) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
+        $img2 = !empty($images[2]) ? base_url(esc($images[2]->image_path)) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';
     ?>
 
     <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 mb-8 rounded overflow-hidden h-[500px]">
@@ -112,6 +114,41 @@
                     <div id="propertyMap" class="w-full h-full"></div>
                 </div>
             </section>
+
+            <!-- PROPERTY FEATURES MATRIX -->
+            <?php if(!empty($propertyFeatures)): ?>
+            <section class="mt-8">
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Property Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+                    <?php foreach($propertyFeatures as $category => $features): ?>
+                        <div>
+                            <h3 class="font-bold text-on-surface flex items-center gap-2 mb-3 border-b border-outline-variant pb-2">
+                                <span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>
+                                <?= esc($category) ?>
+                            </h3>
+                            <ul class="space-y-2">
+                                <?php foreach($features as $feature): ?>
+                                    <li class="text-[14px] text-on-surface-variant flex items-start gap-2">
+                                        <span class="material-symbols-outlined text-[16px] mt-0.5 text-outline">done</span>
+                                        <?= esc($feature) ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+            <?php endif; ?>
+
+            <!-- MIDDLE AD PLACEMENT -->
+            <?php if(!empty($detailAds[0])): ?>
+            <div class="w-full h-[90px] md:h-[120px] my-6 rounded overflow-hidden shadow-sm relative group cursor-pointer border border-outline-variant">
+                <a href="<?= esc($detailAds[0]->target_url) ?>" target="_blank" class="block w-full h-full">
+                    <img src="<?= base_url('uploads/ads/' . $detailAds[0]->image) ?>" class="w-full h-full object-cover">
+                    <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">Advertisement</span>
+                </a>
+            </div>
+            <?php endif; ?>
 
             <!-- NEARBY LOCATIONS (POIs) -->
             <?php if(!empty($nearbyPOIs)): ?>
@@ -222,6 +259,46 @@
                     </div>
                 <?php endif; ?>
 
+                <!-- MORTGAGE CALCULATOR WIDGET -->
+                <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm" x-data="mortgageCalculator()">
+                    <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">calculate</span>
+                        Estimated Payment
+                    </h3>
+                    
+                    <div class="mb-6 text-center">
+                        <span class="text-[12px] text-on-surface-variant font-medium">Monthly Total</span>
+                        <div class="font-headline-lg text-[28px] font-bold text-primary" x-text="'Rp ' + formatRupiah(monthlyPayment)"></div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Home Price (Rp)</label>
+                            <input type="text" x-model="homePrice" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded outline-none" readonly>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Down Payment (%)</label>
+                                <input type="number" x-model="dpPercent" @input="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none focus:border-primary">
+                            </div>
+                            <div>
+                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Interest Rate (%)</label>
+                                <input type="number" step="0.1" x-model="interestRate" @input="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none focus:border-primary">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Loan Term (Years)</label>
+                            <select x-model="loanTerm" @change="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none cursor-pointer focus:border-primary">
+                                <option value="10">10 Years</option>
+                                <option value="15">15 Years</option>
+                                <option value="20">20 Years</option>
+                                <option value="30">30 Years</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AGENT CONTACT FORM -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-outline-variant">
                         <div class="relative">
@@ -280,9 +357,43 @@
     document.addEventListener('DOMContentLoaded', function() {
         var lat = <?= esc($property->latitude ?? -6.200000) ?>;
         var lng = <?= esc($property->longitude ?? 106.816666) ?>;
-        var map = L.map('propertyMap').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
-        L.marker([lat, lng]).addTo(map).bindPopup('<b><?= esc($property->title) ?></b>').openPopup();
+        
+        // Initialize Map
+        var map = L.map('propertyMap').setView([lat, lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+            attribution: '&copy; OpenStreetMap' 
+        }).addTo(map);
+
+        // Define a custom red icon for the main property
+        var homeIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Add Main Property Marker
+        L.marker([lat, lng], {icon: homeIcon})
+            .addTo(map)
+            .bindPopup('<b><?= esc(addslashes($property->title)) ?></b><br>Property Location')
+            .openPopup();
+
+        // Dynamically plot all POIs from the database
+        <?php if(!empty($nearbyPOIs)): ?>
+            <?php foreach($nearbyPOIs as $poi): ?>
+                var poiLat = <?= esc($poi->latitude) ?>;
+                var poiLng = <?= esc($poi->longitude) ?>;
+                
+                L.marker([poiLat, poiLng])
+                    .addTo(map)
+                    .bindPopup(
+                        '<b><?= esc(addslashes($poi->name)) ?></b><br>' + 
+                        '<?= esc($poi->category) ?> - <?= number_format($poi->distance, 2) ?> km away'
+                    );
+            <?php endforeach; ?>
+        <?php endif; ?>
     });
 
     function openGallery() {
@@ -335,4 +446,38 @@
         })
         .catch(error => console.error('Error:', error));
     }
+</script>
+
+<!-- Mortgage Calculator Alpine Component -->
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('mortgageCalculator', () => ({
+            homePriceRaw: <?= esc($property->tax_price ?? 0) ?>,
+            homePrice: '<?= number_format($property->tax_price ?? 0, 0, ',', '.') ?>',
+            dpPercent: 20,
+            interestRate: 6.5,
+            loanTerm: 20,
+            monthlyPayment: 0,
+            
+            init() {
+                this.calculate();
+            },
+            
+            calculate() {
+                let p = this.homePriceRaw - (this.homePriceRaw * (this.dpPercent / 100)); // Principal
+                let r = (this.interestRate / 100) / 12; // Monthly Interest Rate
+                let n = this.loanTerm * 12; // Total Months
+                
+                if (r === 0) {
+                    this.monthlyPayment = p / n;
+                } else {
+                    this.monthlyPayment = p * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+                }
+            },
+            
+            formatRupiah(number) {
+                return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(number);
+            }
+        }))
+    });
 </script>
