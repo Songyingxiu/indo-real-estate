@@ -1,35 +1,11 @@
 <?php namespace App\Controllers;
 
-use App\Models\LeadModel;
 use App\Models\UserModel;
 use App\Models\AgentVerificationModel;
-use App\Models\SavedPropertyModel; // Added for Saved Properties
+use App\Models\SavedPropertyModel;
 
 class User extends BaseController
 {
-    public function inbox()
-    {
-        // Enforce role security: Only Buyers (Role 1) should access this specific frontend inbox
-        if (session()->get('role_id') != 1) {
-            return redirect()->to(base_url('login'))->with('error', 'Please log in as a user to view your inbox.');
-        }
-
-        $leadModel = new LeadModel();
-        
-        $data['title'] = 'My Inbox - HuniKita';
-        
-        $data['leads'] = $leadModel
-            ->select('leads.*, properties.title as property_title, properties.address_line_1')
-            ->join('properties', 'properties.id = leads.property_id', 'left')
-            ->where('leads.buyer_id', session()->get('id'))
-            ->orderBy('leads.created_date', 'DESC')
-            ->paginate(10);
-            
-        $data['pager'] = $leadModel->pager;
-
-        return view('front/user/inbox', $data);
-    }
-
     public function profile()
     {
         // Allowed for ALL logged in users (Buyers, Owners, Agents)
@@ -146,7 +122,6 @@ class User extends BaseController
         return redirect()->back()->with('error', 'KTP document is required for verification.');
     }
 
-    // NEW METHOD: Handle fetching the saved properties
     public function savedProperties()
     {
         if (!session()->get('id')) return redirect()->to(base_url('login'));

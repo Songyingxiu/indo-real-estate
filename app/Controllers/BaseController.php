@@ -6,7 +6,7 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use App\Models\LeadModel;
+use App\Models\InquiryModel;
 
 abstract class BaseController extends Controller
 {
@@ -18,34 +18,32 @@ abstract class BaseController extends Controller
     {
         parent::initController($request, $response, $logger);
         $this->session = \Config\Services::session();
-
-        // --------------------------------------------------------------------
+        
         // GLOBAL NOTIFICATIONS (For both Users and Admins)
-        // --------------------------------------------------------------------
         if ($this->session->get('id')) {
-            $leadModel = new LeadModel();
+            $inquiryModel = new InquiryModel();
             $roleId = $this->session->get('role_id');
 
             if ($roleId == 1) {
                 // Buyer: Fetch their sent inquiries and status updates
-                $notifs = $leadModel
-                    ->select('leads.*, properties.title as property_title')
-                    ->join('properties', 'properties.id = leads.property_id', 'left')
-                    ->where('leads.buyer_id', $this->session->get('id'))
-                    ->orderBy('leads.modified_date', 'DESC')
+                $notifs = $inquiryModel
+                    ->select('inquiries.*, properties.title as property_title')
+                    ->join('properties', 'properties.id = inquiries.property_id', 'left')
+                    ->where('inquiries.sender_id', $this->session->get('id'))
+                    ->orderBy('inquiries.updated_at', 'DESC')
                     ->findAll(5); 
                 
                 $GLOBALS['global_notifications'] = $notifs;
                 $GLOBALS['unread_count'] = 0; 
             } else {
-                // Agent/Owner/Admin: Fetch unread inbox messages
-                $notifs = $leadModel
-                    ->select('leads.*, users.first_name, users.last_name, properties.title as property_title')
-                    ->join('users', 'users.id = leads.buyer_id', 'left')
-                    ->join('properties', 'properties.id = leads.property_id', 'left')
-                    ->where('leads.agent_id', $this->session->get('id'))
-                    ->where('leads.is_read', 0)
-                    ->orderBy('leads.created_date', 'DESC')
+                // Agent/Owner/Admin: Fetch unread inbox messages (Pending status)
+                $notifs = $inquiryModel
+                    ->select('inquiries.*, users.first_name, users.last_name, properties.title as property_title')
+                    ->join('users', 'users.id = inquiries.sender_id', 'left')
+                    ->join('properties', 'properties.id = inquiries.property_id', 'left')
+                    ->where('inquiries.receiver_id', $this->session->get('id'))
+                    ->where('inquiries.status', 'Pending')
+                    ->orderBy('inquiries.created_at', 'DESC')
                     ->findAll();
                 
                 $GLOBALS['global_notifications'] = $notifs;

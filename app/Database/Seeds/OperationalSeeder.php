@@ -8,7 +8,8 @@ class OperationalSeeder extends Seeder
     {
         $date = date('Y-m-d H:i:s');
 
-        // 1. Leads Management Data
+        // 1. Leads Management Data (COMMENTED OUT TO PREVENT CRASHES)
+        /*
         $leads = [
             [
                 'property_id'  => 1, 
@@ -30,6 +31,7 @@ class OperationalSeeder extends Seeder
             ],
         ];
         $this->db->table('leads')->ignore(true)->insertBatch($leads);
+        */
 
         // 2. Property Verifications (Removed 'notes' and 'verified_by')
         $verifications = [
