@@ -74,7 +74,7 @@
                     <div class="min-w-full md:min-w-[50%] lg:min-w-[33%] snap-center rounded-xl overflow-hidden shadow-md bg-surface border border-outline-variant group">
                         <a href="<?= base_url('promo/' . $banner->id) ?>" class="block w-full h-full relative">
                             <!-- Use $banner->image and construct the correct path -->
-                            <img src="<?= base_url('uploads/ads/' . esc($banner->image)) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="<?= base_url('uploads/ads/' . esc($banner->image_path)) ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                                 <h3 class="text-white font-bold text-lg drop-shadow-md"><?= esc($banner->title) ?></h3>
                             </div>
