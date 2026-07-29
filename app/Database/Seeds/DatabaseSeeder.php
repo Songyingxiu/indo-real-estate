@@ -9,6 +9,6 @@ class DatabaseSeeder extends Seeder
         $this->call('MasterSeeder');       // Locations, Roles, Subscriptions
         $this->call('UserSeeder');         // Users
         $this->call('PropertySeeder');     // Properties
-        $this->call('OperationalSeeder');  // NEW: Leads, Verifications, SEO, CMS
+        $this->call('OperationalSeeder');  // Leads, Verifications, SEO, CMS
     }
 }

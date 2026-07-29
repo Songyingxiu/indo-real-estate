@@ -74,7 +74,7 @@
                     <div class="min-w-full md:min-w-[50%] lg:min-w-[33%] snap-center rounded-xl overflow-hidden shadow-md bg-surface border border-outline-variant group">
                         <a href="<?= base_url('promo/' . $banner->id) ?>" class="block w-full h-full relative">
                             <?php 
-                                // FIX: Check both column naming conventions defensively 
+                                // Check both column naming conventions defensively 
                                 $adImg = $banner->image_path ?? $banner->image ?? '';
                                 $adSrc = str_starts_with($adImg, 'http') ? esc($adImg) : base_url('uploads/ads/' . esc($adImg)); 
                             ?>
@@ -123,13 +123,13 @@
                                 </a>
                             </h3>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                <!-- FIX: Area mapping fallback -->
+                                <!-- Area mapping fallback -->
                                 <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                             </p>
                             <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                <!-- FIX: Area mapping fallback -->
+                                <!-- Area mapping fallback -->
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
                             </div>
                         </div>
@@ -178,13 +178,13 @@
                                             </a>
                                         </h3>
                                         <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                            <!-- FIX: Area mapping fallback -->
+                                            <!-- Area mapping fallback -->
                                             <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                                         </p>
                                         <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                            <!-- FIX: Area mapping fallback -->
+                                            <!-- Area mapping fallback -->
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
                                         </div>
                                     </div>

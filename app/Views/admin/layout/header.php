@@ -81,7 +81,7 @@
                                 <div class="flex justify-between items-start mb-1">
                                     <span class="font-label-md text-label-md text-on-surface truncate pr-2"><?= esc($notif->name ?? $notif->first_name) ?></span>
                                     <span class="font-caption text-caption text-primary font-medium shrink-0">
-                                        <?= date('M d', strtotime($notif->created_date)) ?>
+                                        <?= date('M d', strtotime($notif->created_at ?? $notif->created_date)) ?>
                                     </span>
                                 </div>
                                 <p class="font-caption text-caption text-on-surface-variant line-clamp-2">

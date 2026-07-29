@@ -1,6 +1,4 @@
-<?php
-
-namespace App\Models;
+<?php namespace App\Models;
 
 use CodeIgniter\Model;
 
@@ -32,8 +30,8 @@ class PropertyModel extends Model
     {
         $builder = $this->builder();
         
-        // Base selections with zipcodes.zip_code added
-        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path, zipcodes.zip_code';
+        // Base selections with zipcodes.zipcode added
+        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path, zipcodes.zipcode';
 
         // Apply Haversine formula if coordinates and radius are provided
         if ($lat && $lng && $radius) {

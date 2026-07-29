@@ -45,18 +45,18 @@
                                 </div>
                                 <span class="font-medium">KTP / ID Card</span>
                             </td>
-                            <td class="p-4 font-semibold text-primary"><?= esc($v['first_name'] . ' ' . $v['last_name']) ?></td>
-                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v['created_date'])) ?></td>
+                            <td class="p-4 font-semibold text-primary"><?= esc($v->first_name . ' ' . $v->last_name) ?></td>
+                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v->created_at ?? $v->created_date)) ?></td>
                             <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v['approval_status']) ?></span>
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v->approval_status) ?></span>
                             </td>
                             <td class="p-4 text-right">
                                 <button @click="showModal = true; 
                                                 docName = 'Agent KTP (ID Card)'; 
-                                                submitter = '<?= esc(addslashes($v['first_name'] . ' ' . $v['last_name'])) ?>';
-                                                verificationId = <?= $v['id'] ?>;
+                                                submitter = '<?= esc(addslashes($v->first_name . ' ' . $v->last_name)) ?>';
+                                                verificationId = <?= $v->id ?>;
                                                 processUrl = '<?= base_url('admin/verifications/process-agent/') ?>' + verificationId;
-                                                docUrl = '<?= base_url('uploads/documents/' . $v['ktp_document']) ?>';" 
+                                                docUrl = '<?= base_url('uploads/documents/' . $v->ktp_document) ?>';" 
                                         class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
                                     View File
                                 </button>
@@ -95,20 +95,20 @@
                                 <span class="font-medium">Land Certificate (SHM)</span>
                             </td>
                             <td class="p-4">
-                                <p class="font-semibold text-primary mb-1"><?= esc($v['property_title']) ?></p>
-                                <p class="text-xs text-on-surface-variant">Owner: <?= esc($v['first_name'] . ' ' . $v['last_name']) ?></p>
+                                <p class="font-semibold text-primary mb-1"><?= esc($v->property_title) ?></p>
+                                <p class="text-xs text-on-surface-variant">Owner: <?= esc($v->first_name . ' ' . $v->last_name) ?></p>
                             </td>
-                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v['created_date'])) ?></td>
+                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v->created_at ?? $v->created_date)) ?></td>
                             <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v['approval_status']) ?></span>
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v->approval_status) ?></span>
                             </td>
                             <td class="p-4 text-right">
                                 <button @click="showModal = true; 
                                                 docName = 'Property Ownership Certificate (SHM)'; 
-                                                submitter = '<?= esc(addslashes($v['first_name'] . ' ' . $v['last_name'])) ?>';
-                                                verificationId = <?= $v['id'] ?>;
+                                                submitter = '<?= esc(addslashes($v->first_name . ' ' . $v->last_name)) ?>';
+                                                verificationId = <?= $v->id ?>;
                                                 processUrl = '<?= base_url('admin/verifications/process-property/') ?>' + verificationId;
-                                                docUrl = '<?= base_url('uploads/documents/' . $v['ownership_certificate']) ?>';" 
+                                                docUrl = '<?= base_url('uploads/documents/' . $v->ownership_certificate) ?>';" 
                                         class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
                                     View File
                                 </button>
