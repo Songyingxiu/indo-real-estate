@@ -2,6 +2,7 @@
 
 use App\Controllers\BaseController;
 use App\Models\AdsModel;
+use Cloudinary\Cloudinary;
 
 class Advertisements extends BaseController
 {
@@ -40,7 +41,7 @@ class Advertisements extends BaseController
 
         $validationRule = [
             'title'       => 'required|min_length[3]',
-            'description' => 'required|min_length[10]', // Added description validation
+            'description' => 'required|min_length[10]', 
             'placement'   => 'required|in_list[home_banner,sidebar,property_list]',
             'status'      => 'required|in_list[Active,Inactive]',
         ];
@@ -55,7 +56,7 @@ class Advertisements extends BaseController
 
         $data = [
             'title'       => $this->request->getPost('title'),
-            'description' => $this->request->getPost('description'), // Replaced target_url
+            'description' => $this->request->getPost('description'), 
             'placement'   => $this->request->getPost('placement'),
             'status'      => $this->request->getPost('status'),
             'start_date'  => $this->request->getPost('start_date') ?: null,
@@ -64,14 +65,20 @@ class Advertisements extends BaseController
 
         $image = $this->request->getFile('image');
         if ($image && $image->isValid() && !$image->hasMoved()) {
-            $uploadPath = FCPATH . 'uploads/ads';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
+            
+            // Upload to Cloudinary
+            $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+            if (empty($cloudinaryUrl)) {
+                return redirect()->back()->withInput()->with('error', 'Cloudinary configuration is missing.');
             }
-
-            $newName = $image->getRandomName();
-            $image->move($uploadPath, $newName);
-            $data['image_path'] = 'uploads/ads/' . $newName;
+            
+            $cloudinary = new Cloudinary($cloudinaryUrl);
+            $response = $cloudinary->uploadApi()->upload($image->getTempName(), [
+                'folder' => 'hunikita_ads',
+            ]);
+            
+            // Save the secure URL directly to the database
+            $data['image_path'] = $response['secure_url'];
         }
 
         if ($id) {
@@ -91,10 +98,6 @@ class Advertisements extends BaseController
         $ad = $adsModel->find($id);
         
         if ($ad) {
-            // Optionally delete the physical image file here
-            if (file_exists(FCPATH . $ad->image_path)) {
-                unlink(FCPATH . $ad->image_path);
-            }
             $adsModel->delete($id);
             return redirect()->to(base_url('admin/advertisements'))->with('success', 'Advertisement deleted.');
         }
