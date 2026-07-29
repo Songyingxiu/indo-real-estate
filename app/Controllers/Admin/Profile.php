@@ -98,6 +98,14 @@ class Profile extends BaseController
         $userId = session()->get('user_id') ?? session()->get('id');
         if (!$userId) return redirect()->to(base_url('login'));
 
+        $agentVerifyModel = new AgentVerificationModel();
+
+        // Prevent multiple submissions on the backend
+        $existingVerification = $agentVerifyModel->where('user_id', $userId)->first();
+        if ($existingVerification) {
+            return redirect()->back()->with('error', 'You have already submitted a verification document.');
+        }
+
         $rules = [
             'ktp_document' => 'uploaded[ktp_document]|ext_in[ktp_document,pdf,jpg,jpeg,png]|max_size[ktp_document,5120]'
         ];
@@ -117,7 +125,6 @@ class Profile extends BaseController
                     'folder' => 'hunikita_documents',
                 ]);
                 
-                $agentVerifyModel = new AgentVerificationModel();
                 $agentVerifyModel->builder()->insert([
                     'user_id'         => $userId,
                     'ktp_document'    => $response['secure_url'], 
