@@ -126,12 +126,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/update-zipcode/(:num)', 'MasterData::updateZipcode/$1');
     $routes->get('inquiries', 'Inquiries::index');
     $routes->post('inquiries/update-status/(:num)', 'Inquiries::updateStatus/$1');
-    
-    // Legacy Lead routes kept temporarily just in case you haven't dropped the leads table
-    $routes->get('leads', 'Leads::index');       
-    $routes->post('leads/update-status/(:num)', 'Leads::updateStatus/$1');
-    $routes->post('leads/delete/(:num)', 'Leads::delete/$1');        
-    $routes->post('leads/mark-read/(:num)', 'Leads::markRead/$1');
+    $routes->post('inquiries/reply', 'Inquiries::reply');
     
     $routes->get('verifications', 'Verifications::index'); 
     $routes->post('verifications/process-agent/(:num)', 'Verifications::processAgent/$1');

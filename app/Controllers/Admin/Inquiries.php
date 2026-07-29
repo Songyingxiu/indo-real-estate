@@ -35,4 +35,23 @@ class Inquiries extends BaseController
         }
         return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
     }
+
+    public function reply()
+    {
+        $inquiryModel = new InquiryModel();
+        
+        $data = [
+            'property_id' => $this->request->getPost('property_id'),
+            'sender_id'   => session()->get('id'),
+            'receiver_id' => $this->request->getPost('receiver_id'),
+            'message'     => $this->request->getPost('message'),
+            'status'      => 'Replied'
+        ];
+
+        if ($inquiryModel->insert($data)) {
+            return redirect()->back()->with('success', 'Your reply has been sent to the client.');
+        }
+        
+        return redirect()->back()->with('error', 'Failed to send the reply. Please try again.');
+    }
 }
