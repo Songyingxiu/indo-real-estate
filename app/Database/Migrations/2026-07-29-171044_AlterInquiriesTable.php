@@ -37,6 +37,6 @@ class AlterInquiriesTable extends Migration
         $this->forge->dropColumn('inquiries', 'parent_id');
         
         // Note: We don't automatically rebuild the old `leads` table on rollback 
-        // since it's being permanently deprecated in Phase 3.
+        // since it's being permanently deprecated change from leads to inquiries.
     }
 }

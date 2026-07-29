@@ -341,6 +341,14 @@ class Properties extends BaseController
         return $this->response->setJSON($cities);
     }
 
+    public function getZipcodes($cityId)
+    {
+        $zipModel = new \App\Models\ZipcodeModel();
+        $zipcodes = $zipModel->where('city_id', $cityId)->findAll();
+        
+        return $this->response->setJSON($zipcodes);
+    }
+
     public function updateStatus($id)
     {
         $propertyModel = new \App\Models\PropertyModel();
