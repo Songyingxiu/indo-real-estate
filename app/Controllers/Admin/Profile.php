@@ -99,11 +99,21 @@ class Profile extends BaseController
         if (!$userId) return redirect()->to(base_url('login'));
 
         $agentVerifyModel = new AgentVerificationModel();
-
-        // Prevent multiple submissions on the backend
+        
         $existingVerification = $agentVerifyModel->where('user_id', $userId)->first();
+        $isRejected = false;
+        $existingId = null;
+
+        // Check if a record exists and evaluate the resubmission status
         if ($existingVerification) {
-            return redirect()->back()->with('error', 'You have already submitted a verification document.');
+            $status = is_object($existingVerification) ? $existingVerification->approval_status : $existingVerification['approval_status'];
+            
+            if ($status !== 'Rejected') {
+                return redirect()->back()->with('error', 'You have already submitted a verification document.');
+            }
+            
+            $isRejected = true;
+            $existingId = is_object($existingVerification) ? $existingVerification->id : $existingVerification['id'];
         }
 
         $rules = [
@@ -125,12 +135,21 @@ class Profile extends BaseController
                     'folder' => 'hunikita_documents',
                 ]);
                 
-                $agentVerifyModel->builder()->insert([
-                    'user_id'         => $userId,
-                    'ktp_document'    => $response['secure_url'], 
-                    'approval_status' => 'Pending',
-                    'status'          => 'Active'
-                ]);
+                if ($isRejected && $existingId) {
+                    // Update the previously rejected record
+                    $agentVerifyModel->update($existingId, [
+                        'ktp_document'    => $response['secure_url'], 
+                        'approval_status' => 'Pending'
+                    ]);
+                } else {
+                    // Insert a brand new record
+                    $agentVerifyModel->builder()->insert([
+                        'user_id'         => $userId,
+                        'ktp_document'    => $response['secure_url'], 
+                        'approval_status' => 'Pending',
+                        'status'          => 'Active'
+                    ]);
+                }
 
                 return redirect()->back()->with('success', 'Your identity document has been submitted and is pending verification.');
             }

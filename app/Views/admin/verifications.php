@@ -37,7 +37,7 @@
             </thead>
             <tbody class="text-sm text-on-surface">
                 <?php if (!empty($agent_verifications)): ?>
-                    <?php foreach ($agent_verifications as $v): ?>
+                    <?php foreach ($agent_verifications as $v): $row = (object) $v; ?>
                         <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
                             <td class="p-4 flex items-center gap-3">
                                 <div class="bg-surface-container p-2 rounded border border-outline-variant">
@@ -45,18 +45,18 @@
                                 </div>
                                 <span class="font-medium">KTP / ID Card</span>
                             </td>
-                            <td class="p-4 font-semibold text-primary"><?= esc(($v->first_name ?? '') . ' ' . ($v->last_name ?? '')) ?></td>
-                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v->created_at ?? $v->created_date ?? 'now')) ?></td>
+                            <td class="p-4 font-semibold text-primary"><?= esc(($row->first_name ?? '') . ' ' . ($row->last_name ?? '')) ?></td>
+                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($row->created_at ?? $row->created_date ?? 'now')) ?></td>
                             <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v->approval_status ?? '') ?></span>
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($row->approval_status ?? '') ?></span>
                             </td>
                             <td class="p-4 text-right">
                                 <button @click="showModal = true; 
                                                 docName = 'Agent KTP (ID Card)'; 
-                                                submitter = '<?= esc(addslashes(($v->first_name ?? '') . ' ' . ($v->last_name ?? ''))) ?>';
-                                                verificationId = <?= $v->id ?? 0 ?>;
+                                                submitter = '<?= esc(addslashes(($row->first_name ?? '') . ' ' . ($row->last_name ?? ''))) ?>';
+                                                verificationId = <?= $row->id ?? 0 ?>;
                                                 processUrl = '<?= base_url('admin/verifications/process-agent/') ?>' + verificationId;
-                                                docUrl = '<?= strpos($v->ktp_document ?? '', 'http') === 0 ? esc($v->ktp_document) : base_url('uploads/documents/' . ($v->ktp_document ?? '')) ?>';" 
+                                                docUrl = '<?= strpos($row->ktp_document ?? '', 'http') === 0 ? esc($row->ktp_document) : base_url('uploads/documents/' . ($row->ktp_document ?? '')) ?>';" 
                                         class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
                                     View File
                                 </button>
@@ -86,7 +86,7 @@
             </thead>
             <tbody class="text-sm text-on-surface">
                 <?php if (!empty($prop_verifications)): ?>
-                    <?php foreach ($prop_verifications as $v): ?>
+                    <?php foreach ($prop_verifications as $v): $row = (object) $v; ?>
                         <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
                             <td class="p-4 flex items-center gap-3">
                                 <div class="bg-surface-container p-2 rounded border border-outline-variant">
@@ -95,20 +95,20 @@
                                 <span class="font-medium">Land Certificate (SHM)</span>
                             </td>
                             <td class="p-4">
-                                <p class="font-semibold text-primary mb-1"><?= esc($v->property_title ?? '') ?></p>
-                                <p class="text-xs text-on-surface-variant">Owner: <?= esc(($v->first_name ?? '') . ' ' . ($v->last_name ?? '')) ?></p>
+                                <p class="font-semibold text-primary mb-1"><?= esc($row->property_title ?? '') ?></p>
+                                <p class="text-xs text-on-surface-variant">Owner: <?= esc(($row->first_name ?? '') . ' ' . ($row->last_name ?? '')) ?></p>
                             </td>
-                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($v->created_at ?? $v->created_date ?? 'now')) ?></td>
+                            <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($row->created_at ?? $row->created_date ?? 'now')) ?></td>
                             <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($v->approval_status ?? '') ?></span>
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($row->approval_status ?? '') ?></span>
                             </td>
                             <td class="p-4 text-right">
                                 <button @click="showModal = true; 
                                                 docName = 'Property Ownership Certificate (SHM)'; 
-                                                submitter = '<?= esc(addslashes(($v->first_name ?? '') . ' ' . ($v->last_name ?? ''))) ?>';
-                                                verificationId = <?= $v->id ?? 0 ?>;
+                                                submitter = '<?= esc(addslashes(($row->first_name ?? '') . ' ' . ($row->last_name ?? ''))) ?>';
+                                                verificationId = <?= $row->id ?? 0 ?>;
                                                 processUrl = '<?= base_url('admin/verifications/process-property/') ?>' + verificationId;
-                                                docUrl = '<?= strpos($v->ownership_certificate ?? '', 'http') === 0 ? esc($v->ownership_certificate) : base_url('uploads/documents/' . ($v->ownership_certificate ?? '')) ?>';" 
+                                                docUrl = '<?= strpos($row->ownership_certificate ?? '', 'http') === 0 ? esc($row->ownership_certificate) : base_url('uploads/documents/' . ($row->ownership_certificate ?? '')) ?>';" 
                                         class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
                                     View File
                                 </button>
