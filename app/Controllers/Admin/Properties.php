@@ -12,7 +12,7 @@ use App\Models\PropertyVerificationModel;
 use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\PoiModel;
-use Cloudinary\Cloudinary;
+use Cloudinary\Cloudinary; 
 
 class Properties extends BaseController
 {
@@ -37,7 +37,6 @@ class Properties extends BaseController
         $stateModel = new StateModel();
         $featureModel = new FeatureModel(); 
         
-        // POI Subscription Limits Check
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
         $poiModel = new PoiModel();
@@ -56,23 +55,18 @@ class Properties extends BaseController
             }
         }
 
-        // Admins always have unlimited POIs
         if ($roleId == 4) {
             $maxPois = 9999;
         }
 
-        // Count how many POIs this specific user has added
         $poisCreated = $poiModel->where('added_by', $userId)->countAllResults();
 
         $data['maxPois']     = $maxPois;
         $data['poisCreated'] = $poisCreated;
         
-        // Fetch all active POIs to display on the map
         $data['pois'] = $poiModel->where('status', 'Active')->findAll();
-        
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
-        
         $data['features'] = $featureModel->where('status', 'Active')->findAll();
         
         return view('admin/properties/create', $data);
@@ -119,7 +113,9 @@ class Properties extends BaseController
             'bath'             => $this->request->getPost('bath'),
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
+            'total_area'       => $this->request->getPost('total_area') ?? $this->request->getPost('total_land_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'area_name'        => $this->request->getPost('area_name'), 
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
             'owner_id'         => session()->get('user_id'),
@@ -133,7 +129,8 @@ class Properties extends BaseController
         $selectedFeatures = $this->request->getPost('features');
         if (!empty($selectedFeatures) && is_array($selectedFeatures)) {
             foreach ($selectedFeatures as $featureId) {
-                $propertyFeatureModel->insert([
+                // FIX: Use Builder to prevent CI4 EmptyPrimaryKey Exception
+                $propertyFeatureModel->builder()->insert([
                     'property_id' => $propertyId,
                     'feature_id'  => $featureId,
                     'status'      => 'Active'
@@ -146,14 +143,13 @@ class Properties extends BaseController
                 $isFirst = true;
                 foreach ($imagefile['property_images'] as $img) {
                     if ($img->isValid() && ! $img->hasMoved()) {
-                        // Upload to Cloudinary
                         $response = $cloudinary->uploadApi()->upload($img->getTempName(), [
                             'folder' => 'hunikita_properties',
                         ]);
                         
-                        $imageModel->insert([
+                        $imageModel->builder()->insert([
                             'property_id' => $propertyId,
-                            'image_path'  => $response['secure_url'],
+                            'image_path'  => $response['secure_url'], 
                             'is_primary'  => $isFirst ? 1 : 0 
                         ]);
                         $isFirst = false;
@@ -164,15 +160,14 @@ class Properties extends BaseController
 
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
-            // Upload to Cloudinary
             $response = $cloudinary->uploadApi()->upload($shmFile->getTempName(), [
                 'folder' => 'hunikita_documents',
             ]);
 
             $propVerifyModel = new PropertyVerificationModel();
-            $propVerifyModel->insert([
+            $propVerifyModel->builder()->insert([
                 'property_id' => $propertyId,
-                'ownership_certificate' => $response['secure_url'],
+                'ownership_certificate' => $response['secure_url'], 
                 'approval_status' => 'Pending Verification',
                 'status' => 'Active'
             ]);
@@ -223,9 +218,7 @@ class Properties extends BaseController
         $data['maxPois']     = $maxPois;
         $data['poisCreated'] = $poisCreated;
         
-        // Fetch all active POIs to display on the map
         $data['pois'] = $poiModel->where('status', 'Active')->findAll();
-
         $data['property'] = $property;
         $data['propertyTypes'] = (new PropertyTypeModel())->findAll();
         $data['states'] = (new StateModel())->where('status', 'Active')->findAll();
@@ -294,7 +287,9 @@ class Properties extends BaseController
             'bath'             => $this->request->getPost('bath'),
             'total_land_area'  => $this->request->getPost('total_land_area'),
             'usable_area'      => $this->request->getPost('usable_area'),
+            'total_area'       => $this->request->getPost('total_area') ?? $this->request->getPost('total_land_area'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'area_name'        => $this->request->getPost('area_name'),
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
             'approval_status'  => 'Draft' 
@@ -308,7 +303,8 @@ class Properties extends BaseController
         
         if (!empty($selectedFeatures) && is_array($selectedFeatures)) {
             foreach ($selectedFeatures as $featureId) {
-                $propertyFeatureModel->insert([
+                // FIX: Use Builder to prevent CI4 EmptyPrimaryKey Exception
+                $propertyFeatureModel->builder()->insert([
                     'property_id' => $id,
                     'feature_id'  => $featureId,
                     'status'      => 'Active'
@@ -318,7 +314,6 @@ class Properties extends BaseController
 
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
-            // Upload to Cloudinary
             $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
             if (!empty($cloudinaryUrl)) {
                 $cloudinary = new Cloudinary($cloudinaryUrl);
@@ -328,9 +323,9 @@ class Properties extends BaseController
                 
                 $propVerifyModel = new PropertyVerificationModel();
                 $propVerifyModel->where('property_id', $id)->delete();
-                $propVerifyModel->insert([
+                $propVerifyModel->builder()->insert([
                     'property_id' => $id,
-                    'ownership_certificate' => $response['secure_url'], // Save secure URL
+                    'ownership_certificate' => $response['secure_url'], 
                     'approval_status' => 'Pending Verification',
                     'status' => 'Active'
                 ]);

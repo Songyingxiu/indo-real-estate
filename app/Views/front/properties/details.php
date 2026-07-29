@@ -1,7 +1,6 @@
 <?= $this->include('front/layout/header') ?>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<!-- CSRF Token for AJAX requests -->
 <meta name="<?= csrf_token() ?>" content="<?= csrf_hash() ?>">
 
 <div id="photoGallery" class="fixed inset-0 z-[100] hidden bg-black/95 flex-col items-center justify-center p-4">
@@ -69,8 +68,9 @@
                             </button>
                         </div>
                         <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
+                            <!-- FIX: Area Name coalescing -->
                             <span class="material-symbols-outlined mr-2">location_on</span>
-                            <?= esc($property->address_line_1 ?? $property->area_name) ?>
+                            <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location') ?>
                         </p>
                     </div>
                     <div class="text-left md:text-right">
@@ -95,7 +95,8 @@
                         <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">straighten</span>
                         </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->total_area) ?> Sqm</p>
+                        <!-- FIX: Area coalescing -->
+                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> Sqm</p>
                     </div>
                 </div>
             </section>
@@ -142,9 +143,11 @@
             <!-- PHASE 2: MIDDLE AD PLACEMENT -->
             <?php if(!empty($detailAds[0])): ?>
             <div class="w-full h-[90px] md:h-[120px] my-6 rounded overflow-hidden shadow-sm relative group cursor-pointer border border-outline-variant">
-                <a href="<?= esc($detailAds[0]->target_url) ?>" target="_blank" class="block w-full h-full">
+                <a href="<?= esc($detailAds[0]->target_url ?? '#') ?>" target="_blank" class="block w-full h-full">
                     <?php 
-                        $adSrc = str_starts_with($detailAds[0]->image, 'http') ? esc($detailAds[0]->image) : base_url('uploads/ads/' . $detailAds[0]->image);
+                        // FIX: Bulletproof check for BOTH image column scenarios 
+                        $midAdImg = $detailAds[0]->image_path ?? $detailAds[0]->image ?? '';
+                        $adSrc = str_starts_with($midAdImg, 'http') ? esc($midAdImg) : base_url('uploads/ads/' . esc($midAdImg));
                     ?>
                     <img src="<?= $adSrc ?>" class="w-full h-full object-cover">
                     <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">Advertisement</span>
@@ -195,7 +198,7 @@
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np['title']) ?></span>
                                 <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np['tax_price'], 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np['distance'], 1) ?> km away</span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np['distance'] ?? 0, 1) ?> km away</span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -219,7 +222,7 @@
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st['title']) ?></span>
                                 <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($st['tax_price'], 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st['bed']) ?> Bed • <?= esc($st['bath']) ?> Bath</span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st['bed'] ?? 0) ?> Bed • <?= esc($st['bath'] ?? 0) ?> Bath</span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -243,7 +246,8 @@
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($sp['title']) ?></span>
                                 <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($sp['tax_price'], 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1 line-clamp-1"><?= esc($sp['area_name']) ?></span>
+                                <!-- FIX: Area coalescing mapped to prevent empty string loops -->
+                                <span class="text-[12px] text-on-surface-variant mt-1 line-clamp-1"><?= esc($sp['area_name'] ?? $sp['address_line_1'] ?? 'Location') ?></span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -270,7 +274,6 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- PHASE 2: MORTGAGE CALCULATOR WIDGET -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm" x-data="mortgageCalculator()">
                     <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">calculate</span>
@@ -309,7 +312,6 @@
                     </div>
                 </div>
 
-                <!-- AGENT CONTACT FORM -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm">
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-outline-variant">
                         <div class="relative">
@@ -369,13 +371,11 @@
         var lat = <?= esc($property->latitude ?? -6.200000) ?>;
         var lng = <?= esc($property->longitude ?? 106.816666) ?>;
         
-        // Initialize Map
         var map = L.map('propertyMap').setView([lat, lng], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
             attribution: '&copy; OpenStreetMap' 
         }).addTo(map);
 
-        // Define a custom red icon for the main property
         var homeIcon = L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -385,13 +385,11 @@
             shadowSize: [41, 41]
         });
 
-        // Add Main Property Marker
         L.marker([lat, lng], {icon: homeIcon})
             .addTo(map)
             .bindPopup('<b><?= esc(addslashes($property->title)) ?></b><br>Property Location')
             .openPopup();
 
-        // Dynamically plot all POIs from the database
         <?php if(!empty($nearbyPOIs)): ?>
             <?php foreach($nearbyPOIs as $poi): ?>
                 var poiLat = <?= esc($poi->latitude) ?>;
@@ -418,7 +416,6 @@
         document.getElementById('photoGallery').classList.remove('flex');
     }
 
-    // AJAX FUNCTION TO TOGGLE SAVED PROPERTY
     function toggleSaveProperty(propertyId) {
         const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
         const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
@@ -459,7 +456,6 @@
     }
 </script>
 
-<!-- PHASE 2: Mortgage Calculator Alpine Component -->
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('mortgageCalculator', () => ({
@@ -475,9 +471,9 @@
             },
             
             calculate() {
-                let p = this.homePriceRaw - (this.homePriceRaw * (this.dpPercent / 100)); // Principal
-                let r = (this.interestRate / 100) / 12; // Monthly Interest Rate
-                let n = this.loanTerm * 12; // Total Months
+                let p = this.homePriceRaw - (this.homePriceRaw * (this.dpPercent / 100)); 
+                let r = (this.interestRate / 100) / 12; 
+                let n = this.loanTerm * 12; 
                 
                 if (r === 0) {
                     this.monthlyPayment = p / n;
