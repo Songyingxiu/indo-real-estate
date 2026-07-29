@@ -5,6 +5,7 @@ use App\Models\UserModel;
 use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\AgentVerificationModel;
+use Cloudinary\Cloudinary;
 
 class Profile extends BaseController 
 {
@@ -90,5 +91,44 @@ class Profile extends BaseController
         ]);
 
         return redirect()->to(base_url('admin/profile'))->with('success', 'Password updated successfully.');
+    }
+
+    public function uploadDocs()
+    {
+        $userId = session()->get('user_id') ?? session()->get('id');
+        if (!$userId) return redirect()->to(base_url('login'));
+
+        $rules = [
+            'ktp_document' => 'uploaded[ktp_document]|ext_in[ktp_document,pdf,jpg,jpeg,png]|max_size[ktp_document,5120]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->with('error', 'Invalid file. Please upload an image or PDF under 5MB.');
+        }
+
+        $file = $this->request->getFile('ktp_document');
+        
+        if ($file && $file->isValid() && ! $file->hasMoved()) {
+            $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+            
+            if (!empty($cloudinaryUrl)) {
+                $cloudinary = new Cloudinary($cloudinaryUrl);
+                $response = $cloudinary->uploadApi()->upload($file->getTempName(), [
+                    'folder' => 'hunikita_documents',
+                ]);
+                
+                $agentVerifyModel = new AgentVerificationModel();
+                $agentVerifyModel->builder()->insert([
+                    'user_id'         => $userId,
+                    'ktp_document'    => $response['secure_url'], 
+                    'approval_status' => 'Pending',
+                    'status'          => 'Active'
+                ]);
+
+                return redirect()->back()->with('success', 'Your identity document has been submitted and is pending verification.');
+            }
+        }
+
+        return redirect()->back()->with('error', 'Failed to upload document.');
     }
 }

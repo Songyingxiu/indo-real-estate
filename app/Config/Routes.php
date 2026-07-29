@@ -41,7 +41,6 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->get('profile', 'User::profile');
     $routes->post('update-profile', 'User::updateProfile');
     $routes->post('update-password', 'User::updatePassword');
-    $routes->post('upload-agent-docs', 'User::uploadAgentDocs');
     $routes->get('saved-properties', 'User::savedProperties');
 });
 
@@ -168,4 +167,5 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('profile', 'Profile::index');
     $routes->post('profile/update', 'Profile::update');
     $routes->post('profile/update-password', 'Profile::updatePassword');
+    $routes->post('profile/upload-docs', 'Profile::uploadDocs');
 });
