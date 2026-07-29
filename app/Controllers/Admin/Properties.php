@@ -129,7 +129,6 @@ class Properties extends BaseController
         $selectedFeatures = $this->request->getPost('features');
         if (!empty($selectedFeatures) && is_array($selectedFeatures)) {
             foreach ($selectedFeatures as $featureId) {
-                // FIX: Use Builder to prevent CI4 EmptyPrimaryKey Exception
                 $propertyFeatureModel->builder()->insert([
                     'property_id' => $propertyId,
                     'feature_id'  => $featureId,
@@ -303,7 +302,6 @@ class Properties extends BaseController
         
         if (!empty($selectedFeatures) && is_array($selectedFeatures)) {
             foreach ($selectedFeatures as $featureId) {
-                // FIX: Use Builder to prevent CI4 EmptyPrimaryKey Exception
                 $propertyFeatureModel->builder()->insert([
                     'property_id' => $id,
                     'feature_id'  => $featureId,
@@ -341,5 +339,23 @@ class Properties extends BaseController
         $cities = $cityModel->where('state_id', $stateId)->findAll();
         
         return $this->response->setJSON($cities);
+    }
+
+    public function updateStatus($id)
+    {
+        $propertyModel = new \App\Models\PropertyModel();
+        
+        $json = $this->request->getJSON();
+        $status = $json->status ?? '';
+        
+        if (empty($status)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'No status provided.']);
+        }
+
+        if ($propertyModel->update($id, ['status' => $status])) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Status updated successfully.']);
+        }
+        
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Database update failed.']);
     }
 }
