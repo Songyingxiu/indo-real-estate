@@ -131,11 +131,17 @@
                         <span class="material-symbols-outlined text-primary">verified_user</span> Identity Verification
                     </h3>
 
-                    <?php if (isset($agentVerification) && $agentVerification): ?>
-                        <?php $approvalStatus = is_object($agentVerification) ? $agentVerification->approval_status : $agentVerification['approval_status']; ?>
-                        <div class="flex items-center gap-4 p-4 rounded-lg <?= $approvalStatus == 'Verified' ? 'bg-[#d3e3fd] border border-[#a8c7fa]' : ($approvalStatus == 'Rejected' ? 'bg-[#ffdad6] border border-[#ffb4ab]' : 'bg-[#fef7e0] border border-[#ffe082]') ?>">
-                            <span class="material-symbols-outlined text-3xl <?= $approvalStatus == 'Verified' ? 'text-primary' : ($approvalStatus == 'Rejected' ? 'text-error' : 'text-[#b06000]') ?>">
-                                <?= $approvalStatus == 'Verified' ? 'check_circle' : ($approvalStatus == 'Rejected' ? 'cancel' : 'hourglass_empty') ?>
+                    <?php 
+                        $approvalStatus = '';
+                        if (isset($agentVerification) && $agentVerification) {
+                            $approvalStatus = is_object($agentVerification) ? $agentVerification->approval_status : $agentVerification['approval_status'];
+                        }
+                    ?>
+
+                    <?php if ($approvalStatus && $approvalStatus !== 'Rejected'): ?>
+                        <div class="flex items-center gap-4 p-4 rounded-lg <?= $approvalStatus == 'Verified' ? 'bg-[#d3e3fd] border border-[#a8c7fa]' : 'bg-[#fef7e0] border border-[#ffe082]' ?>">
+                            <span class="material-symbols-outlined text-3xl <?= $approvalStatus == 'Verified' ? 'text-primary' : 'text-[#b06000]' ?>">
+                                <?= $approvalStatus == 'Verified' ? 'check_circle' : 'hourglass_empty' ?>
                             </span>
                             <div>
                                 <p class="font-bold text-on-surface">Status: <?= esc($approvalStatus) ?></p>
@@ -146,7 +152,14 @@
                         </div>
                     <?php else: ?>
                         <div class="bg-surface-container-lowest p-4 border border-outline-variant rounded-lg">
-                            <p class="text-sm text-on-surface-variant mb-4">To post listings on HuniKita, you must first verify your identity. Please upload a clear photo of your KTP.</p>
+                            <?php if ($approvalStatus === 'Rejected'): ?>
+                                <div class="bg-[#ffdad6] text-[#410002] border border-[#ffb4ab] p-3 rounded mb-4 text-sm flex gap-2">
+                                    <span class="material-symbols-outlined text-[20px]">error</span>
+                                    Your previous verification document was rejected. Please upload a clear, legible photo of your valid KTP.
+                                </div>
+                            <?php else: ?>
+                                <p class="text-sm text-on-surface-variant mb-4">To post listings on HuniKita, you must first verify your identity. Please upload a clear photo of your KTP.</p>
+                            <?php endif; ?>
                             
                             <form action="<?= base_url('admin/profile/upload-docs') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
                                 <?= csrf_field() ?>
