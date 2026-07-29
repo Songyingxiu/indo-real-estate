@@ -35,6 +35,8 @@ $routes->get('logout', 'Auth::logout');
 // User Routes
 $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->get('inbox', 'Inquiry::index');
+    $routes->get('inbox/thread/(:num)', 'Inquiry::getThread/$1');
+    $routes->post('inbox/reply', 'Inquiry::reply');
     
     $routes->get('profile', 'User::profile');
     $routes->post('update-profile', 'User::updateProfile');
@@ -124,10 +126,14 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
     $routes->post('master-data/update-plan/(:num)', 'MasterData::updatePlan/$1');
     $routes->post('master-data/update-zipcode/(:num)', 'MasterData::updateZipcode/$1');
+    
+    // Inquiries (Chat System)
     $routes->get('inquiries', 'Inquiries::index');
+    $routes->get('inquiries/thread/(:num)', 'Inquiries::getThread/$1');
     $routes->post('inquiries/update-status/(:num)', 'Inquiries::updateStatus/$1');
     $routes->post('inquiries/reply', 'Inquiries::reply');
     
+    // Verifications
     $routes->get('verifications', 'Verifications::index'); 
     $routes->post('verifications/process-agent/(:num)', 'Verifications::processAgent/$1');
     $routes->post('verifications/process-property/(:num)', 'Verifications::processProperty/$1');

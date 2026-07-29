@@ -9,22 +9,59 @@ class Inquiry extends BaseController
         $inquiryModel = new InquiryModel();
         $userId = session()->get('id');
         
-        // Fetch inquiries where the user is EITHER the sender OR the receiver
-        $inquiries = $inquiryModel->select('inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name, users.email')
+        // Fetch only threads initiated by the buyer
+        $threads = $inquiryModel->select('inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name')
             ->join('properties', 'properties.id = inquiries.property_id', 'left')
-            ->join('users', 'users.id = inquiries.sender_id', 'left') // Join to get the person who sent the current message row
-            ->groupStart()
-                ->where('inquiries.sender_id', $userId)
-                ->orWhere('inquiries.receiver_id', $userId)
-            ->groupEnd()
+            ->join('users', 'users.id = inquiries.receiver_id', 'left') // Get the agent details
+            ->where('inquiries.sender_id', $userId)
+            ->where('inquiries.parent_id', null)
             ->orderBy('inquiries.created_at', 'DESC')
-            ->paginate(10);
+            ->findAll();
 
+        return view('front/user/inbox', ['threads' => $threads]);
+    }
+
+    public function getThread($id)
+    {
+        $inquiryModel = new InquiryModel();
+        
+        // Fetch thread messages
+        $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
+            ->join('users', 'users.id = inquiries.sender_id', 'left')
+            ->groupStart()
+                ->where('inquiries.inquiry_id', $id)
+                ->orWhere('inquiries.parent_id', $id)
+            ->groupEnd()
+            ->orderBy('inquiries.created_at', 'ASC')
+            ->findAll();
+            
+        return $this->response->setJSON($messages);
+    }
+
+    public function reply()
+    {
+        $inquiryModel = new InquiryModel();
+        $json = $this->request->getJSON();
+        
         $data = [
-            'inquiries' => $inquiries,
-            'pager'     => $inquiryModel->pager
+            'parent_id'   => $json->parent_id,
+            'property_id' => $json->property_id,
+            'sender_id'   => session()->get('id'),
+            'receiver_id' => $json->receiver_id, // The agent
+            'message'     => $json->message,
+            'status'      => 'Replied'
         ];
 
-        return view('front/user/inbox', $data);
+        if ($inquiryModel->insert($data)) {
+            $data['inquiry_id'] = $inquiryModel->getInsertID();
+            $data['created_at'] = date('Y-m-d H:i:s');
+            
+            // Note: Buyers replying sets status to 'Pending' so agents know it needs attention
+            $inquiryModel->update($json->parent_id, ['status' => 'Pending']);
+            
+            return $this->response->setJSON(['status' => 'success', 'message_data' => $data]);
+        }
+        
+        return $this->response->setJSON(['status' => 'error']);
     }
 }
