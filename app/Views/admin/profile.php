@@ -86,11 +86,11 @@
                     <div class="bg-primary-container text-on-primary-container p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div>
                             <p class="text-sm font-semibold opacity-80 mb-1">Current Plan</p>
-                            <h4 class="text-2xl font-bold"><?= esc($activePlan->name ?? 'Premium Plan') ?></h4>
+                            <h4 class="text-2xl font-bold"><?= esc($activePlan->name ?? $activePlan['name'] ?? 'Premium Plan') ?></h4>
                         </div>
                         <div class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
                             <span class="material-symbols-outlined text-[16px]">verified</span> 
-                            <?= esc($activeSubscription->sub_status ?? '') ?>
+                            <?= esc($activeSubscription->sub_status ?? $activeSubscription['sub_status'] ?? '') ?>
                         </div>
                     </div>
 
@@ -101,7 +101,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-on-surface-variant">Start Date</p>
-                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->start_date ?? 'now')) ?></p>
+                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->start_date ?? $activeSubscription['start_date'] ?? 'now')) ?></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -110,7 +110,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-on-surface-variant">Expiration Date</p>
-                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->end_date ?? 'now')) ?></p>
+                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->end_date ?? $activeSubscription['end_date'] ?? 'now')) ?></p>
                             </div>
                         </div>
                     </div>
@@ -132,14 +132,15 @@
                     </h3>
 
                     <?php if (isset($agentVerification) && $agentVerification): ?>
-                        <div class="flex items-center gap-4 p-4 rounded-lg <?= $agentVerification->approval_status == 'Verified' ? 'bg-[#d3e3fd] border border-[#a8c7fa]' : ($agentVerification->approval_status == 'Rejected' ? 'bg-[#ffdad6] border border-[#ffb4ab]' : 'bg-[#fef7e0] border border-[#ffe082]') ?>">
-                            <span class="material-symbols-outlined text-3xl <?= $agentVerification->approval_status == 'Verified' ? 'text-primary' : ($agentVerification->approval_status == 'Rejected' ? 'text-error' : 'text-[#b06000]') ?>">
-                                <?= $agentVerification->approval_status == 'Verified' ? 'check_circle' : ($agentVerification->approval_status == 'Rejected' ? 'cancel' : 'hourglass_empty') ?>
+                        <?php $approvalStatus = is_object($agentVerification) ? $agentVerification->approval_status : $agentVerification['approval_status']; ?>
+                        <div class="flex items-center gap-4 p-4 rounded-lg <?= $approvalStatus == 'Verified' ? 'bg-[#d3e3fd] border border-[#a8c7fa]' : ($approvalStatus == 'Rejected' ? 'bg-[#ffdad6] border border-[#ffb4ab]' : 'bg-[#fef7e0] border border-[#ffe082]') ?>">
+                            <span class="material-symbols-outlined text-3xl <?= $approvalStatus == 'Verified' ? 'text-primary' : ($approvalStatus == 'Rejected' ? 'text-error' : 'text-[#b06000]') ?>">
+                                <?= $approvalStatus == 'Verified' ? 'check_circle' : ($approvalStatus == 'Rejected' ? 'cancel' : 'hourglass_empty') ?>
                             </span>
                             <div>
-                                <p class="font-bold text-on-surface">Status: <?= esc($agentVerification->approval_status) ?></p>
+                                <p class="font-bold text-on-surface">Status: <?= esc($approvalStatus) ?></p>
                                 <p class="text-sm text-on-surface-variant">
-                                    <?= $agentVerification->approval_status == 'Verified' ? 'You are fully verified and can post properties.' : 'Your identity documents are currently under review.' ?>
+                                    <?= $approvalStatus == 'Verified' ? 'You are fully verified and can post properties.' : 'Your identity documents are currently under review.' ?>
                                 </p>
                             </div>
                         </div>
