@@ -12,7 +12,7 @@ class InquiryModel extends Model
     protected $returnType       = 'object';
     
     protected $allowedFields    = [
-        'property_id', 'sender_id', 'receiver_id', 'message', 'status'
+        'parent_id', 'property_id', 'sender_id', 'receiver_id', 'message', 'status'
     ];
 
     protected $useTimestamps = true;

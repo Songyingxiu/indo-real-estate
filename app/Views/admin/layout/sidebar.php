@@ -15,7 +15,6 @@
 
 <nav class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 py-stack-md bg-surface-container-low border-r border-outline-variant transition-colors duration-300 z-40">
     <div class="px-margin-desktop mb-stack-lg flex flex-col items-center">
-        <!-- Logo Image Reference -->
         <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-16 h-16 rounded-full object-cover shadow-sm bg-white mb-stack-sm" onerror="this.outerHTML='<div class=\'w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-3xl mb-stack-sm shadow-sm\'>H</div>'">
         <h1 class="font-brand-text text-brand-text text-primary text-center">HuniKita</h1>
         
@@ -47,7 +46,6 @@
             <span class="font-label-md text-label-md">Inquiries Inbox</span>
         </a>
 
-        <!-- HIDDEN FROM ADMIN (ROLE 4) -->
         <?php if($role != 4): ?>
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/pricing') ?>">
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/pricing')) ? 'icon-fill' : '' ?>">workspace_premium</span>
@@ -55,28 +53,15 @@
             </a>
         <?php endif; ?>
 
-        <?php 
-            // Premium Tools Access Logic: Admins (4) OR Owners/Agents (2, 3) with Plan IDs 2 or 3
-            $planId = session()->get('plan_id') ?? 1;
-            $canAccessTemplates = ($role == 4) || (in_array($role, [2, 3]) && in_array($planId, [2, 3]));
-        ?>
-
-        <?php if($canAccessTemplates): ?>
+        <?php if($role == 4): ?>
             <div class="px-6 py-3 mt-4">
-                <p class="text-[11px] font-bold text-outline uppercase tracking-wider">Premium Tools</p>
+                <p class="text-[11px] font-bold text-outline uppercase tracking-wider">Administration</p>
             </div>
-            
+
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/email-templates') ?>">
                 <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/email-templates') === 0) ? 'icon-fill' : '' ?>">mail</span>
                 <span class="font-label-md text-label-md">Email Templates</span>
             </a>
-        <?php endif; ?>
-
-        <?php if($role == 4): ?>
-            
-            <div class="px-6 py-3 mt-4">
-                <p class="text-[11px] font-bold text-outline uppercase tracking-wider">Administration</p>
-            </div>
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/moderation')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/moderation') ?>">
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/moderation')) ? 'icon-fill' : '' ?>">rule</span>
