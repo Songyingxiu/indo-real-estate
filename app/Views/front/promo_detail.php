@@ -11,9 +11,9 @@
 
         <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
             <!-- Check the 'image' property and wrap with base_url() pointing to /uploads/ads/ -->
-            <?php if (!empty($promo->image)): ?>
+            <?php if (!empty($promo->image_path)): ?>
                 <div class="w-full h-64 md:h-96">
-                    <img src="<?= base_url('uploads/ads/' . esc($promo->image)) ?>" alt="<?= esc($promo->title) ?>" class="w-full h-full object-cover">
+                    <img src="<?= base_url('uploads/ads/' . esc($promo->image_path)) ?>" alt="<?= esc($promo->title) ?>" class="w-full h-full object-cover">
                 </div>
             <?php endif; ?>
             
