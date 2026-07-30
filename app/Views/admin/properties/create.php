@@ -24,7 +24,6 @@
                     if (this.stateId) { this.fetchCities(); }
                     if (this.cityId) { this.fetchZipcodes(); }
                     
-                    // Fixed: Use $watch to prevent race conditions instead of @change
                     this.$watch('stateId', (value) => {
                         this.cityId = '';
                         this.cities = [];
@@ -39,7 +38,8 @@
                 },
                 fetchCities() {
                     this.isLoading = true;
-                    fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
+                    const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>/' + this.stateId;
+                    fetch(url)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
                             return response.json();
@@ -56,7 +56,8 @@
                 },
                 fetchZipcodes() {
                     this.isZipLoading = true;
-                    fetch('<?= base_url('admin/properties/get-zipcodes/') ?>' + this.cityId)
+                    const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>/' + this.cityId;
+                    fetch(url)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
                             return response.json();
