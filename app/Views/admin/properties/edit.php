@@ -24,7 +24,6 @@
                     if (this.stateId) { this.fetchCities(); }
                     if (this.cityId) { this.fetchZipcodes(); }
                     
-                    // Fixed: Use $watch to prevent race conditions instead of @change
                     this.$watch('stateId', (value) => {
                         this.cityId = '';
                         this.cities = [];
@@ -39,23 +38,39 @@
                 },
                 fetchCities() {
                     this.isLoading = true;
-                    fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
-                        .then(response => response.json())
+                    const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>/' + this.stateId;
+                    fetch(url)
+                        .then(response => {
+                            if(!response.ok) throw new Error('Server returned an error.');
+                            return response.json();
+                        })
                         .then(data => {
                             this.cities = data;
                             this.isLoading = false;
                         })
-                        .catch(error => { this.cities = []; this.isLoading = false; });
+                        .catch(error => {
+                            console.error('AJAX Error:', error);
+                            this.cities = [];
+                            this.isLoading = false;
+                        });
                 },
                 fetchZipcodes() {
                     this.isZipLoading = true;
-                    fetch('<?= base_url('admin/properties/get-zipcodes/') ?>' + this.cityId)
-                        .then(response => response.json())
+                    const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>/' + this.cityId;
+                    fetch(url)
+                        .then(response => {
+                            if(!response.ok) throw new Error('Server returned an error.');
+                            return response.json();
+                        })
                         .then(data => {
                             this.zipcodes = data;
                             this.isZipLoading = false;
                         })
-                        .catch(error => { this.zipcodes = []; this.isZipLoading = false; });
+                        .catch(error => {
+                            console.error('AJAX Error:', error);
+                            this.zipcodes = [];
+                            this.isZipLoading = false;
+                        });
                 }
             }">
                 
