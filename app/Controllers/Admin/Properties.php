@@ -354,7 +354,6 @@ class Properties extends BaseController
         return redirect()->to(base_url('admin/properties'))->with('success', 'Property updated and reset to Draft.');
     }
     
-    // --- UPDATED: Fallback to getGet() to allow Query Parameters to bypass strict route requirements
     public function getCities($stateId = null)
     {
         $id = $stateId ?? $this->request->getGet('state_id');
@@ -373,7 +372,6 @@ class Properties extends BaseController
         return $this->response->setJSON($zipcodes);
     }
 
-    // Retain aliases just in case
     public function get_cities($stateId = null)
     {
         return $this->getCities($stateId);

@@ -38,8 +38,8 @@
                 },
                 fetchCities() {
                     this.isLoading = true;
-                    // Fix: Use Query Parameter to bypass Route restrictions
-                    const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>?state_id=' + this.stateId;
+                    // Restored slash segments to satisfy Routes.php explicit definitions
+                    const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>/' + this.stateId;
                     fetch(url)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
@@ -57,8 +57,8 @@
                 },
                 fetchZipcodes() {
                     this.isZipLoading = true;
-                    // Fix: Use Query Parameter to bypass Route restrictions
-                    const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>?city_id=' + this.cityId;
+                    // Restored slash segments to satisfy Routes.php explicit definitions
+                    const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>/' + this.cityId;
                     fetch(url)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
