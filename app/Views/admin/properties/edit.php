@@ -93,9 +93,9 @@
                 <div>
                     <label class="block font-semibold mb-2">Zip Code</label>
                     <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="zipcodes.length === 0 || isZipLoading">
-                        <option value="" disabled x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                        <option value="" <?= empty($property['zipcode_id']) ? 'selected' : '' ?> x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
                         <template x-for="zip in zipcodes" :key="zip.id">
-                            <option :value="zip.id" :selected="zip.id == <?= esc($property['zipcode_id'] ?? "''") ?>" x-text="zip.zip_code || zip.code"></option>
+                            <option :value="zip.id" :selected="zip.id == <?= esc($property['zipcode_id'] ?? "''") ?>" x-text="zip.zipcode"></option>
                         </template>
                     </select>
                 </div>
@@ -212,7 +212,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block font-semibold mb-2">Upload New SHM Document</label>
-                    <input type="file" name="shm_document" accept=".pdf,.jpg" class="w-full p-2 border rounded bg-surface">
+                    <input type="file" name="shm_document" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded bg-surface">
                     <p class="text-xs text-on-surface-variant mt-1">Leave empty to keep current document.</p>
                 </div>
             </div>
