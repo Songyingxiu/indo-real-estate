@@ -38,8 +38,8 @@
                 },
                 fetchCities() {
                     this.isLoading = true;
-                    // Changed to camelCase
-                    const url = '<?= rtrim(base_url('admin/properties/getCities'), '/') ?>/' + this.stateId;
+                    // REVERTED to get-cities with a dash!
+                    const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>/' + this.stateId;
                     fetch(url)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
@@ -57,15 +57,14 @@
                 },
                 fetchZipcodes() {
                     this.isZipLoading = true;
-                    // Changed to camelCase
-                    const url = '<?= rtrim(base_url('admin/properties/getZipcodes'), '/') ?>/' + this.cityId;
+                    // REVERTED to get-zipcodes with a dash!
+                    const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>/' + this.cityId;
                     fetch(url)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
                             return response.json();
                         })
                         .then(data => {
-                            console.log('Loaded zipcodes:', data); // Debugging log
                             this.zipcodes = data;
                             this.isZipLoading = false;
                         })
@@ -104,7 +103,6 @@
 
                 <div>
                     <label class="block font-semibold mb-2">City *</label>
-                    <!-- Changed disabled attribute so it unlocks when State is selected -->
                     <select name="city_id" x-model="cityId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!stateId || isLoading">
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" :selected="city.id == <?= esc($property['city_id'] ?? "''") ?>" x-text="city.city_name || city.name"></option>
@@ -114,7 +112,6 @@
 
                 <div>
                     <label class="block font-semibold mb-2">Zip Code</label>
-                    <!-- Changed disabled attribute so it unlocks when City is selected -->
                     <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
                         <option value="" <?= empty($property['zipcode_id']) ? 'selected' : '' ?> x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
                         <template x-for="zip in zipcodes" :key="zip.id">
