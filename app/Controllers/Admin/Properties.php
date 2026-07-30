@@ -5,7 +5,8 @@ use App\Models\PropertyModel;
 use App\Models\PropertyImageModel;
 use App\Models\PropertyTypeModel; 
 use App\Models\StateModel;
-use App\Models\CityModel; 
+use App\Models\CityModel;
+use App\Models\ZipcodeModel; 
 use App\Models\FeatureModel;
 use App\Models\PropertyFeatureModel;
 use App\Models\PropertyVerificationModel;
@@ -127,7 +128,8 @@ class Properties extends BaseController
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
-            'city_id'          => $this->request->getPost('city_id'),  
+            'city_id'          => $this->request->getPost('city_id'),
+            'zipcode_id'       => $this->request->getPost('zipcode_id') ?: null,
             'tax_price'        => $this->request->getPost('tax_price'),
             'bed'              => $this->request->getPost('bed'),
             'bath'             => $this->request->getPost('bath'),
@@ -300,7 +302,8 @@ class Properties extends BaseController
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
-            'city_id'          => $this->request->getPost('city_id'),  
+            'city_id'          => $this->request->getPost('city_id'),
+            'zipcode_id'       => $this->request->getPost('zipcode_id') ?: null,
             'tax_price'        => $this->request->getPost('tax_price'),
             'bed'              => $this->request->getPost('bed'),
             'bath'             => $this->request->getPost('bath'),
@@ -363,7 +366,8 @@ class Properties extends BaseController
 
     public function getZipcodes($cityId)
     {
-        $zipModel = new \App\Models\ZipcodeModel();
+        // Now using the properly imported model namespace
+        $zipModel = new ZipcodeModel();
         $zipcodes = $zipModel->where('city_id', $cityId)->findAll();
         
         return $this->response->setJSON($zipcodes);
@@ -371,7 +375,7 @@ class Properties extends BaseController
 
     public function updateStatus($id)
     {
-        $propertyModel = new \App\Models\PropertyModel();
+        $propertyModel = new PropertyModel();
         
         $json = $this->request->getJSON();
         $status = $json->status ?? '';

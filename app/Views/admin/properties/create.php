@@ -122,7 +122,7 @@
                 <div>
                     <label class="block font-semibold mb-2">Zip Code</label>
                     <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="zipcodes.length === 0 || isZipLoading">
-                        <option value="" disabled selected x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                        <option value="" <?= !old('zipcode_id') ? 'selected' : '' ?> x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
                         <template x-for="zip in zipcodes" :key="zip.id">
                             <option :value="zip.id" :selected="zip.id == '<?= old('zipcode_id') ?>'" x-text="zip.zipcode"></option>
                         </template>
