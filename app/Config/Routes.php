@@ -69,6 +69,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('properties/edit/(:num)', 'Properties::edit/$1');
     $routes->post('properties/update/(:num)', 'Properties::update/$1');
     $routes->get('properties/get-cities/(:any)', 'Properties::getCities/$1');
+    $routes->get('properties/get-zipcodes/(:any)', 'Properties::getZipcodes/$1');
     
     // Property Status AJAX Update
     $routes->post('properties/update-status/(:num)', 'Properties::updateStatus/$1');

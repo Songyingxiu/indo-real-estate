@@ -16,6 +16,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
                 stateId: '<?= esc($property['state_id'] ?? '') ?>', 
                 cityId: '<?= esc($property['city_id'] ?? '') ?>',
+                zipcodeId: '<?= esc($property['zipcode_id'] ?? '') ?>',
                 cities: [], 
                 zipcodes: [],
                 isLoading: false,
@@ -26,12 +27,14 @@
                     
                     this.$watch('stateId', (value) => {
                         this.cityId = '';
+                        this.zipcodeId = '';
                         this.cities = [];
                         this.zipcodes = [];
                         if (value) this.fetchCities();
                     });
 
                     this.$watch('cityId', (value) => {
+                        this.zipcodeId = '';
                         this.zipcodes = [];
                         if (value) this.fetchZipcodes();
                     });
@@ -105,17 +108,17 @@
                     <label class="block font-semibold mb-2">City *</label>
                     <select name="city_id" x-model="cityId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!stateId || isLoading">
                         <template x-for="city in cities" :key="city.id">
-                            <option :value="city.id" :selected="city.id == <?= esc($property['city_id'] ?? "''") ?>" x-text="city.city_name || city.name"></option>
+                            <option :value="city.id" x-text="city.city_name || city.name"></option>
                         </template>
                     </select>
                 </div>
 
                 <div>
                     <label class="block font-semibold mb-2">Zip Code</label>
-                    <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
-                        <option value="" <?= empty($property['zipcode_id']) ? 'selected' : '' ?> x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                    <select name="zipcode_id" x-model="zipcodeId" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
+                        <option value="" x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
                         <template x-for="zip in zipcodes" :key="zip.id">
-                            <option :value="zip.id" :selected="zip.id == <?= esc($property['zipcode_id'] ?? "''") ?>" x-text="zip.zipcode"></option>
+                            <option :value="zip.id" x-text="zip.zipcode"></option>
                         </template>
                     </select>
                 </div>
@@ -243,7 +246,7 @@
         </div>
     </form>
 
-    <!-- ALPINE.JS VALIDATION MODAL -->
+    <!-- alpine.js validation modal -->
     <div x-show="showValidationErrorModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showValidationErrorModal = false" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="p-6 text-center">

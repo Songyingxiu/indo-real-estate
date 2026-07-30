@@ -16,6 +16,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
                 stateId: '<?= old('state_id', '') ?>', 
                 cityId: '<?= old('city_id', '') ?>',
+                zipcodeId: '<?= old('zipcode_id', '') ?>',
                 cities: [], 
                 zipcodes: [],
                 isLoading: false,
@@ -26,12 +27,14 @@
                     
                     this.$watch('stateId', (value) => {
                         this.cityId = '';
+                        this.zipcodeId = '';
                         this.cities = [];
                         this.zipcodes = [];
                         if (value) this.fetchCities();
                     });
 
                     this.$watch('cityId', (value) => {
+                        this.zipcodeId = '';
                         this.zipcodes = [];
                         if (value) this.fetchZipcodes();
                     });
@@ -114,17 +117,17 @@
                     <select name="city_id" x-model="cityId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!stateId || isLoading">
                         <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
                         <template x-for="city in cities" :key="city.id">
-                            <option :value="city.id" :selected="city.id == '<?= old('city_id') ?>'" x-text="city.city_name || city.name"></option>
+                            <option :value="city.id" x-text="city.city_name || city.name"></option>
                         </template>
                     </select>
                 </div>
 
                 <div>
                     <label class="block font-semibold mb-2">Zip Code</label>
-                    <select name="zipcode_id" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
-                        <option value="" <?= !old('zipcode_id') ? 'selected' : '' ?> x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                    <select name="zipcode_id" x-model="zipcodeId" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
+                        <option value="" x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
                         <template x-for="zip in zipcodes" :key="zip.id">
-                            <option :value="zip.id" :selected="zip.id == '<?= old('zipcode_id') ?>'" x-text="zip.zipcode"></option>
+                            <option :value="zip.id" x-text="zip.zipcode"></option>
                         </template>
                     </select>
                 </div>
@@ -260,7 +263,7 @@
         </div>
     </form>
 
-    <!-- ALPINE.JS VALIDATION MODAL -->
+    <!-- alpine.js validation modal -->
     <div x-show="showValidationErrorModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showValidationErrorModal = false" x-show="showValidationErrorModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="p-6 text-center">
@@ -287,7 +290,7 @@
         </div>
     </div>
 
-    <!-- AGENT AJAX POI MODAL -->
+    <!-- agent ajax POI modal -->
     <div x-data="{ showAgentPoiModal: false }" @open-poi-modal.window="showAgentPoiModal = true" @close-poi-modal.window="showAgentPoiModal = false">
         <div x-show="showAgentPoiModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
             <div @click.outside="showAgentPoiModal = false" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
@@ -323,7 +326,7 @@
         </div>
     </div>
 
-    <!-- INITIALIZE LEAFLET MAP & AJAX -->
+    <!-- initialize leaflet map & ajax -->
     <script>
         let map;
         let poiIcon;
