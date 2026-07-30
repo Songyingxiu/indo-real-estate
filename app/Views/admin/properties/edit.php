@@ -21,16 +21,23 @@
                 isLoading: false,
                 isZipLoading: false,
                 init() {
-                    if(this.stateId) { this.fetchCities(); }
-                    if(this.cityId) { this.fetchZipcodes(); }
+                    if (this.stateId) { this.fetchCities(); }
+                    if (this.cityId) { this.fetchZipcodes(); }
+                    
+                    // Fixed: Use $watch to prevent race conditions instead of @change
+                    this.$watch('stateId', (value) => {
+                        this.cityId = '';
+                        this.cities = [];
+                        this.zipcodes = [];
+                        if (value) this.fetchCities();
+                    });
+
+                    this.$watch('cityId', (value) => {
+                        this.zipcodes = [];
+                        if (value) this.fetchZipcodes();
+                    });
                 },
                 fetchCities() {
-                    if (!this.stateId) {
-                        this.cities = [];
-                        this.cityId = '';
-                        this.zipcodes = [];
-                        return;
-                    }
                     this.isLoading = true;
                     fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
                         .then(response => response.json())
@@ -41,10 +48,6 @@
                         .catch(error => { this.cities = []; this.isLoading = false; });
                 },
                 fetchZipcodes() {
-                    if (!this.cityId) {
-                        this.zipcodes = [];
-                        return;
-                    }
                     this.isZipLoading = true;
                     fetch('<?= base_url('admin/properties/get-zipcodes/') ?>' + this.cityId)
                         .then(response => response.json())
@@ -74,7 +77,7 @@
 
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
-                    <select name="state_id" x-model="stateId" @change="fetchCities(); cityId=''; zipcodes=[];" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <select name="state_id" x-model="stateId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <?php foreach ($states as $state): ?>
                             <option value="<?= esc($state->id) ?>"><?= esc($state->region_name ?? $state->name) ?></option>
                         <?php endforeach; ?>
@@ -83,7 +86,7 @@
 
                 <div>
                     <label class="block font-semibold mb-2">City *</label>
-                    <select name="city_id" x-model="cityId" @change="fetchZipcodes()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
+                    <select name="city_id" x-model="cityId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" :selected="city.id == <?= esc($property['city_id'] ?? "''") ?>" x-text="city.city_name || city.name"></option>
                         </template>

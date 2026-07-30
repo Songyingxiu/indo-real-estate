@@ -366,7 +366,6 @@ class Properties extends BaseController
 
     public function getZipcodes($cityId)
     {
-        // Now using the properly imported model namespace
         $zipModel = new ZipcodeModel();
         $zipcodes = $zipModel->where('city_id', $cityId)->findAll();
         
