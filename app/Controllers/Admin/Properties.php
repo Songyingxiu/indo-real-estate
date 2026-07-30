@@ -372,6 +372,20 @@ class Properties extends BaseController
         return $this->response->setJSON($zipcodes);
     }
 
+    // --- ALIASES FOR CI4 AUTO-ROUTING FIX ---
+    // CodeIgniter 4 auto-routing translates dashes in URIs (like get-zipcodes) 
+    // to underscores (get_zipcodes). These aliases catch those requests 
+    // and forward them to the correct camelCase functions to prevent 404 errors.
+    public function get_cities($stateId)
+    {
+        return $this->getCities($stateId);
+    }
+
+    public function get_zipcodes($cityId)
+    {
+        return $this->getZipcodes($cityId);
+    }
+
     public function updateStatus($id)
     {
         $propertyModel = new PropertyModel();
