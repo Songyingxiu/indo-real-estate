@@ -3,6 +3,7 @@
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\AgentVerificationModel;
 
 class Users extends BaseController
 {
@@ -13,6 +14,20 @@ class Users extends BaseController
         $userModel = new UserModel();
         // Fetch users and display newest first
         $data['users'] = $userModel->withDeleted()->orderBy('created_date', 'DESC')->findAll();
+        
+        // Fetch latest agent verifications to attach to the user list
+        $agentVerifyModel = new AgentVerificationModel();
+        $allDocs = $agentVerifyModel->orderBy('id', 'DESC')->findAll();
+        
+        $mappedDocs = [];
+        foreach ($allDocs as $doc) {
+            $row = (object) $doc;
+            // Only store the most recent document submission per user
+            if (!isset($mappedDocs[$row->user_id])) {
+                $mappedDocs[$row->user_id] = $row;
+            }
+        }
+        $data['agentDocs'] = $mappedDocs;
         
         return view('admin/users/user', $data);
     }
