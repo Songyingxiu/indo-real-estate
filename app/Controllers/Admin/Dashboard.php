@@ -53,7 +53,8 @@ class Dashboard extends BaseController
                         'icon'      => 'badge',
                         'submitter' => trim($firstName . ' ' . $lastName),
                         'initials'  => strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1)) ?: 'U',
-                        'date'      => $agentArr['created_date'],
+                        // Fix: Check for created_at first, then created_date
+                        'date'      => $agentArr['created_at'] ?? $agentArr['created_date'] ?? null,
                         'status'    => $agentArr['approval_status']
                     ];
                 }
@@ -74,7 +75,8 @@ class Dashboard extends BaseController
                             'icon'      => 'receipt_long',
                             'submitter' => trim($firstName . ' ' . $lastName),
                             'initials'  => strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1)) ?: 'U',
-                            'date'      => $paymentArr['created_date'],
+                            // Fix: Check for created_at first, then created_date
+                            'date'      => $paymentArr['created_at'] ?? $paymentArr['created_date'] ?? null,
                             'status'    => $paymentArr['approval_status']
                         ];
                     }
@@ -82,7 +84,7 @@ class Dashboard extends BaseController
             }
 
             usort($verifications, function($a, $b) {
-                return strtotime($b['date']) - strtotime($a['date']);
+                return strtotime($b['date'] ?? 'now') - strtotime($a['date'] ?? 'now');
             });
             
             $data['verifications'] = array_slice($verifications, 0, 5);
