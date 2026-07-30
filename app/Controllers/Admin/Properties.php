@@ -38,7 +38,6 @@ class Properties extends BaseController
         $userId = session()->get('user_id');
         $roleId = session()->get('role_id');
 
-        // Check if agent is verified
         $agentVerifyModel = new AgentVerificationModel();
         $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
         
@@ -87,7 +86,6 @@ class Properties extends BaseController
         $userId = session()->get('user_id');
         $roleId = session()->get('role_id');
 
-        // Check if agent is verified before processing store
         $agentVerifyModel = new AgentVerificationModel();
         $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
         
@@ -356,32 +354,32 @@ class Properties extends BaseController
         return redirect()->to(base_url('admin/properties'))->with('success', 'Property updated and reset to Draft.');
     }
     
-    public function getCities($stateId)
+    // --- UPDATED: Fallback to getGet() to allow Query Parameters to bypass strict route requirements
+    public function getCities($stateId = null)
     {
+        $id = $stateId ?? $this->request->getGet('state_id');
         $cityModel = new CityModel();
-        $cities = $cityModel->where('state_id', $stateId)->findAll();
+        $cities = $cityModel->where('state_id', $id)->findAll();
         
         return $this->response->setJSON($cities);
     }
 
-    public function getZipcodes($cityId)
+    public function getZipcodes($cityId = null)
     {
+        $id = $cityId ?? $this->request->getGet('city_id');
         $zipModel = new ZipcodeModel();
-        $zipcodes = $zipModel->where('city_id', $cityId)->findAll();
+        $zipcodes = $zipModel->where('city_id', $id)->findAll();
         
         return $this->response->setJSON($zipcodes);
     }
 
-    // --- ALIASES FOR CI4 AUTO-ROUTING FIX ---
-    // CodeIgniter 4 auto-routing translates dashes in URIs (like get-zipcodes) 
-    // to underscores (get_zipcodes). These aliases catch those requests 
-    // and forward them to the correct camelCase functions to prevent 404 errors.
-    public function get_cities($stateId)
+    // Retain aliases just in case
+    public function get_cities($stateId = null)
     {
         return $this->getCities($stateId);
     }
 
-    public function get_zipcodes($cityId)
+    public function get_zipcodes($cityId = null)
     {
         return $this->getZipcodes($cityId);
     }
