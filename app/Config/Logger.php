@@ -118,7 +118,7 @@ class Logger extends BaseConfig
              * By default, logs are written to WRITEPATH . 'logs/'
              * Specify a different destination here, if desired.
              */
-            'path' => '',
+            'path' => '/tmp',
         ],
 
         /*
