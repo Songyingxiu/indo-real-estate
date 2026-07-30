@@ -21,23 +21,24 @@
                 isLoading: false,
                 isZipLoading: false,
                 init() {
-                    if (this.stateId) {
-                        this.fetchCities();
-                    }
-                    if (this.cityId) {
-                        this.fetchZipcodes();
-                    }
+                    if (this.stateId) { this.fetchCities(); }
+                    if (this.cityId) { this.fetchZipcodes(); }
+                    
+                    // Fixed: Use $watch to prevent race conditions instead of @change
+                    this.$watch('stateId', (value) => {
+                        this.cityId = '';
+                        this.cities = [];
+                        this.zipcodes = [];
+                        if (value) this.fetchCities();
+                    });
+
+                    this.$watch('cityId', (value) => {
+                        this.zipcodes = [];
+                        if (value) this.fetchZipcodes();
+                    });
                 },
                 fetchCities() {
-                    if (!this.stateId) {
-                        this.cities = [];
-                        this.cityId = '';
-                        this.zipcodes = [];
-                        return;
-                    }
                     this.isLoading = true;
-                    this.cityId = '';
-                    this.zipcodes = [];
                     fetch('<?= base_url('admin/properties/get-cities/') ?>' + this.stateId)
                         .then(response => {
                             if(!response.ok) throw new Error('Server returned an error.');
@@ -54,10 +55,6 @@
                         });
                 },
                 fetchZipcodes() {
-                    if (!this.cityId) {
-                        this.zipcodes = [];
-                        return;
-                    }
                     this.isZipLoading = true;
                     fetch('<?= base_url('admin/properties/get-zipcodes/') ?>' + this.cityId)
                         .then(response => {
@@ -97,7 +94,7 @@
 
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
-                    <select name="state_id" id="state_id" x-model="stateId" @change="fetchCities()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <select name="state_id" id="state_id" x-model="stateId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="" disabled <?= old('state_id') ? '' : 'selected' ?>>Select a region...</option>
                         <?php if (!empty($states)): ?>
                             <?php foreach ($states as $state): ?>
@@ -111,7 +108,7 @@
 
                 <div>
                     <label class="block font-semibold mb-2">City *</label>
-                    <select name="city_id" x-model="cityId" @change="fetchZipcodes()" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
+                    <select name="city_id" x-model="cityId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="cities.length === 0 || isLoading">
                         <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" :selected="city.id == '<?= old('city_id') ?>'" x-text="city.city_name || city.name"></option>
