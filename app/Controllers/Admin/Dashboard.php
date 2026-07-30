@@ -53,8 +53,8 @@ class Dashboard extends BaseController
                         'icon'      => 'badge',
                         'submitter' => trim($firstName . ' ' . $lastName),
                         'initials'  => strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1)) ?: 'U',
-                        // Fix: Check for created_at first, then created_date
-                        'date'      => $agentArr['created_at'] ?? $agentArr['created_date'] ?? null,
+                        // Fix: Match the Verification Center's fallback logic
+                        'date'      => $agentArr['created_at'] ?? $agentArr['created_date'] ?? date('Y-m-d H:i:s'),
                         'status'    => $agentArr['approval_status']
                     ];
                 }
@@ -75,16 +75,16 @@ class Dashboard extends BaseController
                             'icon'      => 'receipt_long',
                             'submitter' => trim($firstName . ' ' . $lastName),
                             'initials'  => strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1)) ?: 'U',
-                            // Fix: Check for created_at first, then created_date
-                            'date'      => $paymentArr['created_at'] ?? $paymentArr['created_date'] ?? null,
+                            'date'      => $paymentArr['created_at'] ?? $paymentArr['created_date'] ?? date('Y-m-d H:i:s'),
                             'status'    => $paymentArr['approval_status']
                         ];
                     }
                 }
             }
 
+            // Fallbacks ensure date is never null, making strtotime safe
             usort($verifications, function($a, $b) {
-                return strtotime($b['date'] ?? 'now') - strtotime($a['date'] ?? 'now');
+                return strtotime($b['date']) - strtotime($a['date']);
             });
             
             $data['verifications'] = array_slice($verifications, 0, 5);
