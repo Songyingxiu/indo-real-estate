@@ -32,18 +32,18 @@ class Dashboard extends BaseController
         $data['totalUsers'] = $userModel->countAllResults();
         $data['activeProperties'] = $propertyModel->where('approval_status', 'Published')->countAllResults();
         $data['propTotal'] = $propertyModel->countAllResults();
-        $data['propToday'] = $propertyModel->where("DATE(created_at) = '$today'")->countAllResults();
-        $data['prop7Days'] = $propertyModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
-        $data['propLastWeek'] = $propertyModel->where("DATE(created_at) >= '$fourteenDaysAgo' AND DATE(created_at) < '$sevenDaysAgo'")->countAllResults();
-        $data['propThisMonth'] = $propertyModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
-        $data['propLastMonth'] = $propertyModel->where("DATE(created_at) >= '$lastMonthStart' AND DATE(created_at) <= '$lastMonthEnd'")->countAllResults();
+        $data['propToday'] = $propertyModel->where("DATE(created_date) = '$today'")->countAllResults();
+        $data['prop7Days'] = $propertyModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
+        $data['propLastWeek'] = $propertyModel->where("DATE(created_date) >= '$fourteenDaysAgo' AND DATE(created_date) < '$sevenDaysAgo'")->countAllResults();
+        $data['propThisMonth'] = $propertyModel->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
+        $data['propLastMonth'] = $propertyModel->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
         
         // inquiries metrics
         $data['inqTotal'] = $inquiryModel->countAllResults();
         $data['inqCompleted'] = $inquiryModel->whereIn('status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
-        $data['inqToday'] = $inquiryModel->where("DATE(created_at) = '$today'")->countAllResults();
-        $data['inqWeekly'] = $inquiryModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
-        $data['inqMonthly'] = $inquiryModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
+        $data['inqToday'] = $inquiryModel->where("DATE(created_date) = '$today'")->countAllResults();
+        $data['inqWeekly'] = $inquiryModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
+        $data['inqMonthly'] = $inquiryModel->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
 
         // Prepare arrays for the Chart.js Graphic
         $chartLabels = ['Active Users', 'Published Properties', 'Total Inquiries'];
@@ -55,9 +55,9 @@ class Dashboard extends BaseController
             
             // subscription metrics (Admin)
             $data['subTotal'] = $subscriptionModel->countAllResults();
-            $data['subToday'] = $subscriptionModel->where("DATE(created_at) = '$today'")->countAllResults();
-            $data['sub7Days'] = $subscriptionModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
-            $data['sub30Days'] = $subscriptionModel->where("DATE(created_at) >= '$thirtyDaysAgo'")->countAllResults();
+            $data['subToday'] = $subscriptionModel->where("DATE(created_date) = '$today'")->countAllResults();
+            $data['sub7Days'] = $subscriptionModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
+            $data['sub30Days'] = $subscriptionModel->where("DATE(created_date) >= '$thirtyDaysAgo'")->countAllResults();
             
             // Calculate Revenue (Assuming amount field or joining with payments)
             $db = \Config\Database::connect();
