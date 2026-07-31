@@ -21,7 +21,7 @@ class Reports extends BaseController
         $subscriptions = $subscriptionModel->findAll();
 
         // Define the Filename with today's date
-        $filename = 'HuniKita_Phase4_Analytics_' . date('Y-m-d') . '.csv';
+        $filename = 'HuniKita_Platform_Report_' . date('Y-m-d') . '.csv';
 
         // Set Headers to force browser to download the file as a CSV
         header('Content-Type: text/csv; charset=utf-8');
@@ -31,40 +31,44 @@ class Reports extends BaseController
 
         // Open the output stream
         $output = fopen('php://output', 'w');
-
-        // section 1: meta data
-        fputcsv($output, ['HuniKita Platform Report - Phase 4 Analytics']);
-        fputcsv($output, ['Generated On:', date('F j, Y, g:i a')]);
-        fputcsv($output, []); // Blank Row for readability
-
-        // section 2: properties data        
-        fputcsv($output, ['--- PROPERTIES LISTING ---']);
-        // Column Headers
-        fputcsv($output, ['Property ID', 'Title', 'Listing Type', 'Status', 'Tax Price', 'Created Date']);
         
-        // Loop through Properties (Note: PropertyModel returns arrays)
+        // Add UTF-8 BOM to ensure Excel reads special characters correctly
+        fputs($output, "\xEF\xBB\xBF");
+
+        // Define the delimiter as a semicolon for Excel compatibility
+        $delimiter = ';';
+
+        // section 1 meta data
+        fputcsv($output, ['HuniKita Platform Report'], $delimiter);
+        fputcsv($output, ['Generated On:', date('F j, Y, g:i a')], $delimiter);
+        fputcsv($output, [], $delimiter); // Blank Row
+
+        // section 2 properties data
+        fputcsv($output, ['--- PROPERTIES LISTING ---'], $delimiter);
+        // Column Headers
+        fputcsv($output, ['Property ID', 'Title', 'Listing Type', 'Status', 'Tax Price', 'Created Date'], $delimiter);
+        
+        // Loop through Properties
         foreach ($properties as $prop) {
             fputcsv($output, [
                 $prop['id'],
                 $prop['title'] ?? 'N/A',
                 $prop['listing_type'] ?? 'N/A',
                 $prop['status'] ?? 'N/A',
-                // Format price cleanly
                 'Rp ' . number_format((float)($prop['tax_price'] ?? 0), 0, ',', '.'),
-                // Format date cleanly
                 date('d M Y', strtotime($prop['created_date'] ?? date('Y-m-d')))
-            ]);
+            ], $delimiter);
         }
 
-        fputcsv($output, []); // Blank Row
-        fputcsv($output, []); // Blank Row
+        fputcsv($output, [], $delimiter); // Blank Row
+        fputcsv($output, [], $delimiter); // Blank Row
 
         // section 3: subscription data
-        fputcsv($output, ['--- PLATFORM SUBSCRIPTIONS ---']);
+        fputcsv($output, ['--- PLATFORM SUBSCRIPTIONS ---'], $delimiter);
         // Column Headers
-        fputcsv($output, ['Subscription ID', 'User ID', 'Plan ID', 'Status', 'Start Date', 'End Date']);
+        fputcsv($output, ['Subscription ID', 'User ID', 'Plan ID', 'Status', 'Start Date', 'End Date'], $delimiter);
         
-        // Loop through Subscriptions (Note: SubscriptionModel returns objects)
+        // Loop through Subscriptions
         foreach ($subscriptions as $sub) {
             fputcsv($output, [
                 $sub->id,
@@ -73,10 +77,10 @@ class Reports extends BaseController
                 $sub->status ?? 'N/A',
                 date('d M Y', strtotime($sub->start_date ?? date('Y-m-d'))),
                 date('d M Y', strtotime($sub->end_date ?? date('Y-m-d')))
-            ]);
+            ], $delimiter);
         }
 
-        // Close the stream and exit so no HTML is accidentally appended
+        // Close the stream and exit
         fclose($output);
         exit();
     }
