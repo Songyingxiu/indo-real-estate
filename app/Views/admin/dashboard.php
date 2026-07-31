@@ -8,11 +8,6 @@
         <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
         <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace analytics.</p>
     </div>
-    <?php if(session()->get('role_id') == 4): ?>
-        <a href="<?= base_url('admin/reports/export') ?>" class="bg-primary text-on-primary px-4 py-2 rounded shadow flex items-center gap-2 hover:opacity-90 transition">
-            <span class="material-symbols-outlined">download</span> Export CSV
-        </a>
-    <?php endif; ?>
 </div>
 
 <!-- Primary Stats Row -->
