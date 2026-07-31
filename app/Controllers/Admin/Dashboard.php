@@ -59,10 +59,10 @@ class Dashboard extends BaseController
             $data['sub7Days'] = $subscriptionModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
             $data['sub30Days'] = $subscriptionModel->where("DATE(created_date) >= '$thirtyDaysAgo'")->countAllResults();
             
-            // Calculate Revenue (Assuming amount field or joining with payments)
-            $db = \Config\Database::connect();
-            $revenueQuery = $db->table('offline_payments')->selectSum('amount')->where('approval_status', 'Verified')->get()->getRow();
-            $data['revenueSum'] = $revenueQuery->amount ?? 0;
+            // Calculate Revenue
+            // The offline_payments table does not contain a price/amount column.
+            // To get actual revenue, this will require a JOIN with subscriptions and plans in the future.
+            $data['revenueSum'] = 0;
 
             // Add pending to chart
             $chartLabels[] = 'Pending Properties';
