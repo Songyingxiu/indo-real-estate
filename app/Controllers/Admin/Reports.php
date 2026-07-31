@@ -4,64 +4,80 @@ use App\Controllers\BaseController;
 use App\Models\PropertyModel;
 use App\Models\SubscriptionModel;
 
-class Reports extends BaseController 
+class Reports extends BaseController
 {
-    public function export() 
+    public function export()
     {
-        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+        // Security check: Only Admin (Role 4) should be able to download reports
+        if (session()->get('role_id') != 4) {
+            return redirect()->back()->with('error', 'Unauthorized access.');
+        }
 
         $propertyModel = new PropertyModel();
         $subscriptionModel = new SubscriptionModel();
 
-        // Fetch Detailed Lists
-        $properties = $propertyModel->orderBy('created_at', 'DESC')->findAll();
-        $subscriptions = $subscriptionModel->orderBy('created_at', 'DESC')->findAll();
+        // Fetch Data
+        $properties = $propertyModel->findAll();
+        $subscriptions = $subscriptionModel->findAll();
 
-        // Setup CSV headers for download
-        $filename = 'System_Export_' . date('Ymd_His') . '.csv';
-        header("Content-Description: File Transfer");
-        header("Content-Disposition: attachment; filename=$filename");
-        header("Content-Type: application/csv; "); 
+        // Define the Filename with today's date
+        $filename = 'HuniKita_Phase4_Analytics_' . date('Y-m-d') . '.csv';
 
-        // Write the data directly to the output buffer
-        $file = fopen('php://output', 'w');
+        // Set Headers to force browser to download the file as a CSV
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        // Open the output stream
+        $output = fopen('php://output', 'w');
+
+        // section 1: meta data
+        fputcsv($output, ['HuniKita Platform Report - Phase 4 Analytics']);
+        fputcsv($output, ['Generated On:', date('F j, Y, g:i a')]);
+        fputcsv($output, []); // Blank Row for readability
+
+        // section 2: properties data        
+        fputcsv($output, ['--- PROPERTIES LISTING ---']);
+        // Column Headers
+        fputcsv($output, ['Property ID', 'Title', 'Listing Type', 'Status', 'Tax Price', 'Created Date']);
         
-        // SECTION 1: PROPERTIES
-        fputcsv($file, ['--- EXPORT: PROPERTY LISTINGS ---']);
-        fputcsv($file, ['ID', 'Title', 'Listing Type', 'Tax Price', 'City ID', 'Approval Status', 'Created At']);
+        // Loop through Properties (Note: PropertyModel returns arrays)
         foreach ($properties as $prop) {
-            $p = (array) $prop;
-            fputcsv($file, [
-                $p['id'] ?? 'N/A', 
-                $p['title'] ?? 'N/A', 
-                $p['listing_type'] ?? 'N/A', 
-                $p['tax_price'] ?? '0', 
-                $p['city_id'] ?? 'N/A', 
-                $p['approval_status'] ?? 'N/A', 
-                $p['created_at'] ?? 'N/A'
+            fputcsv($output, [
+                $prop['id'],
+                $prop['title'] ?? 'N/A',
+                $prop['listing_type'] ?? 'N/A',
+                $prop['status'] ?? 'N/A',
+                // Format price cleanly
+                'Rp ' . number_format((float)($prop['tax_price'] ?? 0), 0, ',', '.'),
+                // Format date cleanly
+                date('d M Y', strtotime($prop['created_date'] ?? date('Y-m-d')))
             ]);
         }
 
-        fputcsv($file, []); // Spacing
-        fputcsv($file, []); // Spacing
+        fputcsv($output, []); // Blank Row
+        fputcsv($output, []); // Blank Row
 
-        // SECTION 2: SUBSCRIPTIONS
-        fputcsv($file, ['--- EXPORT: SUBSCRIPTIONS ---']);
-        fputcsv($file, ['ID', 'User ID', 'Plan ID', 'Status', 'Start Date', 'End Date', 'Created At']);
-        foreach ($subscriptions as $sub) {
-            $s = (array) $sub;
-            fputcsv($file, [
-                $s['id'] ?? 'N/A', 
-                $s['user_id'] ?? 'N/A', 
-                $s['plan_id'] ?? 'N/A', 
-                $s['sub_status'] ?? 'N/A', 
-                $s['start_date'] ?? 'N/A', 
-                $s['end_date'] ?? 'N/A', 
-                $s['created_at'] ?? 'N/A'
-            ]);
-        }
+        // section 3: subscription data
+        fputcsv($output, ['--- PLATFORM SUBSCRIPTIONS ---']);
+        // Column Headers
+        fputcsv($output, ['Subscription ID', 'User ID', 'Plan ID', 'Status', 'Start Date', 'End Date']);
         
-        fclose($file);
-        exit; // Stop execution so no HTML is rendered into the CSV
+        // Loop through Subscriptions (Note: SubscriptionModel returns objects)
+        foreach ($subscriptions as $sub) {
+            fputcsv($output, [
+                $sub->id,
+                $sub->user_id ?? 'N/A',
+                $sub->plan_id ?? 'N/A',
+                $sub->status ?? 'N/A',
+                date('d M Y', strtotime($sub->start_date ?? date('Y-m-d'))),
+                date('d M Y', strtotime($sub->end_date ?? date('Y-m-d')))
+            ]);
+        }
+
+        // Close the stream and exit so no HTML is accidentally appended
+        fclose($output);
+        exit();
     }
 }
