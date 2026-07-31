@@ -6,6 +6,7 @@ use App\Models\PropertyModel;
 use App\Models\AgentVerificationModel;
 use App\Models\OfflinePaymentModel;
 use App\Models\SubscriptionModel;
+use App\Models\InquiryModel;
 
 class Dashboard extends BaseController
 {
@@ -15,25 +16,60 @@ class Dashboard extends BaseController
         
         $userModel = new UserModel();
         $propertyModel = new PropertyModel();
+        $subscriptionModel = new SubscriptionModel();
+        $inquiryModel = new InquiryModel();
 
+        // Base Date Calculations
+        $today = date('Y-m-d');
+        $sevenDaysAgo = date('Y-m-d', strtotime('-7 days'));
+        $fourteenDaysAgo = date('Y-m-d', strtotime('-14 days'));
+        $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+        $thisMonthStart = date('Y-m-01');
+        $lastMonthStart = date('Y-m-01', strtotime('first day of last month'));
+        $lastMonthEnd = date('Y-m-t', strtotime('last day of last month'));
+
+        // property metrics
         $data['totalUsers'] = $userModel->countAllResults();
         $data['activeProperties'] = $propertyModel->where('approval_status', 'Published')->countAllResults();
+        $data['propTotal'] = $propertyModel->countAllResults();
+        $data['propToday'] = $propertyModel->where("DATE(created_at) = '$today'")->countAllResults();
+        $data['prop7Days'] = $propertyModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
+        $data['propLastWeek'] = $propertyModel->where("DATE(created_at) >= '$fourteenDaysAgo' AND DATE(created_at) < '$sevenDaysAgo'")->countAllResults();
+        $data['propThisMonth'] = $propertyModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
+        $data['propLastMonth'] = $propertyModel->where("DATE(created_at) >= '$lastMonthStart' AND DATE(created_at) <= '$lastMonthEnd'")->countAllResults();
         
-        // Prepare arrays for the Chart.js Graphic
-        $chartLabels = ['Active Users', 'Published Properties'];
-        $chartValues = [$data['totalUsers'], $data['activeProperties']];
+        // inquiries metrics
+        $data['inqTotal'] = $inquiryModel->countAllResults();
+        $data['inqCompleted'] = $inquiryModel->whereIn('status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
+        $data['inqToday'] = $inquiryModel->where("DATE(created_at) = '$today'")->countAllResults();
+        $data['inqWeekly'] = $inquiryModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
+        $data['inqMonthly'] = $inquiryModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
 
-        // --- ADMIN ONLY DATA (ROLE 4) ---
+        // Prepare arrays for the Chart.js Graphic
+        $chartLabels = ['Active Users', 'Published Properties', 'Total Inquiries'];
+        $chartValues = [$data['totalUsers'], $data['activeProperties'], $data['inqTotal']];
+
+        // admin only data (role 4)
         if ($roleId == 4) {
             $data['pendingProperties'] = $propertyModel->where('approval_status', 'Pending Review')->countAllResults();
             
+            // subscription metrics (Admin)
+            $data['subTotal'] = $subscriptionModel->countAllResults();
+            $data['subToday'] = $subscriptionModel->where("DATE(created_at) = '$today'")->countAllResults();
+            $data['sub7Days'] = $subscriptionModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
+            $data['sub30Days'] = $subscriptionModel->where("DATE(created_at) >= '$thirtyDaysAgo'")->countAllResults();
+            
+            // Calculate Revenue (Assuming amount field or joining with payments)
+            $db = \Config\Database::connect();
+            $revenueQuery = $db->table('offline_payments')->selectSum('amount')->where('approval_status', 'Verified')->get()->getRow();
+            $data['revenueSum'] = $revenueQuery->amount ?? 0;
+
             // Add pending to chart
             $chartLabels[] = 'Pending Properties';
             $chartValues[] = $data['pendingProperties'];
 
             $agentVerifModel = new AgentVerificationModel();
             $paymentModel = new OfflinePaymentModel();
-            $subscriptionModel = new SubscriptionModel();
 
             $pendingAgents = $agentVerifModel->where('approval_status', 'Pending')->findAll();
             $pendingPayments = $paymentModel->where('approval_status', 'Pending')->findAll();
@@ -53,7 +89,6 @@ class Dashboard extends BaseController
                         'icon'      => 'badge',
                         'submitter' => trim($firstName . ' ' . $lastName),
                         'initials'  => strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1)) ?: 'U',
-                        // Fix: Match the Verification Center's fallback logic
                         'date'      => $agentArr['created_at'] ?? $agentArr['created_date'] ?? date('Y-m-d H:i:s'),
                         'status'    => $agentArr['approval_status']
                     ];
@@ -82,7 +117,6 @@ class Dashboard extends BaseController
                 }
             }
 
-            // Fallbacks ensure date is never null, making strtotime safe
             usort($verifications, function($a, $b) {
                 return strtotime($b['date']) - strtotime($a['date']);
             });

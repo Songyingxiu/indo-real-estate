@@ -3,13 +3,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="mb-stack-lg mt-4">
-    <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
-    <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace.</p>
+<div class="mb-stack-lg mt-4 flex justify-between items-end">
+    <div>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace analytics.</p>
+    </div>
+    <?php if(session()->get('role_id') == 4): ?>
+        <a href="<?= base_url('admin/reports/export') ?>" class="bg-primary text-on-primary px-4 py-2 rounded shadow flex items-center gap-2 hover:opacity-90 transition">
+            <span class="material-symbols-outlined">download</span> Export CSV
+        </a>
+    <?php endif; ?>
 </div>
 
+<!-- Primary Stats Row -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
-    
     <?php if(session()->get('role_id') == 4): ?>
         <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
             <div class="flex justify-between items-start mb-stack-sm">
@@ -48,22 +55,62 @@
     <?php if(session()->get('role_id') == 4): ?>
         <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
             <div class="flex justify-between items-start mb-stack-sm">
-                <span class="font-label-md text-label-md text-on-surface-variant">Moderation Queue</span>
-                <span class="material-symbols-outlined text-primary">gavel</span>
+                <span class="font-label-md text-label-md text-on-surface-variant">Total Revenue</span>
+                <span class="material-symbols-outlined text-primary">payments</span>
             </div>
-            <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= esc($pendingProperties ?? 0) ?></div>
-            <div class="font-caption text-caption text-error flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">trending_up</span> Needs attention
+            <div class="font-headline-lg text-headline-lg text-primary mb-2">Rp <?= number_format($revenueSum ?? 0, 0, ',', '.') ?></div>
+            <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">trending_up</span> Lifetime Volume
             </div>
         </div>
     <?php endif; ?>
+</div>
 
+<!-- Detailed Metrics Grids -->
+<div class="grid grid-cols-1 md:grid-cols-2 <?= session()->get('role_id') == 4 ? 'lg:grid-cols-3' : 'lg:grid-cols-2' ?> gap-6 mb-8">
+    
+    <!-- Properties Analytics -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5">
+        <h3 class="font-bold text-on-surface border-b border-outline-variant pb-2 mb-4">Properties Analytics</h3>
+        <ul class="space-y-3 text-sm">
+            <li class="flex justify-between"><span class="text-on-surface-variant">Total Created</span> <span class="font-semibold"><?= number_format($propTotal) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Created Today</span> <span class="font-semibold text-primary"><?= number_format($propToday) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Last 7 Days</span> <span class="font-semibold"><?= number_format($prop7Days) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Last Week</span> <span class="font-semibold"><?= number_format($propLastWeek) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">This Month</span> <span class="font-semibold"><?= number_format($propThisMonth) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Last Month</span> <span class="font-semibold"><?= number_format($propLastMonth) ?></span></li>
+        </ul>
+    </div>
+
+    <!-- Inquiries Analytics -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5">
+        <h3 class="font-bold text-on-surface border-b border-outline-variant pb-2 mb-4">Inquiries & Threads</h3>
+        <ul class="space-y-3 text-sm">
+            <li class="flex justify-between"><span class="text-on-surface-variant">Total Inquiries</span> <span class="font-semibold"><?= number_format($inqTotal) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Successfully Completed</span> <span class="font-semibold text-[#0d652d]"><?= number_format($inqCompleted) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Received Today</span> <span class="font-semibold text-primary"><?= number_format($inqToday) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">This Week</span> <span class="font-semibold"><?= number_format($inqWeekly) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">This Month</span> <span class="font-semibold"><?= number_format($inqMonthly) ?></span></li>
+        </ul>
+    </div>
+
+    <!-- Subscriptions Analytics (Admin Only) -->
+    <?php if(session()->get('role_id') == 4): ?>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5">
+        <h3 class="font-bold text-on-surface border-b border-outline-variant pb-2 mb-4">Subscriptions Growth</h3>
+        <ul class="space-y-3 text-sm">
+            <li class="flex justify-between"><span class="text-on-surface-variant">Total Subscriptions</span> <span class="font-semibold"><?= number_format($subTotal ?? 0) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">New Today</span> <span class="font-semibold text-primary"><?= number_format($subToday ?? 0) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Last 7 Days</span> <span class="font-semibold"><?= number_format($sub7Days ?? 0) ?></span></li>
+            <li class="flex justify-between"><span class="text-on-surface-variant">Last 30 Days</span> <span class="font-semibold"><?= number_format($sub30Days ?? 0) ?></span></li>
+        </ul>
+    </div>
+    <?php endif; ?>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    
     <div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-bold text-on-surface mb-4">Platform Growth Metrics</h3>
+        <h3 class="text-lg font-bold text-on-surface mb-4">Platform Growth Chart</h3>
         <div class="relative h-[300px] w-full">
             <canvas id="platformAnalyticsChart"></canvas>
         </div>
@@ -87,6 +134,7 @@
 </div>
 
 <?php if(session()->get('role_id') == 4): ?>
+    <!-- Verification Center Block Removed for Brevity (Keep your existing one here) -->
     <div class="bg-surface-container-lowest border border-outline-variant rounded-lg mt-8 shadow-sm">
         <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low rounded-t-lg">
             <div>
@@ -196,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { precision: 0 } // Prevent decimals in counts
+                    ticks: { precision: 0 } 
                 }
             }
         }
