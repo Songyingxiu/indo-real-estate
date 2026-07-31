@@ -4,6 +4,8 @@ use App\Models\PropertyModel;
 use App\Models\CityModel;
 use App\Models\StateModel;
 use App\Models\InquiryModel;
+use App\Models\UserModel;
+use App\Libraries\EmailService;
 
 class Property extends BaseController
 {
@@ -108,23 +110,45 @@ class Property extends BaseController
     public function submitInquiry()
     {
         $inquiryModel = new InquiryModel();
+        $userModel = new UserModel();
+        $emailService = new EmailService();
         
+        $propertyId = $this->request->getPost('property_id');
+        $receiverId = $this->request->getPost('agent_id');
+        $customerEmail = $this->request->getPost('email');
+        $customerName = $this->request->getPost('name');
+
         // Compile the submitted form data into a readable message thread block
         $compiledMessage = "Inquiry Type: " . $this->request->getPost('source') . "\n";
-        $compiledMessage .= "Name: " . $this->request->getPost('name') . "\n";
+        $compiledMessage .= "Name: " . $customerName . "\n";
         $compiledMessage .= "Phone: " . $this->request->getPost('phone') . "\n";
-        $compiledMessage .= "Email: " . $this->request->getPost('email') . "\n\n";
+        $compiledMessage .= "Email: " . $customerEmail . "\n\n";
         $compiledMessage .= "Message:\n" . $this->request->getPost('message');
 
         $data = [
-            'property_id' => $this->request->getPost('property_id'),
-            'sender_id'   => session()->get('id'),
-            'receiver_id' => $this->request->getPost('agent_id'),
+            'property_id' => $propertyId,
+            'sender_id'   => session()->get('id') ?? null,
+            'receiver_id' => $receiverId,
             'message'     => $compiledMessage,
             'status'      => 'Pending'
         ];
 
         $inquiryModel->insert($data);
+
+        // trigger 1: Email to Customer
+        $emailService->sendDynamicEmail('New Inquiry Customer', $customerEmail, [
+            '{first_name}' => $customerName,
+            '{property_id}' => $propertyId
+        ]);
+
+        // trigger 2: Email to Agent/Owner
+        $agent = $userModel->find($receiverId);
+        if ($agent) {
+            $emailService->sendDynamicEmail('New Inquiry Agent', $agent['email'], [
+                '{property_id}' => $propertyId
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Your inquiry has been sent successfully! You can track it in your inbox.');
     }
 }

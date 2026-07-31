@@ -2,6 +2,7 @@
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\SubscriptionModel;
+use App\Libraries\EmailService;
 
 class Auth extends BaseController
 {
@@ -40,11 +41,14 @@ class Auth extends BaseController
         $selectedRole = $this->request->getPost('role');
         $roleId = $roleMap[$selectedRole] ?? 1; 
 
+        $email = $this->request->getPost('email');
+        $firstName = $this->request->getPost('first_name');
+
         $userData = [
             'role_id'      => $roleId,
-            'first_name'   => $this->request->getPost('first_name'),
+            'first_name'   => $firstName,
             'last_name'    => $this->request->getPost('last_name'),
-            'email'        => $this->request->getPost('email'),
+            'email'        => $email,
             'phone_number' => $this->request->getPost('phone_number'),
             'password'     => $hashedPassword,
             'status'       => 'Active'
@@ -52,6 +56,13 @@ class Auth extends BaseController
 
         $userModel = new UserModel();
         $userModel->insert($userData);
+
+        // TRIGGER: Welcome Email
+        $emailService = new EmailService();
+        $emailService->sendDynamicEmail('User Sign Up', $email, [
+            '{first_name}' => $firstName,
+            '{login_link}' => base_url('login')
+        ]);
 
         return redirect()->to(base_url('login'))->with('success', 'Account created successfully! Please sign in.');
     }
