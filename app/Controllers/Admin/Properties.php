@@ -15,6 +15,7 @@ use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\PoiModel;
 use Cloudinary\Cloudinary; 
+use App\Libraries\EmailService;
 
 class Properties extends BaseController
 {
@@ -85,6 +86,8 @@ class Properties extends BaseController
     {
         $userId = session()->get('user_id');
         $roleId = session()->get('role_id');
+        $userFirstName = session()->get('first_name') ?? 'User';
+        $userEmail = session()->get('email');
 
         $agentVerifyModel = new AgentVerificationModel();
         $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
@@ -120,8 +123,10 @@ class Properties extends BaseController
         $imageModel = new PropertyImageModel();
         $propertyFeatureModel = new PropertyFeatureModel(); 
         
+        $propTitle = $this->request->getPost('title');
+
         $data = [
-            'title'            => $this->request->getPost('title'),
+            'title'            => $propTitle,
             'description'      => $this->request->getPost('description'),
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
@@ -138,7 +143,7 @@ class Properties extends BaseController
             'area_name'        => $this->request->getPost('area_name'), 
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
-            'owner_id'         => session()->get('user_id'),
+            'owner_id'         => $userId,
             'approval_status'  => 'Draft',
             'status'           => 'Active',
         ];
@@ -191,6 +196,21 @@ class Properties extends BaseController
                 'status' => 'Active'
             ]);
         }
+
+        // triggers: Property Listing Notifications
+        $emailService = new EmailService();
+        
+        // Email Customer (Acknowledgment)
+        $emailService->sendDynamicEmail('Property Listed Customer', $userEmail, [
+            '{first_name}' => $userFirstName,
+            '{property_title}' => $propTitle
+        ]);
+
+        // Email Admin (Moderation Request)
+        $emailService->sendDynamicEmail('Property Listed Admin', 'admin@hunikita.com', [
+            '{property_id}' => $propertyId,
+            '{property_title}' => $propTitle
+        ]);
 
         return redirect()->to(base_url('admin/properties'))->with('success', 'Property saved! SHM document sent to verification center.');
     }
