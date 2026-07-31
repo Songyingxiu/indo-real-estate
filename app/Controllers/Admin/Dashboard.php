@@ -28,7 +28,7 @@ class Dashboard extends BaseController
         $lastMonthStart = date('Y-m-01', strtotime('first day of last month'));
         $lastMonthEnd = date('Y-m-t', strtotime('last day of last month'));
 
-        // property metrics
+        // property metrics (uses created_date)
         $data['totalUsers'] = $userModel->countAllResults();
         $data['activeProperties'] = $propertyModel->where('approval_status', 'Published')->countAllResults();
         $data['propTotal'] = $propertyModel->countAllResults();
@@ -38,12 +38,12 @@ class Dashboard extends BaseController
         $data['propThisMonth'] = $propertyModel->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
         $data['propLastMonth'] = $propertyModel->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
         
-        // inquiries metrics
+        // inquiries metrics (uses created_at)
         $data['inqTotal'] = $inquiryModel->countAllResults();
         $data['inqCompleted'] = $inquiryModel->whereIn('status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
-        $data['inqToday'] = $inquiryModel->where("DATE(created_date) = '$today'")->countAllResults();
-        $data['inqWeekly'] = $inquiryModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
-        $data['inqMonthly'] = $inquiryModel->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
+        $data['inqToday'] = $inquiryModel->where("DATE(created_at) = '$today'")->countAllResults();
+        $data['inqWeekly'] = $inquiryModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
+        $data['inqMonthly'] = $inquiryModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
 
         // Prepare arrays for the Chart.js Graphic
         $chartLabels = ['Active Users', 'Published Properties', 'Total Inquiries'];
@@ -53,7 +53,7 @@ class Dashboard extends BaseController
         if ($roleId == 4) {
             $data['pendingProperties'] = $propertyModel->where('approval_status', 'Pending Review')->countAllResults();
             
-            // subscription metrics (Admin)
+            // subscription metrics (uses created_date)
             $data['subTotal'] = $subscriptionModel->countAllResults();
             $data['subToday'] = $subscriptionModel->where("DATE(created_date) = '$today'")->countAllResults();
             $data['sub7Days'] = $subscriptionModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
