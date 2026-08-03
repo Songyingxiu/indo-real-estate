@@ -14,7 +14,7 @@ class UserModel extends Model
     // soft deletes so user records are never permanently lost
     protected $useSoftDeletes   = true;
 
-    // Registration form
+    // Registration form & Password reset
     protected $allowedFields    = [
         'role_id', 
         'first_name', 
@@ -23,7 +23,9 @@ class UserModel extends Model
         'phone_number', 
         'password', 
         'status',
-        'remember_token'
+        'remember_token',
+        'reset_token',
+        'reset_expires_at'
     ];
 
     // Dates
