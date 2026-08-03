@@ -62,10 +62,11 @@ class Auth extends BaseController
         $emailService = new EmailService();
         $emailService->sendDynamicEmail('User Sign Up', $email, [
             '{first_name}' => $firstName,
-            '{login_link}' => base_url('login')
+            '{login_link}' => base_url('login') // Keep base_url here for the email payload
         ]);
 
-        return redirect()->to(base_url('login'))->with('success', 'Account created successfully! Please sign in.');
+        // Changed to relative path to fix 404 issue
+        return redirect()->to('/login')->with('success', 'Account created successfully! Please sign in.');
     }
 
     public function attemptLogin()
@@ -110,9 +111,9 @@ class Auth extends BaseController
             session()->set($sessionData);
 
             if ($user['role_id'] == 1) {
-                return redirect()->to(base_url('/'));
+                return redirect()->to('/');
             } else {
-                return redirect()->to(base_url('admin/dashboard'));
+                return redirect()->to('/admin/dashboard');
             }
             
         } else {
@@ -131,7 +132,7 @@ class Auth extends BaseController
         }
 
         session()->destroy();
-        return redirect()->to(base_url('login'))->with('success', 'You have been logged out successfully.');
+        return redirect()->to('/login')->with('success', 'You have been logged out successfully.');
     }
 
     // forgot password
@@ -169,25 +170,25 @@ class Auth extends BaseController
             $emailService = new EmailService();
             $emailService->sendDynamicEmail('Forgot Password', $user['email'], [
                 '{first_name}' => $user['first_name'],
-                '{reset_link}' => $resetLink
+                '{reset_link}' => $resetLink // Keep base_url here for the email payload
             ]);
         }
 
         // Generic message for security so users cannot harvest valid emails
-        return redirect()->to(base_url('login'))->with('success', 'If an account exists with that email, a password reset link has been sent.');
+        return redirect()->to('/login')->with('success', 'If an account exists with that email, a password reset link has been sent.');
     }
 
     public function resetPassword($token = null)
     {
         if (!$token) {
-            return redirect()->to(base_url('login'))->with('error', 'Invalid password reset token.');
+            return redirect()->to('/login')->with('error', 'Invalid password reset token.');
         }
 
         $userModel = new UserModel();
         $user = $userModel->where('reset_token', $token)->first();
 
         if (!$user || strtotime($user['reset_expires_at']) < time()) {
-            return redirect()->to(base_url('login'))->with('error', 'This password reset token is invalid or has expired.');
+            return redirect()->to('/login')->with('error', 'This password reset token is invalid or has expired.');
         }
 
         return view('auth/reset_password', ['token' => $token]);
@@ -212,7 +213,7 @@ class Auth extends BaseController
         $user = $userModel->where('reset_token', $token)->first();
 
         if (!$user || strtotime($user['reset_expires_at']) < time()) {
-            return redirect()->to(base_url('login'))->with('error', 'Token expired or invalid.');
+            return redirect()->to('/login')->with('error', 'Token expired or invalid.');
         }
 
         $hashedPassword = password_hash($this->request->getPost('password'), PASSWORD_BCRYPT);
@@ -223,6 +224,6 @@ class Auth extends BaseController
             'reset_expires_at' => null
         ]);
 
-        return redirect()->to(base_url('login'))->with('success', 'Password reset successfully! You may now sign in.');
+        return redirect()->to('/login')->with('success', 'Password reset successfully! You may now sign in.');
     }
 }
