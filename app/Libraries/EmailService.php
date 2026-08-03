@@ -51,6 +51,7 @@ class EmailService
         }
 
         $this->email->clear();
+        $this->email->setFrom('debra.nethania.s@gmail.com', 'HuniKita');
         $this->email->setTo($toEmail);
         $this->email->setSubject($subject);
         $this->email->setMessage($body);
