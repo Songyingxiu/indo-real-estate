@@ -59,8 +59,8 @@ class EmailService
         if ($this->email->send()) {
             return true;
         } else {
-            log_message('error', 'EmailService: Failed to send email to ' . $toEmail . '. Error: ' . $this->email->printDebugger(['headers']));
-            return false;
+            echo $this->email->printDebugger(['headers']);
+            exit;
         }
     }
 }
