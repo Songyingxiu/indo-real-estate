@@ -51,6 +51,11 @@ class EmailService
         }
 
         $this->email->clear();
+        
+        // SMTP Line Endings Fix for Vercel/Linux
+        $this->email->setCRLF("\r\n");
+        $this->email->setNewline("\r\n");
+
         $this->email->setFrom('debra.nethania.s@gmail.com', 'HuniKita');
         $this->email->setTo($toEmail);
         $this->email->setSubject($subject);
@@ -60,8 +65,9 @@ class EmailService
         if ($this->email->send()) {
             return true;
         } else {
-            echo $this->email->printDebugger(['headers']);
-            exit;
+            // Reverted back to production-safe error logging instead of outputting the debugger to the screen
+            log_message('error', 'EmailService: Failed to send email to ' . $toEmail . '. Error: ' . $this->email->printDebugger(['headers']));
+            return false;
         }
     }
 }
