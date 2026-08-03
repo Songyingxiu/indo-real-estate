@@ -30,6 +30,10 @@ $routes->get('properties/zipcode/(:num)', 'Property::zipcode/$1');
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
 $routes->post('register', 'Auth::attemptRegister');
+$routes->get('forgot-password', 'Auth::forgotPassword');
+$routes->post('forgot-password', 'Auth::attemptForgotPassword');
+$routes->get('reset-password/(:segment)', 'Auth::resetPassword/$1');
+$routes->post('reset-password', 'Auth::attemptResetPassword');
 $routes->get('logout', 'Auth::logout');
 
 // User Routes

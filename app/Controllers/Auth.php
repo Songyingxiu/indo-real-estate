@@ -1,4 +1,5 @@
 <?php namespace App\Controllers;
+
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\SubscriptionModel;
@@ -131,5 +132,97 @@ class Auth extends BaseController
 
         session()->destroy();
         return redirect()->to(base_url('login'))->with('success', 'You have been logged out successfully.');
+    }
+
+    // forgot password
+
+    public function forgotPassword()
+    {
+        return view('auth/forgot_password');
+    }
+
+    public function attemptForgotPassword()
+    {
+        $rules = [
+            'email' => 'required|valid_email'
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', 'Please enter a valid email address.');
+        }
+
+        $email = $this->request->getPost('email');
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $email)->first();
+
+        if ($user) {
+            $token = bin2hex(random_bytes(32));
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            $userModel->update($user['id'], [
+                'reset_token'      => $token,
+                'reset_expires_at' => $expiresAt
+            ]);
+
+            $resetLink = base_url('reset-password/' . $token);
+
+            $emailService = new EmailService();
+            $emailService->sendDynamicEmail('Forgot Password', $user['email'], [
+                '{first_name}' => $user['first_name'],
+                '{reset_link}' => $resetLink
+            ]);
+        }
+
+        // Generic message for security so users cannot harvest valid emails
+        return redirect()->to(base_url('login'))->with('success', 'If an account exists with that email, a password reset link has been sent.');
+    }
+
+    public function resetPassword($token = null)
+    {
+        if (!$token) {
+            return redirect()->to(base_url('login'))->with('error', 'Invalid password reset token.');
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->where('reset_token', $token)->first();
+
+        if (!$user || strtotime($user['reset_expires_at']) < time()) {
+            return redirect()->to(base_url('login'))->with('error', 'This password reset token is invalid or has expired.');
+        }
+
+        return view('auth/reset_password', ['token' => $token]);
+    }
+
+    public function attemptResetPassword()
+    {
+        $rules = [
+            'token'            => 'required',
+            'password'         => 'required|min_length[8]',
+            'password_confirm' => 'required|matches[password]'
+        ];
+
+        if (! $this->validate($rules)) {
+            $errors = $this->validator->getErrors();
+            $errorMessage = implode('<br> • ', $errors);
+            return redirect()->back()->withInput()->with('error', $errorMessage);
+        }
+
+        $token = $this->request->getPost('token');
+        $userModel = new UserModel();
+        $user = $userModel->where('reset_token', $token)->first();
+
+        if (!$user || strtotime($user['reset_expires_at']) < time()) {
+            return redirect()->to(base_url('login'))->with('error', 'Token expired or invalid.');
+        }
+
+        $hashedPassword = password_hash($this->request->getPost('password'), PASSWORD_BCRYPT);
+
+        $userModel->update($user['id'], [
+            'password'         => $hashedPassword,
+            'reset_token'      => null,
+            'reset_expires_at' => null
+        ]);
+
+        return redirect()->to(base_url('login'))->with('success', 'Password reset successfully! You may now sign in.');
     }
 }
