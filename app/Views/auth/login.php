@@ -119,7 +119,7 @@
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface">Password</label>
-                                        <a onclick="alert('Password reset module coming soon!')" class="font-label-md text-[14px] font-semibold text-primary-container hover:underline transition-all cursor-pointer">Forgot Password?</a>
+                                        <a href="<?= base_url('forgot-password') ?>" class="font-label-md text-[14px] font-semibold text-primary-container hover:underline transition-all cursor-pointer">Forgot Password?</a>
                                     </div>
                                     <div class="relative">
                                         <input class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" name="password" placeholder="••••••••" required type="password">
