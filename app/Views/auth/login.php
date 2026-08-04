@@ -279,15 +279,15 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 
-        // Injected HuniKita Firebase Configuration
+        // Injected HuniKita Firebase Configuration via Environment Variables
         const firebaseConfig = {
-            apiKey: "AIzaSyDj9UsZL9lzaOavqZKCFjmDInF2qs5tV70",
-            authDomain: "hunikita-8e3e1.firebaseapp.com",
-            projectId: "hunikita-8e3e1",
-            storageBucket: "hunikita-8e3e1.firebasestorage.app",
-            messagingSenderId: "161153660535",
-            appId: "1:161153660535:web:6a3ffbb1d527d19d9d3872",
-            measurementId: "G-9HDXCD2PL6"
+            apiKey: "<?= getenv('FIREBASE_API_KEY') ?>",
+            authDomain: "<?= getenv('FIREBASE_AUTH_DOMAIN') ?>",
+            projectId: "<?= getenv('FIREBASE_PROJECT_ID') ?>",
+            storageBucket: "<?= getenv('FIREBASE_STORAGE_BUCKET') ?>",
+            messagingSenderId: "<?= getenv('FIREBASE_MESSAGING_SENDER_ID') ?>",
+            appId: "<?= getenv('FIREBASE_APP_ID') ?>",
+            measurementId: "<?= getenv('FIREBASE_MEASUREMENT_ID') ?>"
         };
 
         const app = initializeApp(firebaseConfig);
