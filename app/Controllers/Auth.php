@@ -7,6 +7,42 @@ use App\Libraries\EmailService;
 
 class Auth extends BaseController
 {
+    /**
+     * Evaluates soft-deleted accounts for 60-day expiration.
+     * Restores the account if <= 60 days. Hard wipes data if > 60 days.
+     */
+    private function processAccountRecovery(&$user, UserModel $userModel)
+    {
+        if ($user && $user['deleted_at'] !== null) {
+            $deletedTime = strtotime($user['deleted_at']);
+            $daysPassed  = (time() - $deletedTime) / 86400; // 86400 seconds = 1 day
+
+            if ($daysPassed > 60) {
+                // 1. Account expired. Hard-delete related data first to prevent orphans.
+                $db = \Config\Database::connect();
+                
+                // Note: Ensure these table names match your database exactly
+                $db->table('inquiries')->where('user_id', $user['id'])->delete();
+                $db->table('favorites')->where('user_id', $user['id'])->delete();
+                
+                // 2. Hard delete the user (the true parameter bypasses soft-deletes)
+                $userModel->delete($user['id'], true);
+                
+                // 3. Reset user to null so the system treats this as a brand new account
+                $user = null;
+            } else {
+                // Account is within 60 days. Restore it!
+                $userModel->builder()->where('id', $user['id'])->update([
+                    'deleted_at' => null,
+                    'status'     => 'Active'
+                ]);
+                
+                // Re-fetch the clean record
+                $user = $userModel->where('id', $user['id'])->first();
+            }
+        }
+    }
+
     public function login()
     {
         return view('auth/login');
@@ -59,14 +95,12 @@ class Auth extends BaseController
         $userModel = new UserModel();
         $userModel->insert($userData);
 
-        // TRIGGER: Welcome Email
         $emailService = new EmailService();
         $emailService->sendDynamicEmail('User Sign Up', $email, [
             '{first_name}' => $firstName,
-            '{login_link}' => base_url('login') // Keep base_url here for the email payload
+            '{login_link}' => base_url('login') 
         ]);
 
-        // Changed to relative path to fix 404 issue
         return redirect()->to('/login')->with('success', 'Account created successfully! Please sign in.');
     }
 
@@ -76,9 +110,13 @@ class Auth extends BaseController
         $password = $this->request->getPost('password');
 
         $userModel = new UserModel();
-        $user = $userModel->where('email', $email)->first();
+        
+        // Fetch user, including soft-deleted ones, to process potential account recovery
+        $user = $userModel->withDeleted()->where('email', $email)->first();
+        
+        // Run the 60-day expiration check
+        $this->processAccountRecovery($user, $userModel);
 
-        // Prevent users who signed up exclusively with Google from logging in with a blank password
         if ($user && $user['auth_provider'] === 'google' && empty($user['password'])) {
              return redirect()->back()->withInput()->with('error', 'This account uses Google Sign-In. Please click "Continue with Google".');
         }
@@ -89,7 +127,6 @@ class Auth extends BaseController
                 return redirect()->back()->withInput()->with('error', 'Your account is currently suspended. Please contact support.');
             }
 
-            // REMEMBER ME LOGIC
             helper('cookie');
             if ($this->request->getPost('remember')) {
                 $token = bin2hex(random_bytes(32));
@@ -116,11 +153,7 @@ class Auth extends BaseController
             ];
             session()->set($sessionData);
 
-            if ($user['role_id'] == 1) {
-                return redirect()->to('/');
-            } else {
-                return redirect()->to('/admin/dashboard');
-            }
+            return redirect()->to($user['role_id'] == 1 ? '/' : '/admin/dashboard');
             
         } else {
             return redirect()->back()->withInput()->with('error', 'Invalid Email or Password.');
@@ -140,8 +173,6 @@ class Auth extends BaseController
         session()->destroy();
         return redirect()->to('/login')->with('success', 'You have been logged out successfully.');
     }
-
-    // forgot password
 
     public function forgotPassword()
     {
@@ -176,11 +207,10 @@ class Auth extends BaseController
             $emailService = new EmailService();
             $emailService->sendDynamicEmail('Forgot Password', $user['email'], [
                 '{first_name}' => $user['first_name'],
-                '{reset_link}' => $resetLink // Keep base_url here for the email payload
+                '{reset_link}' => $resetLink 
             ]);
         }
 
-        // Generic message for security so users cannot harvest valid emails
         return redirect()->to('/login')->with('success', 'If an account exists with that email, a password reset link has been sent.');
     }
 
@@ -233,7 +263,6 @@ class Auth extends BaseController
         return redirect()->to('/login')->with('success', 'Password reset successfully! You may now sign in.');
     }
 
-    // Google Authentication Handler
     public function googleLogin()
     {
         $json = $this->request->getJSON();
@@ -250,10 +279,14 @@ class Auth extends BaseController
         }
 
         $userModel = new UserModel();
-        $user = $userModel->where('email', $email)->first();
+        
+        // Fetch user, including soft-deleted ones, to process potential account recovery
+        $user = $userModel->withDeleted()->where('email', $email)->first();
+
+        // Run the 60-day expiration check
+        $this->processAccountRecovery($user, $userModel);
 
         if ($user) {
-            // User exists, ensure google_id is updated if missing
             if (empty($user['google_id'])) {
                 $userModel->update($user['id'], ['google_id' => $googleId, 'auth_provider' => 'google']);
             }
@@ -262,13 +295,13 @@ class Auth extends BaseController
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Your account is currently suspended.']);
             }
         } else {
-            // New user registration via Google
+            // New user registration (or registering after a 60-day hard wipe)
             $nameParts = explode(' ', $displayName, 2);
             $firstName = $nameParts[0] ?? 'Google';
             $lastName = $nameParts[1] ?? 'User';
 
             $userData = [
-                'role_id'       => 1, // Default to buyer
+                'role_id'       => 1, 
                 'first_name'    => $firstName,
                 'last_name'     => $lastName,
                 'email'         => $email,
@@ -282,7 +315,6 @@ class Auth extends BaseController
             $userModel->insert($userData);
             $user = $userModel->where('email', $email)->first();
             
-            // Trigger Welcome Email
             $emailService = new EmailService();
             $emailService->sendDynamicEmail('User Sign Up', $email, [
                 '{first_name}' => $firstName,
@@ -290,7 +322,6 @@ class Auth extends BaseController
             ]);
         }
 
-        // Establish Session
         $subModel = new SubscriptionModel();
         $activeSub = $subModel->where('user_id', $user['id'])
                               ->where('status', 'Active')
@@ -310,7 +341,6 @@ class Auth extends BaseController
         ];
         session()->set($sessionData);
 
-        // Utilize relative routing for Vercel stability
         return $this->response->setJSON([
             'status' => 'success', 
             'redirect' => $user['role_id'] == 1 ? '/' : '/admin/dashboard'
