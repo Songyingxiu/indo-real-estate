@@ -52,7 +52,8 @@ class Auth extends BaseController
             'email'        => $email,
             'phone_number' => $this->request->getPost('phone_number'),
             'password'     => $hashedPassword,
-            'status'       => 'Active'
+            'status'       => 'Active',
+            'auth_provider'=> 'local'
         ];
 
         $userModel = new UserModel();
@@ -76,6 +77,11 @@ class Auth extends BaseController
 
         $userModel = new UserModel();
         $user = $userModel->where('email', $email)->first();
+
+        // Prevent users who signed up exclusively with Google from logging in with a blank password
+        if ($user && $user['auth_provider'] === 'google' && empty($user['password'])) {
+             return redirect()->back()->withInput()->with('error', 'This account uses Google Sign-In. Please click "Continue with Google".');
+        }
 
         if ($user && password_verify($password, $user['password'])) {
             
@@ -225,5 +231,89 @@ class Auth extends BaseController
         ]);
 
         return redirect()->to('/login')->with('success', 'Password reset successfully! You may now sign in.');
+    }
+
+    // Google Authentication Handler
+    public function googleLogin()
+    {
+        $json = $this->request->getJSON();
+        if (!$json) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request data.']);
+        }
+
+        $email = $json->email ?? '';
+        $googleId = $json->uid ?? '';
+        $displayName = $json->displayName ?? '';
+        
+        if (empty($email) || empty($googleId)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Missing Google authentication data.']);
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $email)->first();
+
+        if ($user) {
+            // User exists, ensure google_id is updated if missing
+            if (empty($user['google_id'])) {
+                $userModel->update($user['id'], ['google_id' => $googleId, 'auth_provider' => 'google']);
+            }
+            
+            if ($user['status'] !== 'Active') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Your account is currently suspended.']);
+            }
+        } else {
+            // New user registration via Google
+            $nameParts = explode(' ', $displayName, 2);
+            $firstName = $nameParts[0] ?? 'Google';
+            $lastName = $nameParts[1] ?? 'User';
+
+            $userData = [
+                'role_id'       => 1, // Default to buyer
+                'first_name'    => $firstName,
+                'last_name'     => $lastName,
+                'email'         => $email,
+                'phone_number'  => null,
+                'password'      => null, 
+                'status'        => 'Active',
+                'auth_provider' => 'google',
+                'google_id'     => $googleId
+            ];
+
+            $userModel->insert($userData);
+            $user = $userModel->where('email', $email)->first();
+            
+            // Trigger Welcome Email
+            $emailService = new EmailService();
+            $emailService->sendDynamicEmail('User Sign Up', $email, [
+                '{first_name}' => $firstName,
+                '{login_link}' => base_url('login')
+            ]);
+        }
+
+        // Establish Session
+        $subModel = new SubscriptionModel();
+        $activeSub = $subModel->where('user_id', $user['id'])
+                              ->where('status', 'Active')
+                              ->orderBy('id', 'DESC')
+                              ->first();
+        $planId = $activeSub ? $activeSub->plan_id : 1; 
+
+        $sessionData = [
+            'id'         => $user['id'],
+            'user_id'    => $user['id'],
+            'role_id'    => $user['role_id'],
+            'plan_id'    => $planId,
+            'first_name' => $user['first_name'],
+            'last_name'  => $user['last_name'],
+            'email'      => $user['email'],
+            'isLoggedIn' => true
+        ];
+        session()->set($sessionData);
+
+        // Utilize relative routing for Vercel stability
+        return $this->response->setJSON([
+            'status' => 'success', 
+            'redirect' => $user['role_id'] == 1 ? '/' : '/admin/dashboard'
+        ]);
     }
 }

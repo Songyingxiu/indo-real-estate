@@ -25,7 +25,9 @@ class UserModel extends Model
         'status',
         'remember_token',
         'reset_token',
-        'reset_expires_at'
+        'reset_expires_at',
+        'auth_provider', // Added
+        'google_id'      // Added
     ];
 
     // Dates
