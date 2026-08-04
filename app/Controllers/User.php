@@ -10,7 +10,6 @@ class User extends BaseController
 {
     public function profile()
     {
-        // Allowed for ALL logged in users (Buyers, Owners, Agents)
         if (!session()->get('id')) return redirect()->to(base_url('login'));
 
         $userModel = new UserModel();
@@ -105,7 +104,7 @@ class User extends BaseController
         if ($licenseFile = $this->request->getFile('business_license')) {
             if ($licenseFile->isValid() && !$licenseFile->hasMoved()) {
                 $licenseName = $licenseFile->getRandomName();
-                $licenseFile->move(FCPATH . 'uploads/documents', $licenseName);
+                $licenseName->move(FCPATH . 'uploads/documents', $licenseName);
             }
         }
 
@@ -132,7 +131,6 @@ class User extends BaseController
         
         $data['title'] = 'My Saved Properties - HuniKita';
         
-        // Fetch properties joined with their types and primary images
         $data['properties'] = $savedModel
             ->select('properties.*, property_types.name as type_name, property_images.image_path, saved_properties.created_at as saved_at')
             ->join('properties', 'properties.id = saved_properties.property_id', 'inner')
@@ -147,7 +145,6 @@ class User extends BaseController
         return view('front/user/saved_properties', $data);
     }
 
-    // Delete Account Method
     public function deleteAccount()
     {
         if (!session()->get('id')) return redirect()->to(base_url('login'));
@@ -157,11 +154,11 @@ class User extends BaseController
         $user = $userModel->find($userId);
 
         if ($user) {
-            // Soft delete all properties owned by this user FIRST
+            // Soft delete all properties owned by this user (using agent_id)
             $propertyModel = new PropertyModel();
-            $propertyModel->where('user_id', $userId)->delete();
+            $propertyModel->where('agent_id', $userId)->delete();
 
-            // 1. Send the email using your existing dynamic EmailService
+            // Send deletion email
             $emailService = new EmailService();
             $emailService->sendDynamicEmail(
                 'Account Deleted',
@@ -169,10 +166,10 @@ class User extends BaseController
                 ['{first_name}' => $user['first_name']]
             );
 
-            // 2. Soft delete the user
+            // Soft delete the user
             $userModel->delete($userId);
 
-            // 3. Destroy the session
+            // Destroy the session
             session()->destroy();
             
             return redirect()->to(base_url('/'))->with('success', 'Your account and active listings have been hidden. You have 60 days to restore them by logging back in.');
