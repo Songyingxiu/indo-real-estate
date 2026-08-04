@@ -31,7 +31,7 @@ class Dashboard extends BaseController
 
         $data = [];
 
-        // Check if Admin (Role 4 based on your previous code)
+        // Check if Admin (Role 4)
         if ($roleId == 4) {
             // Admin Metrics (Sees Everything)
             $data['totalUsers'] = $userModel->countAllResults();
@@ -122,22 +122,22 @@ class Dashboard extends BaseController
             $data['pendingTasks'] = $data['pendingProperties'] + count($verifications); 
             
         } else {
-            // Agent / Owner Metrics (Sees only their own data)
-            $data['totalUsers'] = 1; // Unused for agents
-            $data['activeProperties'] = $propertyModel->where('user_id', $userId)->where('approval_status', 'Published')->countAllResults();
-            $data['propTotal'] = $propertyModel->where('user_id', $userId)->countAllResults();
-            $data['propToday'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) = '$today'")->countAllResults();
-            $data['prop7Days'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
-            $data['propLastWeek'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$fourteenDaysAgo' AND DATE(created_date) < '$sevenDaysAgo'")->countAllResults();
-            $data['propThisMonth'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
-            $data['propLastMonth'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
+            // Agent / Owner Metrics (Uses agent_id instead of user_id)
+            $data['totalUsers'] = 1;
+            $data['activeProperties'] = $propertyModel->where('agent_id', $userId)->where('approval_status', 'Published')->countAllResults();
+            $data['propTotal'] = $propertyModel->where('agent_id', $userId)->countAllResults();
+            $data['propToday'] = $propertyModel->where('agent_id', $userId)->where("DATE(created_date) = '$today'")->countAllResults();
+            $data['prop7Days'] = $propertyModel->where('agent_id', $userId)->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
+            $data['propLastWeek'] = $propertyModel->where('agent_id', $userId)->where("DATE(created_date) >= '$fourteenDaysAgo' AND DATE(created_date) < '$sevenDaysAgo'")->countAllResults();
+            $data['propThisMonth'] = $propertyModel->where('agent_id', $userId)->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
+            $data['propLastMonth'] = $propertyModel->where('agent_id', $userId)->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
             
-            // Inquiry Metrics (Joined with properties to isolate ownership)
-            $data['inqTotal'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->countAllResults();
-            $data['inqCompleted'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->whereIn('inquiries.status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
-            $data['inqToday'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->where("DATE(inquiries.created_at) = '$today'")->countAllResults();
-            $data['inqWeekly'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->where("DATE(inquiries.created_at) >= '$sevenDaysAgo'")->countAllResults();
-            $data['inqMonthly'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->where("DATE(inquiries.created_at) >= '$thisMonthStart'")->countAllResults();
+            // Inquiry Metrics (Joined with properties.agent_id)
+            $data['inqTotal'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.agent_id', $userId)->countAllResults();
+            $data['inqCompleted'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.agent_id', $userId)->whereIn('inquiries.status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
+            $data['inqToday'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.agent_id', $userId)->where("DATE(inquiries.created_at) = '$today'")->countAllResults();
+            $data['inqWeekly'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.agent_id', $userId)->where("DATE(inquiries.created_at) >= '$sevenDaysAgo'")->countAllResults();
+            $data['inqMonthly'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.agent_id', $userId)->where("DATE(inquiries.created_at) >= '$thisMonthStart'")->countAllResults();
 
             // Chart Data
             $chartLabels = ['My Total Properties', 'My Published Properties', 'My Total Inquiries'];
