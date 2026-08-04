@@ -3,6 +3,7 @@
 use App\Models\UserModel;
 use App\Models\AgentVerificationModel;
 use App\Models\SavedPropertyModel;
+use App\Libraries\EmailService;
 
 class User extends BaseController
 {
@@ -143,5 +144,35 @@ class User extends BaseController
         $data['pager'] = $savedModel->pager;
 
         return view('front/user/saved_properties', $data);
+    }
+
+    // Delete Account Method
+    public function deleteAccount()
+    {
+        if (!session()->get('id')) return redirect()->to(base_url('login'));
+
+        $userId = session()->get('id');
+        $userModel = new UserModel();
+        $user = $userModel->find($userId);
+
+        if ($user) {
+            // 1. Send the email using your existing dynamic EmailService
+            $emailService = new EmailService();
+            $emailService->sendDynamicEmail(
+                'Account Deleted',
+                $user['email'],
+                ['{first_name}' => $user['first_name']]
+            );
+
+            // 2. Delete the user
+            $userModel->delete($userId);
+
+            // 3. Destroy the session
+            session()->destroy();
+            
+            return redirect()->to(base_url('/'))->with('success', 'Your account has been permanently deleted.');
+        }
+
+        return redirect()->back()->with('error', 'We encountered an issue deleting your account. Please try again.');
     }
 }

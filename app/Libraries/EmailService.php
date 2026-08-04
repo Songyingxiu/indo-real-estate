@@ -39,6 +39,9 @@ class EmailService
             } elseif ($templateName === 'User Sign Up') {
                 $subject = 'Welcome to HuniKita!';
                 $body    = '<p>Hi {first_name},</p><p>Thank you for signing up with HuniKita! Click here to login: <a href="{login_link}">Login</a></p>';
+            } elseif ($templateName === 'Account Deleted') {
+                $subject = 'Your HuniKita Account Has Been Deleted';
+                $body    = '<p>Hi {first_name},</p><p>We are writing to confirm that your HuniKita account has been successfully closed and deleted as requested.</p><p>We\'re sorry to see you go! You are always welcome back.</p>';
             } else {
                 log_message('error', "EmailService: Template '{$templateName}' not found and no fallback provided.");
                 return false;
