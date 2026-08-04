@@ -35,6 +35,7 @@ $routes->post('forgot-password', 'Auth::attemptForgotPassword');
 $routes->get('reset-password/(:segment)', 'Auth::resetPassword/$1');
 $routes->post('reset-password', 'Auth::attemptResetPassword');
 $routes->get('logout', 'Auth::logout');
+$routes->post('auth/google-login', 'Auth::googleLogin'); // Added for Firebase
 
 // User Routes
 $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {

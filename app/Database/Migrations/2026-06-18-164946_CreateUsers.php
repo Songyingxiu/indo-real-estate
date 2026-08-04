@@ -9,10 +9,12 @@ class CreateUsers extends Migration {
             'role_id'          => ['type' => 'INT', 'constraint' => 11, 'null' => true],
             'first_name'       => ['type' => 'VARCHAR', 'constraint' => 100],
             'last_name'        => ['type' => 'VARCHAR', 'constraint' => 100],
-            'phone_number'     => ['type' => 'VARCHAR', 'constraint' => 20],
+            'phone_number'     => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true], // Nullable for Google Auth
             'email'            => ['type' => 'VARCHAR', 'constraint' => 255, 'unique' => true],
-            'password'         => ['type' => 'VARCHAR', 'constraint' => 255],
+            'password'         => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true], // Nullable for Google Auth
             'status'           => ['type' => 'ENUM', 'constraint' => ['Active', 'Inactive'], 'default' => 'Active'],
+            'auth_provider'    => ['type' => 'VARCHAR', 'constraint' => 50, 'default' => 'local'], // Added
+            'google_id'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true], // Added
             'remember_token'   => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'reset_token'      => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'reset_expires_at' => ['type' => 'DATETIME', 'null' => true],
