@@ -1,6 +1,7 @@
 <?php namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\PropertyModel;
 use App\Models\AgentVerificationModel;
 use App\Models\SavedPropertyModel;
 use App\Libraries\EmailService;
@@ -156,6 +157,10 @@ class User extends BaseController
         $user = $userModel->find($userId);
 
         if ($user) {
+            // Soft delete all properties owned by this user FIRST
+            $propertyModel = new PropertyModel();
+            $propertyModel->where('user_id', $userId)->delete();
+
             // 1. Send the email using your existing dynamic EmailService
             $emailService = new EmailService();
             $emailService->sendDynamicEmail(
@@ -164,13 +169,13 @@ class User extends BaseController
                 ['{first_name}' => $user['first_name']]
             );
 
-            // 2. Delete the user
+            // 2. Soft delete the user
             $userModel->delete($userId);
 
             // 3. Destroy the session
             session()->destroy();
             
-            return redirect()->to(base_url('/'))->with('success', 'Your account has been permanently deleted.');
+            return redirect()->to(base_url('/'))->with('success', 'Your account and active listings have been hidden. You have 60 days to restore them by logging back in.');
         }
 
         return redirect()->back()->with('error', 'We encountered an issue deleting your account. Please try again.');

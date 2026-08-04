@@ -6,7 +6,7 @@
 <div class="mb-stack-lg mt-4 flex justify-between items-end">
     <div>
         <h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Dashboard Overview</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of the marketplace analytics.</p>
+        <p class="font-body-md text-body-md text-on-surface-variant">Here is the current status of your analytics.</p>
     </div>
 </div>
 
@@ -23,22 +23,22 @@
                 <span class="material-symbols-outlined text-[14px]">trending_up</span> Action Required
             </div>
         </div>
+        
+        <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
+            <div class="flex justify-between items-start mb-stack-sm">
+                <span class="font-label-md text-label-md text-on-surface-variant">Active Users</span>
+                <span class="material-symbols-outlined text-primary">group</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($totalUsers) ?></div>
+            <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">trending_up</span> Platform Total
+            </div>
+        </div>
     <?php endif; ?>
     
     <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
         <div class="flex justify-between items-start mb-stack-sm">
-            <span class="font-label-md text-label-md text-on-surface-variant">Active Users</span>
-            <span class="material-symbols-outlined text-primary">group</span>
-        </div>
-        <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($totalUsers) ?></div>
-        <div class="font-caption text-caption text-[#0d652d] flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">trending_up</span> Platform Total
-        </div>
-    </div>
-    
-    <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
-        <div class="flex justify-between items-start mb-stack-sm">
-            <span class="font-label-md text-label-md text-on-surface-variant">Active Properties</span>
+            <span class="font-label-md text-label-md text-on-surface-variant"><?= session()->get('role_id') == 4 ? 'Active Properties' : 'My Active Properties' ?></span>
             <span class="material-symbols-outlined text-primary">real_estate_agent</span>
         </div>
         <div class="font-headline-lg text-headline-lg text-primary mb-2"><?= number_format($activeProperties) ?></div>
@@ -46,8 +46,19 @@
             <span class="material-symbols-outlined text-[14px]">trending_up</span> Published Listings
         </div>
     </div>
-    
+
     <?php if(session()->get('role_id') == 4): ?>
+        <div class="bg-red-50 border border-red-200 rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
+            <div class="flex justify-between items-start mb-stack-sm">
+                <span class="font-label-md text-label-md text-red-700">Suspended Users</span>
+                <span class="material-symbols-outlined text-red-700">block</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-red-700 mb-2"><?= number_format($suspendedUsers) ?></div>
+            <div class="font-caption text-caption text-red-600 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">error</span> Deleted / Inactive
+            </div>
+        </div>
+
         <div class="bg-surface-container-lowest border border-outline-variant rounded p-stack-md hover:shadow-lg transition-shadow duration-200">
             <div class="flex justify-between items-start mb-stack-sm">
                 <span class="font-label-md text-label-md text-on-surface-variant">Total Revenue</span>
@@ -105,7 +116,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-bold text-on-surface mb-4">Platform Growth Chart</h3>
+        <h3 class="text-lg font-bold text-on-surface mb-4"><?= session()->get('role_id') == 4 ? 'Platform Growth Chart' : 'My Activity Chart' ?></h3>
         <div class="relative h-[300px] w-full">
             <canvas id="platformAnalyticsChart"></canvas>
         </div>
@@ -113,23 +124,36 @@
 
     <div class="bg-surface-container-lowest border border-outline-variant rounded-lg shadow-sm p-6 flex flex-col gap-3">
         <h3 class="text-lg font-bold text-on-surface mb-2">Quick Actions</h3>
+        
+        <!-- Visible to everyone -->
         <a href="<?= base_url('admin/properties/create') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-primary">add_box</span>
             <span class="font-medium text-sm text-on-surface">Add New Property</span>
         </a>
+        <a href="<?= base_url('admin/inquiries') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-primary">forum</span>
+            <span class="font-medium text-sm text-on-surface">View Inquiries</span>
+        </a>
+
+        <!-- Visible ONLY to Admins -->
+        <?php if(session()->get('role_id') == 4): ?>
         <a href="<?= base_url('admin/users') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-primary">person_add</span>
-            <span class="font-medium text-sm text-on-surface">Manage Users</span>
+            <span class="font-medium text-sm text-on-surface">Manage Active Users</span>
+        </a>
+        <a href="<?= base_url('admin/users/suspended') ?>" class="w-full flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors">
+            <span class="material-symbols-outlined text-red-600">person_off</span>
+            <span class="font-medium text-sm text-red-700">Manage Suspended Users</span>
         </a>
         <a href="<?= base_url('admin/seo') ?>" class="w-full flex items-center gap-3 p-3 bg-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
             <span class="material-symbols-outlined text-primary">search_insights</span>
             <span class="font-medium text-sm text-on-surface">Configure SEO</span>
         </a>
+        <?php endif; ?>
     </div>
 </div>
 
 <?php if(session()->get('role_id') == 4): ?>
-    <!-- Verification Center Block Removed for Brevity (Keep your existing one here) -->
     <div class="bg-surface-container-lowest border border-outline-variant rounded-lg mt-8 shadow-sm">
         <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low rounded-t-lg">
             <div>
@@ -214,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Platform Data Count',
+                label: 'Data Count',
                 data: dataValues,
                 backgroundColor: [
                     'rgba(59, 130, 246, 0.7)', // Blue
