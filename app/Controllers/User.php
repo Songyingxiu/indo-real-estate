@@ -104,7 +104,7 @@ class User extends BaseController
         if ($licenseFile = $this->request->getFile('business_license')) {
             if ($licenseFile->isValid() && !$licenseFile->hasMoved()) {
                 $licenseName = $licenseFile->getRandomName();
-                $licenseName->move(FCPATH . 'uploads/documents', $licenseName);
+                $licenseFile->move(FCPATH . 'uploads/documents', $licenseName);
             }
         }
 
@@ -154,9 +154,9 @@ class User extends BaseController
         $user = $userModel->find($userId);
 
         if ($user) {
-            // Soft delete all properties owned by this user (using agent_id)
+            // Soft delete all properties owned by this user
             $propertyModel = new PropertyModel();
-            $propertyModel->where('agent_id', $userId)->delete();
+            $propertyModel->where('owner_id', $userId)->delete();
 
             // Send deletion email
             $emailService = new EmailService();
