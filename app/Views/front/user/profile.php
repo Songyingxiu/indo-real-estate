@@ -124,14 +124,14 @@
         </div>
         <?php endif; ?>
 
-        <!-- Danger Zone for Account Deletion -->
+        <!-- Danger Zone for Account Deletion (Soft Delete / 60-Day Retention) -->
         <div class="mt-8 pt-8 border-t border-outline-variant md:col-span-2">
             <h3 class="font-headline-lg text-[20px] font-bold text-[#ba1a1a] mb-2">Danger Zone</h3>
             <p class="font-body-md text-[14px] text-on-surface-variant mb-4">
-                Deleting your account will immediately hide your profile and active listings from the platform. You will lose all access to your saved properties, past inquiries, and account settings.
+                Deleting your account will immediately hide your profile and active listings. <strong>Your data will be kept for 60 days.</strong> If you change your mind, simply log back in within 60 days to restore your account. After 60 days, your data will be permanently erased.
             </p>
             
-            <form action="<?= base_url('user/delete-account') ?>" method="POST" onsubmit="return confirm('Are you sure you want to delete your HuniKita account? You will lose access to all your data.');">
+            <form action="<?= base_url('user/delete-account') ?>" method="POST" onsubmit="return confirm('Are you sure you want to delete your HuniKita account? You have 60 days to recover it before permanent deletion.');">
                 <?= csrf_field() ?>
                 <button type="submit" class="bg-[#ba1a1a] text-white font-label-md text-[14px] font-semibold py-2 px-4 rounded hover:bg-[#93000a] transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">person_remove</span>
