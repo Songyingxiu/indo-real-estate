@@ -13,6 +13,7 @@ class Dashboard extends BaseController
     public function index()
     {
         $roleId = session()->get('role_id');
+        $userId = session()->get('id');
         
         $userModel = new UserModel();
         $propertyModel = new PropertyModel();
@@ -28,62 +29,60 @@ class Dashboard extends BaseController
         $lastMonthStart = date('Y-m-01', strtotime('first day of last month'));
         $lastMonthEnd = date('Y-m-t', strtotime('last day of last month'));
 
-        // property metrics (uses created_date)
-        $data['totalUsers'] = $userModel->countAllResults();
-        $data['activeProperties'] = $propertyModel->where('approval_status', 'Published')->countAllResults();
-        $data['propTotal'] = $propertyModel->countAllResults();
-        $data['propToday'] = $propertyModel->where("DATE(created_date) = '$today'")->countAllResults();
-        $data['prop7Days'] = $propertyModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
-        $data['propLastWeek'] = $propertyModel->where("DATE(created_date) >= '$fourteenDaysAgo' AND DATE(created_date) < '$sevenDaysAgo'")->countAllResults();
-        $data['propThisMonth'] = $propertyModel->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
-        $data['propLastMonth'] = $propertyModel->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
-        
-        // inquiries metrics (uses created_at)
-        $data['inqTotal'] = $inquiryModel->countAllResults();
-        $data['inqCompleted'] = $inquiryModel->whereIn('status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
-        $data['inqToday'] = $inquiryModel->where("DATE(created_at) = '$today'")->countAllResults();
-        $data['inqWeekly'] = $inquiryModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
-        $data['inqMonthly'] = $inquiryModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
+        $data = [];
 
-        // Prepare arrays for the Chart.js Graphic
-        $chartLabels = ['Active Users', 'Published Properties', 'Total Inquiries'];
-        $chartValues = [$data['totalUsers'], $data['activeProperties'], $data['inqTotal']];
-
-        // admin only data (role 4)
+        // Check if Admin (Role 4 based on your previous code)
         if ($roleId == 4) {
-            $data['pendingProperties'] = $propertyModel->where('approval_status', 'Pending Review')->countAllResults();
+            // Admin Metrics (Sees Everything)
+            $data['totalUsers'] = $userModel->countAllResults();
+            $data['activeProperties'] = $propertyModel->where('approval_status', 'Published')->countAllResults();
+            $data['propTotal'] = $propertyModel->countAllResults();
+            $data['propToday'] = $propertyModel->where("DATE(created_date) = '$today'")->countAllResults();
+            $data['prop7Days'] = $propertyModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
+            $data['propLastWeek'] = $propertyModel->where("DATE(created_date) >= '$fourteenDaysAgo' AND DATE(created_date) < '$sevenDaysAgo'")->countAllResults();
+            $data['propThisMonth'] = $propertyModel->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
+            $data['propLastMonth'] = $propertyModel->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
             
-            // subscription metrics (uses created_date)
+            // Suspended / Deleted Users
+            $data['suspendedUsers'] = $userModel->where('status', 'Suspended')
+                                                ->orWhere('deleted_at IS NOT NULL')
+                                                ->withDeleted()
+                                                ->countAllResults();
+            
+            // Inquiry Metrics
+            $data['inqTotal'] = $inquiryModel->countAllResults();
+            $data['inqCompleted'] = $inquiryModel->whereIn('status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
+            $data['inqToday'] = $inquiryModel->where("DATE(created_at) = '$today'")->countAllResults();
+            $data['inqWeekly'] = $inquiryModel->where("DATE(created_at) >= '$sevenDaysAgo'")->countAllResults();
+            $data['inqMonthly'] = $inquiryModel->where("DATE(created_at) >= '$thisMonthStart'")->countAllResults();
+            
+            // Chart Data
+            $chartLabels = ['Active Users', 'Published Properties', 'Total Inquiries'];
+            $chartValues = [$data['totalUsers'], $data['activeProperties'], $data['inqTotal']];
+
+            // Subscriptions & Pending Verifications (Admin Only)
+            $data['pendingProperties'] = $propertyModel->where('approval_status', 'Pending Review')->countAllResults();
             $data['subTotal'] = $subscriptionModel->countAllResults();
             $data['subToday'] = $subscriptionModel->where("DATE(created_date) = '$today'")->countAllResults();
             $data['sub7Days'] = $subscriptionModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
             $data['sub30Days'] = $subscriptionModel->where("DATE(created_date) >= '$thirtyDaysAgo'")->countAllResults();
-            
-            // Calculate Revenue
-            // The offline_payments table does not contain a price/amount column.
-            // To get actual revenue, this will require a JOIN with subscriptions and plans in the future.
             $data['revenueSum'] = 0;
 
-            // Add pending to chart
             $chartLabels[] = 'Pending Properties';
             $chartValues[] = $data['pendingProperties'];
 
             $agentVerifModel = new AgentVerificationModel();
             $paymentModel = new OfflinePaymentModel();
-
             $pendingAgents = $agentVerifModel->where('approval_status', 'Pending')->findAll();
             $pendingPayments = $paymentModel->where('approval_status', 'Pending')->findAll();
-
             $verifications = [];
 
             foreach ($pendingAgents as $agent) {
                 $agentArr = (array) $agent;
                 $user = (array) $userModel->find($agentArr['user_id']);
-                
                 if (!empty($user)) {
                     $firstName = $user['first_name'] ?? 'Unknown';
                     $lastName = $user['last_name'] ?? '';
-                    
                     $verifications[] = [
                         'type'      => 'Agent KTP',
                         'icon'      => 'badge',
@@ -98,13 +97,11 @@ class Dashboard extends BaseController
             foreach ($pendingPayments as $payment) {
                 $paymentArr = (array) $payment;
                 $sub = (array) $subscriptionModel->find($paymentArr['subscription_id']);
-                
                 if (!empty($sub)) {
                     $user = (array) $userModel->find($sub['user_id']);
                     if (!empty($user)) {
                         $firstName = $user['first_name'] ?? 'Unknown';
                         $lastName = $user['last_name'] ?? '';
-                        
                         $verifications[] = [
                             'type'      => 'Offline Payment',
                             'icon'      => 'receipt_long',
@@ -123,6 +120,28 @@ class Dashboard extends BaseController
             
             $data['verifications'] = array_slice($verifications, 0, 5);
             $data['pendingTasks'] = $data['pendingProperties'] + count($verifications); 
+            
+        } else {
+            // Agent / Owner Metrics (Sees only their own data)
+            $data['totalUsers'] = 1; // Unused for agents
+            $data['activeProperties'] = $propertyModel->where('user_id', $userId)->where('approval_status', 'Published')->countAllResults();
+            $data['propTotal'] = $propertyModel->where('user_id', $userId)->countAllResults();
+            $data['propToday'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) = '$today'")->countAllResults();
+            $data['prop7Days'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
+            $data['propLastWeek'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$fourteenDaysAgo' AND DATE(created_date) < '$sevenDaysAgo'")->countAllResults();
+            $data['propThisMonth'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$thisMonthStart'")->countAllResults();
+            $data['propLastMonth'] = $propertyModel->where('user_id', $userId)->where("DATE(created_date) >= '$lastMonthStart' AND DATE(created_date) <= '$lastMonthEnd'")->countAllResults();
+            
+            // Inquiry Metrics (Joined with properties to isolate ownership)
+            $data['inqTotal'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->countAllResults();
+            $data['inqCompleted'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->whereIn('inquiries.status', ['Closed', 'Completed', 'Under Contract'])->countAllResults();
+            $data['inqToday'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->where("DATE(inquiries.created_at) = '$today'")->countAllResults();
+            $data['inqWeekly'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->where("DATE(inquiries.created_at) >= '$sevenDaysAgo'")->countAllResults();
+            $data['inqMonthly'] = $inquiryModel->select('inquiries.id')->join('properties', 'properties.id = inquiries.property_id')->where('properties.user_id', $userId)->where("DATE(inquiries.created_at) >= '$thisMonthStart'")->countAllResults();
+
+            // Chart Data
+            $chartLabels = ['My Total Properties', 'My Published Properties', 'My Total Inquiries'];
+            $chartValues = [$data['propTotal'], $data['activeProperties'], $data['inqTotal']];
         }
 
         // Pass Chart Data to View
