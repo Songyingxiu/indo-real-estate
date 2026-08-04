@@ -1,7 +1,8 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<div class="pb-12" x-data="{ showEditModal: false, showPasswordModal: false }">
+<!-- Added showDeleteModal to the Alpine x-data state -->
+<div class="pb-12" x-data="{ showEditModal: false, showPasswordModal: false, showDeleteModal: false }">
 
     <div class="mt-4 mb-6">
         <h1 class="text-2xl font-bold text-on-surface">My Profile & Settings</h1>
@@ -233,10 +234,25 @@
                 </div>
             </div>
 
+            <!-- DANGER ZONE -->
+            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-[#ba1a1a] mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#ba1a1a]">warning</span> Danger Zone
+                </h3>
+                <p class="text-sm text-on-surface-variant mb-4">
+                    Deleting your account will immediately hide your profile and active listings. <strong>Your data will be kept for 60 days.</strong> If you change your mind, simply log back in within 60 days to restore your account.
+                </p>
+                <button type="button" @click="showDeleteModal = true" class="px-4 py-2 bg-[#ba1a1a] text-white rounded font-semibold hover:bg-[#93000a] transition shadow-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">person_remove</span> Delete My Account
+                </button>
+            </div>
+
         </div>
     </div>
 
-    <!-- Modals (Edit Profile & Password) -->
+    <!-- Modals (Edit Profile, Password, Delete Account) -->
+    
+    <!-- Edit Profile Modal -->
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showEditModal = false" x-show="showEditModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -272,6 +288,7 @@
         </div>
     </div>
 
+    <!-- Password Modal -->
     <div x-show="showPasswordModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showPasswordModal = false" x-show="showPasswordModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -299,6 +316,30 @@
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">Update Password</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div x-show="showDeleteModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showDeleteModal = false" x-show="showDeleteModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#ba1a1a]">warning</span> Confirm Deletion
+                </h2>
+                <button type="button" @click="showDeleteModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-gray-600 text-sm">
+                    Are you sure you want to delete your account? You have 60 days to recover it before your account and all associated property listings are permanently erased.
+                </p>
+            </div>
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                <button type="button" @click="showDeleteModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                <form action="<?= base_url('user/delete-account') ?>" method="POST">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="px-6 py-2 bg-[#ba1a1a] text-white rounded font-semibold hover:bg-[#93000a] transition shadow-sm">Yes, Delete Account</button>
+                </form>
+            </div>
         </div>
     </div>
 
