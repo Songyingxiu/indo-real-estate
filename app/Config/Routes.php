@@ -100,7 +100,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->get('users/create', 'Users::create');
         $routes->post('users/store', 'Users::store');                          
         $routes->post('users/updateRole/(:num)', 'Users::updateRole/$1');
-        $routes->post('users/delete/(:num)', 'Users::delete/$1');                
+        $routes->post('users/delete/(:num)', 'Users::delete/$1');
+        $routes->post('users/restore/(:num)', 'Users::restore/$1');
+        $routes->post('users/force-delete/(:num)', 'Users::forceDelete/$1');               
         
         // Property Moderation & State Machine
         $routes->get('moderation', 'Moderation::index');

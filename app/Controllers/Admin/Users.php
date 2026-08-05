@@ -12,8 +12,12 @@ class Users extends BaseController
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
 
         $userModel = new UserModel();
-        // Fetch users and display newest first
-        $data['users'] = $userModel->withDeleted()->orderBy('created_date', 'DESC')->findAll();
+        
+        // Fetch active users (automatically excludes soft-deleted rows)
+        $data['activeUsers'] = $userModel->orderBy('created_date', 'DESC')->findAll();
+        
+        // Fetch only suspended/soft-deleted users
+        $data['suspendedUsers'] = $userModel->onlyDeleted()->orderBy('deleted_at', 'DESC')->findAll();
         
         // Fetch latest agent verifications to attach to the user list
         $agentVerifyModel = new AgentVerificationModel();
@@ -92,8 +96,31 @@ class Users extends BaseController
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
 
         $userModel = new UserModel();
+        // This triggers a soft delete because $useSoftDeletes is true in the model
         $userModel->delete($id);
         
         return redirect()->to(base_url('admin/users'))->with('success', 'User account has been suspended (Soft Deleted).');
+    }
+
+    public function restore($id)
+    {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+
+        // Using Query Builder directly to safely restore the soft-deleted row
+        $db = \Config\Database::connect();
+        $db->table('users')->where('id', $id)->update(['deleted_at' => null, 'status' => 'Active']);
+        
+        return redirect()->to(base_url('admin/users'))->with('success', 'User account has been successfully restored.');
+    }
+
+    public function forceDelete($id)
+    {
+        if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
+
+        $userModel = new UserModel();
+        // The true parameter forces a hard, permanent delete in CodeIgniter 4
+        $userModel->delete($id, true);
+        
+        return redirect()->to(base_url('admin/users'))->with('success', 'User account has been permanently deleted.');
     }
 }
