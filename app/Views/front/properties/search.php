@@ -33,6 +33,45 @@
                 </div>
             </div>
 
+            <hr class="border-outline-variant"/>
+
+            <!-- NEW: PRICE RANGE FILTER -->
+            <div>
+                <h3 class="font-label-md text-[14px] text-on-surface mb-3">Price Range (Rp)</h3>
+                <div class="flex items-center gap-2">
+                    <input type="number" name="min_price" value="<?= esc($_GET['min_price'] ?? '') ?>" placeholder="Min" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
+                    <span class="text-on-surface-variant">-</span>
+                    <input type="number" name="max_price" value="<?= esc($_GET['max_price'] ?? '') ?>" placeholder="Max" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
+                </div>
+            </div>
+
+            <!-- NEW: BED & BATH FILTER -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-label-md text-[14px] text-on-surface mb-3">Beds</h3>
+                    <select name="bed" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
+                        <option value="">Any</option>
+                        <option value="1" <?= ($_GET['bed'] ?? '') == '1' ? 'selected' : '' ?>>1+</option>
+                        <option value="2" <?= ($_GET['bed'] ?? '') == '2' ? 'selected' : '' ?>>2+</option>
+                        <option value="3" <?= ($_GET['bed'] ?? '') == '3' ? 'selected' : '' ?>>3+</option>
+                        <option value="4" <?= ($_GET['bed'] ?? '') == '4' ? 'selected' : '' ?>>4+</option>
+                        <option value="5" <?= ($_GET['bed'] ?? '') == '5' ? 'selected' : '' ?>>5+</option>
+                    </select>
+                </div>
+                <div>
+                    <h3 class="font-label-md text-[14px] text-on-surface mb-3">Baths</h3>
+                    <select name="bath" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
+                        <option value="">Any</option>
+                        <option value="1" <?= ($_GET['bath'] ?? '') == '1' ? 'selected' : '' ?>>1+</option>
+                        <option value="2" <?= ($_GET['bath'] ?? '') == '2' ? 'selected' : '' ?>>2+</option>
+                        <option value="3" <?= ($_GET['bath'] ?? '') == '3' ? 'selected' : '' ?>>3+</option>
+                        <option value="4" <?= ($_GET['bath'] ?? '') == '4' ? 'selected' : '' ?>>4+</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr class="border-outline-variant"/>
+
             <!-- RADIUS FILTER -->
             <div class="flex flex-col gap-2">
                 <div class="flex justify-between items-center">
