@@ -1,4 +1,5 @@
 <?php namespace App\Database\Migrations;
+
 use CodeIgniter\Database\Migration;
 
 class CreateProperties extends Migration {
@@ -10,6 +11,7 @@ class CreateProperties extends Migration {
             'city_id'               => ['type' => 'INT', 'constraint' => 11, 'null' => true],
             'zipcode_id'            => ['type' => 'INT', 'constraint' => 11, 'null' => true],
             'title'                 => ['type' => 'VARCHAR', 'constraint' => 255],
+            'slug'                  => ['type' => 'VARCHAR', 'constraint' => 255],
             'description'           => ['type' => 'TEXT', 'null' => true],
             'listing_type'          => ['type' => 'ENUM', 'constraint' => ['Sale', 'Rent']],
             'address_line_1'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
