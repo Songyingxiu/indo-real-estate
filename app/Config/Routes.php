@@ -13,10 +13,12 @@ $routes->get('search/(:segment)', 'Home::search/$1'); // SEO: /search/rent or /s
 $routes->get('api/suggest', 'Home::suggest');
 $routes->post('search/save', 'Home::saveSearch');
 
+// --- PROPERTY DETAIL ROUTES ---
+$routes->get('property/(:num)', 'Home::detail/$1');
 // SEO Property Detail Route: /property/tangerang/classic-heritage-townhouse-9
 $routes->get('property/(:segment)/(:any)-(:num)', 'Home::detail/$3');
-$routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 
+$routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 $routes->post('property/submit-inquiry', 'Property::submitInquiry');
 
 $routes->get('page/(:segment)', 'Cms::page/$1');
@@ -124,6 +126,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->post('master-data/store-city', 'MasterData::storeCity');
         $routes->post('master-data/store-state', 'MasterData::storeState');
         $routes->post('master-data/store-feature', 'MasterData::storeFeature'); 
+        $routes->post('master-data/store-feature-category', 'MasterData::storeFeatureCategory');
         $routes->post('master-data/store-plan', 'MasterData::storePlan');
         $routes->post('master-data/store-zipcode', 'MasterData::storeZipcode'); 
         $routes->post('master-data/store-poi', 'MasterData::storePoi'); 
@@ -132,6 +135,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->post('master-data/delete-city/(:num)', 'MasterData::deleteCity/$1'); 
         $routes->post('master-data/delete-state/(:num)', 'MasterData::deleteState/$1');
         $routes->post('master-data/delete-feature/(:num)', 'MasterData::deleteFeature/$1');
+        $routes->post('master-data/delete-feature-category/(:num)', 'MasterData::deleteFeatureCategory/$1');
         $routes->post('master-data/delete-plan/(:num)', 'MasterData::deletePlan/$1');
         $routes->post('master-data/delete-zipcode/(:num)', 'MasterData::deleteZipcode/$1');
         $routes->post('master-data/delete-poi/(:num)', 'MasterData::deletePoi/$1');
@@ -141,6 +145,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->post('master-data/update-city/(:num)', 'MasterData::updateCity/$1');
         $routes->post('master-data/update-plan/(:num)', 'MasterData::updatePlan/$1');
         $routes->post('master-data/update-zipcode/(:num)', 'MasterData::updateZipcode/$1');
+        $routes->post('master-data/update-feature/(:num)', 'MasterData::updateFeature/$1');
+        $routes->post('master-data/update-feature-category/(:num)', 'MasterData::updateFeatureCategory/$1');
         
         $routes->get('verifications', 'Verifications::index'); 
         $routes->post('verifications/process-agent/(:num)', 'Verifications::processAgent/$1');
