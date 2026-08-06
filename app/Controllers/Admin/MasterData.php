@@ -187,6 +187,25 @@ class MasterData extends BaseController
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Zipcode updated successfully.'); 
     }
 
+    public function updateFeatureCategory($id)
+    {
+        $db = \Config\Database::connect();
+        $db->table('feature_categories')->where('id', $id)->update([
+            'name' => $this->request->getPost('name')
+        ]);
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature Category updated successfully.');
+    }
+
+    public function updateFeature($id)
+    {
+        $model = new FeatureModel();
+        $model->update($id, [
+            'category_id' => $this->request->getPost('category_id'),
+            'name'        => $this->request->getPost('name')
+        ]);
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature updated successfully.');
+    }
+
     public function updatePlan($id)
     {
         $model = new SubscriptionPlanModel();

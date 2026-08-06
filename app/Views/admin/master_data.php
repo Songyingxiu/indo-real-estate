@@ -9,7 +9,9 @@
     showEditZipcodeModal: false, editZipcodeId: '', editZipcodeVal: '', editZipcodeCityId: '',
     showCreatePlanModal: false, showEditPlanModal: false,
     editPlanId: '', editPlanCode: '', editPlanName: '', editPlanDesc: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanPoi: 0, editPlanMsg: 0, editPlanEmail: 0,
-    showCreatePoiModal: false
+    showCreatePoiModal: false,
+    showEditFeatureCatModal: false, editFeatureCatId: '', editFeatureCatName: '',
+    showEditFeatureModal: false, editFeatureId: '', editFeatureName: '', editFeatureCategoryId: ''
 }">
     
     <div class="mb-stack-lg mt-4 flex justify-between items-end">
@@ -279,7 +281,10 @@
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
                                         <td class="py-3 px-6 text-sm text-on-surface font-semibold"><?= esc($cat->name) ?></td>
                                         <td class="py-3 px-6 text-right">
-                                            <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature-category/' . $cat->id) ?>'; deleteMessage = 'Delete this category?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button type="button" @click="showEditFeatureCatModal = true; editFeatureCatId = <?= $cat->id ?>; editFeatureCatName = '<?= esc(addslashes($cat->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+                                                <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature-category/' . $cat->id) ?>'; deleteMessage = 'Delete this category?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -322,7 +327,10 @@
                                             <span class="text-xs text-on-surface-variant block">Category: <?= esc($feature->category_name ?? 'Uncategorized') ?></span>
                                         </td>
                                         <td class="py-3 px-6 text-right">
-                                            <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature/' . $feature->id) ?>'; deleteMessage = 'Delete this feature?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button type="button" @click="showEditFeatureModal = true; editFeatureId = <?= $feature->id ?>; editFeatureName = '<?= esc(addslashes($feature->name ?? $feature->feature_name)) ?>'; editFeatureCategoryId = '<?= $feature->category_id ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+                                                <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature/' . $feature->id) ?>'; deleteMessage = 'Delete this feature?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -655,6 +663,58 @@
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
                     <button type="button" @click="showEditZipcodeModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feature Category Edit Modal -->
+    <div x-show="showEditFeatureCatModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showEditFeatureCatModal = false" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Edit Feature Category</h2>
+                <button type="button" @click="showEditFeatureCatModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form :action="'<?= base_url('admin/master-data/update-feature-category/') ?>' + editFeatureCatId" method="POST">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                <div class="p-6">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Category Name</label>
+                    <input type="text" name="name" x-model="editFeatureCatName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showEditFeatureCatModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feature Edit Modal -->
+    <div x-show="showEditFeatureModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showEditFeatureModal = false" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Edit Feature</h2>
+                <button type="button" @click="showEditFeatureModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form :action="'<?= base_url('admin/master-data/update-feature/') ?>' + editFeatureId" method="POST">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                <div class="p-6 flex flex-col gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Assigned Category</label>
+                        <select name="category_id" x-model="editFeatureCategoryId" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none cursor-pointer">
+                            <?php if(!empty($featureCategories)): foreach($featureCategories as $cat): ?>
+                                <option value="<?= $cat->id ?>"><?= esc($cat->name) ?></option>
+                            <?php endforeach; endif; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Feature Name</label>
+                        <input type="text" name="name" x-model="editFeatureName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                    <button type="button" @click="showEditFeatureModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save Changes</button>
                 </div>
             </form>
