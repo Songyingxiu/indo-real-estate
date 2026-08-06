@@ -15,7 +15,7 @@
     <div class="mb-stack-lg mt-4 flex justify-between items-end">
         <div>
             <h1 class="font-headline-lg text-headline-lg text-primary mb-stack-sm">Master Data Configuration</h1>
-            <p class="font-body-md text-body-md text-on-surface-variant">Manage core system taxonomies, locations, and packages.</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">Manage core system taxonomies, locations, features, and packages.</p>
         </div>
     </div>
 
@@ -92,6 +92,7 @@
                         <span class="material-symbols-outlined text-primary">map</span> Regions
                     </h2>
                     <form action="<?= base_url('admin/master-data/store-state') ?>" method="POST" class="flex flex-col gap-3">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                         <input name="name" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add region..." type="text"/>
                         <button type="submit" class="w-full h-10 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add Region</button>
                     </form>
@@ -129,6 +130,7 @@
                         <span class="material-symbols-outlined text-primary">location_city</span> Cities
                     </h2>
                     <form action="<?= base_url('admin/master-data/store-city') ?>" method="POST" class="flex flex-col gap-3">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                         <select name="state_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Select Region...</option>
                             <?php if(!empty($states)): foreach($states as $state): ?>
@@ -175,6 +177,7 @@
                         <span class="material-symbols-outlined text-primary">mark_as_unread</span> Zipcodes
                     </h2>
                     <form action="<?= base_url('admin/master-data/store-zipcode') ?>" method="POST" class="flex flex-col gap-3">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                         <select name="city_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Select City...</option>
                             <?php if(!empty($cities)): foreach($cities as $city): ?>
@@ -223,6 +226,7 @@
                         <span class="material-symbols-outlined text-primary">category</span> Property Types
                     </h2>
                     <form action="<?= base_url('admin/master-data/store-type') ?>" method="POST" class="flex gap-2">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                         <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add new type..." type="text"/>
                         <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
                     </form>
@@ -255,14 +259,56 @@
                 </div>
             </section>
 
+            <!-- FEATURE CATEGORIES MODULE -->
             <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200">
+                <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg">
+                    <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">sell</span> Feature Categories
+                    </h2>
+                    <form action="<?= base_url('admin/master-data/store-feature-category') ?>" method="POST" class="flex gap-2">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="e.g. Interior, Exterior..." type="text"/>
+                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
+                    </form>
+                </div>
+                <div class="flex-1 overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <tbody>
+                            <?php if(!empty($featureCategories)): ?>
+                                <?php foreach($featureCategories as $cat): ?>
+                                    <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
+                                        <td class="py-3 px-6 text-sm text-on-surface font-semibold"><?= esc($cat->name) ?></td>
+                                        <td class="py-3 px-6 text-right">
+                                            <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature-category/' . $cat->id) ?>'; deleteMessage = 'Delete this category?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="2" class="py-6 text-center text-outline text-sm">No feature categories found.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- FEATURES / AMENITIES MODULE -->
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200 md:col-span-2">
                 <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg">
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">format_list_bulleted</span> Features (Amenities)
                     </h2>
-                    <form action="<?= base_url('admin/master-data/store-feature') ?>" method="POST" class="flex gap-2">
-                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add feature..." type="text"/>
-                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
+                    <form action="<?= base_url('admin/master-data/store-feature') ?>" method="POST" class="flex flex-col gap-3">
+                        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                        <select name="category_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
+                            <option value="" disabled selected>Assign Category...</option>
+                            <?php if(!empty($featureCategories)): foreach($featureCategories as $cat): ?>
+                                <option value="<?= $cat->id ?>"><?= esc($cat->name) ?></option>
+                            <?php endforeach; endif; ?>
+                        </select>
+                        <div class="flex gap-2">
+                            <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="e.g. Swimming Pool..." type="text"/>
+                            <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
+                        </div>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -271,7 +317,10 @@
                             <?php if(!empty($features)): ?>
                                 <?php foreach($features as $feature): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-6 text-sm text-on-surface font-semibold"><?= esc($feature->name ?? $feature->feature_name) ?></td>
+                                        <td class="py-3 px-6">
+                                            <span class="font-semibold block text-sm text-on-surface"><?= esc($feature->name ?? $feature->feature_name) ?></span>
+                                            <span class="text-xs text-on-surface-variant block">Category: <?= esc($feature->category_name ?? 'Uncategorized') ?></span>
+                                        </td>
                                         <td class="py-3 px-6 text-right">
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature/' . $feature->id) ?>'; deleteMessage = 'Delete this feature?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                                         </td>
@@ -353,6 +402,7 @@
                 <button type="button" @click="showCreatePoiModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form action="<?= base_url('admin/master-data/store-poi') ?>" method="POST" class="overflow-y-auto custom-scrollbar">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 flex flex-col gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Name</label>
@@ -396,6 +446,7 @@
                 <button type="button" @click="showCreatePlanModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form action="<?= base_url('admin/master-data/store-plan') ?>" method="POST" class="overflow-y-auto custom-scrollbar">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Unique Code</label>
@@ -454,6 +505,7 @@
                 <button type="button" @click="showEditPlanModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form :action="'<?= base_url('admin/master-data/update-plan/') ?>' + editPlanId" method="POST" class="overflow-y-auto custom-scrollbar">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Unique Code</label>
@@ -513,6 +565,7 @@
                 <button type="button" @click="showEditTypeModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form :action="'<?= base_url('admin/master-data/update-type/') ?>' + editTypeId" method="POST">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6">
                     <label class="block text-sm font-semibold text-on-surface mb-2">Type Name</label>
                     <input type="text" name="name" x-model="editTypeName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
@@ -533,6 +586,7 @@
                 <button type="button" @click="showEditStateModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form :action="'<?= base_url('admin/master-data/update-state/') ?>' + editStateId" method="POST">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6">
                     <label class="block text-sm font-semibold text-on-surface mb-2">Region Name</label>
                     <input type="text" name="name" x-model="editStateName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
@@ -553,6 +607,7 @@
                 <button type="button" @click="showEditCityModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form :action="'<?= base_url('admin/master-data/update-city/') ?>' + editCityId" method="POST">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 flex flex-col gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-2">Assigned Region</label>
@@ -583,6 +638,7 @@
                 <button type="button" @click="showEditZipcodeModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form :action="'<?= base_url('admin/master-data/update-zipcode/') ?>' + editZipcodeId" method="POST">
+                <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 flex flex-col gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-2">Assigned City</label>
@@ -615,7 +671,10 @@
             </div>
             <div class="px-6 py-4 flex justify-between gap-3 bg-surface-container-lowest border-t border-outline-variant">
                 <button type="button" @click="showDeleteModal = false" class="flex-1 px-4 py-2 border border-outline-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
-                <form :action="deleteUrl" method="POST" class="flex-1"><button type="submit" class="w-full px-4 py-2 bg-error text-on-error rounded font-semibold hover:opacity-90 transition">Delete</button></form>
+                <form :action="deleteUrl" method="POST" class="flex-1">
+                    <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
+                    <button type="submit" class="w-full px-4 py-2 bg-error text-on-error rounded font-semibold hover:opacity-90 transition">Delete</button>
+                </form>
             </div>
         </div>
     </div>

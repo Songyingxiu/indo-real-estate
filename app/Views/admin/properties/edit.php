@@ -9,18 +9,56 @@
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Edit Property Listing</h2>
 
     <form action="<?= base_url('admin/properties/update/' . $property['id']) ?>" method="POST" enctype="multipart/form-data" novalidate class="bg-surface-container-lowest shadow-sm rounded-lg border border-outline-variant p-6 space-y-8">
+        <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
         
+        <!-- SECTION 1: BASIC INFO & LEGAL -->
         <div>
-            <h3 class="font-headline-md text-lg font-semibold mb-4">Property Details</h3>
-            
+            <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">1. Basic Information & Legal</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block font-semibold mb-2">Property Title *</label>
+                    <input type="text" name="title" value="<?= esc($property['title']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Property Type *</label>
+                    <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                        <?php foreach ($propertyTypes as $type): ?>
+                            <option value="<?= esc($type->id) ?>" <?= $property['property_type_id'] == $type->id ? 'selected' : '' ?>>
+                                <?= esc($type->type_name ?? $type->name) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Listing Type *</label>
+                    <select name="listing_type" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                        <option value="Sale" <?= $property['listing_type'] == 'Sale' ? 'selected' : '' ?>>For Sale</option>
+                        <option value="Rent" <?= $property['listing_type'] == 'Rent' ? 'selected' : '' ?>>For Rent</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block font-semibold mb-2">Asking Price (IDR) *</label>
+                    <input type="number" name="tax_price" value="<?= esc($property['tax_price']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Property Tax Number (NOP / PBB)</label>
+                    <input type="text" name="property_tax_number" value="<?= esc($property['property_tax_number']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: LOCATION DETAILS & MAP -->
+        <div>
+            <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">2. Location Details & Zip Code</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
                 stateId: '<?= esc($property['state_id'] ?? '') ?>', 
                 cityId: '<?= esc($property['city_id'] ?? '') ?>',
                 zipcodeId: '<?= esc($property['zipcode_id'] ?? '') ?>',
-                cities: [], 
-                zipcodes: [],
-                isLoading: false,
-                isZipLoading: false,
+                cities: [], zipcodes: [], isLoading: false, isZipLoading: false,
                 init() {
                     if (this.stateId) { this.fetchCities(); }
                     if (this.cityId) { this.fetchZipcodes(); }
@@ -41,7 +79,6 @@
                 },
                 fetchCities() {
                     this.isLoading = true;
-                    // Restored slash segments to satisfy Routes.php explicit definitions
                     const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>/' + this.stateId;
                     fetch(url)
                         .then(response => {
@@ -60,7 +97,6 @@
                 },
                 fetchZipcodes() {
                     this.isZipLoading = true;
-                    // Restored slash segments to satisfy Routes.php explicit definitions
                     const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>/' + this.cityId;
                     fetch(url)
                         .then(response => {
@@ -79,22 +115,6 @@
                 }
             }">
                 
-                <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Property Title *</label>
-                    <input type="text" name="title" value="<?= esc($property['title']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                </div>
-
-                <div>
-                    <label class="block font-semibold mb-2">Property Type *</label>
-                    <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                        <?php foreach ($propertyTypes as $type): ?>
-                            <option value="<?= esc($type->id) ?>" <?= $property['property_type_id'] == $type->id ? 'selected' : '' ?>>
-                                <?= esc($type->type_name ?? $type->name) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
                     <select name="state_id" x-model="stateId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
@@ -114,9 +134,8 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">Zip Code</label>
-                    <select name="zipcode_id" x-model="zipcodeId" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
-                        <option value="" x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
+                    <label class="block font-semibold mb-2">Zip Code *</label>
+                    <select name="zipcode_id" x-model="zipcodeId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
                         <template x-for="zip in zipcodes" :key="zip.id">
                             <option :value="zip.id" x-text="zip.zipcode"></option>
                         </template>
@@ -124,81 +143,114 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">Listing Type *</label>
-                    <select name="listing_type" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                        <option value="Sale" <?= $property['listing_type'] == 'Sale' ? 'selected' : '' ?>>For Sale</option>
-                        <option value="Rent" <?= $property['listing_type'] == 'Rent' ? 'selected' : '' ?>>For Rent</option>
+                    <label class="block font-semibold mb-2">Area / District Name</label>
+                    <input type="text" name="area_name" value="<?= esc($property['area_name']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block font-semibold mb-2">Address Line 1 *</label>
+                    <input type="text" name="address_line_1" value="<?= esc($property['address_line_1']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block font-semibold mb-2">Address Line 2</label>
+                    <input type="text" name="address_line_2" value="<?= esc($property['address_line_2']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                </div>
+
+                <div class="md:col-span-2 mt-2">
+                    <label class="block font-semibold mb-2">Pinpoint on Map *</label>
+                    <p class="text-xs text-on-surface-variant mb-2">Drag the marker or click anywhere on the map to set the exact property location.</p>
+                    <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
+                    <div class="flex gap-4 mt-2">
+                        <input type="text" name="latitude" id="propertyLat" value="<?= esc($property['latitude']) ?>" required readonly class="w-full bg-surface-container-lowest border border-outline-variant px-2 py-1 text-xs rounded text-on-surface-variant">
+                        <input type="text" name="longitude" id="propertyLng" value="<?= esc($property['longitude']) ?>" required readonly class="w-full bg-surface-container-lowest border border-outline-variant px-2 py-1 text-xs rounded text-on-surface-variant">
+                    </div>
+                </div>
+
+                <!-- POI Button Integration -->
+                <div class="md:col-span-2 mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-sm text-on-surface">Enhance Local Map</h4>
+                        <p class="text-xs text-on-surface-variant">Missing a school or hospital? Add it to the map for buyers.</p>
+                    </div>
+                    <?php 
+                        $poiRemaining = ($maxPois ?? 0) - ($poisCreated ?? 0); 
+                    ?>
+                    <?php if (isset($maxPois) && $maxPois > 0): ?>
+                        <?php if ($poiRemaining > 0 || session()->get('role_id') == 4): ?>
+                            <button type="button" @click="$dispatch('open-poi-modal')" class="px-4 py-2 bg-secondary text-on-secondary rounded text-sm font-bold hover:opacity-90 transition flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
+                                Add Custom POI (<?= session()->get('role_id') == 4 ? 'Unlimited' : $poiRemaining . ' Left' ?>)
+                            </button>
+                        <?php else: ?>
+                            <button type="button" disabled class="px-4 py-2 bg-surface-variant text-on-surface-variant rounded text-sm font-bold opacity-50 cursor-not-allowed flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">lock</span>
+                                POI Limit Reached (<?= $maxPois ?>/<?= $maxPois ?>)
+                            </button>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <a href="<?= base_url('admin/pricing') ?>" target="_blank" class="px-4 py-2 border border-primary text-primary rounded text-sm font-bold hover:bg-primary-container transition flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">upgrade</span>
+                            Upgrade to Add POIs
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: DIMENSIONS & FACILITIES -->
+        <div>
+            <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">3. Property Dimensions & Facilities</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div><label class="block text-xs mb-1 font-semibold">Beds</label><input type="number" name="bed" value="<?= esc($property['bed']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Baths</label><input type="number" name="bath" value="<?= esc($property['bath']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Total Area (m2)</label><input type="number" name="total_area" value="<?= esc($property['total_area']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Usable Area (m2)</label><input type="number" name="usable_area" value="<?= esc($property['usable_area']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Land Area (m2)</label><input type="number" name="total_land_area" value="<?= esc($property['total_land_area']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Year Built</label><input type="number" name="year_built" value="<?= esc($property['year_built']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Total Floors</label><input type="number" name="total_floors" value="<?= esc($property['total_floors']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Unit Number</label><input type="text" name="unit_number" value="<?= esc($property['unit_number']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-3">
+                    <label class="block text-xs mb-1 font-semibold">Building / Society Name</label>
+                    <input type="text" name="building_society_name" value="<?= esc($property['building_society_name']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
+                </div>
+                
+                <div>
+                    <label class="block text-xs mb-1 font-semibold">Parking Availability</label>
+                    <select name="parking" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
+                        <option value="Available" <?= $property['parking'] == 'Available' ? 'selected' : '' ?>>Available</option>
+                        <option value="Not Available" <?= $property['parking'] == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label class="block font-semibold mb-2">Asking Price (IDR) *</label>
-                    <input type="number" name="tax_price" value="<?= esc($property['tax_price']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <label class="block text-xs mb-1 font-semibold">Total Parking Spots</label>
+                    <input type="number" name="total_parking" value="<?= esc($property['total_parking']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
                 </div>
-                
-                <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Address *</label>
-                    <input type="text" name="address_line_1" value="<?= esc($property['address_line_1']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                    
-                    <!-- Interactive Map for Pinpointing -->
-                    <div class="mt-4">
-                        <label class="block font-semibold mb-2">Pinpoint on Map *</label>
-                        <p class="text-xs text-on-surface-variant mb-2">Drag the marker or click anywhere on the map to set the exact property location.</p>
-                        <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
-                        <input type="hidden" name="latitude" id="propertyLat" value="<?= esc($property['latitude'] ?? '') ?>" required>
-                        <input type="hidden" name="longitude" id="propertyLng" value="<?= esc($property['longitude'] ?? '') ?>" required>
-                    </div>
 
-                    <!-- POI Button Integration -->
-                    <div class="mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between">
-                        <div>
-                            <h4 class="font-bold text-sm text-on-surface">Enhance Local Map</h4>
-                            <p class="text-xs text-on-surface-variant">Missing a school or hospital? Add it to the map for buyers.</p>
-                        </div>
-                        <?php 
-                            $poiRemaining = ($maxPois ?? 0) - ($poisCreated ?? 0); 
-                        ?>
-                        <?php if (isset($maxPois) && $maxPois > 0): ?>
-                            <?php if ($poiRemaining > 0 || session()->get('role_id') == 4): ?>
-                                <button type="button" @click="$dispatch('open-poi-modal')" class="px-4 py-2 bg-secondary text-on-secondary rounded text-sm font-bold hover:opacity-90 transition flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
-                                    Add Custom POI (<?= session()->get('role_id') == 4 ? 'Unlimited' : $poiRemaining . ' Left' ?>)
-                                </button>
-                            <?php else: ?>
-                                <button type="button" disabled class="px-4 py-2 bg-surface-variant text-on-surface-variant rounded text-sm font-bold opacity-50 cursor-not-allowed flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[18px]">lock</span>
-                                    POI Limit Reached (<?= $maxPois ?>/<?= $maxPois ?>)
-                                </button>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <a href="<?= base_url('admin/pricing') ?>" target="_blank" class="px-4 py-2 border border-primary text-primary rounded text-sm font-bold hover:bg-primary-container transition flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[18px]">upgrade</span>
-                                Upgrade to Add POIs
-                            </a>
-                        <?php endif; ?>
-                    </div>
+                <div>
+                    <label class="block text-xs mb-1 font-semibold">Basement</label>
+                    <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
+                        <option value="No" <?= $property['basement'] == 'No' ? 'selected' : '' ?>>No</option>
+                        <option value="Yes" <?= $property['basement'] == 'Yes' ? 'selected' : '' ?>>Yes</option>
+                    </select>
                 </div>
-                
-                <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Description</label>
-                    <textarea name="description" rows="4" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded"><?= esc($property['description']) ?></textarea>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <div><label class="block text-xs mb-1 font-semibold">Beds</label><input type="number" name="bed" value="<?= esc($property['bed']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Baths</label><input type="number" name="bath" value="<?= esc($property['bath']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Land (m2)</label><input type="number" name="total_land_area" value="<?= esc($property['total_land_area']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Building (m2)</label><input type="number" name="usable_area" value="<?= esc($property['usable_area']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div class="md:col-span-3">
+                    <label class="block text-xs mb-1 font-semibold">Water Facility Type</label>
+                    <input type="text" name="water_facility" value="<?= esc($property['water_facility']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
+                </div>
             </div>
         </div>
 
-        <div class="border-t border-outline-variant pt-6">
-            <h3 class="font-headline-md text-lg font-semibold mb-2">Features & Amenities</h3>
-            <p class="text-sm text-on-surface-variant mb-4">Select the premium amenities included with this property.</p>
-            
+        <!-- SECTION 4: FEATURES -->
+        <div>
+            <h3 class="font-headline-md text-lg font-semibold mb-2 border-b border-outline-variant pb-2">4. Premium Features</h3>
             <?php if (!empty($categorizedFeatures)): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
                     <?php foreach ($categorizedFeatures as $category => $catFeatures): ?>
                         <div class="bg-surface-container-lowest p-4 border border-outline-variant rounded-lg">
                             <h4 class="font-bold text-on-surface mb-3 flex items-center gap-2">
@@ -217,36 +269,39 @@
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <?php if (!empty($features)): ?>
-                        <?php foreach ($features as $feature): ?>
-                            <label class="flex items-center gap-2 cursor-pointer hover:bg-surface-bright p-2 rounded transition-colors">
-                                <input type="checkbox" name="features[]" value="<?= esc($feature->id) ?>" <?= in_array($feature->id, $selectedFeatureIds ?? []) ? 'checked' : '' ?> class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
-                                <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
-                            </label>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                <p class="text-sm text-on-surface-variant col-span-full bg-surface-container-lowest p-4 rounded border border-outline-variant mt-4">No additional features have been set up in Master Data.</p>
             <?php endif; ?>
         </div>
 
-        <div class="border-t border-outline-variant pt-6">
-            <h3 class="font-headline-md text-lg font-semibold mb-4">Media & Legal Verification</h3>
+        <!-- SECTION 5: DESCRIPTION & MEDIA -->
+        <div>
+            <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">5. Description & Media</h3>
+            <div class="md:col-span-2 mb-6">
+                <label class="block font-semibold mb-2">Description</label>
+                <textarea name="description" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded"><?= esc($property['description']) ?></textarea>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-2">Upload New SHM Document</label>
+                    <label class="block font-semibold mb-2">Upload New Photos (Optional)</label>
+                    <input type="file" name="property_images[]" multiple accept="image/*" class="w-full p-2 border rounded bg-surface">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2">Upload New SHM Document (Optional)</label>
                     <input type="file" name="shm_document" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded bg-surface">
-                    <p class="text-xs text-on-surface-variant mt-1">Leave empty to keep current document.</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block font-semibold mb-2">Video Tour URL</label>
+                    <input type="url" name="video_url" value="<?= esc($property['video_url']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
             </div>
         </div>
 
         <div class="pt-6 border-t flex justify-end">
-            <button type="submit" class="bg-primary text-on-primary px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity">Update Listing</button>
+            <button type="submit" class="bg-primary text-on-primary px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity shadow-md">Update Listing</button>
         </div>
     </form>
 
-    <!-- alpine.js validation modal -->
+    <!-- ALPINE VALIDATION MODAL -->
     <div x-show="showValidationErrorModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showValidationErrorModal = false" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="p-6 text-center">

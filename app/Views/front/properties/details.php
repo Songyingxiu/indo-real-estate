@@ -68,7 +68,7 @@
                         </div>
                         <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
                             <span class="material-symbols-outlined mr-2">location_on</span>
-                            <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
+                            <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?><?= !empty($property->zipcode) ? ', ' . esc($property->zipcode) : '' ?>
                         </p>
                     </div>
                     <div class="text-left md:text-right">
@@ -322,6 +322,7 @@
 
                     <?php if(session()->get('id')): ?>
                         <form action="<?= base_url('property/submit-inquiry') ?>" method="POST" class="flex flex-col gap-3">
+                            <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                             <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
                             <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
                             

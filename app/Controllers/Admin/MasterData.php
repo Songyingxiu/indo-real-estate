@@ -36,7 +36,16 @@ class MasterData extends BaseController
         $data['zipcodes'] = $zipcodeModel->orderBy('zipcodes.id', 'DESC')->paginate(5, 'zipcodes');
 
         $data['states'] = $stateModel->orderBy('id', 'DESC')->paginate(5, 'states');
-        $data['features'] = $featureModel->orderBy('id', 'DESC')->paginate(5, 'features');
+
+        // Feature Categories Fetching
+        $db = \Config\Database::connect();
+        $data['featureCategories'] = $db->table('feature_categories')->where('status', 'Active')->get()->getResult();
+
+        // Features Fetching with Category Join
+        $featureModel->select('features.*, feature_categories.name as category_name');
+        $featureModel->join('feature_categories', 'feature_categories.id = features.category_id', 'left');
+        $data['features'] = $featureModel->orderBy('features.id', 'DESC')->paginate(5, 'features');
+        
         $data['plans'] = $planModel->orderBy('price', 'ASC')->paginate(10, 'plans');
         
         // Fetch POIs
@@ -74,11 +83,25 @@ class MasterData extends BaseController
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New region added successfully!');
     }
 
+    public function storeFeatureCategory()
+    {
+        $db = \Config\Database::connect();
+        $db->table('feature_categories')->insert([
+            'name'   => $this->request->getPost('name'),
+            'status' => 'Active'
+        ]);
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'New Feature Category added!');
+    }
+
     public function storeFeature()
     {
         $model = new FeatureModel();
-        $model->insert(['name' => $this->request->getPost('name'), 'status' => 'Active']);
-        return redirect()->to(base_url('admin/master-data'))->with('success', 'New feature added!');
+        $model->insert([
+            'category_id' => $this->request->getPost('category_id'),
+            'name'        => $this->request->getPost('name'), 
+            'status'      => 'Active'
+        ]);
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'New feature added and assigned to category!');
     }
 
     public function storeZipcode()
@@ -130,6 +153,14 @@ class MasterData extends BaseController
     public function deleteType($id) { (new PropertyTypeModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type removed.'); }
     public function deleteCity($id) { (new CityModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Location removed.'); }
     public function deleteState($id) { (new StateModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Region removed.'); }
+    
+    public function deleteFeatureCategory($id) 
+    { 
+        $db = \Config\Database::connect();
+        $db->table('feature_categories')->where('id', $id)->delete();
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature Category removed.'); 
+    }
+
     public function deleteFeature($id) { (new FeatureModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature removed.'); }
     public function deletePlan($id) { (new SubscriptionPlanModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Plan removed.'); }
     public function deleteZipcode($id) { (new ZipcodeModel())->delete($id); return redirect()->to(base_url('admin/master-data'))->with('success', 'Zipcode removed.'); }
