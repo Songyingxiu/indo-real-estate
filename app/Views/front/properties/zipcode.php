@@ -19,7 +19,14 @@
         <?php if(!empty($properties)): foreach($properties as $property): ?>
             <article class="bg-surface border border-outline-variant rounded overflow-hidden hover:shadow-md transition-shadow flex flex-col">
                 <a href="<?= base_url('properties/' . $property['id']) ?>" class="h-48 bg-surface-container-high block relative">
-                    <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover" src="<?= esc($property['image_path'] ?? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80') ?>"/>
+                    <?php 
+                        $imgPath = trim($property['image_path'] ?? $property['image'] ?? '');
+                        $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
+                        if (!empty($imgPath)) {
+                            $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
+                        }
+                    ?>
+                    <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" src="<?= $imgSrc ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';"/>
                     <div class="absolute top-2 left-2 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded uppercase">
                         <?= esc($property['listing_type']) ?>
                     </div>

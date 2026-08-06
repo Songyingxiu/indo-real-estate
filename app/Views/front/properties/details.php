@@ -10,9 +10,9 @@
     <div class="w-full max-w-5xl overflow-y-auto max-h-screen flex flex-col gap-6 custom-scrollbar p-4 md:p-8">
         <?php if(!empty($images)): foreach($images as $img): ?>
             <?php $imgSrc = (strpos(trim($img->image_path), 'http') === 0) ? esc($img->image_path) : base_url(esc($img->image_path)); ?>
-            <img src="<?= $imgSrc ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';" class="w-full h-auto rounded-lg shadow-2xl object-cover">
+            <img src="<?= $imgSrc ?>" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-auto rounded-lg shadow-2xl object-cover">
         <?php endforeach; else: ?>
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80" class="w-full h-auto rounded-lg shadow-2xl">
+            <img src="https://placehold.co/1920x1080/e2e8f0/8492a6?text=No+Image+Available" class="w-full h-auto rounded-lg shadow-2xl">
         <?php endif; ?>
     </div>
 </div>
@@ -27,24 +27,24 @@
     </nav>
 
     <?php 
-        $mainImg = !empty($images[0]) ? ((strpos(trim($images[0]->image_path), 'http') === 0) ? esc($images[0]->image_path) : base_url(esc($images[0]->image_path))) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';
-        $img1 = !empty($images[1]) ? ((strpos(trim($images[1]->image_path), 'http') === 0) ? esc($images[1]->image_path) : base_url(esc($images[1]->image_path))) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
-        $img2 = !empty($images[2]) ? ((strpos(trim($images[2]->image_path), 'http') === 0) ? esc($images[2]->image_path) : base_url(esc($images[2]->image_path))) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';
+        $mainImg = !empty($images[0]) ? ((strpos(trim($images[0]->image_path), 'http') === 0) ? esc($images[0]->image_path) : base_url(esc($images[0]->image_path))) : 'https://placehold.co/1920x1080/e2e8f0/8492a6?text=Property+Image';
+        $img1 = !empty($images[1]) ? ((strpos(trim($images[1]->image_path), 'http') === 0) ? esc($images[1]->image_path) : base_url(esc($images[1]->image_path))) : 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
+        $img2 = !empty($images[2]) ? ((strpos(trim($images[2]->image_path), 'http') === 0) ? esc($images[2]->image_path) : base_url(esc($images[2]->image_path))) : 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
     ?>
 
     <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 mb-8 rounded overflow-hidden h-[500px]">
         <div class="md:col-span-3 md:row-span-2 relative group overflow-hidden cursor-pointer" onclick="openGallery()">
-            <img alt="Featured" src="<?= $mainImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <img alt="Featured" src="<?= $mainImg ?>" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded flex items-center gap-2 hover:bg-white transition-colors">
                 <span class="material-symbols-outlined text-primary text-[20px] fill">photo_library</span>
                 <span class="font-label-md text-[14px] text-primary font-bold">View All Photos (<?= count($images) ?>)</span>
             </div>
         </div>
         <div class="relative overflow-hidden group hidden md:block cursor-pointer" onclick="openGallery()">
-            <img alt="Gallery 1" src="<?= $img1 ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <img alt="Gallery 1" src="<?= $img1 ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
         </div>
         <div class="relative overflow-hidden group hidden md:block cursor-pointer" onclick="openGallery()">
-            <img alt="Gallery 2" src="<?= $img2 ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            <img alt="Gallery 2" src="<?= $img2 ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
         </div>
     </div>
@@ -143,7 +143,7 @@
                         $midAdImg = $detailAds[0]->image_path ?? $detailAds[0]->image ?? '';
                         $adSrc = (strpos(trim($midAdImg), 'http') === 0) ? esc($midAdImg) : base_url('uploads/ads/' . esc($midAdImg));
                     ?>
-                    <img src="<?= $adSrc ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover">
+                    <img src="<?= $adSrc ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x200/e2e8f0/8492a6?text=Advertisement';" class="w-full h-full object-cover">
                     <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">Advertisement</span>
                 </a>
             </div>
@@ -184,9 +184,9 @@
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <?php 
                                     $rawNp = trim($np->image_path ?? $np->image ?? '');
-                                    $npImg = !empty($rawNp) ? ((strpos($rawNp, 'http') === 0) ? esc($rawNp) : base_url(esc($rawNp))) : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'; 
+                                    $npImg = !empty($rawNp) ? ((strpos($rawNp, 'http') === 0) ? esc($rawNp) : base_url(esc($rawNp))) : 'https://placehold.co/200x200/e2e8f0/8492a6?text=Property'; 
                                 ?>
-                                <img src="<?= $npImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                <img src="<?= $npImg ?>" onerror="this.onerror=null;this.src='https://placehold.co/200x200/e2e8f0/8492a6?text=No+Image';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np->title) ?></span>
@@ -208,9 +208,9 @@
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <?php 
                                     $rawSt = trim($st->image_path ?? $st->image ?? '');
-                                    $stImg = !empty($rawSt) ? ((strpos($rawSt, 'http') === 0) ? esc($rawSt) : base_url(esc($rawSt))) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80'; 
+                                    $stImg = !empty($rawSt) ? ((strpos($rawSt, 'http') === 0) ? esc($rawSt) : base_url(esc($rawSt))) : 'https://placehold.co/200x200/e2e8f0/8492a6?text=Property'; 
                                 ?>
-                                <img src="<?= $stImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                <img src="<?= $stImg ?>" onerror="this.onerror=null;this.src='https://placehold.co/200x200/e2e8f0/8492a6?text=No+Image';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st->title) ?></span>
@@ -232,9 +232,9 @@
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <?php 
                                     $rawSp = trim($sp->image_path ?? $sp->image ?? '');
-                                    $spImg = !empty($rawSp) ? ((strpos($rawSp, 'http') === 0) ? esc($rawSp) : base_url(esc($rawSp))) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80'; 
+                                    $spImg = !empty($rawSp) ? ((strpos($rawSp, 'http') === 0) ? esc($rawSp) : base_url(esc($rawSp))) : 'https://placehold.co/200x200/e2e8f0/8492a6?text=Property'; 
                                 ?>
-                                <img src="<?= $spImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                                <img src="<?= $spImg ?>" onerror="this.onerror=null;this.src='https://placehold.co/200x200/e2e8f0/8492a6?text=No+Image';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($sp->title) ?></span>
