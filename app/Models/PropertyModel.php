@@ -29,8 +29,8 @@ class PropertyModel extends Model
     public function searchProperties($keyword = null, $listingType = null, $types = [], $lat = null, $lng = null, $radius = null)
     {
         $builder = $this->builder();
+        $request = \Config\Services::request();
         
-        // Added cities.name as city_name so we don't get "Location Not Set"
         $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path, zipcodes.zipcode, cities.name as city_name';
 
         // Apply Haversine formula if coordinates and radius are provided
@@ -44,7 +44,7 @@ class PropertyModel extends Model
         $builder->join('users', 'users.id = properties.owner_id', 'left');
         $builder->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left');
         $builder->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left');
-        $builder->join('cities', 'cities.id = properties.city_id', 'left'); // NEW JOIN
+        $builder->join('cities', 'cities.id = properties.city_id', 'left'); 
         
         $builder->where('properties.status', 'Active');
         $builder->where('properties.approval_status', 'Published');
@@ -53,7 +53,7 @@ class PropertyModel extends Model
             $builder->groupStart()
                     ->like('properties.title', $keyword)
                     ->orLike('properties.area_name', $keyword)
-                    ->orLike('cities.name', $keyword) // Search by city as well
+                    ->orLike('cities.name', $keyword) 
                     ->groupEnd();
         }
 
@@ -65,12 +65,31 @@ class PropertyModel extends Model
             $builder->whereIn('properties.property_type_id', $types);
         }
 
-        // Apply radius filter and ordering
+        // --- NEW FILTERS: Price, Bed, Bath ---
+        $minPrice = $request->getGet('min_price');
+        $maxPrice = $request->getGet('max_price');
+        $bed = $request->getGet('bed');
+        $bath = $request->getGet('bath');
+
+        if (is_numeric($minPrice) && $minPrice > 0) {
+            $builder->where('properties.tax_price >=', (float)$minPrice);
+        }
+        if (is_numeric($maxPrice) && $maxPrice > 0) {
+            $builder->where('properties.tax_price <=', (float)$maxPrice);
+        }
+        if (!empty($bed)) {
+            $builder->where('properties.bed >=', (int)$bed);
+        }
+        if (!empty($bath)) {
+            $builder->where('properties.bath >=', (int)$bath);
+        }
+
+        // Apply radius filter (Using WHERE instead of HAVING to fix Pagination Bug)
         if ($lat && $lng && $radius) {
-            $builder->having('distance <=', (float)$radius);
-            $builder->orderBy('distance', 'ASC'); // Closest first
+            $builder->where("{$haversine} <=", (float)$radius);
+            $builder->orderBy('distance', 'ASC'); 
         } else {
-            $builder->orderBy('properties.created_date', 'DESC'); // Newest first
+            $builder->orderBy('properties.created_date', 'DESC'); 
         }
 
         return $this;
@@ -111,7 +130,6 @@ class PropertyModel extends Model
         if (!$lat || !$lng) return [];
         $haversine = "(6371 * acos(cos(radians($lat)) * cos(radians(properties.latitude)) * cos(radians(properties.longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(properties.latitude))))";
         
-        // Added proper table prefixes and JOINS for images/cities
         return $this->select("properties.*, property_images.image_path, cities.name as city_name, {$haversine} AS distance")
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->join('cities', 'cities.id = properties.city_id', 'left')
@@ -126,7 +144,6 @@ class PropertyModel extends Model
 
     public function getSimilarProperties($field, $value, $excludeId, $limit = 5)
     {
-        // Added proper table prefixes and JOINS for images/cities
         return $this->select('properties.*, property_images.image_path, cities.name as city_name')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->join('cities', 'cities.id = properties.city_id', 'left')
