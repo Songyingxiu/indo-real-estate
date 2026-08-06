@@ -10,7 +10,7 @@ class PropertyModel extends Model
     protected $returnType       = 'array';
     
     protected $allowedFields    = [
-        'owner_id', 'property_type_id', 'city_id', 'zipcode_id', 'title', 
+        'owner_id', 'property_type_id', 'city_id', 'zipcode_id', 'title', 'slug', 
         'description', 'listing_type', 'address_line_1', 'address_line_2', 
         'area_name', 'unit_number', 'building_society_name', 'latitude', 
         'longitude', 'year_built', 'total_floors', 'bed', 'bath', 
