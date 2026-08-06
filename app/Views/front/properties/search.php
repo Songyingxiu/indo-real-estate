@@ -92,8 +92,14 @@
                     <?php if(!empty($properties)): foreach($properties as $property): ?>
                         <article class="bg-surface border border-outline-variant rounded-b-lg rounded-t-xl overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300 flex flex-col">
                             <a href="<?= base_url('property/' . $property['id']) ?>" class="relative h-48 w-full bg-surface-container-highest block group">
-                                <?php $imgSrc = !empty($property['image_path']) ? esc($property['image_path']) : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; ?>
-                                <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $imgSrc ?>"/>
+                                <?php 
+                                    $imgPath = trim($property['image_path'] ?? $property['image'] ?? '');
+                                    $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
+                                    if (!empty($imgPath)) {
+                                        $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
+                                    }
+                                ?>
+                                <img alt="<?= esc($property['title']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $imgSrc ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';"/>
                                 
                                 <div class="absolute top-3 left-3 bg-tertiary-container text-on-tertiary font-label-md text-[12px] px-2 py-1 rounded flex items-center gap-1 shadow-sm">
                                     <span class="material-symbols-outlined text-[14px]">sell</span>
@@ -115,7 +121,7 @@
                                 
                                 <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">location_on</span>
-                                    <?= esc($property['area_name'] ?? $property['address_line_1']) ?>
+                                    <?= esc($property['area_name'] ?? $property['address_line_1'] ?? 'Location Not Set') ?>
                                 </p>
                                 
                                 <div class="flex items-center gap-4 border-t border-outline-variant pt-4 mt-auto">

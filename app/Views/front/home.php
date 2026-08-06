@@ -55,7 +55,7 @@
                                 $adImg = $banner->image_path ?? $banner->image ?? '';
                                 $adSrc = (strpos(trim($adImg), 'http') === 0) ? esc($adImg) : base_url('uploads/ads/' . esc($adImg)); 
                             ?>
-                            <img src="<?= $adSrc ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="<?= $adSrc ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x400/e2e8f0/8492a6?text=Advertisement';" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                                 <h3 class="text-white font-bold text-lg drop-shadow-md"><?= esc($banner->title) ?></h3>
                             </div>
@@ -84,12 +84,12 @@
                         <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
                             <?php 
                                 $imgPath = trim($property->image_path ?? '');
-                                $imgSrc = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
+                                $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
                                 if (!empty($imgPath)) {
                                     $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
                                 }
                             ?>
-                            <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
+                            <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
                             <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                 <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                             </div>
@@ -136,12 +136,12 @@
                                         <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">New</div>
                                         <?php 
                                             $imgPath = trim($property->image_path ?? '');
-                                            $imgSrc = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80';
+                                            $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
                                             if (!empty($imgPath)) {
                                                 $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
                                             }
                                         ?>
-                                        <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
+                                        <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
                                         <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                             <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                                         </div>
