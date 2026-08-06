@@ -30,8 +30,8 @@ class PropertyModel extends Model
     {
         $builder = $this->builder();
         
-        // Base selections with zipcodes.zipcode added
-        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path, zipcodes.zipcode';
+        // Added cities.name as city_name so we don't get "Location Not Set"
+        $selects = 'properties.*, property_types.name as type_name, users.first_name, users.last_name, property_images.image_path, zipcodes.zipcode, cities.name as city_name';
 
         // Apply Haversine formula if coordinates and radius are provided
         if ($lat && $lng && $radius) {
@@ -44,6 +44,7 @@ class PropertyModel extends Model
         $builder->join('users', 'users.id = properties.owner_id', 'left');
         $builder->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left');
         $builder->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left');
+        $builder->join('cities', 'cities.id = properties.city_id', 'left'); // NEW JOIN
         
         $builder->where('properties.status', 'Active');
         $builder->where('properties.approval_status', 'Published');
@@ -52,6 +53,7 @@ class PropertyModel extends Model
             $builder->groupStart()
                     ->like('properties.title', $keyword)
                     ->orLike('properties.area_name', $keyword)
+                    ->orLike('cities.name', $keyword) // Search by city as well
                     ->groupEnd();
         }
 
@@ -107,12 +109,15 @@ class PropertyModel extends Model
     public function getNearbyProperties($lat, $lng, $excludeId, $limit = 5)
     {
         if (!$lat || !$lng) return [];
-        $haversine = "(6371 * acos(cos(radians($lat)) * cos(radians(latitude)) * cos(radians(longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(latitude))))";
+        $haversine = "(6371 * acos(cos(radians($lat)) * cos(radians(properties.latitude)) * cos(radians(properties.longitude) - radians($lng)) + sin(radians($lat)) * sin(radians(properties.latitude))))";
         
-        return $this->select("*, {$haversine} AS distance")
-            ->where('id !=', $excludeId)
-            ->where('status', 'Active')
-            ->where('approval_status', 'Published')
+        // Added proper table prefixes and JOINS for images/cities
+        return $this->select("properties.*, property_images.image_path, cities.name as city_name, {$haversine} AS distance")
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
+            ->where('properties.id !=', $excludeId)
+            ->where('properties.status', 'Active')
+            ->where('properties.approval_status', 'Published')
             ->having('distance <=', 10) 
             ->orderBy('distance', 'ASC')
             ->limit($limit)
@@ -121,11 +126,15 @@ class PropertyModel extends Model
 
     public function getSimilarProperties($field, $value, $excludeId, $limit = 5)
     {
-        return $this->where($field, $value)
-            ->where('id !=', $excludeId)
-            ->where('status', 'Active')
-            ->where('approval_status', 'Published')
-            ->orderBy('created_date', 'DESC')
+        // Added proper table prefixes and JOINS for images/cities
+        return $this->select('properties.*, property_images.image_path, cities.name as city_name')
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
+            ->where("properties.{$field}", $value)
+            ->where('properties.id !=', $excludeId)
+            ->where('properties.status', 'Active')
+            ->where('properties.approval_status', 'Published')
+            ->orderBy('properties.created_date', 'DESC')
             ->limit($limit)
             ->find();
     }

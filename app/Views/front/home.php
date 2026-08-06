@@ -55,7 +55,7 @@
                                 $adImg = $banner->image_path ?? $banner->image ?? '';
                                 $adSrc = (strpos(trim($adImg), 'http') === 0) ? esc($adImg) : base_url('uploads/ads/' . esc($adImg)); 
                             ?>
-                            <img src="<?= $adSrc ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="<?= $adSrc ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
                                 <h3 class="text-white font-bold text-lg drop-shadow-md"><?= esc($banner->title) ?></h3>
                             </div>
@@ -89,7 +89,7 @@
                                     $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
                                 }
                             ?>
-                            <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
+                            <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
                             <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                 <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                             </div>
@@ -101,7 +101,7 @@
                                 </a>
                             </h3>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
+                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                             </p>
                             <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
@@ -141,7 +141,7 @@
                                                 $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
                                             }
                                         ?>
-                                        <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
+                                        <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
                                         <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
                                             <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                                         </div>
@@ -153,7 +153,7 @@
                                             </a>
                                         </h3>
                                         <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
+                                            <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                                         </p>
                                         <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
