@@ -22,7 +22,6 @@ class Home extends BaseController
         $cmsModel = new CmsModel();
         $adsModel = new AdsModel();
         
-        // Force the timezone to WIB
         $today = Time::now('Asia/Jakarta')->toDateString();
         
         $data['banners'] = $adsModel->where('placement', 'home_banner')
@@ -70,7 +69,6 @@ class Home extends BaseController
             ->limit(3)
             ->find();
 
-        // Fetching FAQs from the CMS table
         $data['faqs'] = $cmsModel
             ->where('category', 'FAQ')
             ->where('status', 'Published')
@@ -85,7 +83,6 @@ class Home extends BaseController
     public function promo($id)
     {
         $adsModel = new AdsModel();
-        
         $promo = $adsModel->find($id);
 
         if (!$promo || $promo->status !== 'Active') {
@@ -149,26 +146,27 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
-        // Calculate how many POIs this property owner is allowed to display
         $subModel = new \App\Models\SubscriptionModel();
         $planModel = new \App\Models\SubscriptionPlanModel();
         $userModel = new \App\Models\UserModel();
 
         $activeSub = $subModel->where('user_id', $property->owner_id)->where('sub_status', 'Active')->first();
-        $maxPois = 0;
+        
+        // BUG FIX: Set default max POIs to 5 for users without an active subscription
+        $maxPois = 5; 
         
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
-                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 5) : ($plan->max_pois ?? 5);
             }
         }
 
         $owner = $userModel->find($property->owner_id);
         $ownerRole = is_array($owner) ? ($owner['role_id'] ?? null) : ($owner->role_id ?? null);
         
-        if ($ownerRole == 4) { // Admins get unlimited display
+        if ($ownerRole == 4) { 
             $maxPois = 9999;
         }
 
@@ -185,7 +183,6 @@ class Home extends BaseController
         $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
 
-        // Fetch features and group them by category for the detail view
         $db = \Config\Database::connect();
         $featuresRaw = $db->table('property_feature_map pfm')
             ->select('f.name as feature_name, fc.name as category_name')
@@ -201,7 +198,6 @@ class Home extends BaseController
         }
         $data['propertyFeatures'] = $categorizedFeatures;
 
-        // Fetch specific ads meant for the detail page sidebar/content
         $today = Time::now('Asia/Jakarta')->toDateString();
         $data['detailAds'] = $adsModel->where('placement', 'property_detail')
             ->where('status', 'Active')
@@ -216,15 +212,12 @@ class Home extends BaseController
             ->limit(2)
             ->findAll();
 
-        // Geospatial & Recommendation Data
         $data['nearbyProperties'] = [];
         $data['nearbyPOIs'] = [];
 
-        // Safeguard: Only run geographic queries if the property has coordinates
         if (!empty($property->latitude) && !empty($property->longitude)) {
             $data['nearbyProperties'] = $propertyModel->getNearbyProperties($property->latitude, $property->longitude, $property->id);
             
-            // Fetch all, but strictly enforce the owner's subscription POI limit
             $allNearbyPOIs = $poiModel->getNearbyPOIs($property->latitude, $property->longitude);
             $data['nearbyPOIs'] = array_slice($allNearbyPOIs, 0, $maxPois);
         }
@@ -233,12 +226,20 @@ class Home extends BaseController
         
         $minPrice = $property->tax_price * 0.8;
         $maxPrice = $property->tax_price * 1.2;
-        $data['similarPrice'] = $propertyModel->where('tax_price >=', $minPrice)->where('tax_price <=', $maxPrice)->where('id !=', $property->id)->limit(5)->find();
+        
+        // BUG FIX: Added Select and Join for property images
+        $data['similarPrice'] = $propertyModel->asObject()
+            ->select('properties.*, property_images.image_path')
+            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->where('tax_price >=', $minPrice)
+            ->where('tax_price <=', $maxPrice)
+            ->where('properties.id !=', $property->id)
+            ->limit(5)
+            ->find();
         
         return view('front/properties/details', $data);
     }
 
-    // LOCATION LANDING PAGES
     public function province($provinceSlug)
     {
         $stateModel = new StateModel();
@@ -327,7 +328,6 @@ class Home extends BaseController
 
         $results = [];
 
-        // 1. Search Active Regions/States
         $states = $stateModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($states as $state) {
             $slug = url_title(strtolower($state->name), '-', true);
@@ -338,7 +338,6 @@ class Home extends BaseController
             ];
         }
 
-        // 2. Search Active Cities
         $cities = $cityModel->select('cities.*, states.name as state_name')
             ->join('states', 'states.id = cities.state_id', 'left')
             ->like('cities.name', $query)
@@ -356,7 +355,6 @@ class Home extends BaseController
             ];
         }
 
-        // 3. Search Zipcodes
         $zipcodes = $zipcodeModel->like('zipcode', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($zipcodes as $zip) {
             $results[] = [
@@ -366,7 +364,6 @@ class Home extends BaseController
             ];
         }
 
-        // 4. Search Published Properties
         $properties = $propertyModel->asObject()
             ->groupStart()
                 ->like('title', $query)
