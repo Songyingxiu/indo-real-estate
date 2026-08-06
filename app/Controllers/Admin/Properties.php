@@ -48,7 +48,6 @@ class Properties extends BaseController
 
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
-        $featureModel = new FeatureModel(); 
         
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
@@ -77,7 +76,21 @@ class Properties extends BaseController
         $data['pois'] = $poiModel->where('status', 'Active')->findAll();
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
-        $data['features'] = $featureModel->where('status', 'Active')->findAll();
+        
+        // Fetch and group categorized features
+        $db = \Config\Database::connect();
+        $rawFeatures = $db->table('features')
+            ->select('features.id, features.name, feature_categories.name as category_name')
+            ->join('feature_categories', 'feature_categories.id = features.category_id', 'left')
+            ->where('features.status', 'Active')
+            ->get()->getResult();
+
+        $categorizedFeatures = [];
+        foreach ($rawFeatures as $feature) {
+            $catName = !empty($feature->category_name) ? $feature->category_name : 'Uncategorized';
+            $categorizedFeatures[$catName][] = $feature;
+        }
+        $data['categorizedFeatures'] = $categorizedFeatures;
         
         return view('admin/properties/create', $data);
     }
@@ -270,7 +283,20 @@ class Properties extends BaseController
             $data['cities'] = [];
         }
 
-        $data['features'] = (new FeatureModel())->where('status', 'Active')->findAll();
+        // Fetch and group categorized features
+        $db = \Config\Database::connect();
+        $rawFeatures = $db->table('features')
+            ->select('features.id, features.name, feature_categories.name as category_name')
+            ->join('feature_categories', 'feature_categories.id = features.category_id', 'left')
+            ->where('features.status', 'Active')
+            ->get()->getResult();
+
+        $categorizedFeatures = [];
+        foreach ($rawFeatures as $feature) {
+            $catName = !empty($feature->category_name) ? $feature->category_name : 'Uncategorized';
+            $categorizedFeatures[$catName][] = $feature;
+        }
+        $data['categorizedFeatures'] = $categorizedFeatures;
         
         $propertyFeatureModel = new PropertyFeatureModel();
         $currentFeatures = $propertyFeatureModel->where('property_id', $id)->findAll();
