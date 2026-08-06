@@ -68,7 +68,7 @@
                         </div>
                         <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
                             <span class="material-symbols-outlined mr-2">location_on</span>
-                            <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location') ?>
+                            <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                         </p>
                     </div>
                     <div class="text-left md:text-right">
@@ -179,19 +179,19 @@
             <section class="mt-8 border-t border-outline-variant pt-8">
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Nearby Properties</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <?php foreach(array_slice($nearbyProperties, 0, 4) as $np): ?>
-                        <a href="<?= base_url('property/' . $np['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
+                    <?php foreach(array_slice($nearbyProperties, 0, 4) as $np): $np = (object)$np; ?>
+                        <a href="<?= base_url('property/' . $np->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <?php 
-                                    $rawNp = $np['image_path'] ?? $np['image'] ?? '';
-                                    $npImg = !empty($rawNp) ? ((strpos(trim($rawNp), 'http') === 0) ? esc($rawNp) : base_url(esc($rawNp))) : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'; 
+                                    $rawNp = trim($np->image_path ?? $np->image ?? '');
+                                    $npImg = !empty($rawNp) ? ((strpos($rawNp, 'http') === 0) ? esc($rawNp) : base_url(esc($rawNp))) : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80'; 
                                 ?>
                                 <img src="<?= $npImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
-                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np['title']) ?></span>
-                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np['tax_price'], 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np['distance'] ?? 0, 1) ?> km away</span>
+                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np->title) ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np->tax_price, 0, ',', '.') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np->distance ?? 0, 1) ?> km away</span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -203,19 +203,19 @@
             <section class="mt-8 border-t border-outline-variant pt-8">
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Similar Property Types</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <?php foreach(array_slice($similarType, 0, 4) as $st): ?>
-                        <a href="<?= base_url('property/' . $st['id']) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
+                    <?php foreach(array_slice($similarType, 0, 4) as $st): $st = (object)$st; ?>
+                        <a href="<?= base_url('property/' . $st->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <?php 
-                                    $rawSt = $st['image_path'] ?? $st['image'] ?? '';
-                                    $stImg = !empty($rawSt) ? ((strpos(trim($rawSt), 'http') === 0) ? esc($rawSt) : base_url(esc($rawSt))) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80'; 
+                                    $rawSt = trim($st->image_path ?? $st->image ?? '');
+                                    $stImg = !empty($rawSt) ? ((strpos($rawSt, 'http') === 0) ? esc($rawSt) : base_url(esc($rawSt))) : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80'; 
                                 ?>
                                 <img src="<?= $stImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                             </div>
                             <div class="flex flex-col">
-                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st['title']) ?></span>
-                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($st['tax_price'], 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st['bed'] ?? 0) ?> Bed • <?= esc($st['bath'] ?? 0) ?> Bath</span>
+                                <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st->title) ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($st->tax_price, 0, ',', '.') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st->bed ?? 0) ?> Bed • <?= esc($st->bath ?? 0) ?> Bath</span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -227,11 +227,11 @@
             <section class="mt-8 border-t border-outline-variant pt-8">
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">In The Same Price Range</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <?php foreach(array_slice($similarPrice, 0, 4) as $sp): ?>
+                    <?php foreach(array_slice($similarPrice, 0, 4) as $sp): $sp = (object)$sp; ?>
                         <a href="<?= base_url('property/' . $sp->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
                             <div class="w-20 h-20 bg-surface-container-high rounded overflow-hidden flex-shrink-0">
                                 <?php 
-                                    $rawSp = trim($sp->image_path ?? '');
+                                    $rawSp = trim($sp->image_path ?? $sp->image ?? '');
                                     $spImg = !empty($rawSp) ? ((strpos($rawSp, 'http') === 0) ? esc($rawSp) : base_url(esc($rawSp))) : 'https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80'; 
                                 ?>
                                 <img src="<?= $spImg ?>" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1600607687920-4e20d33c01f6?auto=format&fit=crop&w=200&q=80';" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
@@ -239,7 +239,7 @@
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($sp->title) ?></span>
                                 <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($sp->tax_price, 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1 line-clamp-1"><?= esc($sp->area_name ?? $sp->address_line_1 ?? 'Location') ?></span>
+                                <span class="text-[12px] text-on-surface-variant mt-1 line-clamp-1"><?= esc($sp->area_name ?? $sp->city_name ?? $sp->address_line_1 ?? 'Location') ?></span>
                             </div>
                         </a>
                     <?php endforeach; ?>
