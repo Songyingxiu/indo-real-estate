@@ -20,7 +20,14 @@
             <?php foreach ($properties as $prop): ?>
                 <a href="<?= base_url('property/' . $prop->id) ?>" class="property-card bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col h-full group">
                     <div class="relative h-56 overflow-hidden">
-                        <img alt="<?= esc($prop->title) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= base_url(esc($prop->image_path ?? 'assets/images/placeholder.jpg')) ?>">
+                        <?php 
+                            $imgPath = trim($prop->image_path ?? '');
+                            $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
+                            if (!empty($imgPath)) {
+                                $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
+                            }
+                        ?>
+                        <img alt="<?= esc($prop->title) ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="<?= $imgSrc ?>">
                         <div class="absolute top-4 left-4 flex gap-2">
                             <span class="bg-surface/90 backdrop-blur text-on-surface font-label-md text-[12px] px-2 py-1 rounded font-bold"><?= esc($prop->listing_type) ?></span>
                         </div>
