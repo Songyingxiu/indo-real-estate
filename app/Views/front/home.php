@@ -1,28 +1,12 @@
 <?= $this->include('front/layout/header') ?>
 
-<!-- Add Swiper JS CSS for the Carousel -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
 
 <style>
-    /* Customizing Swiper Navigation Colors */
     .swiper-button-next::after,
-    .swiper-button-prev::after {
-        font-size: 24px !important;
-        font-weight: bold;
-    }
-    .swiper-button-next,
-    .swiper-button-prev {
-        color: var(--color-primary, #0d6efd); 
-        background-color: rgba(255, 255, 255, 0.8);
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .swiper-button-next:hover,
-    .swiper-button-prev:hover {
-        background-color: #ffffff;
-    }
+    .swiper-button-prev::after { font-size: 24px !important; font-weight: bold; }
+    .swiper-button-next, .swiper-button-prev { color: var(--color-primary, #0d6efd); background-color: rgba(255, 255, 255, 0.8); width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .swiper-button-next:hover, .swiper-button-prev:hover { background-color: #ffffff; }
 </style>
 
 <main class="flex-grow">
@@ -40,21 +24,16 @@
             
             <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
                 <form action="<?= base_url('search') ?>" method="GET" class="flex flex-col gap-4">
-                    
                     <input type="hidden" name="listing_type" id="home_listing_type" value="Sale">
-
                     <div class="flex gap-2 border-b border-outline-variant pb-2">
                         <button type="button" onclick="document.getElementById('home_listing_type').value='Sale'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors">For Sale</button>
-                        
                         <button type="button" onclick="document.getElementById('home_listing_type').value='Rent'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">For Rent</button>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4 relative">
                         <div class="relative flex-grow">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                            
                             <input name="q" id="searchInput" autocomplete="off" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by State, City, or Zipcode..." type="text">
-                            
                             <div id="suggestDropdown" class="absolute left-0 right-0 top-full mt-1 bg-surface border border-outline-variant rounded shadow-lg z-50 hidden max-h-60 overflow-y-auto"></div>
                         </div>
                         <button type="submit" class="bg-primary text-on-primary font-label-md text-[14px] font-semibold px-6 py-3 rounded hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
@@ -66,7 +45,6 @@
         </div>
     </section>
 
-    <!-- Advertisement Banner Section -->
     <?php if (!empty($banners)): ?>
         <div class="w-full max-w-7xl mx-auto px-4 mt-8 mb-2">
             <div class="flex overflow-x-auto gap-4 snap-x pb-4 custom-scrollbar">
@@ -74,9 +52,8 @@
                     <div class="min-w-full md:min-w-[50%] lg:min-w-[33%] snap-center rounded-xl overflow-hidden shadow-md bg-surface border border-outline-variant group">
                         <a href="<?= base_url('promo/' . $banner->id) ?>" class="block w-full h-full relative">
                             <?php 
-                                // Check both column naming conventions defensively 
                                 $adImg = $banner->image_path ?? $banner->image ?? '';
-                                $adSrc = str_starts_with($adImg, 'http') ? esc($adImg) : base_url('uploads/ads/' . esc($adImg)); 
+                                $adSrc = (strpos(trim($adImg), 'http') === 0) ? esc($adImg) : base_url('uploads/ads/' . esc($adImg)); 
                             ?>
                             <img src="<?= $adSrc ?>" alt="<?= esc($banner->title) ?>" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
@@ -106,9 +83,10 @@
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
                             <?php 
+                                $imgPath = trim($property->image_path ?? '');
                                 $imgSrc = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
-                                if (!empty($property->image_path)) {
-                                    $imgSrc = str_starts_with($property->image_path, 'http') ? esc($property->image_path) : base_url(esc($property->image_path));
+                                if (!empty($imgPath)) {
+                                    $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
                                 }
                             ?>
                             <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
@@ -123,13 +101,11 @@
                                 </a>
                             </h3>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                <!-- Area mapping fallback -->
                                 <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                             </p>
                             <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                <!-- Area mapping fallback -->
                                 <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
                             </div>
                         </div>
@@ -141,7 +117,6 @@
         </div>
     </section>
 
-    <!-- NEWLY LISTED - SWIPER CAROUSEL UPDATE -->
     <section class="bg-surface-container-lowest py-16 border-y border-outline-variant/50">
         <div class="max-w-[1280px] mx-auto px-4 md:px-10 relative">
             <div class="flex justify-between items-end mb-8">
@@ -151,7 +126,6 @@
                 </div>
             </div>
 
-            <!-- Swiper Container -->
             <div class="swiper newlyListedSwiper !pb-14 !pt-2">
                 <div class="swiper-wrapper">
                     <?php if (!empty($newestProperties)): ?>
@@ -161,9 +135,10 @@
                                     <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group shrink-0">
                                         <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">New</div>
                                         <?php 
+                                            $imgPath = trim($property->image_path ?? '');
                                             $imgSrc = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80';
-                                            if (!empty($property->image_path)) {
-                                                $imgSrc = str_starts_with($property->image_path, 'http') ? esc($property->image_path) : base_url(esc($property->image_path));
+                                            if (!empty($imgPath)) {
+                                                $imgSrc = (strpos($imgPath, 'http') === 0) ? esc($imgPath) : base_url(esc($imgPath));
                                             }
                                         ?>
                                         <img alt="<?= esc($property->title) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
@@ -178,13 +153,11 @@
                                             </a>
                                         </h3>
                                         <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                            <!-- Area mapping fallback -->
                                             <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
                                         </p>
                                         <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                            <!-- Area mapping fallback -->
                                             <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
                                         </div>
                                     </div>
@@ -195,17 +168,13 @@
                         <p class="w-full text-center text-on-surface-variant py-10">No new properties currently available.</p>
                     <?php endif; ?>
                 </div>
-                
                 <div class="swiper-pagination"></div>
             </div>
-            
             <div class="swiper-button-prev -left-5 md:-left-6 hidden md:flex"></div>
             <div class="swiper-button-next -right-5 md:-right-6 hidden md:flex"></div>
-            
         </div>
     </section>
 
-    <!-- FAQ MODULE -->
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="mb-10 text-center max-w-2xl mx-auto">
             <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-3">Frequently Asked Questions</h2>
@@ -233,33 +202,20 @@
             <?php endif; ?>
         </div>
     </section>
-
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const swiper = new Swiper('.newlyListedSwiper', {
         slidesPerView: 1,
         spaceBetween: 24,
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-            dynamicBullets: true,
-        },
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
+        pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true, },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev', },
         grabCursor: true, 
         breakpoints: {
-            768: {
-                slidesPerView: 2,
-            },
-            1024: {
-                slidesPerView: 3,
-            },
+            768: { slidesPerView: 2, },
+            1024: { slidesPerView: 3, },
         }
     });
 
@@ -340,5 +296,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 <?= $this->include('front/layout/footer') ?>
