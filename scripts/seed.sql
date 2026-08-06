@@ -1,5 +1,8 @@
 SET FOREIGN_KEY_CHECKS=0;
 
+-- Drop the video_url column as requested
+ALTER TABLE properties DROP COLUMN IF EXISTS video_url;
+
 TRUNCATE TABLE properties;
 TRUNCATE TABLE property_images;
 TRUNCATE TABLE property_features;
@@ -20,7 +23,6 @@ TRUNCATE TABLE cities;
 TRUNCATE TABLE zipcodes;
 TRUNCATE TABLE users;
 
-
 -- Insert Users
 INSERT INTO users (id, role_id, first_name, last_name, phone_number, email, password, status, created_date) VALUES
 (1, 4, 'Reza', 'Avanluna', '081234567890', 'reza@estate.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Active', NOW()),
@@ -30,6 +32,29 @@ INSERT INTO users (id, role_id, first_name, last_name, phone_number, email, pass
 (5, 3, 'Bonnivier', 'Pranaja', '081234567894', 'bonni@agent.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Active', NOW()),
 (6, 1, 'Riksa', 'Dhirendra', '081234567895', 'riksa@buyer.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Active', NOW()),
 (7, 1, 'Etna', 'Crimson', '081234567896', 'etna@buyer.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Active', NOW());
+
+-- Insert Zipcodes
+INSERT INTO zipcodes (id, city_id, zipcode, status, created_date) VALUES
+(1, 1, '12110', 'Active', NOW()), 
+(2, 2, '10110', 'Active', NOW()), 
+(3, 3, '11410', 'Active', NOW()), 
+(4, 4, '40111', 'Active', NOW()), 
+(5, 5, '16121', 'Active', NOW()), 
+(6, 6, '17141', 'Active', NOW()), 
+(7, 7, '50131', 'Active', NOW()), 
+(8, 8, '57131', 'Active', NOW()), 
+(9, 9, '60261', 'Active', NOW()), 
+(10, 10, '65111', 'Active', NOW()), 
+(11, 11, '15111', 'Active', NOW()), 
+(12, 12, '55271', 'Active', NOW()), 
+(13, 13, '80111', 'Active', NOW()), 
+(14, 14, '80361', 'Active', NOW()), 
+(15, 15, '20111', 'Active', NOW()), 
+(16, 16, '30111', 'Active', NOW()), 
+(17, 17, '90111', 'Active', NOW()), 
+(18, 18, '76111', 'Active', NOW()), 
+(19, 19, '75111', 'Active', NOW()), 
+(20, 20, '99111', 'Active', NOW());
 
 -- Insert Properties, Images, POIs, and Inquiries
 INSERT INTO states (id, name, status) VALUES (1, 'DKI Jakarta', 'Active');
@@ -1713,5 +1738,42 @@ INSERT INTO points_of_interest (property_id, name, category, latitude, longitude
 INSERT INTO points_of_interest (property_id, name, category, latitude, longitude, distance_km, created_at) VALUES (200, 'Jayapura Central Middle School', 'Middle School', -2.535202, 140.703529, 0.8, NOW());
 INSERT INTO points_of_interest (property_id, name, category, latitude, longitude, distance_km, created_at) VALUES (200, 'Jayapura Central Kindergarten', 'Kindergarten', -2.533726, 140.703035, 1.9, NOW());
 INSERT INTO points_of_interest (property_id, name, category, latitude, longitude, distance_km, created_at) VALUES (200, 'Jayapura Central High School', 'High School', -2.533117, 140.71112, 2.9, NOW());
+
+-- 1. Map Zipcodes based on City ID
+UPDATE properties SET zipcode_id = city_id;
+
+-- 2. Map Realistic Sub-Districts (Kecamatan)
+UPDATE properties SET area_name = CASE city_id
+    WHEN 1 THEN 'Kebayoran Baru'
+    WHEN 2 THEN 'Gambir'
+    WHEN 3 THEN 'Palmerah'
+    WHEN 4 THEN 'Sumur Bandung'
+    WHEN 5 THEN 'Bogor Tengah'
+    WHEN 6 THEN 'Bekasi Selatan'
+    WHEN 7 THEN 'Semarang Tengah'
+    WHEN 8 THEN 'Banjarsari'
+    WHEN 9 THEN 'Tegalsari'
+    WHEN 10 THEN 'Klojen'
+    WHEN 11 THEN 'Tangerang'
+    WHEN 12 THEN 'Gedong Tengen'
+    WHEN 13 THEN 'Denpasar Barat'
+    WHEN 14 THEN 'Kuta'
+    WHEN 15 THEN 'Medan Petisah'
+    WHEN 16 THEN 'Ilir Timur I'
+    WHEN 17 THEN 'Ujung Pandang'
+    WHEN 18 THEN 'Balikpapan Kota'
+    WHEN 19 THEN 'Samarinda Kota'
+    WHEN 20 THEN 'Jayapura Utara'
+    ELSE 'Central District'
+END;
+
+-- 3. Generate Realistic Addresses
+UPDATE properties 
+SET address_line_1 = CONCAT(
+    ELT(MOD(id, 12) + 1, 'Jl. Sudirman', 'Jl. Merdeka', 'Jl. Diponegoro', 'Jl. Gatot Subroto', 'Jl. Ahmad Yani', 'Jl. Pahlawan', 'Jl. Veteran', 'Jl. Gajah Mada', 'Jl. Hayam Wuruk', 'Jl. Teuku Umar', 'Jl. MH Thamrin', 'Jl. Asia Afrika'),
+    ' Kav. ', (MOD(id * 3, 50) + 1),
+    ', Blok ', CHAR(65 + MOD(id, 10)), 
+    ' No. ', (MOD(id * 7, 199) + 1)
+);
 
 SET FOREIGN_KEY_CHECKS=1;
