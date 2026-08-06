@@ -8,10 +8,13 @@ use CodeIgniter\Router\RouteCollection;
 
 // Public Facing Routes
 $routes->get('/', 'Home::index');            
-$routes->get('search', 'Home::search');
+$routes->get('search', 'Home::search'); // Fallback for generic searches
+$routes->get('search/(:segment)', 'Home::search/$1'); // SEO: /search/rent or /search/sale
 $routes->get('api/suggest', 'Home::suggest');
 $routes->post('search/save', 'Home::saveSearch');
-$routes->get('property/(:num)', 'Home::detail/$1');
+
+// SEO Property Detail Route: /property/tangerang/classic-heritage-townhouse-9
+$routes->get('property/(:segment)/(:any)-(:num)', 'Home::detail/$3');
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
 
 $routes->post('property/submit-inquiry', 'Property::submitInquiry');
@@ -21,10 +24,10 @@ $routes->get('faq', 'Cms::faq');
 $routes->get('news', 'Cms::blog');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
-// SEO-Friendly Location Routes
-$routes->get('properties/province/(:segment)', 'Property::province/$1');
-$routes->get('properties/city/(:segment)/(:segment)', 'Property::city/$1/$2');
-$routes->get('properties/zipcode/(:num)', 'Property::zipcode/$1');
+// SEO-Friendly Location Routes (Strict Rent/Sale Separation)
+$routes->get('properties/(:segment)/province/(:segment)', 'Property::province/$2/$1');
+$routes->get('properties/(:segment)/city/(:segment)/(:segment)', 'Property::city/$2/$3/$1');
+$routes->get('properties/(:segment)/zipcode/(:num)', 'Property::zipcode/$2/$1');
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');
@@ -56,7 +59,6 @@ $routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'ad
 });
 
 // Admin Dashboard Routes (Protected by AdminFilter)
-// Allows Roles: 2 (Owner), 3 (Agent), 4 (Admin)
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
 
     // --- SHARED ROUTES (Agents, Owners, Admins) ---
@@ -72,43 +74,39 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->get('properties/get-zipcodes/(:any)', 'Properties::getZipcodes/$1');
     $routes->post('properties/update-status/(:num)', 'Properties::updateStatus/$1');
     
-    // Subscriptions Management (User Approvals & Upgrades)
+    // Subscriptions Management
     $routes->get('subscriptions', 'Subscriptions::index');
     $routes->get('pricing', 'Subscription::pricing');
     $routes->match(['get', 'post'], 'subscription/checkout', 'Subscription::checkout');
     $routes->post('subscription/upload-proof', 'Subscription::uploadProof');
     $routes->get('subscription/invoice/(:num)', 'Subscription::invoice/$1');
     
-    // Inquiries (Chat System)
+    // Inquiries
     $routes->get('inquiries', 'Inquiries::index');
     $routes->get('inquiries/thread/(:num)', 'Inquiries::getThread/$1');
     $routes->post('inquiries/update-status/(:num)', 'Inquiries::updateStatus/$1');
     $routes->post('inquiries/reply', 'Inquiries::reply');
     
-    // Profile & Settings
+    // Profile
     $routes->get('profile', 'Profile::index');
     $routes->post('profile/update', 'Profile::update');
     $routes->post('profile/update-password', 'Profile::updatePassword');
     $routes->post('profile/upload-docs', 'Profile::uploadDocs');
 
-    // super admin routes only (protected by SuperAdminFilter)
-    // Allows ONLY Role: 4 (Admin)
+    // super admin routes only
     $routes->group('', ['filter' => 'superAdminAuth'], static function ($routes) {
         
-        // User Management
         $routes->get('users', 'Users::index');
         $routes->get('users/create', 'Users::create');
         $routes->post('users/store', 'Users::store');                          
         $routes->post('users/updateRole/(:num)', 'Users::updateRole/$1');
         $routes->post('users/delete/(:num)', 'Users::delete/$1');
         $routes->post('users/restore/(:num)', 'Users::restore/$1');
-        $routes->post('users/force-delete/(:num)', 'Users::forceDelete/$1');               
+        $routes->post('users/force-delete/(:num)', 'Users::forceDelete/$1');                
         
-        // Property Moderation & State Machine
         $routes->get('moderation', 'Moderation::index');
         $routes->post('moderation/update-status/(:num)', 'Moderation::updateStatus/$1');
 
-        // POI Management
         $routes->group('poi', ['namespace' => 'App\Controllers\Admin'], function($routes) {
             $routes->get('/', 'Poi::index');
             $routes->get('create', 'Poi::create');
@@ -118,11 +116,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
             $routes->get('delete/(:num)', 'Poi::delete/$1'); 
         });
 
-        // Subscription Admin Approvals
         $routes->post('subscriptions/activate/(:num)', 'Subscriptions::activate/$1');
         $routes->post('subscriptions/revoke/(:num)', 'Subscriptions::revoke/$1');
 
-        // Master Data & Configuration
         $routes->get('master-data', 'MasterData::index');
         $routes->post('master-data/store-type', 'MasterData::storeType');
         $routes->post('master-data/store-city', 'MasterData::storeCity');
@@ -146,26 +142,22 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->post('master-data/update-plan/(:num)', 'MasterData::updatePlan/$1');
         $routes->post('master-data/update-zipcode/(:num)', 'MasterData::updateZipcode/$1');
         
-        // Verifications
         $routes->get('verifications', 'Verifications::index'); 
         $routes->post('verifications/process-agent/(:num)', 'Verifications::processAgent/$1');
         $routes->post('verifications/process-property/(:num)', 'Verifications::processProperty/$1');
 
-        // System Settings & Content
         $routes->get('cms', 'Cms::index');
         $routes->post('cms/save', 'Cms::savePost');
         $routes->post('cms/delete/(:num)', 'Cms::delete/$1');
         $routes->get('seo', 'Seo::index');
         $routes->post('seo/save', 'Seo::saveSettings');
 
-        // Advertisements
         $routes->get('advertisements', 'Advertisements::index');
         $routes->get('advertisements/create', 'Advertisements::create');
         $routes->post('advertisements/save', 'Advertisements::save');
         $routes->get('advertisements/edit/(:num)', 'Advertisements::edit/$1');
         $routes->get('advertisements/delete/(:num)', 'Advertisements::delete/$1');
 
-        // Email Templates
         $routes->get('email-templates', 'EmailTemplates::index');
         $routes->get('email-templates/create', 'EmailTemplates::create');
         $routes->post('email-templates/save', 'EmailTemplates::save');
@@ -173,7 +165,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->get('email-templates/delete/(:num)', 'EmailTemplates::delete/$1');
         $routes->post('email-templates/test/(:num)', 'EmailTemplates::sendTest/$1');
 
-        // Reports and Support
         $routes->get('reports/export', 'Reports::export');
         $routes->get('support', 'Support::index');
     });

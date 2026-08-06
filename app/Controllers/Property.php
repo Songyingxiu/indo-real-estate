@@ -9,9 +9,10 @@ use App\Libraries\EmailService;
 
 class Property extends BaseController
 {
-    public function province($slug)
+    public function province($slug, $listingType = 'sale')
     {
         $db = \Config\Database::connect();
+        $type = ucfirst(strtolower($listingType));
         
         $stateName = ucwords(str_replace('-', ' ', $slug));
         $state = $db->table('states')->where('name', $stateName)->get()->getRow();
@@ -20,7 +21,7 @@ class Property extends BaseController
 
         $cityStats = $db->table('cities c')
             ->select('c.name as city_name, COUNT(p.id) as property_count, AVG(p.tax_price) as avg_price')
-            ->join('properties p', 'p.city_id = c.id', 'left')
+            ->join('properties p', "p.city_id = c.id AND p.listing_type = '{$type}'", 'left')
             ->where('c.state_id', $state->id)
             ->groupBy('c.id')
             ->get()->getResult();
@@ -31,21 +32,24 @@ class Property extends BaseController
             ->join('cities', 'cities.id = properties.city_id')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where("cities.state_id = " . (int)$state->id) 
+            ->where('properties.listing_type', $type)
             ->paginate(20);
 
         $data = [
             'state' => $state,
             'cityStats' => $cityStats,
             'properties' => $properties,
-            'pager' => $propertyModel->pager
+            'pager' => $propertyModel->pager,
+            'currentType' => $type
         ];
 
         return view('front/properties/state', $data);
     }
 
-    public function city($slug, $stateSlug)
+    public function city($slug, $stateSlug, $listingType = 'sale')
     {
         $db = \Config\Database::connect();
+        $type = ucfirst(strtolower($listingType));
         
         $cityName = ucwords(str_replace('-', ' ', $slug));
         $city = $db->table('cities')->where('name', $cityName)->get()->getRowArray();
@@ -57,11 +61,13 @@ class Property extends BaseController
         $properties = $propertyModel->select('properties.*, property_images.image_path')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('city_id', $city['id'])
+            ->where('properties.listing_type', $type)
             ->paginate(20);
 
         $markers = $db->table('properties')
             ->select('id, title, tax_price, latitude, longitude')
             ->where('city_id', $city['id'])
+            ->where('listing_type', $type)
             ->where('latitude IS NOT NULL')
             ->limit(150)
             ->get()->getResultArray();
@@ -70,15 +76,17 @@ class Property extends BaseController
             'city' => $city,
             'properties' => $properties,
             'markers' => $markers,
-            'pager' => $propertyModel->pager
+            'pager' => $propertyModel->pager,
+            'currentType' => $type
         ];
 
         return view('front/properties/city', $data);
     }
 
-    public function zipcode($zipcode)
+    public function zipcode($zipcode, $listingType = 'sale')
     {
         $db = \Config\Database::connect();
+        $type = ucfirst(strtolower($listingType));
         
         $zip = $db->table('zipcodes')->where('zipcode', $zipcode)->get()->getRowArray();
         $zipcodeId = $zip ? $zip['id'] : 0;
@@ -88,11 +96,13 @@ class Property extends BaseController
         $properties = $propertyModel->select('properties.*, property_images.image_path')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('zipcode_id', $zipcodeId)
+            ->where('properties.listing_type', $type)
             ->paginate(20);
 
         $markers = $db->table('properties')
             ->select('id, title, tax_price, latitude, longitude')
             ->where('zipcode_id', $zipcodeId)
+            ->where('listing_type', $type)
             ->where('latitude IS NOT NULL')
             ->limit(150)
             ->get()->getResultArray();
@@ -101,7 +111,8 @@ class Property extends BaseController
             'zipcode' => ['zipcode' => $zipcode],
             'properties' => $properties,
             'markers' => $markers,
-            'pager' => $propertyModel->pager
+            'pager' => $propertyModel->pager,
+            'currentType' => $type
         ];
 
         return view('front/properties/zipcode', $data);
@@ -118,7 +129,6 @@ class Property extends BaseController
         $customerEmail = $this->request->getPost('email');
         $customerName = $this->request->getPost('name');
 
-        // Compile the submitted form data into a readable message thread block
         $compiledMessage = "Inquiry Type: " . $this->request->getPost('source') . "\n";
         $compiledMessage .= "Name: " . $customerName . "\n";
         $compiledMessage .= "Phone: " . $this->request->getPost('phone') . "\n";
@@ -135,13 +145,11 @@ class Property extends BaseController
 
         $inquiryModel->insert($data);
 
-        // trigger 1: Email to Customer
         $emailService->sendDynamicEmail('New Inquiry Customer', $customerEmail, [
             '{first_name}' => $customerName,
             '{property_id}' => $propertyId
         ]);
 
-        // trigger 2: Email to Agent/Owner
         $agent = $userModel->find($receiverId);
         if ($agent) {
             $emailService->sendDynamicEmail('New Inquiry Agent', $agent['email'], [

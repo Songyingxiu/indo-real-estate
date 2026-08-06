@@ -95,7 +95,7 @@ class Home extends BaseController
         return view('front/promo_detail', $data);
     }
 
-    public function search()
+    public function search($type = null)
     {
         $propertyModel = new PropertyModel();
         $typeModel = new PropertyTypeModel();
@@ -104,10 +104,12 @@ class Home extends BaseController
 
         $keyword     = $this->request->getGet('q');
         $types       = $this->request->getGet('type') ?? [];
-        $listingType = $this->request->getGet('listing_type');
         $lat         = $this->request->getGet('lat');
         $lng         = $this->request->getGet('lng');
         $radius      = $this->request->getGet('radius');
+
+        // Dynamically resolve listing type from SEO URL route or query param
+        $listingType = $type ? ucfirst(strtolower($type)) : $this->request->getGet('listing_type');
 
         $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius);
 
@@ -152,7 +154,6 @@ class Home extends BaseController
 
         $activeSub = $subModel->where('user_id', $property->owner_id)->where('sub_status', 'Active')->first();
         
-        // BUG FIX: Set default max POIs to 5 for users without an active subscription
         $maxPois = 5; 
         
         if ($activeSub) {
@@ -227,7 +228,6 @@ class Home extends BaseController
         $minPrice = $property->tax_price * 0.8;
         $maxPrice = $property->tax_price * 1.2;
         
-        // BUG FIX: Added Select and Join for property images
         $data['similarPrice'] = $propertyModel->asObject()
             ->select('properties.*, property_images.image_path')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
@@ -240,10 +240,11 @@ class Home extends BaseController
         return view('front/properties/details', $data);
     }
 
-    public function province($provinceSlug)
+    public function province($provinceSlug, $listingType = 'sale')
     {
         $stateModel = new StateModel();
         $propertyModel = new PropertyModel();
+        $type = ucfirst(strtolower($listingType));
 
         $state = $stateModel->where("LOWER(REPLACE(name, ' ', '-'))", $provinceSlug)->first();
         if (!$state) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Province not found");
@@ -254,60 +255,68 @@ class Home extends BaseController
         $propertyModel->select('properties.*, property_images.image_path')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->where('state_id', $state->id)
+                      ->where('listing_type', $type)
                       ->where('status', 'Active')
                       ->where('approval_status', 'Published');
                       
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
         $data['title'] = $state->name . ' Real Estate - HuniKita';
+        $data['currentType'] = $type;
 
         return view('front/properties/state', $data);
     }
 
-    public function city($citySlug, $provinceSlug)
+    public function city($citySlug, $provinceSlug, $listingType = 'sale')
     {
         $cityModel = new CityModel();
         $propertyModel = new PropertyModel();
+        $type = ucfirst(strtolower($listingType));
 
         $city = $cityModel->where("LOWER(REPLACE(name, ' ', '-'))", $citySlug)->first();
         if (!$city) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("City not found");
 
         $data['city'] = $city;
-        $data['markers'] = $propertyModel->getMapMarkers(['city_id' => $city->id]);
+        $data['markers'] = $propertyModel->getMapMarkers(['city_id' => $city->id, 'listing_type' => $type]);
         
         $propertyModel->select('properties.*, property_images.image_path')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->where('city_id', $city->id)
+                      ->where('listing_type', $type)
                       ->where('status', 'Active')
                       ->where('approval_status', 'Published');
 
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
         $data['title'] = 'Properties in ' . $city->name . ' - HuniKita';
+        $data['currentType'] = $type;
 
         return view('front/properties/city', $data);
     }
 
-    public function zipcode($zipcode)
+    public function zipcode($zipcode, $listingType = 'sale')
     {
         $zipcodeModel = new ZipcodeModel();
         $propertyModel = new PropertyModel();
+        $type = ucfirst(strtolower($listingType));
 
         $zip = $zipcodeModel->where('zipcode', $zipcode)->first();
         if (!$zip) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Zipcode not found");
 
         $data['zipcode'] = $zip;
-        $data['markers'] = $propertyModel->getMapMarkers(['zipcode_id' => $zip->id]);
+        $data['markers'] = $propertyModel->getMapMarkers(['zipcode_id' => $zip->id, 'listing_type' => $type]);
         
         $propertyModel->select('properties.*, property_images.image_path')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->where('zipcode_id', $zip->id)
+                      ->where('listing_type', $type)
                       ->where('status', 'Active')
                       ->where('approval_status', 'Published');
 
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
         $data['title'] = 'Properties in ' . $zip->zipcode . ' - HuniKita';
+        $data['currentType'] = $type;
 
         return view('front/properties/zipcode', $data);
     }
@@ -334,7 +343,7 @@ class Home extends BaseController
             $results[] = [
                 'text' => $state->name,
                 'category' => 'Region',
-                'url' => base_url("properties/province/{$slug}")
+                'url' => base_url("properties/sale/province/{$slug}")
             ];
         }
 
@@ -351,7 +360,7 @@ class Home extends BaseController
             $results[] = [
                 'text' => $city->name . ', ' . $city->state_name,
                 'category' => 'Location',
-                'url' => base_url("properties/city/{$citySlug}/{$stateSlug}")
+                'url' => base_url("properties/sale/city/{$citySlug}/{$stateSlug}")
             ];
         }
 
@@ -360,25 +369,29 @@ class Home extends BaseController
             $results[] = [
                 'text' => $zip->zipcode,
                 'category' => 'Zip Code',
-                'url' => base_url("properties/zipcode/{$zip->zipcode}")
+                'url' => base_url("properties/sale/zipcode/{$zip->zipcode}")
             ];
         }
 
         $properties = $propertyModel->asObject()
+            ->select('properties.*, cities.name as city_name')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
             ->groupStart()
-                ->like('title', $query)
-                ->orLike('area_name', $query)
+                ->like('properties.title', $query)
+                ->orLike('properties.area_name', $query)
             ->groupEnd()
-            ->where('status', 'Active')
-            ->where('approval_status', 'Published')
+            ->where('properties.status', 'Active')
+            ->where('properties.approval_status', 'Published')
             ->limit(4)
             ->find();
 
         foreach ($properties as $prop) {
+            $citySlug = url_title(strtolower($prop->city_name ?? 'indonesia'), '-', true);
+            $titleSlug = url_title(strtolower($prop->title), '-', true);
             $results[] = [
                 'text' => $prop->title,
                 'category' => 'Property Listing',
-                'url' => base_url("properties/{$prop->id}")
+                'url' => base_url("property/{$citySlug}/{$titleSlug}-{$prop->id}")
             ];
         }
 
