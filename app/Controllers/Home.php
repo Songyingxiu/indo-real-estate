@@ -136,9 +136,10 @@ class Home extends BaseController
         
         $property = $propertyModel
             ->asObject()
-            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone_number, users.email')
+            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone_number, users.email, zipcodes.zipcode')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('users', 'users.id = properties.owner_id', 'left')
+            ->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left') // Added missing Zipcode join
             ->where('properties.id', $id)
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
@@ -147,6 +148,9 @@ class Home extends BaseController
         if (!$property) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
+
+        // Generate Time Ago humanized string
+        $data['timeAgo'] = Time::parse($property->created_date)->humanize();
 
         $subModel = new \App\Models\SubscriptionModel();
         $planModel = new \App\Models\SubscriptionPlanModel();
@@ -185,11 +189,13 @@ class Home extends BaseController
         $data['title'] = $property->title . ' - HuniKita';
 
         $db = \Config\Database::connect();
-        $featuresRaw = $db->table('property_feature_map pfm')
+        
+        // Fixed: Use 'property_features' instead of 'property_feature_map'
+        $featuresRaw = $db->table('property_features pf')
             ->select('f.name as feature_name, fc.name as category_name')
-            ->join('features f', 'f.id = pfm.feature_id')
+            ->join('features f', 'f.id = pf.feature_id')
             ->join('feature_categories fc', 'fc.id = f.category_id', 'left')
-            ->where('pfm.property_id', $id)
+            ->where('pf.property_id', $id)
             ->get()->getResult();
 
         $categorizedFeatures = [];
