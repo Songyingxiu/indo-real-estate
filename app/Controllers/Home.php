@@ -264,8 +264,8 @@ class Home extends BaseController
         $propertyModel->select('properties.*, property_images.image_path, cities.name as city_name')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->join('cities', 'cities.id = properties.city_id', 'left')
-                      ->where('state_id', $state->id)
-                      ->where('listing_type', $type)
+                      ->where('cities.state_id', $state->id) // FIXED: Explicity use cities.state_id
+                      ->where('properties.listing_type', $type)
                       ->where('properties.status', 'Active')
                       ->where('properties.approval_status', 'Published');
                       
@@ -303,7 +303,7 @@ class Home extends BaseController
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->join('cities', 'cities.id = properties.city_id', 'left')
                       ->where('properties.city_id', $city->id)
-                      ->where('listing_type', $type)
+                      ->where('properties.listing_type', $type)
                       ->where('properties.status', 'Active')
                       ->where('properties.approval_status', 'Published');
 
@@ -341,7 +341,7 @@ class Home extends BaseController
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->join('cities', 'cities.id = properties.city_id', 'left')
                       ->where('properties.zipcode_id', $zip->id)
-                      ->where('listing_type', $type)
+                      ->where('properties.listing_type', $type)
                       ->where('properties.status', 'Active')
                       ->where('properties.approval_status', 'Published');
 
@@ -357,6 +357,8 @@ class Home extends BaseController
     {
         helper('url');
         $query = $this->request->getGet('q');
+        // Fetch the context of the search (rent or sale), default to sale
+        $typeFilter = strtolower($this->request->getGet('type') ?: 'sale');
 
         if (empty($query) || strlen($query) < 2) {
             return $this->response->setJSON([]);
@@ -369,16 +371,18 @@ class Home extends BaseController
 
         $results = [];
 
+        // 1. Region Suggestions
         $states = $stateModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($states as $state) {
             $slug = url_title(strtolower($state->name), '-', true);
             $results[] = [
                 'text' => $state->name,
                 'category' => 'Region',
-                'url' => base_url("properties/sale/province/{$slug}")
+                'url' => base_url("properties/{$typeFilter}/province/{$slug}")
             ];
         }
 
+        // 2. City Suggestions
         $cities = $cityModel->select('cities.*, states.name as state_name')
             ->join('states', 'states.id = cities.state_id', 'left')
             ->like('cities.name', $query)
@@ -392,19 +396,21 @@ class Home extends BaseController
             $results[] = [
                 'text' => $city->name . ', ' . $city->state_name,
                 'category' => 'Location',
-                'url' => base_url("properties/sale/city/{$citySlug}/{$stateSlug}")
+                'url' => base_url("properties/{$typeFilter}/city/{$citySlug}/{$stateSlug}")
             ];
         }
 
+        // 3. Zipcode Suggestions
         $zipcodes = $zipcodeModel->like('zipcode', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($zipcodes as $zip) {
             $results[] = [
                 'text' => $zip->zipcode,
                 'category' => 'Zip Code',
-                'url' => base_url("properties/sale/zipcode/{$zip->zipcode}")
+                'url' => base_url("properties/{$typeFilter}/zipcode/{$zip->zipcode}")
             ];
         }
 
+        // 4. Property Name Suggestions
         $properties = $propertyModel->asObject()
             ->select('properties.*, cities.name as city_name')
             ->join('cities', 'cities.id = properties.city_id', 'left')
@@ -412,6 +418,7 @@ class Home extends BaseController
                 ->like('properties.title', $query)
                 ->orLike('properties.area_name', $query)
             ->groupEnd()
+            ->where('properties.listing_type', ucfirst($typeFilter))
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->limit(4)
