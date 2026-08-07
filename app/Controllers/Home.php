@@ -42,9 +42,10 @@ class Home extends BaseController
         
         $data['featuredProperties'] = $propertyModel
             ->asObject() 
-            ->select('properties.*, property_types.name as type_name, property_images.image_path')
+            ->select('properties.*, property_types.name as type_name, property_images.image_path, cities.name as city_name')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->orderBy('RAND()') 
@@ -53,9 +54,10 @@ class Home extends BaseController
 
         $data['newestProperties'] = $propertyModel
             ->asObject() 
-            ->select('properties.*, property_types.name as type_name, property_images.image_path')
+            ->select('properties.*, property_types.name as type_name, property_images.image_path, cities.name as city_name')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->orderBy('properties.created_date', 'DESC')
@@ -110,6 +112,7 @@ class Home extends BaseController
 
         // Dynamically resolve listing type from SEO URL route or query param
         $listingType = $type ? ucfirst(strtolower($type)) : $this->request->getGet('listing_type');
+        if (empty($listingType)) $listingType = 'Sale'; // fallback
 
         $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius);
 
@@ -139,7 +142,7 @@ class Home extends BaseController
             ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone_number, users.email, zipcodes.zipcode')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('users', 'users.id = properties.owner_id', 'left')
-            ->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left') // Added missing Zipcode join
+            ->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left') 
             ->where('properties.id', $id)
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
@@ -190,7 +193,6 @@ class Home extends BaseController
 
         $db = \Config\Database::connect();
         
-        // Fixed: Use 'property_features' instead of 'property_feature_map'
         $featuresRaw = $db->table('property_features pf')
             ->select('f.name as feature_name, fc.name as category_name')
             ->join('features f', 'f.id = pf.feature_id')
@@ -235,8 +237,9 @@ class Home extends BaseController
         $maxPrice = $property->tax_price * 1.2;
         
         $data['similarPrice'] = $propertyModel->asObject()
-            ->select('properties.*, property_images.image_path')
+            ->select('properties.*, property_images.image_path, cities.name as city_name')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
             ->where('tax_price >=', $minPrice)
             ->where('tax_price <=', $maxPrice)
             ->where('properties.id !=', $property->id)
@@ -258,12 +261,13 @@ class Home extends BaseController
         $data['state'] = $state;
         $data['cityStats'] = $propertyModel->getCityStatsByState($state->id);
         
-        $propertyModel->select('properties.*, property_images.image_path')
+        $propertyModel->select('properties.*, property_images.image_path, cities.name as city_name')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
+                      ->join('cities', 'cities.id = properties.city_id', 'left')
                       ->where('state_id', $state->id)
                       ->where('listing_type', $type)
-                      ->where('status', 'Active')
-                      ->where('approval_status', 'Published');
+                      ->where('properties.status', 'Active')
+                      ->where('properties.approval_status', 'Published');
                       
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
@@ -283,14 +287,25 @@ class Home extends BaseController
         if (!$city) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("City not found");
 
         $data['city'] = $city;
-        $data['markers'] = $propertyModel->getMapMarkers(['city_id' => $city->id, 'listing_type' => $type]);
         
-        $propertyModel->select('properties.*, property_images.image_path')
+        // Ensure map markers also query specific to the listing type.
+        $db = \Config\Database::connect();
+        $data['markers'] = $db->table('properties')
+            ->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, cities.name as city_name')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
+            ->where('properties.city_id', $city->id)
+            ->where('properties.listing_type', $type)
+            ->where('properties.latitude IS NOT NULL')
+            ->limit(150)
+            ->get()->getResultArray();
+        
+        $propertyModel->select('properties.*, property_images.image_path, cities.name as city_name')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
-                      ->where('city_id', $city->id)
+                      ->join('cities', 'cities.id = properties.city_id', 'left')
+                      ->where('properties.city_id', $city->id)
                       ->where('listing_type', $type)
-                      ->where('status', 'Active')
-                      ->where('approval_status', 'Published');
+                      ->where('properties.status', 'Active')
+                      ->where('properties.approval_status', 'Published');
 
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
@@ -310,14 +325,25 @@ class Home extends BaseController
         if (!$zip) throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Zipcode not found");
 
         $data['zipcode'] = $zip;
-        $data['markers'] = $propertyModel->getMapMarkers(['zipcode_id' => $zip->id, 'listing_type' => $type]);
         
-        $propertyModel->select('properties.*, property_images.image_path')
+        // Ensure map markers also query specific to the listing type.
+        $db = \Config\Database::connect();
+        $data['markers'] = $db->table('properties')
+            ->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, cities.name as city_name')
+            ->join('cities', 'cities.id = properties.city_id', 'left')
+            ->where('properties.zipcode_id', $zip->id)
+            ->where('properties.listing_type', $type)
+            ->where('properties.latitude IS NOT NULL')
+            ->limit(150)
+            ->get()->getResultArray();
+        
+        $propertyModel->select('properties.*, property_images.image_path, cities.name as city_name')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
-                      ->where('zipcode_id', $zip->id)
+                      ->join('cities', 'cities.id = properties.city_id', 'left')
+                      ->where('properties.zipcode_id', $zip->id)
                       ->where('listing_type', $type)
-                      ->where('status', 'Active')
-                      ->where('approval_status', 'Published');
+                      ->where('properties.status', 'Active')
+                      ->where('properties.approval_status', 'Published');
 
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;

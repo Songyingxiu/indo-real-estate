@@ -26,8 +26,13 @@
     <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6">Available Properties</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <?php if(!empty($properties)): foreach($properties as $property): ?>
+            <?php 
+                $cSlug = url_title(strtolower($property['city_name'] ?? 'indonesia'), '-', true);
+                $tSlug = url_title(strtolower($property['title']), '-', true);
+                $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property['id']}");
+            ?>
             <article class="bg-surface border border-outline-variant rounded overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-                <a href="<?= base_url('properties/' . $property['id']) ?>" class="h-48 bg-surface-container-high block relative">
+                <a href="<?= $seoUrl ?>" class="h-48 bg-surface-container-high block relative">
                     <?php 
                         $imgPath = trim($property['image_path'] ?? $property['image'] ?? '');
                         $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
@@ -41,7 +46,7 @@
                     </div>
                 </a>
                 <div class="p-4 flex flex-col flex-1">
-                    <a href="<?= base_url('properties/' . $property['id']) ?>" class="font-bold text-[16px] text-on-surface hover:text-primary line-clamp-2"><?= esc($property['title']) ?></a>
+                    <a href="<?= $seoUrl ?>" class="font-bold text-[16px] text-on-surface hover:text-primary line-clamp-2"><?= esc($property['title']) ?></a>
                     <span class="font-bold text-primary-container mt-2">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></span>
                 </div>
             </article>

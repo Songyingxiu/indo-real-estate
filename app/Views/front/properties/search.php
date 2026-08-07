@@ -5,9 +5,7 @@
 <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-80px)]">
     
     <aside class="w-full md:w-80 bg-surface border-r border-outline-variant flex-shrink-0 flex flex-col h-full overflow-y-auto custom-scrollbar z-20">
-        <form id="filterForm" action="<?= base_url('search') ?>" method="GET" class="p-6 flex flex-col gap-6 h-full relative">
-            
-            <input type="hidden" name="listing_type" id="filter_listing_type" value="<?= esc($listingType ?? 'Sale') ?>">
+        <form id="filterForm" action="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" method="GET" class="p-6 flex flex-col gap-6 h-full relative">
             
             <!-- Hidden inputs for Radius Search Coordinates -->
             <input type="hidden" name="lat" id="filter_lat" value="<?= esc($lat ?? '') ?>">
@@ -35,7 +33,7 @@
 
             <hr class="border-outline-variant"/>
 
-            <!-- NEW: PRICE RANGE FILTER -->
+            <!-- PRICE RANGE FILTER -->
             <div>
                 <h3 class="font-label-md text-[14px] text-on-surface mb-3">Price Range (Rp)</h3>
                 <div class="flex items-center gap-2">
@@ -45,7 +43,7 @@
                 </div>
             </div>
 
-            <!-- NEW: BED & BATH FILTER -->
+            <!-- BED & BATH FILTER -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <h3 class="font-label-md text-[14px] text-on-surface mb-3">Beds</h3>
@@ -104,7 +102,7 @@
 
             <div class="mt-auto pt-8">
                 <button type="submit" class="w-full bg-primary-container text-on-primary font-label-md text-[14px] font-bold py-3 rounded hover:bg-primary transition-colors">Apply Filters</button>
-                <a href="<?= base_url('search') ?>" class="block text-center w-full mt-2 bg-transparent text-primary-container font-label-md text-[14px] py-3 rounded hover:bg-surface-container-low transition-colors">Clear All</a>
+                <a href="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" class="block text-center w-full mt-2 bg-transparent text-primary-container font-label-md text-[14px] py-3 rounded hover:bg-surface-container-low transition-colors">Clear All</a>
             </div>
         </form>
     </aside>
@@ -119,8 +117,8 @@
             
             <div class="flex items-center gap-4">
                 <div class="flex bg-surface-container-highest p-1 rounded">
-                    <button onclick="document.getElementById('filter_listing_type').value='Sale'; document.getElementById('filterForm').submit();" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= ($listingType ?? 'Sale') == 'Sale' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all">Sale</button>
-                    <button onclick="document.getElementById('filter_listing_type').value='Rent'; document.getElementById('filterForm').submit();" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= ($listingType ?? '') == 'Rent' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all">Rent</button>
+                    <button onclick="document.getElementById('filterForm').action='<?= base_url('search/sale') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Sale' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all">Sale</button>
+                    <button onclick="document.getElementById('filterForm').action='<?= base_url('search/rent') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Rent' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all">Rent</button>
                 </div>
             </div>
         </header>
@@ -129,8 +127,13 @@
             <div class="p-6 flex-1">
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <?php if(!empty($properties)): foreach($properties as $property): ?>
+                        <?php 
+                            $cSlug = url_title(strtolower($property['city_name'] ?? 'indonesia'), '-', true);
+                            $tSlug = url_title(strtolower($property['title']), '-', true);
+                            $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property['id']}");
+                        ?>
                         <article class="bg-surface border border-outline-variant rounded-b-lg rounded-t-xl overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300 flex flex-col">
-                            <a href="<?= base_url('property/' . $property['id']) ?>" class="relative h-48 w-full bg-surface-container-highest block group">
+                            <a href="<?= $seoUrl ?>" class="relative h-48 w-full bg-surface-container-highest block group">
                                 <?php 
                                     $imgPath = trim($property['image_path'] ?? $property['image'] ?? '');
                                     $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
@@ -153,7 +156,7 @@
                             <div class="p-4 flex flex-col flex-1">
                                 <div class="flex justify-between items-start mb-2 gap-2">
                                     <h3 class="font-headline-lg-mobile text-[18px] leading-tight font-semibold text-on-surface line-clamp-2">
-                                        <a href="<?= base_url('property/' . $property['id']) ?>" class="hover:text-primary"><?= esc($property['title']) ?></a>
+                                        <a href="<?= $seoUrl ?>" class="hover:text-primary"><?= esc($property['title']) ?></a>
                                     </h3>
                                 </div>
                                 <span class="font-headline-lg-mobile text-[20px] font-bold text-primary-container mb-2">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></span>
@@ -177,7 +180,7 @@
                         <div class="col-span-full py-12 text-center text-on-surface-variant flex flex-col items-center">
                             <span class="material-symbols-outlined text-[48px] mb-2 opacity-50">search_off</span>
                             <p class="text-lg">No properties found matching your criteria.</p>
-                            <a href="<?= base_url('search') ?>" class="text-primary hover:underline mt-2">Clear filters</a>
+                            <a href="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" class="text-primary hover:underline mt-2">Clear filters</a>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -210,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         timeout = setTimeout(() => {
-            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}`)
+            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}&type=<?= strtolower($listingType ?? 'sale') ?>`)
                 .then(response => response.json())
                 .then(data => {
                     suggestDropdown.innerHTML = '';

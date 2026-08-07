@@ -27,9 +27,9 @@ $routes->get('news', 'Cms::blog');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // SEO-Friendly Location Routes (Strict Rent/Sale Separation)
-$routes->get('properties/(:segment)/province/(:segment)', 'Property::province/$2/$1');
-$routes->get('properties/(:segment)/city/(:segment)/(:segment)', 'Property::city/$2/$3/$1');
-$routes->get('properties/(:segment)/zipcode/(:num)', 'Property::zipcode/$2/$1');
+$routes->get('properties/(:segment)/province/(:segment)', 'Home::province/$2/$1');
+$routes->get('properties/(:segment)/city/(:segment)/(:segment)', 'Home::city/$2/$3/$1');
+$routes->get('properties/(:segment)/zipcode/(:num)', 'Home::zipcode/$2/$1');
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');

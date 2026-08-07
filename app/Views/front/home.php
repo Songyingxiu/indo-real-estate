@@ -23,11 +23,10 @@
             </div>
             
             <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
-                <form action="<?= base_url('search') ?>" method="GET" class="flex flex-col gap-4">
-                    <input type="hidden" name="listing_type" id="home_listing_type" value="Sale">
+                <form id="homeSearchForm" action="<?= base_url('search/sale') ?>" method="GET" class="flex flex-col gap-4">
                     <div class="flex gap-2 border-b border-outline-variant pb-2">
-                        <button type="button" onclick="document.getElementById('home_listing_type').value='Sale'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors">For Sale</button>
-                        <button type="button" onclick="document.getElementById('home_listing_type').value='Rent'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">For Rent</button>
+                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/sale') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors">For Sale</button>
+                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/rent') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">For Rent</button>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4 relative">
@@ -72,7 +71,7 @@
                 <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2">Popular Listings</h2>
                 <p class="text-on-surface-variant font-body-lg">Trending properties currently highly sought after.</p>
             </div>
-            <a href="<?= base_url('search') ?>" class="flex items-center gap-1 text-primary font-label-md text-[14px] font-semibold hover:underline">
+            <a href="<?= base_url('search/sale') ?>" class="flex items-center gap-1 text-primary font-label-md text-[14px] font-semibold hover:underline">
                 View All <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
             </a>
         </div>
@@ -80,8 +79,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php if (!empty($featuredProperties)): ?>
                 <?php foreach ($featuredProperties as $property): ?>
+                    <?php 
+                        $cSlug = url_title(strtolower($property->city_name ?? 'indonesia'), '-', true);
+                        $tSlug = url_title(strtolower($property->title), '-', true);
+                        $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property->id}");
+                    ?>
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
+                        <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
                             <?php 
                                 $imgPath = trim($property->image_path ?? '');
                                 $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
@@ -96,7 +100,7 @@
                         </a>
                         <div class="p-4 flex flex-col flex-grow">
                             <h3 class="font-label-md text-[18px] font-semibold text-on-background mb-1 truncate">
-                                <a href="<?= base_url('property/' . $property->id) ?>" class="hover:text-primary transition-colors">
+                                <a href="<?= $seoUrl ?>" class="hover:text-primary transition-colors">
                                     <?= esc($property->title) ?>
                                 </a>
                             </h3>
@@ -130,9 +134,14 @@
                 <div class="swiper-wrapper">
                     <?php if (!empty($newestProperties)): ?>
                         <?php foreach ($newestProperties as $property): ?>
+                            <?php 
+                                $cSlug = url_title(strtolower($property->city_name ?? 'indonesia'), '-', true);
+                                $tSlug = url_title(strtolower($property->title), '-', true);
+                                $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property->id}");
+                            ?>
                             <div class="swiper-slide h-auto">
                                 <article class="property-card h-full bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                    <a href="<?= base_url('property/' . $property->id) ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group shrink-0">
+                                    <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group shrink-0">
                                         <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">New</div>
                                         <?php 
                                             $imgPath = trim($property->image_path ?? '');
@@ -148,7 +157,7 @@
                                     </a>
                                     <div class="p-4 flex flex-col flex-grow">
                                         <h3 class="font-label-md text-[18px] font-semibold text-on-background mb-1 truncate">
-                                            <a href="<?= base_url('property/' . $property->id) ?>" class="hover:text-primary transition-colors">
+                                            <a href="<?= $seoUrl ?>" class="hover:text-primary transition-colors">
                                                 <?= esc($property->title) ?>
                                             </a>
                                         </h3>
@@ -265,14 +274,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 } else {
                                     const slug = createSlug(item.text);
                                     if (item.category === 'Province' || item.category === 'State') {
-                                        targetUrl = `<?= base_url('properties/province') ?>/${slug}`;
+                                        targetUrl = `<?= base_url('properties/sale/province') ?>/${slug}`;
                                     } else if (item.category === 'City' || item.category === 'Location') {
                                         const stateSlug = item.parent_text ? createSlug(item.parent_text) : 'indonesia';
-                                        targetUrl = `<?= base_url('properties/city') ?>/${slug}/${stateSlug}`;
+                                        targetUrl = `<?= base_url('properties/sale/city') ?>/${slug}/${stateSlug}`;
                                     } else if (item.category === 'Zipcode') {
-                                        targetUrl = `<?= base_url('properties/zipcode') ?>/${item.text}`;
+                                        targetUrl = `<?= base_url('properties/sale/zipcode') ?>/${item.text}`;
                                     } else {
-                                        targetUrl = `<?= base_url('search') ?>?q=${encodeURIComponent(item.text)}`;
+                                        targetUrl = `<?= base_url('search/sale') ?>?q=${encodeURIComponent(item.text)}`;
                                     }
                                 }
                                 window.location.href = targetUrl;
