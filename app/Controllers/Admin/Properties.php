@@ -48,6 +48,7 @@ class Properties extends BaseController
 
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
+        $propertyModel = new PropertyModel();
         
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
@@ -56,22 +57,35 @@ class Properties extends BaseController
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
         
         $maxPois = 0;
+        $maxProperties = 1; // Default fallback if no active subscription
+        
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
                 $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+                $maxProperties = is_array($plan) ? ($plan['max_properties'] ?? 1) : ($plan->max_properties ?? 1);
             }
         }
 
         if ($roleId == 4) {
             $maxPois = 9999;
+            $maxProperties = 9999;
+        }
+
+        // Enforce Property Limits
+        $currentListings = $propertyModel->where('owner_id', $userId)->countAllResults();
+        
+        if ($currentListings >= $maxProperties && $roleId != 4) {
+            return redirect()->to(base_url('admin/properties'))->with('error', 'You have reached your limit of ' . $maxProperties . ' properties on your current plan. Please upgrade to post more.');
         }
 
         $poisCreated = $poiModel->where('added_by', $userId)->countAllResults();
 
-        $data['maxPois']     = $maxPois;
-        $data['poisCreated'] = $poisCreated;
+        $data['maxPois']         = $maxPois;
+        $data['poisCreated']     = $poisCreated;
+        $data['maxProperties']   = $maxProperties;
+        $data['currentListings'] = $currentListings;
         
         $data['pois'] = $poiModel->where('status', 'Active')->findAll();
         $data['propertyTypes'] = $propertyTypeModel->findAll();
@@ -109,6 +123,30 @@ class Properties extends BaseController
             return redirect()->to(base_url('admin/profile'))->with('error', 'You must verify your identity before posting a property listing.');
         }
 
+        // --- ENFORCE PROPERTY LIMITS ON SUBMIT ---
+        $propertyModel = new PropertyModel();
+        $subModel = new SubscriptionModel();
+        $planModel = new SubscriptionPlanModel();
+        
+        $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
+        $maxProperties = 1; 
+        
+        if ($activeSub) {
+            $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $maxProperties = is_array($plan) ? ($plan['max_properties'] ?? 1) : ($plan->max_properties ?? 1);
+            }
+        }
+
+        if ($roleId != 4) {
+            $currentListings = $propertyModel->where('owner_id', $userId)->countAllResults();
+            if ($currentListings >= $maxProperties) {
+                return redirect()->to(base_url('admin/properties'))->with('error', 'Limit reached. Please upgrade your subscription to post more than ' . $maxProperties . ' properties.');
+            }
+        }
+        // ----------------------------------------
+
         $rules = [
             'title'            => 'required|min_length[5]|max_length[255]',
             'property_type_id' => 'required|numeric',
@@ -132,7 +170,6 @@ class Properties extends BaseController
         }
         $cloudinary = new Cloudinary($cloudinaryUrl);
 
-        $propertyModel = new PropertyModel();
         $imageModel = new PropertyImageModel();
         $propertyFeatureModel = new PropertyFeatureModel(); 
         
