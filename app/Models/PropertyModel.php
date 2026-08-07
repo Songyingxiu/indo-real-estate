@@ -101,7 +101,7 @@ class PropertyModel extends Model
         return $this->db->table('properties')
             ->select('cities.name as city_name, COUNT(properties.id) as property_count, AVG(properties.tax_price) as avg_price')
             ->join('cities', 'cities.id = properties.city_id')
-            ->where('properties.state_id', $stateId)
+            ->where('cities.state_id', $stateId) // FIXED: Uses cities.state_id instead of properties.state_id
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->groupBy('cities.id')
@@ -111,17 +111,19 @@ class PropertyModel extends Model
     // Map Markers
     public function getMapMarkers($conditions = [], $limit = 150)
     {
-        $builder = $this->select('id, title, tax_price, latitude, longitude, listing_type')
-                        ->where('status', 'Active')
-                        ->where('approval_status', 'Published')
-                        ->where('latitude IS NOT NULL')
-                        ->where('longitude IS NOT NULL');
+        $builder = $this->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, properties.listing_type');
 
         foreach ($conditions as $key => $val) {
-            $builder->where($key, $val);
+            // Explicitly bind to properties table to prevent ambiguous column errors
+            $builder->where('properties.' . $key, $val);
         }
 
-        return $builder->limit($limit)->find();
+        return $builder->where('properties.status', 'Active')
+                       ->where('properties.approval_status', 'Published')
+                       ->where('properties.latitude IS NOT NULL')
+                       ->where('properties.longitude IS NOT NULL')
+                       ->limit($limit)
+                       ->find();
     }
 
     // Detail Page Algorithms
