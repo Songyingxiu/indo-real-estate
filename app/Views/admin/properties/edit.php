@@ -289,10 +289,6 @@
                     <label class="block font-semibold mb-2">Upload New SHM Document (Optional)</label>
                     <input type="file" name="shm_document" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded bg-surface">
                 </div>
-                <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Video Tour URL</label>
-                    <input type="url" name="video_url" value="<?= esc($property['video_url']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
-                </div>
             </div>
         </div>
 

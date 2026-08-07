@@ -299,12 +299,8 @@
                     <input type="file" name="property_images[]" required multiple accept="image/*" class="w-full p-2 border rounded bg-surface">
                 </div>
                 <div>
-                    <label class="block font-semibold mb-2">SHM Document *</label>
+                    <label class="block font-semibold mb-2">SHM / Legal Document *</label>
                     <input type="file" name="shm_document" required accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded bg-surface">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Video Tour URL (Optional)</label>
-                    <input type="url" name="video_url" value="<?= old('video_url') ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="YouTube or Vimeo link">
                 </div>
             </div>
         </div>
@@ -383,8 +379,8 @@
         let poiIcon;
 
         document.addEventListener("DOMContentLoaded", function() {
-            const oldLat = <?= old('latitude') ? esc(old('latitude')) : 'null' ?>;
-            const oldLng = <?= old('longitude') ? esc(old('longitude')) : 'null' ?>;
+            const oldLat = <?= old('latitude') ? esc(old('latitude')) : '-6.2088' ?>;
+            const oldLng = <?= old('longitude') ? esc(old('longitude')) : '106.8456' ?>;
             
             const defaultLat = oldLat !== null ? oldLat : -6.2250;
             const defaultLng = oldLng !== null ? oldLng : 106.9004;
