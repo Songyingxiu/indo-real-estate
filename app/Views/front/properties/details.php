@@ -105,16 +105,83 @@
                 </div>
             </section>
 
+            <!-- NEW: PROPERTY SPECIFICATIONS SECTION -->
             <section>
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Location</h2>
-                <div class="border border-outline-variant rounded overflow-hidden h-[400px] relative bg-surface-container-low z-0">
-                    <div id="propertyMap" class="w-full h-full"></div>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Property Specifications</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
+                    
+                    <?php if(!empty($property->building_society_name)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Complex/Society</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->building_society_name) ?></span>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if(!empty($property->unit_number)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Unit Number</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->unit_number) ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->year_built)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Year Built</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->year_built) ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->total_floors)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Total Floors</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->total_floors) ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->usable_area)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Usable Area</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->usable_area) ?> m&sup2;</span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->total_land_area)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Land Area</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->total_land_area) ?> m&sup2;</span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->parking)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Parking</span>
+                        <span class="block text-[14px] font-bold text-on-surface">
+                            <?= esc($property->parking) ?> 
+                            <?= (!empty($property->total_parking) && $property->total_parking > 0) ? '(' . esc($property->total_parking) . ' spots)' : '' ?>
+                        </span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->basement)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Basement</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->basement) ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(!empty($property->water_facility)): ?>
+                    <div>
+                        <span class="block text-[12px] text-on-surface-variant font-medium">Water Facility</span>
+                        <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->water_facility) ?></span>
+                    </div>
+                    <?php endif; ?>
+
                 </div>
             </section>
 
             <?php if(!empty($propertyFeatures)): ?>
             <section class="mt-8">
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Property Details</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Premium Features</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
                     <?php foreach($propertyFeatures as $category => $features): ?>
                         <div>
@@ -135,6 +202,13 @@
                 </div>
             </section>
             <?php endif; ?>
+
+            <section>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Location</h2>
+                <div class="border border-outline-variant rounded overflow-hidden h-[400px] relative bg-surface-container-low z-0">
+                    <div id="propertyMap" class="w-full h-full"></div>
+                </div>
+            </section>
 
             <?php if(!empty($detailAds[0])): ?>
             <div class="w-full h-[90px] md:h-[120px] my-6 rounded overflow-hidden shadow-sm relative group cursor-pointer border border-outline-variant">
