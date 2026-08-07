@@ -15,7 +15,7 @@ class PropertyModel extends Model
         'area_name', 'unit_number', 'building_society_name', 'latitude', 
         'longitude', 'year_built', 'total_floors', 'bed', 'bath', 
         'total_area', 'total_land_area', 'usable_area', 'parking', 
-        'total_parking', 'basement', 'water_facility', 'video_url', 
+        'total_parking', 'basement', 'water_facility', 
         'tax_price', 'property_tax_number', 'approval_status', 'status'
     ];
 
