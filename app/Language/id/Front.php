@@ -154,6 +154,58 @@ return [
     'srch_no_criteria' => 'Tidak ada properti yang cocok dengan kriteria Anda.',
     'srch_clear_filters' => 'Hapus filter',
 
+    // User Inbox
+    'inbox_workspace' => 'Ruang Kerja Saya',
+    'inbox_inquiries' => 'Pertanyaan Saya',
+    'inbox_settings' => 'Pengaturan Profil',
+    'inbox_subtitle' => 'Obrolan langsung dengan agen properti.',
+    'inbox_agent' => 'Agen:',
+    'inbox_no_inquiries' => 'Anda belum menghubungi agen manapun.',
+    'inbox_select' => 'Pilih pertanyaan properti',
+    'inbox_you' => 'Anda',
+    'inbox_write_reply' => 'Tulis balasan...',
+
+    // User Profile
+    'prof_title' => 'Profil Saya',
+    'prof_subtitle' => 'Kelola detail akun dan pengaturan keamanan Anda.',
+    'prof_personal_info' => 'Informasi Pribadi',
+    'prof_first_name' => 'Nama Depan',
+    'prof_last_name' => 'Nama Belakang',
+    'prof_email' => 'Alamat Email',
+    'prof_email_notice' => 'Hubungi dukungan jika Anda perlu mengubah email yang terdaftar.',
+    'prof_phone' => 'Nomor Telepon',
+    'prof_save' => 'Simpan Perubahan',
+    'prof_change_pass' => 'Ubah Kata Sandi',
+    'prof_current_pass' => 'Kata Sandi Saat Ini',
+    'prof_new_pass' => 'Kata Sandi Baru',
+    'prof_confirm_pass' => 'Konfirmasi Kata Sandi Baru',
+    'prof_update_pass' => 'Perbarui Kata Sandi',
+    'prof_verify_id' => 'Verifikasi Identitas',
+    'prof_not_verified' => 'Belum Terverifikasi',
+    'prof_verify_desc' => 'Unggah dokumen identitas Anda untuk menerima lencana "Agen Terverifikasi" pada daftar properti Anda. Format yang didukung: JPG, PNG, PDF.',
+    'prof_ktp' => 'KTP',
+    'prof_npwp' => 'NPWP',
+    'prof_siup' => 'SIUP',
+    'prof_submit_verify' => 'Kirim untuk Verifikasi',
+    'prof_danger_zone' => 'Zona Bahaya',
+    'prof_danger_desc' => 'Menghapus akun Anda akan segera menyembunyikan profil dan daftar aktif Anda.',
+    'prof_danger_bold' => 'Data Anda akan disimpan selama 60 hari.',
+    'prof_del_btn' => 'Hapus Akun Saya',
+    'prof_modal_title' => 'Konfirmasi Penghapusan',
+    'prof_modal_desc' => 'Apakah Anda yakin ingin menghapus akun HuniKita Anda? Anda memiliki 60 hari untuk memulihkannya sebelum akun dan semua daftar properti terkait dihapus secara permanen.',
+    'prof_modal_cancel' => 'Batal',
+    'prof_modal_confirm' => 'Ya, Hapus Akun',
+
+    // Saved Properties
+    'saved_title' => 'Properti Tersimpan',
+    'saved_no_title' => 'Belum Ada Properti Tersimpan',
+    'saved_no_desc' => 'Anda belum menyimpan properti apa pun ke favorit Anda. Mulai jelajahi untuk menemukan properti impian Anda.',
+    'saved_explore' => 'Jelajahi Properti',
+    'saved_date' => 'Disimpan:',
+
+    // Promo Detail
+    'promo_back' => 'Kembali ke Beranda',
+
     // Footer
     'ft_desc' => 'Platform real estat premium yang menghubungkan pembeli cerdas dengan agen terverifikasi dan properti eksklusif.',
     'ft_company' => 'Perusahaan',

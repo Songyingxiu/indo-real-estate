@@ -3,16 +3,16 @@
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-8 flex-grow w-full">
     <div class="flex items-center gap-3 mb-8">
         <span class="material-symbols-outlined text-primary text-[32px] fill">favorite</span>
-        <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface">My Saved Properties</h1>
+        <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface"><?= lang('Front.saved_title') ?></h1>
     </div>
 
     <?php if (empty($properties)): ?>
         <div class="flex flex-col items-center justify-center py-20 bg-surface border border-outline-variant rounded-xl shadow-sm">
             <span class="material-symbols-outlined text-[64px] text-outline-variant mb-4 opacity-50">heart_broken</span>
-            <h2 class="font-headline-md text-xl font-bold text-on-surface mb-2">No Saved Properties Yet</h2>
-            <p class="text-on-surface-variant font-body-md text-center max-w-md mb-6">You haven't saved any listings to your favorites yet. Start exploring to find your dream property.</p>
+            <h2 class="font-headline-md text-xl font-bold text-on-surface mb-2"><?= lang('Front.saved_no_title') ?></h2>
+            <p class="text-on-surface-variant font-body-md text-center max-w-md mb-6"><?= lang('Front.saved_no_desc') ?></p>
             <a href="<?= base_url('search') ?>" class="bg-primary text-on-primary px-6 py-3 rounded font-bold hover:bg-primary-container transition-colors">
-                Explore Properties
+                <?= lang('Front.saved_explore') ?>
             </a>
         </div>
     <?php else: ?>
@@ -35,7 +35,7 @@
                     <div class="p-5 flex flex-col flex-grow">
                         <div class="flex justify-between items-start mb-2">
                             <span class="text-primary font-label-md text-[12px] font-bold"><?= esc($prop->type_name) ?></span>
-                            <span class="text-on-surface-variant font-caption text-[11px]">Saved: <?= date('M d, Y', strtotime($prop->saved_at)) ?></span>
+                            <span class="text-on-surface-variant font-caption text-[11px]"><?= lang('Front.saved_date') ?> <?= date('M d, Y', strtotime($prop->saved_at)) ?></span>
                         </div>
                         <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-1 line-clamp-1"><?= esc($prop->title) ?></h3>
                         <p class="text-on-surface-variant font-body-sm text-[14px] flex items-center gap-1 mb-4">

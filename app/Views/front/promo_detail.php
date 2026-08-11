@@ -5,12 +5,11 @@
         
         <div class="mb-6">
             <a href="<?= base_url('/') ?>" class="text-primary font-medium hover:underline flex items-center gap-1 w-fit">
-                <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Home
+                <span class="material-symbols-outlined text-sm">arrow_back</span> <?= lang('Front.promo_back') ?>
             </a>
         </div>
 
         <div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            <!-- Removed the duplicate 'uploads/ads/' since it's already in $promo->image_path -->
             <?php if (!empty($promo->image_path)): ?>
                 <div class="w-full h-64 md:h-96">
                     <img src="<?= base_url(esc($promo->image_path)) ?>" alt="<?= esc($promo->title) ?>" class="w-full h-full object-cover">

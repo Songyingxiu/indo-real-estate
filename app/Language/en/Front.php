@@ -154,6 +154,58 @@ return [
     'srch_no_criteria' => 'No properties found matching your criteria.',
     'srch_clear_filters' => 'Clear filters',
 
+    // User Inbox
+    'inbox_workspace' => 'My Workspace',
+    'inbox_inquiries' => 'My Inquiries',
+    'inbox_settings' => 'Profile Settings',
+    'inbox_subtitle' => 'Live chat with property agents.',
+    'inbox_agent' => 'Agent:',
+    'inbox_no_inquiries' => 'You haven\'t contacted any agents yet.',
+    'inbox_select' => 'Select a property inquiry',
+    'inbox_you' => 'You',
+    'inbox_write_reply' => 'Write a reply...',
+
+    // User Profile
+    'prof_title' => 'My Profile',
+    'prof_subtitle' => 'Manage your account details and security settings.',
+    'prof_personal_info' => 'Personal Information',
+    'prof_first_name' => 'First Name',
+    'prof_last_name' => 'Last Name',
+    'prof_email' => 'Email Address',
+    'prof_email_notice' => 'Contact support if you need to change your registered email.',
+    'prof_phone' => 'Phone Number',
+    'prof_save' => 'Save Changes',
+    'prof_change_pass' => 'Change Password',
+    'prof_current_pass' => 'Current Password',
+    'prof_new_pass' => 'New Password',
+    'prof_confirm_pass' => 'Confirm New Password',
+    'prof_update_pass' => 'Update Password',
+    'prof_verify_id' => 'Identity Verification',
+    'prof_not_verified' => 'Not Verified',
+    'prof_verify_desc' => 'Upload your identity documents to receive a "Verified Agent" badge on your property listings. Supported formats: JPG, PNG, PDF.',
+    'prof_ktp' => 'KTP / ID Card',
+    'prof_npwp' => 'NPWP (Tax ID)',
+    'prof_siup' => 'Business License / SIUP',
+    'prof_submit_verify' => 'Submit for Verification',
+    'prof_danger_zone' => 'Danger Zone',
+    'prof_danger_desc' => 'Deleting your account will immediately hide your profile and active listings.',
+    'prof_danger_bold' => 'Your data will be kept for 60 days.',
+    'prof_del_btn' => 'Delete My Account',
+    'prof_modal_title' => 'Confirm Deletion',
+    'prof_modal_desc' => 'Are you sure you want to delete your HuniKita account? You have 60 days to recover it before your account and all associated property listings are permanently erased.',
+    'prof_modal_cancel' => 'Cancel',
+    'prof_modal_confirm' => 'Yes, Delete Account',
+
+    // Saved Properties
+    'saved_title' => 'My Saved Properties',
+    'saved_no_title' => 'No Saved Properties Yet',
+    'saved_no_desc' => 'You haven\'t saved any listings to your favorites yet. Start exploring to find your dream property.',
+    'saved_explore' => 'Explore Properties',
+    'saved_date' => 'Saved:',
+
+    // Promo Detail
+    'promo_back' => 'Back to Home',
+
     // Footer
     'ft_desc' => 'Premium real estate platform connecting discerning buyers with verified agents and exclusive properties.',
     'ft_company' => 'Company',
