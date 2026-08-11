@@ -5,12 +5,12 @@
         
         <!-- Search Header Section -->
         <div class="text-center mb-10">
-            <h1 class="font-headline-xl text-[32px] md:text-[48px] font-bold text-on-background mb-4">How can we help you?</h1>
-            <p class="text-on-surface-variant font-body-lg mb-8">Search our knowledge base or browse frequently asked questions below.</p>
+            <h1 class="font-headline-xl text-[32px] md:text-[48px] font-bold text-on-background mb-4"><?= lang('Front.faq_title') ?></h1>
+            <p class="text-on-surface-variant font-body-lg mb-8"><?= lang('Front.faq_subtitle') ?></p>
             
             <div class="relative max-w-2xl mx-auto">
                 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                <input type="text" id="faqSearch" placeholder="Type a keyword to find your answer..." class="w-full pl-12 pr-4 py-4 rounded-full border border-outline-variant shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-lg text-[16px] text-on-surface">
+                <input type="text" id="faqSearch" placeholder="<?= lang('Front.placeholder_faq_search') ?>" class="w-full pl-12 pr-4 py-4 rounded-full border border-outline-variant shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-lg text-[16px] text-on-surface">
             </div>
         </div>
 
@@ -31,15 +31,15 @@
             <?php else: ?>
                 <div class="text-center p-8 bg-surface border border-outline-variant rounded-lg">
                     <span class="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2">help_outline</span>
-                    <p class="text-on-surface-variant">No FAQs available at the moment.</p>
+                    <p class="text-on-surface-variant"><?= lang('Front.lbl_no_faq') ?></p>
                 </div>
             <?php endif; ?>
             
             <!-- Empty State for Search Results -->
             <div id="noResults" class="hidden text-center p-8 bg-surface border border-outline-variant rounded-lg">
                 <span class="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2">search_off</span>
-                <p class="text-on-surface-variant text-lg font-semibold">No results found</p>
-                <p class="text-on-surface-variant text-sm mt-1">We couldn't find any FAQs matching your search.</p>
+                <p class="text-on-surface-variant text-lg font-semibold"><?= lang('Front.lbl_no_results') ?></p>
+                <p class="text-on-surface-variant text-sm mt-1"><?= lang('Front.lbl_no_results_sub') ?></p>
             </div>
         </div>
         

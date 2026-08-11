@@ -39,6 +39,38 @@ return [
     'lbl_no_new' => 'No new properties currently available.',
     'lbl_no_faq' => 'No FAQs available at the moment.',
 
+    // Blog
+    'blog_title' => 'News & Updates',
+    'blog_subtitle' => 'Stay up to date with the latest announcements, property tips, and blog posts from HuniKita.',
+    'btn_read_more' => 'Read More',
+    'lbl_no_updates' => 'No updates yet',
+    'lbl_no_updates_sub' => 'Check back later for new articles and announcements.',
+
+    // FAQ Page
+    'faq_title' => 'How can we help you?',
+    'faq_subtitle' => 'Search our knowledge base or browse frequently asked questions below.',
+    'placeholder_faq_search' => 'Type a keyword to find your answer...',
+    'lbl_no_results' => 'No results found',
+    'lbl_no_results_sub' => 'We couldn\'t find any FAQs matching your search.',
+
+    // CMS Page
+    'page_subtitle' => 'Platform details, policy guidelines, and standard informational notices.',
+    'lbl_legal_info' => 'Legal & Info',
+    'lbl_last_updated' => 'Last updated:',
+    'btn_contact_support' => 'Contact Support',
+    'page_mission_title' => 'Our Mission',
+    'page_mission_text' => 'HuniKita was founded with a simple goal: to make finding, buying, and selling property transparent, secure, and effortless. We bridge the gap between premium agents and eager buyers using cutting-edge technology.',
+    'page_choose_title' => 'Why Choose Us?',
+    'page_choose_li1' => 'Verified Agents and authentic property listings.',
+    'page_choose_li2' => 'Secure built-in communication systems.',
+    'page_choose_li3' => 'Advanced map search and virtual tour capabilities.',
+    'page_data_title' => 'Data Collection',
+    'page_data_text' => 'We collect information to provide better services to our users. This includes basic information like your email address and phone number when you submit property inquiries.',
+    'page_use_title' => 'How We Use Your Information',
+    'page_use_text' => 'The information we collect is used strictly to facilitate communication between buyers and verified agents. We do not sell your personal data to third parties.',
+    'page_uc_title' => 'Page Under Construction',
+    'page_uc_text' => 'The content for the <strong>%s</strong> page is currently being drafted by our legal and content teams. Please check back later.',
+
     // Footer
     'ft_desc' => 'Premium real estate platform connecting discerning buyers with verified agents and exclusive properties.',
     'ft_company' => 'Company',
