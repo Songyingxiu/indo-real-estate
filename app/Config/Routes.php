@@ -7,6 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // Public Facing Routes
+$routes->get('lang/(:segment)', 'Language::switch/$1');
 $routes->get('/', 'Home::index');            
 $routes->get('search', 'Home::search'); // Fallback for generic searches
 $routes->get('search/(:segment)', 'Home::search/$1'); // SEO: /search/rent or /search/sale

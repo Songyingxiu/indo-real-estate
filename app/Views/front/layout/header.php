@@ -11,7 +11,7 @@
     $unreadCount = $GLOBALS['unread_count'] ?? 0;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= session()->get('locale') ?? 'en' ?>">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -20,7 +20,6 @@
         $seoModel = new \App\Models\SeoModel();
         $globalSeo = $seoModel->where('target_page', 'Homepage')->first();
         
-        // If a specific controller passed a $title, use it. Otherwise, fallback to the DB SEO settings.
         $metaTitle = $title ?? $globalSeo['meta_title'] ?? 'HuniKita - Real Estate Platform';
         $metaDesc = $globalSeo['meta_description'] ?? 'Discover the most exclusive real estate listings. Buy, sell, and rent properties with trusted verified agents.';
         $keywords = $globalSeo['focus_keywords'] ?? 'real estate, buy house, verified agents, property listing';
@@ -90,18 +89,17 @@
         </a>
         
         <nav class="hidden md:flex items-center gap-8">
-            <a class="font-body-md text-[16px] text-primary hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Sale') ?>">Buy</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search?listing_type=Rent') ?>">Rent</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/about-us') ?>">About Us</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('news') ?>">News & Updates</a>
-            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>">Privacy</a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search/sale') ?>"><?= lang('Front.nav_buy') ?></a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search/rent') ?>"><?= lang('Front.nav_rent') ?></a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/about-us') ?>"><?= lang('Front.nav_about') ?></a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('news') ?>"><?= lang('Front.nav_news') ?></a>
+            <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>"><?= lang('Front.nav_privacy') ?></a>
         </nav>
         
         <div class="hidden md:flex items-center gap-4">
-            
             <?php if($roleId != 1): ?>
                 <a href="<?= base_url('admin/properties/create') ?>" class="font-label-md text-[14px] font-semibold text-primary bg-transparent border border-primary px-4 py-2 rounded hover:bg-surface-container-high transition-colors">
-                    Post Listing
+                    <?= lang('Front.btn_post_listing') ?>
                 </a>
             <?php endif; ?>
 
@@ -128,12 +126,12 @@
                     
                     <div x-show="open" style="display: none;" class="absolute right-0 mt-2 w-80 bg-surface rounded-lg shadow-lg border border-outline-variant overflow-hidden z-50">
                         <div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-                            <span class="font-label-md text-label-md text-on-surface font-bold">Activity</span>
+                            <span class="font-label-md text-label-md text-on-surface font-bold"><?= lang('Front.lbl_activity') ?></span>
                         </div>
                         <div class="max-h-96 overflow-y-auto">
                             <?php if (empty($notifications)): ?>
                                 <div class="px-4 py-6 text-center text-on-surface-variant">
-                                    <p class="font-caption text-caption">No recent activity.</p>
+                                    <p class="font-caption text-caption"><?= lang('Front.lbl_no_activity') ?></p>
                                 </div>
                             <?php else: ?>
                                 <?php foreach ($notifications as $notif): ?>
@@ -164,27 +162,27 @@
                         
                         <a href="<?= base_url($roleId == 1 ? 'user/profile' : 'admin/profile') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[18px]">person</span>
-                            <span class="font-body-sm text-body-sm">My Profile</span>
+                            <span class="font-body-sm text-body-sm"><?= lang('Front.menu_profile') ?></span>
                         </a>
 
                         <?php if($roleId != 1): ?>
                             <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">dashboard</span>
-                                <span class="font-body-sm text-body-sm">Admin Dashboard</span>
+                                <span class="font-body-sm text-body-sm"><?= lang('Front.menu_dashboard') ?></span>
                             </a>
                         <?php endif; ?>
 
                         <div class="border-t border-outline-variant mt-1 pt-1">
                             <a href="<?= base_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-error hover:bg-error-container transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">logout</span>
-                                <span class="font-label-md text-label-md">Sign Out</span>
+                                <span class="font-label-md text-label-md"><?= lang('Front.btn_sign_out') ?></span>
                             </a>
                         </div>
                     </div>
                 </div>
             <?php else: ?>
                 <a href="<?= base_url('login') ?>" class="font-label-md text-[14px] font-semibold text-on-primary bg-primary px-4 py-2 rounded hover:bg-primary-container transition-colors">
-                    Sign In
+                    <?= lang('Front.btn_sign_in') ?>
                 </a>
             <?php endif; ?>
         </div>

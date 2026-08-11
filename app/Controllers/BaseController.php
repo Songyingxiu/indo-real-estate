@@ -19,6 +19,12 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
         $this->session = \Config\Services::session();
         
+        // --- MULTI-LANGUAGE LOCALE INJECTION ---
+        $locale = $this->session->get('locale') ?? $request->getLocale();
+        $request->setLocale($locale);
+        \Config\Services::language()->setLocale($locale);
+        // ---------------------------------------
+
         // GLOBAL NOTIFICATIONS (For both Users and Admins)
         if ($this->session->get('id')) {
             $inquiryModel = new InquiryModel();
