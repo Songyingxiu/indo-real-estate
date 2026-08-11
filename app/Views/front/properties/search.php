@@ -12,20 +12,20 @@
             <input type="hidden" name="lng" id="filter_lng" value="<?= esc($lng ?? '') ?>">
 
             <div class="flex justify-between items-center mb-2">
-                <h2 class="font-headline-lg-mobile text-[20px] font-bold text-primary">Filters</h2>
+                <h2 class="font-headline-lg-mobile text-[20px] font-bold text-primary"><?= lang('Front.srch_filters') ?></h2>
                 <?php if(session()->get('id')): ?>
                     <button type="button" onclick="saveCurrentSearch()" class="text-primary hover:text-primary-container text-[12px] font-bold flex items-center gap-1 bg-primary-container/10 px-2 py-1 rounded transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">bookmark_add</span> Save Search
+                        <span class="material-symbols-outlined text-[14px]">bookmark_add</span> <?= lang('Front.srch_save_search') ?>
                     </button>
                 <?php endif; ?>
             </div>
             
             <div class="flex flex-col gap-2">
-                <label class="font-label-md text-[14px] text-on-surface">Keyword / Location</label>
+                <label class="font-label-md text-[14px] text-on-surface"><?= lang('Front.srch_keyword_loc') ?></label>
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline text-[20px]">search</span>
                     
-                    <input name="q" id="sidebarSearchInput" autocomplete="off" value="<?= esc($keyword ?? '') ?>" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-fixed-dim outline-none transition-all font-body-md text-[14px] text-on-surface" placeholder="e.g. Pool, Canggu" type="text"/>
+                    <input name="q" id="sidebarSearchInput" autocomplete="off" value="<?= esc($keyword ?? '') ?>" class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container focus:ring-1 focus:ring-primary-fixed-dim outline-none transition-all font-body-md text-[14px] text-on-surface" placeholder="<?= lang('Front.srch_placeholder_loc') ?>" type="text"/>
                     
                     <div id="sidebarSuggestDropdown" class="absolute left-0 right-0 top-full mt-1 bg-surface border border-outline-variant rounded shadow-lg z-50 hidden max-h-60 overflow-y-auto w-full"></div>
                 </div>
@@ -35,7 +35,7 @@
 
             <!-- PRICE RANGE FILTER -->
             <div>
-                <h3 class="font-label-md text-[14px] text-on-surface mb-3">Price Range (Rp)</h3>
+                <h3 class="font-label-md text-[14px] text-on-surface mb-3"><?= lang('Front.srch_price_range') ?></h3>
                 <div class="flex items-center gap-2">
                     <input type="number" name="min_price" value="<?= esc($_GET['min_price'] ?? '') ?>" placeholder="Min" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
                     <span class="text-on-surface-variant">-</span>
@@ -46,9 +46,9 @@
             <!-- BED & BATH FILTER -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <h3 class="font-label-md text-[14px] text-on-surface mb-3">Beds</h3>
+                    <h3 class="font-label-md text-[14px] text-on-surface mb-3"><?= lang('Front.srch_beds') ?></h3>
                     <select name="bed" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
-                        <option value="">Any</option>
+                        <option value=""><?= lang('Front.srch_any') ?></option>
                         <option value="1" <?= ($_GET['bed'] ?? '') == '1' ? 'selected' : '' ?>>1+</option>
                         <option value="2" <?= ($_GET['bed'] ?? '') == '2' ? 'selected' : '' ?>>2+</option>
                         <option value="3" <?= ($_GET['bed'] ?? '') == '3' ? 'selected' : '' ?>>3+</option>
@@ -57,9 +57,9 @@
                     </select>
                 </div>
                 <div>
-                    <h3 class="font-label-md text-[14px] text-on-surface mb-3">Baths</h3>
+                    <h3 class="font-label-md text-[14px] text-on-surface mb-3"><?= lang('Front.srch_baths') ?></h3>
                     <select name="bath" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface-container-lowest focus:border-primary-container outline-none font-body-md text-[14px]">
-                        <option value="">Any</option>
+                        <option value=""><?= lang('Front.srch_any') ?></option>
                         <option value="1" <?= ($_GET['bath'] ?? '') == '1' ? 'selected' : '' ?>>1+</option>
                         <option value="2" <?= ($_GET['bath'] ?? '') == '2' ? 'selected' : '' ?>>2+</option>
                         <option value="3" <?= ($_GET['bath'] ?? '') == '3' ? 'selected' : '' ?>>3+</option>
@@ -73,19 +73,19 @@
             <!-- RADIUS FILTER -->
             <div class="flex flex-col gap-2">
                 <div class="flex justify-between items-center">
-                    <label class="font-label-md text-[14px] text-on-surface">Radius (Km)</label>
-                    <span id="radiusValue" class="text-[12px] font-bold text-primary"><?= esc($radius ?? 'Any') ?> <?= isset($radius) && $radius !== '' ? 'Km' : '' ?></span>
+                    <label class="font-label-md text-[14px] text-on-surface"><?= lang('Front.srch_radius') ?></label>
+                    <span id="radiusValue" class="text-[12px] font-bold text-primary"><?= esc($radius ?? lang('Front.srch_any')) ?> <?= isset($radius) && $radius !== '' ? 'Km' : '' ?></span>
                 </div>
                 <input type="range" name="radius" id="radiusSlider" min="1" max="50" value="<?= esc($radius ?? 50) ?>" class="w-full accent-primary" oninput="document.getElementById('radiusValue').innerText = this.value + ' Km'">
                 <button type="button" onclick="getLocation()" class="text-[12px] text-on-surface-variant hover:text-primary flex items-center gap-1 mt-1 transition-colors w-fit">
-                    <span class="material-symbols-outlined text-[14px]">my_location</span> Use my current location
+                    <span class="material-symbols-outlined text-[14px]">my_location</span> <?= lang('Front.srch_use_loc') ?>
                 </button>
             </div>
 
             <hr class="border-outline-variant"/>
 
             <div>
-                <h3 class="font-label-md text-[14px] text-on-surface mb-4">Property Type</h3>
+                <h3 class="font-label-md text-[14px] text-on-surface mb-4"><?= lang('Front.srch_prop_type') ?></h3>
                 <div class="flex flex-col gap-3">
                     <?php 
                         $currentTypes = isset($_GET['type']) ? $_GET['type'] : [];
@@ -101,8 +101,8 @@
             </div>
 
             <div class="mt-auto pt-8">
-                <button type="submit" class="w-full bg-primary-container text-on-primary font-label-md text-[14px] font-bold py-3 rounded hover:bg-primary transition-colors">Apply Filters</button>
-                <a href="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" class="block text-center w-full mt-2 bg-transparent text-primary-container font-label-md text-[14px] py-3 rounded hover:bg-surface-container-low transition-colors">Clear All</a>
+                <button type="submit" class="w-full bg-primary-container text-on-primary font-label-md text-[14px] font-bold py-3 rounded hover:bg-primary transition-colors"><?= lang('Front.srch_apply_filters') ?></button>
+                <a href="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" class="block text-center w-full mt-2 bg-transparent text-primary-container font-label-md text-[14px] py-3 rounded hover:bg-surface-container-low transition-colors"><?= lang('Front.srch_clear_all') ?></a>
             </div>
         </form>
     </aside>
@@ -111,14 +111,14 @@
         
         <header class="bg-surface px-6 py-4 border-b border-outline-variant flex justify-between items-center z-10">
             <div>
-                <h1 class="font-headline-lg-mobile text-[24px] font-bold text-on-background">Explore Properties</h1>
-                <p class="font-body-md text-[14px] text-on-surface-variant mt-1">Showing <?= esc($total) ?> results</p>
+                <h1 class="font-headline-lg-mobile text-[24px] font-bold text-on-background"><?= lang('Front.srch_explore') ?></h1>
+                <p class="font-body-md text-[14px] text-on-surface-variant mt-1"><?= lang('Front.srch_showing_results') ?> <?= esc($total) ?> <?= lang('Front.srch_results') ?></p>
             </div>
             
             <div class="flex items-center gap-4">
                 <div class="flex bg-surface-container-highest p-1 rounded">
-                    <button onclick="document.getElementById('filterForm').action='<?= base_url('search/sale') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Sale' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all">Sale</button>
-                    <button onclick="document.getElementById('filterForm').action='<?= base_url('search/rent') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Rent' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all">Rent</button>
+                    <button onclick="document.getElementById('filterForm').action='<?= base_url('search/sale') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Sale' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all"><?= lang('Front.srch_sale') ?></button>
+                    <button onclick="document.getElementById('filterForm').action='<?= base_url('search/rent') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Rent' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all"><?= lang('Front.srch_rent') ?></button>
                 </div>
             </div>
         </header>
@@ -149,7 +149,7 @@
                                 </div>
                                 <?php if(isset($property['distance'])): ?>
                                     <div class="absolute bottom-3 right-3 bg-surface/90 backdrop-blur-sm text-on-surface font-label-md text-[12px] px-2 py-1 rounded shadow-sm">
-                                        <?= number_format($property['distance'], 1) ?> km away
+                                        <?= number_format($property['distance'], 1) ?> <?= lang('Front.det_km_away') ?>
                                     </div>
                                 <?php endif; ?>
                             </a>
@@ -163,7 +163,7 @@
                                 
                                 <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">location_on</span>
-                                    <?= esc($property['area_name'] ?? $property['address_line_1'] ?? 'Location Not Set') ?>
+                                    <?= esc($property['area_name'] ?? $property['address_line_1'] ?? lang('Front.lbl_location_not_set')) ?>
                                 </p>
                                 
                                 <div class="flex items-center gap-4 border-t border-outline-variant pt-4 mt-auto">
@@ -179,8 +179,8 @@
                     <?php endforeach; else: ?>
                         <div class="col-span-full py-12 text-center text-on-surface-variant flex flex-col items-center">
                             <span class="material-symbols-outlined text-[48px] mb-2 opacity-50">search_off</span>
-                            <p class="text-lg">No properties found matching your criteria.</p>
-                            <a href="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" class="text-primary hover:underline mt-2">Clear filters</a>
+                            <p class="text-lg"><?= lang('Front.srch_no_criteria') ?></p>
+                            <a href="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" class="text-primary hover:underline mt-2"><?= lang('Front.srch_clear_filters') ?></a>
                         </div>
                     <?php endif; ?>
                 </div>

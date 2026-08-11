@@ -19,9 +19,9 @@
 
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-8">
     <nav aria-label="Breadcrumb" class="mb-4 flex items-center text-on-surface-variant text-[12px] font-caption">
-        <a class="hover:text-primary transition-colors" href="<?= base_url() ?>">Home</a>
+        <a class="hover:text-primary transition-colors" href="<?= base_url() ?>"><?= lang('Front.det_home') ?></a>
         <span class="mx-2 material-symbols-outlined text-[16px]">chevron_right</span>
-        <a class="hover:text-primary transition-colors" href="<?= base_url('search') ?>">Properties</a>
+        <a class="hover:text-primary transition-colors" href="<?= base_url('search') ?>"><?= lang('Front.det_properties') ?></a>
         <span class="mx-2 material-symbols-outlined text-[16px]">chevron_right</span>
         <span class="text-on-surface font-medium"><?= esc($property->title) ?></span>
     </nav>
@@ -37,7 +37,7 @@
             <img alt="Featured" src="<?= $mainImg ?>" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
             <div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded flex items-center gap-2 hover:bg-white transition-colors">
                 <span class="material-symbols-outlined text-primary text-[20px] fill">photo_library</span>
-                <span class="font-label-md text-[14px] text-primary font-bold">View All Photos (<?= count($images) ?>)</span>
+                <span class="font-label-md text-[14px] text-primary font-bold"><?= lang('Front.det_view_all_photos') ?> (<?= count($images) ?>)</span>
             </div>
         </div>
         <div class="relative overflow-hidden group hidden md:block cursor-pointer" onclick="openGallery()">
@@ -68,7 +68,7 @@
                         </div>
                         <p class="flex items-center text-on-surface-variant font-body-md text-[16px]">
                             <span class="material-symbols-outlined mr-2">location_on</span>
-                            <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?><?= !empty($property->zipcode) ? ', ' . esc($property->zipcode) : '' ?>
+                            <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? lang('Front.lbl_location_not_set')) ?><?= !empty($property->zipcode) ? ', ' . esc($property->zipcode) : '' ?>
                         </p>
                     </div>
                     <div class="text-left md:text-right">
@@ -81,97 +81,97 @@
                         <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">bed</span>
                         </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->bed) ?> Bedrooms</p>
+                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->bed) ?> <?= lang('Front.det_bedrooms') ?></p>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">shower</span>
                         </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->bath) ?> Bathrooms</p>
+                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->bath) ?> <?= lang('Front.det_bathrooms') ?></p>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
                             <span class="material-symbols-outlined">straighten</span>
                         </div>
-                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> Sqm</p>
+                        <p class="font-label-md text-[14px] font-bold text-on-surface"><?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> <?= lang('Front.det_sqm') ?></p>
                     </div>
                 </div>
             </section>
 
             <section>
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">About This Property</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_about') ?></h2>
                 <div class="prose prose-sm md:prose-base max-w-none text-on-surface-variant font-body-md text-[16px]">
                     <p><?= nl2br(esc($property->description)) ?></p>
                 </div>
             </section>
 
-            <!-- NEW: PROPERTY SPECIFICATIONS SECTION -->
+            <!-- PROPERTY SPECIFICATIONS SECTION -->
             <section>
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Property Specifications</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_specs') ?></h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
                     
                     <?php if(!empty($property->building_society_name)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Complex/Society</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_complex') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->building_society_name) ?></span>
                     </div>
                     <?php endif; ?>
                     
                     <?php if(!empty($property->unit_number)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Unit Number</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_unit_num') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->unit_number) ?></span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->year_built)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Year Built</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_year_built') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->year_built) ?></span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->total_floors)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Total Floors</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_total_floors') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->total_floors) ?></span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->usable_area)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Usable Area</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_usable_area') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->usable_area) ?> m&sup2;</span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->total_land_area)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Land Area</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_land_area') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->total_land_area) ?> m&sup2;</span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->parking)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Parking</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_parking') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface">
                             <?= esc($property->parking) ?> 
-                            <?= (!empty($property->total_parking) && $property->total_parking > 0) ? '(' . esc($property->total_parking) . ' spots)' : '' ?>
+                            <?= (!empty($property->total_parking) && $property->total_parking > 0) ? '(' . esc($property->total_parking) . ' ' . lang('Front.det_spots') . ')' : '' ?>
                         </span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->basement)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Basement</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_basement') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->basement) ?></span>
                     </div>
                     <?php endif; ?>
 
                     <?php if(!empty($property->water_facility)): ?>
                     <div>
-                        <span class="block text-[12px] text-on-surface-variant font-medium">Water Facility</span>
+                        <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_water') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->water_facility) ?></span>
                     </div>
                     <?php endif; ?>
@@ -181,7 +181,7 @@
 
             <?php if(!empty($propertyFeatures)): ?>
             <section class="mt-8">
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Premium Features</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_features') ?></h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
                     <?php foreach($propertyFeatures as $category => $features): ?>
                         <div>
@@ -204,7 +204,7 @@
             <?php endif; ?>
 
             <section>
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Location</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_location') ?></h2>
                 <div class="border border-outline-variant rounded overflow-hidden h-[400px] relative bg-surface-container-low z-0">
                     <div id="propertyMap" class="w-full h-full"></div>
                 </div>
@@ -225,7 +225,7 @@
 
             <?php if(!empty($nearbyPOIs)): ?>
             <section class="mt-4">
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Nearby Locations</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_nearby_loc') ?></h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <?php foreach($nearbyPOIs as $poi): ?>
                         <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded flex items-center gap-4">
@@ -240,7 +240,7 @@
                                 <p class="font-bold text-[14px] text-on-surface"><?= esc($poi->name) ?></p>
                                 <div class="flex items-center gap-2 mt-1">
                                     <span class="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold uppercase"><?= esc($poi->category) ?></span>
-                                    <span class="text-[12px] text-on-surface-variant font-medium"><?= number_format($poi->distance, 2) ?> km away</span>
+                                    <span class="text-[12px] text-on-surface-variant font-medium"><?= number_format($poi->distance, 2) ?> <?= lang('Front.det_km_away') ?></span>
                                 </div>
                             </div>
                         </div>
@@ -251,7 +251,7 @@
 
             <?php if(!empty($nearbyProperties)): ?>
             <section class="mt-8 border-t border-outline-variant pt-8">
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Nearby Properties</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_nearby_prop') ?></h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <?php foreach(array_slice($nearbyProperties, 0, 4) as $np): $np = (object)$np; ?>
                         <a href="<?= base_url('property/' . $np->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
@@ -265,7 +265,7 @@
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np->title) ?></span>
                                 <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np->tax_price, 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np->distance ?? 0, 1) ?> km away</span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np->distance ?? 0, 1) ?> <?= lang('Front.det_km_away') ?></span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -275,7 +275,7 @@
 
             <?php if(!empty($similarType)): ?>
             <section class="mt-8 border-t border-outline-variant pt-8">
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">Similar Property Types</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_similar_type') ?></h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <?php foreach(array_slice($similarType, 0, 4) as $st): $st = (object)$st; ?>
                         <a href="<?= base_url('property/' . $st->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
@@ -289,7 +289,7 @@
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st->title) ?></span>
                                 <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($st->tax_price, 0, ',', '.') ?></span>
-                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st->bed ?? 0) ?> Bed • <?= esc($st->bath ?? 0) ?> Bath</span>
+                                <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st->bed ?? 0) ?> <?= lang('Front.lbl_beds') ?> • <?= esc($st->bath ?? 0) ?> <?= lang('Front.lbl_baths') ?></span>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -299,7 +299,7 @@
 
             <?php if(!empty($similarPrice)): ?>
             <section class="mt-8 border-t border-outline-variant pt-8">
-                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4">In The Same Price Range</h2>
+                <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_same_price') ?></h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <?php foreach(array_slice($similarPrice, 0, 4) as $sp): $sp = (object)$sp; ?>
                         <a href="<?= base_url('property/' . $sp->id) ?>" class="flex items-center gap-4 p-3 bg-surface border border-outline-variant rounded hover:shadow-md transition-shadow group">
@@ -343,36 +343,36 @@
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm" x-data="mortgageCalculator()">
                     <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">calculate</span>
-                        Estimated Payment
+                        <?= lang('Front.det_est_payment') ?>
                     </h3>
                     
                     <div class="mb-6 text-center">
-                        <span class="text-[12px] text-on-surface-variant font-medium">Monthly Total</span>
+                        <span class="text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_monthly_total') ?></span>
                         <div class="font-headline-lg text-[28px] font-bold text-primary" x-text="'Rp ' + formatRupiah(monthlyPayment)"></div>
                     </div>
 
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Home Price (Rp)</label>
+                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1"><?= lang('Front.det_home_price') ?></label>
                             <input type="text" x-model="homePrice" class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded outline-none" readonly>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Down Payment (%)</label>
+                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1"><?= lang('Front.det_dp_percent') ?></label>
                                 <input type="number" x-model="dpPercent" @input="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none focus:border-primary">
                             </div>
                             <div>
-                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Interest Rate (%)</label>
+                                <label class="block text-[12px] font-bold text-on-surface-variant mb-1"><?= lang('Front.det_interest_rate') ?></label>
                                 <input type="number" step="0.1" x-model="interestRate" @input="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none focus:border-primary">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1">Loan Term (Years)</label>
+                            <label class="block text-[12px] font-bold text-on-surface-variant mb-1"><?= lang('Front.det_loan_term') ?></label>
                             <select x-model="loanTerm" @change="calculate()" class="w-full px-3 py-2 bg-surface border border-outline-variant rounded outline-none cursor-pointer focus:border-primary">
-                                <option value="10">10 Years</option>
-                                <option value="15">15 Years</option>
-                                <option value="20">20 Years</option>
-                                <option value="30">30 Years</option>
+                                <option value="10"><?= lang('Front.det_10_years') ?></option>
+                                <option value="15"><?= lang('Front.det_15_years') ?></option>
+                                <option value="20"><?= lang('Front.det_20_years') ?></option>
+                                <option value="30"><?= lang('Front.det_30_years') ?></option>
                             </select>
                         </div>
                     </div>
@@ -387,9 +387,9 @@
                         </div>
                         <div>
                             <h3 class="font-label-md text-[16px] text-on-surface font-bold"><?= esc($property->first_name . ' ' . $property->last_name) ?></h3>
-                            <p class="text-[12px] text-on-surface-variant mb-1">Premium Property Agent</p>
+                            <p class="text-[12px] text-on-surface-variant mb-1"><?= lang('Front.det_premium_agent') ?></p>
                             <span class="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded text-[12px] text-primary border border-outline-variant/50">
-                                <span class="material-symbols-outlined text-[12px]">badge</span> Verified
+                                <span class="material-symbols-outlined text-[12px]">badge</span> <?= lang('Front.det_verified') ?>
                             </span>
                         </div>
                     </div>
@@ -401,25 +401,25 @@
                             <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
                             
                             <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
-                                <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>>I want to ask a question</option>
-                                <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>>I want to schedule a visit</option>
+                                <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>><?= lang('Front.det_ask_question') ?></option>
+                                <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>><?= lang('Front.det_schedule_visit') ?></option>
                             </select>
 
-                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Full Name" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') . ' ' . session()->get('last_name'))) ?>">
-                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Phone Number" type="tel" value="<?= esc(old('phone')) ?>">
-                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="Email Address" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
+                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') . ' ' . session()->get('last_name'))) ?>">
+                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="<?= esc(old('phone')) ?>">
+                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
                             <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
                             
                             <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined text-[20px]">send</span> Send Message
+                                <span class="material-symbols-outlined text-[20px]">send</span> <?= lang('Front.det_send_msg') ?>
                             </button>
                         </form>
                     <?php else: ?>
                         <div class="text-center py-4">
                             <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2 opacity-50">lock</span>
-                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6">You must be logged in to contact the agent and schedule a visit securely.</p>
+                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6"><?= lang('Front.det_lock_notice') ?></p>
                             <a href="<?= base_url('login') ?>" class="w-full inline-block bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors">
-                                Sign In to Contact
+                                <?= lang('Front.det_signin_contact') ?>
                             </a>
                         </div>
                     <?php endif; ?>
