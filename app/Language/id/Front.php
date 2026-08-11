@@ -39,6 +39,38 @@ return [
     'lbl_no_new' => 'Belum ada properti baru yang tersedia.',
     'lbl_no_faq' => 'Belum ada FAQ yang tersedia saat ini.',
 
+    // Blog
+    'blog_title' => 'Berita & Update',
+    'blog_subtitle' => 'Dapatkan pengumuman terbaru, tips properti, dan artikel blog dari HuniKita.',
+    'btn_read_more' => 'Baca Selengkapnya',
+    'lbl_no_updates' => 'Belum ada pembaruan',
+    'lbl_no_updates_sub' => 'Silakan periksa kembali nanti untuk artikel dan pengumuman baru.',
+
+    // FAQ Page
+    'faq_title' => 'Ada yang bisa kami bantu?',
+    'faq_subtitle' => 'Cari di pusat bantuan kami atau telusuri pertanyaan yang sering diajukan di bawah ini.',
+    'placeholder_faq_search' => 'Ketik kata kunci untuk menemukan jawaban...',
+    'lbl_no_results' => 'Hasil tidak ditemukan',
+    'lbl_no_results_sub' => 'Kami tidak dapat menemukan FAQ yang sesuai dengan pencarian Anda.',
+
+    // CMS Page
+    'page_subtitle' => 'Detail platform, panduan kebijakan, dan pemberitahuan informasi standar.',
+    'lbl_legal_info' => 'Hukum & Info',
+    'lbl_last_updated' => 'Terakhir diperbarui:',
+    'btn_contact_support' => 'Hubungi Dukungan',
+    'page_mission_title' => 'Misi Kami',
+    'page_mission_text' => 'HuniKita didirikan dengan satu tujuan sederhana: membuat proses pencarian, pembelian, dan penjualan properti menjadi transparan, aman, dan mudah. Kami menjembatani antara agen premium dan pembeli yang antusias menggunakan teknologi mutakhir.',
+    'page_choose_title' => 'Mengapa Memilih Kami?',
+    'page_choose_li1' => 'Agen terverifikasi dan daftar properti asli.',
+    'page_choose_li2' => 'Sistem komunikasi internal yang aman.',
+    'page_choose_li3' => 'Pencarian peta lanjutan dan kemampuan tur virtual.',
+    'page_data_title' => 'Pengumpulan Data',
+    'page_data_text' => 'Kami mengumpulkan informasi untuk memberikan layanan yang lebih baik kepada pengguna kami. Ini termasuk informasi dasar seperti alamat email dan nomor telepon Anda saat Anda mengirimkan pertanyaan properti.',
+    'page_use_title' => 'Bagaimana Kami Menggunakan Informasi Anda',
+    'page_use_text' => 'Informasi yang kami kumpulkan digunakan secara ketat untuk memfasilitasi komunikasi antara pembeli dan agen terverifikasi. Kami tidak menjual data pribadi Anda kepada pihak ketiga.',
+    'page_uc_title' => 'Halaman Sedang Dalam Perbaikan',
+    'page_uc_text' => 'Konten untuk halaman <strong>%s</strong> sedang disusun oleh tim hukum dan konten kami. Silakan periksa kembali nanti.',
+
     // Footer
     'ft_desc' => 'Platform real estat premium yang menghubungkan pembeli cerdas dengan agen terverifikasi dan properti eksklusif.',
     'ft_company' => 'Perusahaan',

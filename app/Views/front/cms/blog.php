@@ -3,8 +3,8 @@
 
 <main class="max-w-6xl mx-auto px-4 py-12 min-h-screen">
     <div class="mb-10 text-center">
-        <h1 class="text-3xl md:text-4xl font-bold text-on-surface mb-4">News & Updates</h1>
-        <p class="text-on-surface-variant max-w-2xl mx-auto">Stay up to date with the latest announcements, property tips, and blog posts from HuniKita.</p>
+        <h1 class="text-3xl md:text-4xl font-bold text-on-surface mb-4"><?= lang('Front.blog_title') ?></h1>
+        <p class="text-on-surface-variant max-w-2xl mx-auto"><?= lang('Front.blog_subtitle') ?></p>
     </div>
 
     <?php if (!empty($posts)): ?>
@@ -32,7 +32,7 @@
                         <div class="mt-auto pt-4 border-t border-outline-variant">
                             <!-- Link to the individual page using the slug -->
                             <a href="<?= base_url('cms/page/' . $post->slug) ?>" class="text-primary font-semibold hover:underline flex items-center gap-1 text-sm w-max">
-                                Read More <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                <?= lang('Front.btn_read_more') ?> <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
                             </a>
                         </div>
                     </div>
@@ -42,8 +42,8 @@
     <?php else: ?>
         <div class="text-center py-20 bg-surface-container-low rounded-xl border border-outline-variant">
             <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">article</span>
-            <h2 class="text-xl font-semibold text-on-surface">No updates yet</h2>
-            <p class="text-on-surface-variant mt-2">Check back later for new articles and announcements.</p>
+            <h2 class="text-xl font-semibold text-on-surface"><?= lang('Front.lbl_no_updates') ?></h2>
+            <p class="text-on-surface-variant mt-2"><?= lang('Front.lbl_no_updates_sub') ?></p>
         </div>
     <?php endif; ?>
 </main>
