@@ -18,25 +18,25 @@
         
         <div class="relative z-10 w-full max-w-4xl px-4 md:px-0">
             <div class="text-center mb-8">
-                <h1 class="font-headline-xl text-[32px] md:text-[48px] font-bold text-white mb-2 drop-shadow-md">Find Your Perfect Property</h1>
-                <p class="font-body-lg text-[18px] text-white/90 drop-shadow-sm">Discover high-end real estate tailored to your lifestyle with HuniKita.</p>
+                <h1 class="font-headline-xl text-[32px] md:text-[48px] font-bold text-white mb-2 drop-shadow-md"><?= lang('Front.hero_title') ?></h1>
+                <p class="font-body-lg text-[18px] text-white/90 drop-shadow-sm"><?= lang('Front.hero_subtitle') ?></p>
             </div>
             
             <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
                 <form id="homeSearchForm" action="<?= base_url('search/sale') ?>" method="GET" class="flex flex-col gap-4">
                     <div class="flex gap-2 border-b border-outline-variant pb-2">
-                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/sale') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors">For Sale</button>
-                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/rent') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">For Rent</button>
+                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/sale') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors"><?= lang('Front.btn_for_sale') ?></button>
+                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/rent') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors"><?= lang('Front.btn_for_rent') ?></button>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4 relative">
                         <div class="relative flex-grow">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                            <input name="q" id="searchInput" autocomplete="off" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="Search by State, City, or Zipcode..." type="text">
+                            <input name="q" id="searchInput" autocomplete="off" class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md text-[16px] text-on-surface" placeholder="<?= lang('Front.placeholder_search') ?>" type="text">
                             <div id="suggestDropdown" class="absolute left-0 right-0 top-full mt-1 bg-surface border border-outline-variant rounded shadow-lg z-50 hidden max-h-60 overflow-y-auto"></div>
                         </div>
                         <button type="submit" class="bg-primary text-on-primary font-label-md text-[14px] font-semibold px-6 py-3 rounded hover:bg-primary-container transition-colors shadow-sm whitespace-nowrap">
-                            Search Properties
+                            <?= lang('Front.btn_search') ?>
                         </button>
                     </div>
                 </form>
@@ -68,11 +68,11 @@
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="flex justify-between items-end mb-8">
             <div>
-                <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2">Popular Listings</h2>
-                <p class="text-on-surface-variant font-body-lg">Trending properties currently highly sought after.</p>
+                <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2"><?= lang('Front.sec_popular') ?></h2>
+                <p class="text-on-surface-variant font-body-lg"><?= lang('Front.sec_popular_sub') ?></p>
             </div>
             <a href="<?= base_url('search/sale') ?>" class="flex items-center gap-1 text-primary font-label-md text-[14px] font-semibold hover:underline">
-                View All <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                <?= lang('Front.btn_view_all') ?> <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
             </a>
         </div>
 
@@ -105,18 +105,18 @@
                                 </a>
                             </h3>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
+                                <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? lang('Front.lbl_location_not_set')) ?>
                             </p>
                             <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
-                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
-                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> <?= lang('Front.lbl_beds') ?></div>
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> <?= lang('Front.lbl_baths') ?></div>
+                                <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> <?= lang('Front.lbl_sqm') ?></div>
                             </div>
                         </div>
                     </article>
                 <?php endforeach; ?>
             <?php else: ?>
-                <p class="col-span-3 text-center text-on-surface-variant py-10">No popular properties currently available.</p>
+                <p class="col-span-3 text-center text-on-surface-variant py-10"><?= lang('Front.lbl_no_popular') ?></p>
             <?php endif; ?>
         </div>
     </section>
@@ -125,8 +125,8 @@
         <div class="max-w-[1280px] mx-auto px-4 md:px-10 relative">
             <div class="flex justify-between items-end mb-8">
                 <div>
-                    <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2">Newly Listed</h2>
-                    <p class="text-on-surface-variant font-body-lg">Be the first to check out these fresh properties on the market.</p>
+                    <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2"><?= lang('Front.sec_newly') ?></h2>
+                    <p class="text-on-surface-variant font-body-lg"><?= lang('Front.sec_newly_sub') ?></p>
                 </div>
             </div>
 
@@ -142,7 +142,7 @@
                             <div class="swiper-slide h-auto">
                                 <article class="property-card h-full bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                     <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group shrink-0">
-                                        <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">New</div>
+                                        <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider"><?= lang('Front.lbl_new') ?></div>
                                         <?php 
                                             $imgPath = trim($property->image_path ?? '');
                                             $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
@@ -162,19 +162,19 @@
                                             </a>
                                         </h3>
                                         <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
-                                            <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? 'Location Not Set') ?>
+                                            <span class="material-symbols-outlined text-[16px]">location_on</span> <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? lang('Front.lbl_location_not_set')) ?>
                                         </p>
                                         <div class="grid grid-cols-3 gap-2 border-t border-outline-variant pt-4 mt-auto">
-                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> Beds</div>
-                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> Baths</div>
-                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> m²</div>
+                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">bed</span> <?= esc($property->bed) ?> <?= lang('Front.lbl_beds') ?></div>
+                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">shower</span> <?= esc($property->bath) ?> <?= lang('Front.lbl_baths') ?></div>
+                                            <div class="flex items-center gap-1 text-on-surface-variant text-[12px]"><span class="material-symbols-outlined text-[18px]">square_foot</span> <?= esc($property->total_area ?? $property->total_land_area ?? 0) ?> <?= lang('Front.lbl_sqm') ?></div>
                                         </div>
                                     </div>
                                 </article>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <p class="w-full text-center text-on-surface-variant py-10">No new properties currently available.</p>
+                        <p class="w-full text-center text-on-surface-variant py-10"><?= lang('Front.lbl_no_new') ?></p>
                     <?php endif; ?>
                 </div>
                 <div class="swiper-pagination"></div>
@@ -186,8 +186,8 @@
 
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="mb-10 text-center max-w-2xl mx-auto">
-            <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-3">Frequently Asked Questions</h2>
-            <p class="text-on-surface-variant font-body-lg">Everything you need to know about using HuniKita.</p>
+            <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-3"><?= lang('Front.sec_faq') ?></h2>
+            <p class="text-on-surface-variant font-body-lg"><?= lang('Front.sec_faq_sub') ?></p>
         </div>
 
         <div class="max-w-3xl mx-auto flex flex-col gap-4">
@@ -206,7 +206,7 @@
             <?php else: ?>
                 <div class="text-center p-8 bg-surface-container-lowest border border-outline-variant rounded-lg">
                     <span class="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2">help_outline</span>
-                    <p class="text-on-surface-variant text-sm">No FAQs available at the moment.</p>
+                    <p class="text-on-surface-variant text-sm"><?= lang('Front.lbl_no_faq') ?></p>
                 </div>
             <?php endif; ?>
         </div>
