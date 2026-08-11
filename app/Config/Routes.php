@@ -13,7 +13,7 @@ $routes->get('search/(:segment)', 'Home::search/$1'); // SEO: /search/rent or /s
 $routes->get('api/suggest', 'Home::suggest');
 $routes->post('search/save', 'Home::saveSearch');
 
-// --- PROPERTY DETAIL ROUTES ---
+// property details routes
 $routes->get('property/(:num)', 'Home::detail/$1');
 // SEO Property Detail Route: /property/tangerang/classic-heritage-townhouse-9
 $routes->get('property/(:segment)/(:any)-(:num)', 'Home::detail/$3');
@@ -63,7 +63,7 @@ $routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'ad
 // Admin Dashboard Routes (Protected by AdminFilter)
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
 
-    // --- SHARED ROUTES (Agents, Owners, Admins) ---
+    // shared routes (Agents, Owners, Admins)
     $routes->get('dashboard', 'Dashboard::index');
     
     // Property Management
