@@ -2,20 +2,20 @@
 
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-10 min-h-[calc(100vh-80px)]">
     <div class="mb-8">
-        <h1 class="font-headline-lg text-[32px] font-bold text-on-background">Real Estate in <?= esc($state->name) ?></h1>
-        <p class="text-on-surface-variant mt-2">Explore properties and market statistics across the region.</p>
+        <h1 class="font-headline-lg text-[32px] font-bold text-on-background"><?= lang('Front.prop_real_estate_in') ?> <?= esc($state->name) ?></h1>
+        <p class="text-on-surface-variant mt-2"><?= lang('Front.prop_region_sub') ?></p>
     </div>
 
     <!-- City Statistics Block -->
     <?php if(!empty($cityStats)): ?>
     <div class="bg-surface border border-outline-variant rounded-lg p-6 mb-10 shadow-sm">
-        <h2 class="font-headline-md text-[20px] font-bold text-primary mb-4">Market Overview by City</h2>
+        <h2 class="font-headline-md text-[20px] font-bold text-primary mb-4"><?= lang('Front.prop_market_overview') ?></h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <?php foreach($cityStats as $stat): ?>
                 <div class="p-4 bg-surface-container-lowest border border-outline-variant rounded flex flex-col">
                     <span class="font-bold text-on-surface text-[16px]"><?= esc($stat->city_name) ?></span>
-                    <span class="text-on-surface-variant text-[14px] mt-1"><?= $stat->property_count ?> Properties</span>
-                    <span class="text-primary font-bold mt-2">Avg: Rp <?= number_format($stat->avg_price, 0, ',', '.') ?></span>
+                    <span class="text-on-surface-variant text-[14px] mt-1"><?= $stat->property_count ?> <?= lang('Front.prop_properties_count') ?></span>
+                    <span class="text-primary font-bold mt-2"><?= lang('Front.prop_avg_price') ?> Rp <?= number_format($stat->avg_price, 0, ',', '.') ?></span>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -23,7 +23,7 @@
     <?php endif; ?>
 
     <!-- Property Grid -->
-    <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6">Available Properties</h2>
+    <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6"><?= lang('Front.prop_available') ?></h2>
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <?php if(!empty($properties)): foreach($properties as $property): ?>
             <?php 
@@ -51,7 +51,7 @@
                 </div>
             </article>
         <?php endforeach; else: ?>
-            <p class="col-span-full text-center text-on-surface-variant py-8">No properties found in this region yet.</p>
+            <p class="col-span-full text-center text-on-surface-variant py-8"><?= lang('Front.prop_no_region') ?></p>
         <?php endif; ?>
     </div>
 

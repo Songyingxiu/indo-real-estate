@@ -4,8 +4,8 @@
 
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-10 min-h-[calc(100vh-80px)]">
     <div class="mb-6">
-        <h1 class="font-headline-lg text-[32px] font-bold text-on-background">Properties in Zip Code: <?= esc($zipcode['zipcode'] ?? '') ?></h1>
-        <p class="text-on-surface-variant mt-2">Explore available real estate locations on the map below.</p>
+        <h1 class="font-headline-lg text-[32px] font-bold text-on-background"><?= lang('Front.prop_in_zip') ?> <?= esc($zipcode['zipcode'] ?? '') ?></h1>
+        <p class="text-on-surface-variant mt-2"><?= lang('Front.prop_in_city_sub') ?></p>
     </div>
 
     <!-- Map View -->
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Property Grid -->
-    <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6">Available Properties</h2>
+    <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6"><?= lang('Front.prop_available') ?></h2>
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <?php if(!empty($properties)): foreach($properties as $property): ?>
             <?php 
@@ -42,7 +42,7 @@
                 </div>
             </article>
         <?php endforeach; else: ?>
-            <p class="col-span-full text-center text-on-surface-variant py-8">No properties found in this zip code yet.</p>
+            <p class="col-span-full text-center text-on-surface-variant py-8"><?= lang('Front.prop_no_zip') ?></p>
         <?php endif; ?>
     </div>
 
