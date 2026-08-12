@@ -3,15 +3,42 @@
 
 <div class="max-w-6xl mx-auto mt-4 pb-12" x-data="{ 
     showDeleteModal: false, deleteUrl: '', deleteMessage: '',
-    showEditTypeModal: false, editTypeId: '', editTypeName: '',
+    showEditTypeModal: false, editTypeId: '', editTypeNameEN: '', editTypeNameID: '',
     showEditStateModal: false, editStateId: '', editStateName: '',
     showEditCityModal: false, editCityId: '', editCityName: '', editCityStateId: '',
     showEditZipcodeModal: false, editZipcodeId: '', editZipcodeVal: '', editZipcodeCityId: '',
     showCreatePlanModal: false, showEditPlanModal: false,
-    editPlanId: '', editPlanCode: '', editPlanName: '', editPlanDesc: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanPoi: 0, editPlanMsg: 0, editPlanEmail: 0,
+    editPlanId: '', editPlanCode: '', editPlanNameEN: '', editPlanNameID: '', editPlanDescEN: '', editPlanDescID: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanPoi: 0, editPlanMsg: 0, editPlanEmail: 0,
     showCreatePoiModal: false,
-    showEditFeatureCatModal: false, editFeatureCatId: '', editFeatureCatName: '',
-    showEditFeatureModal: false, editFeatureId: '', editFeatureName: '', editFeatureCategoryId: ''
+    showEditFeatureCatModal: false, editFeatureCatId: '', editFeatureCatNameEN: '', editFeatureCatNameID: '',
+    showEditFeatureModal: false, editFeatureId: '', editFeatureNameEN: '', editFeatureNameID: '', editFeatureCategoryId: '',
+    translateText(text, targetProperty) {
+        if (!text.trim()) return;
+        fetch('http://127.0.0.1:5000/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                q: text,
+                source: 'auto',
+                target: 'id',
+                format: 'text'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.translatedText) {
+                // If it's a property on the Alpine instance
+                if(this.hasOwnProperty(targetProperty)) {
+                    this[targetProperty] = data.translatedText;
+                } else {
+                    // If it's an ID for a static form element
+                    let el = document.getElementById(targetProperty);
+                    if(el) el.value = data.translatedText;
+                }
+            }
+        })
+        .catch(err => console.error('Translation error:', err));
+    }
 }">
     
     <div class="mb-stack-lg mt-4 flex justify-between items-end">
@@ -38,7 +65,7 @@
                     <thead>
                         <tr class="bg-surface border-b border-outline-variant">
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Code</th>
-                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Package Name</th>
+                            <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Package Name (EN)</th>
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Price</th>
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant">Limits (Props/Agents/POIs)</th>
                             <th class="py-3 px-6 font-label-md text-caption text-on-surface-variant text-right">Actions</th>
@@ -50,8 +77,8 @@
                                 <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
                                     <td class="py-3 px-6 font-label-md font-bold text-primary"><?= esc($plan->code ?? $plan->package_code ?? 'N/A') ?></td>
                                     <td class="py-3 px-6 font-body-md text-on-surface">
-                                        <span class="font-semibold block"><?= esc($plan->name) ?></span>
-                                        <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block"><?= esc($plan->description ?? 'No description') ?></span>
+                                        <span class="font-semibold block"><?= esc($plan->name_en ?? $plan->name) ?></span>
+                                        <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block"><?= esc($plan->features_en ?? $plan->description ?? 'No description') ?></span>
                                     </td>
                                     <td class="py-3 px-6 font-body-md text-on-surface">Rp <?= number_format($plan->price, 0, ',', '.') ?></td>
                                     <td class="py-3 px-6 text-on-surface-variant text-sm flex gap-1 flex-wrap">
@@ -61,7 +88,7 @@
                                     </td>
                                     <td class="py-3 px-6 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? $plan->package_code ?? '')) ?>'; editPlanName = '<?= esc(addslashes($plan->name)) ?>'; editPlanDesc = '<?= esc(addslashes($plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanPoi = <?= $plan->max_pois ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->allow_direct_email ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? $plan->package_code ?? '')) ?>'; editPlanNameEN = '<?= esc(addslashes($plan->name_en ?? $plan->name)) ?>'; editPlanNameID = '<?= esc(addslashes($plan->name_id ?? $plan->name)) ?>'; editPlanDescEN = '<?= esc(addslashes($plan->features_en ?? $plan->description ?? '')) ?>'; editPlanDescID = '<?= esc(addslashes($plan->features_id ?? $plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanPoi = <?= $plan->max_pois ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->allow_direct_email ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </button>
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-plan/' . $plan->id) ?>'; deleteMessage = 'Are you sure you want to permanently delete this package?';" class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
@@ -227,10 +254,11 @@
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">category</span> Property Types
                     </h2>
-                    <form action="<?= base_url('admin/master-data/store-type') ?>" method="POST" class="flex gap-2">
+                    <form action="<?= base_url('admin/master-data/store-type') ?>" method="POST" class="flex flex-col gap-2">
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
-                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add new type..." type="text"/>
-                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
+                        <input name="name_en" id="create_type_en" @blur="translateText($event.target.value, 'create_type_id')" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Add new type (EN)..." type="text"/>
+                        <input name="name_id" id="create_type_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Auto-translated (ID)..." type="text"/>
+                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors mt-2">Add</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -239,10 +267,10 @@
                             <?php if(!empty($propertyTypes)): ?>
                                 <?php foreach($propertyTypes as $type): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-6 text-sm text-on-surface"><?= esc($type->type_name ?? $type->name) ?></td>
+                                        <td class="py-3 px-6 text-sm text-on-surface"><?= esc($type->name_en ?? $type->name) ?></td>
                                         <td class="py-3 px-6 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button type="button" @click="showEditTypeModal = true; editTypeId = <?= $type->id ?>; editTypeName = '<?= esc(addslashes($type->type_name ?? $type->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+                                                <button type="button" @click="showEditTypeModal = true; editTypeId = <?= $type->id ?>; editTypeNameEN = '<?= esc(addslashes($type->name_en ?? $type->name)) ?>'; editTypeNameID = '<?= esc(addslashes($type->name_id ?? $type->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
                                                 <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-type/' . $type->id) ?>'; deleteMessage = 'Delete this property type?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                                             </div>
                                         </td>
@@ -267,10 +295,11 @@
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">sell</span> Feature Categories
                     </h2>
-                    <form action="<?= base_url('admin/master-data/store-feature-category') ?>" method="POST" class="flex gap-2">
+                    <form action="<?= base_url('admin/master-data/store-feature-category') ?>" method="POST" class="flex flex-col gap-2">
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
-                        <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="e.g. Interior, Exterior..." type="text"/>
-                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
+                        <input name="name_en" id="create_feat_cat_en" @blur="translateText($event.target.value, 'create_feat_cat_id')" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="e.g. Interior, Exterior (EN)..." type="text"/>
+                        <input name="name_id" id="create_feat_cat_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Auto-translated (ID)..." type="text"/>
+                        <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors mt-2">Add</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -279,10 +308,10 @@
                             <?php if(!empty($featureCategories)): ?>
                                 <?php foreach($featureCategories as $cat): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
-                                        <td class="py-3 px-6 text-sm text-on-surface font-semibold"><?= esc($cat->name) ?></td>
+                                        <td class="py-3 px-6 text-sm text-on-surface font-semibold"><?= esc($cat->name_en ?? $cat->name) ?></td>
                                         <td class="py-3 px-6 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button type="button" @click="showEditFeatureCatModal = true; editFeatureCatId = <?= $cat->id ?>; editFeatureCatName = '<?= esc(addslashes($cat->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+                                                <button type="button" @click="showEditFeatureCatModal = true; editFeatureCatId = <?= $cat->id ?>; editFeatureCatNameEN = '<?= esc(addslashes($cat->name_en ?? $cat->name)) ?>'; editFeatureCatNameID = '<?= esc(addslashes($cat->name_id ?? $cat->name)) ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
                                                 <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature-category/' . $cat->id) ?>'; deleteMessage = 'Delete this category?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                                             </div>
                                         </td>
@@ -307,13 +336,14 @@
                         <select name="category_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Assign Category...</option>
                             <?php if(!empty($featureCategories)): foreach($featureCategories as $cat): ?>
-                                <option value="<?= $cat->id ?>"><?= esc($cat->name) ?></option>
+                                <option value="<?= $cat->id ?>"><?= esc($cat->name_en ?? $cat->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
-                        <div class="flex gap-2">
-                            <input name="name" required class="flex-1 h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="e.g. Swimming Pool..." type="text"/>
-                            <button type="submit" class="h-10 px-6 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add</button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <input name="name_en" id="create_feat_en" @blur="translateText($event.target.value, 'create_feat_id')" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="e.g. Swimming Pool (EN)..." type="text"/>
+                            <input name="name_id" id="create_feat_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 bg-surface-container-lowest" placeholder="Auto-translated (ID)..." type="text"/>
                         </div>
+                        <button type="submit" class="w-full h-10 bg-primary text-on-primary rounded text-sm font-semibold hover:bg-primary-container transition-colors">Add Feature</button>
                     </form>
                 </div>
                 <div class="flex-1 overflow-x-auto">
@@ -323,12 +353,12 @@
                                 <?php foreach($features as $feature): ?>
                                     <tr class="border-b border-outline-variant hover:bg-surface-bright transition-colors">
                                         <td class="py-3 px-6">
-                                            <span class="font-semibold block text-sm text-on-surface"><?= esc($feature->name ?? $feature->feature_name) ?></span>
+                                            <span class="font-semibold block text-sm text-on-surface"><?= esc($feature->name_en ?? $feature->name ?? $feature->feature_name) ?></span>
                                             <span class="text-xs text-on-surface-variant block">Category: <?= esc($feature->category_name ?? 'Uncategorized') ?></span>
                                         </td>
                                         <td class="py-3 px-6 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button type="button" @click="showEditFeatureModal = true; editFeatureId = <?= $feature->id ?>; editFeatureName = '<?= esc(addslashes($feature->name ?? $feature->feature_name)) ?>'; editFeatureCategoryId = '<?= $feature->category_id ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+                                                <button type="button" @click="showEditFeatureModal = true; editFeatureId = <?= $feature->id ?>; editFeatureNameEN = '<?= esc(addslashes($feature->name_en ?? $feature->name ?? $feature->feature_name)) ?>'; editFeatureNameID = '<?= esc(addslashes($feature->name_id ?? $feature->name ?? $feature->feature_name)) ?>'; editFeatureCategoryId = '<?= $feature->category_id ?>';" class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">edit</span></button>
                                                 <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-feature/' . $feature->id) ?>'; deleteMessage = 'Delete this feature?';" class="text-on-surface-variant hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[20px]">delete</span></button>
                                             </div>
                                         </td>
@@ -456,17 +486,25 @@
             <form action="<?= base_url('admin/master-data/store-plan') ?>" method="POST" class="overflow-y-auto custom-scrollbar">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-semibold mb-1">Unique Code</label>
                         <input type="text" name="code" placeholder="e.g. FREE" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Package Name</label>
-                        <input type="text" name="name" placeholder="e.g. Starter Free" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                        <label class="block text-sm font-semibold mb-1">Package Name (EN)</label>
+                        <input type="text" name="name_en" @blur="translateText($event.target.value, 'create_plan_name_id')" placeholder="e.g. Starter Free" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold mb-1">Description</label>
-                        <textarea name="description" rows="2" required placeholder="List details separated by commas..." class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Package Name (ID)</label>
+                        <input type="text" name="name_id" id="create_plan_name_id" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Description/Features (EN)</label>
+                        <textarea name="description_en" @blur="translateText($event.target.value, 'create_plan_desc_id')" rows="2" required placeholder="List details separated by commas..." class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Description/Features (ID)</label>
+                        <textarea name="description_id" id="create_plan_desc_id" rows="2" required class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">Price (IDR)</label>
@@ -484,7 +522,7 @@
                         <label class="block text-sm font-semibold mb-1">Max Custom POIs Allowed</label>
                         <input type="number" name="max_pois" value="0" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
-                    <div class="flex flex-col gap-2 pt-4">
+                    <div class="flex flex-col gap-2 pt-4 md:col-span-2">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="hidden" name="allow_messages" value="0">
                             <input type="checkbox" name="allow_messages" value="1" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4"> 
@@ -515,17 +553,25 @@
             <form :action="'<?= base_url('admin/master-data/update-plan/') ?>' + editPlanId" method="POST" class="overflow-y-auto custom-scrollbar">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-semibold mb-1">Unique Code</label>
                         <input type="text" name="code" x-model="editPlanCode" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Package Name</label>
-                        <input type="text" name="name" x-model="editPlanName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                        <label class="block text-sm font-semibold mb-1">Package Name (EN)</label>
+                        <input type="text" name="name_en" x-model="editPlanNameEN" @blur="translateText($event.target.value, 'editPlanNameID')" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold mb-1">Description</label>
-                        <textarea name="description" x-model="editPlanDesc" required rows="2" class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Package Name (ID)</label>
+                        <input type="text" name="name_id" x-model="editPlanNameID" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Description (EN)</label>
+                        <textarea name="description_en" x-model="editPlanDescEN" @blur="translateText($event.target.value, 'editPlanDescID')" required rows="2" class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Description (ID)</label>
+                        <textarea name="description_id" x-model="editPlanDescID" required rows="2" class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">Price (IDR)</label>
@@ -543,7 +589,7 @@
                         <label class="block text-sm font-semibold mb-1">Max Custom POIs</label>
                         <input type="number" name="max_pois" x-model="editPlanPoi" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
-                    <div class="flex flex-col gap-2 pt-4">
+                    <div class="flex flex-col gap-2 pt-4 md:col-span-2">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="hidden" name="allow_messages" value="0">
                             <input type="checkbox" name="allow_messages" value="1" :checked="editPlanMsg == 1" @change="editPlanMsg = $event.target.checked ? 1 : 0" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4"> 
@@ -575,8 +621,11 @@
             <form :action="'<?= base_url('admin/master-data/update-type/') ?>' + editTypeId" method="POST">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Type Name</label>
-                    <input type="text" name="name" x-model="editTypeName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Type Name (EN)</label>
+                    <input type="text" name="name_en" x-model="editTypeNameEN" @blur="translateText($event.target.value, 'editTypeNameID')" required class="w-full h-10 px-3 mb-4 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Type Name (ID)</label>
+                    <input type="text" name="name_id" x-model="editTypeNameID" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
                     <button type="button" @click="showEditTypeModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
@@ -679,8 +728,11 @@
             <form :action="'<?= base_url('admin/master-data/update-feature-category/') ?>' + editFeatureCatId" method="POST">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 <div class="p-6">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Category Name</label>
-                    <input type="text" name="name" x-model="editFeatureCatName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Category Name (EN)</label>
+                    <input type="text" name="name_en" x-model="editFeatureCatNameEN" @blur="translateText($event.target.value, 'editFeatureCatNameID')" required class="w-full h-10 px-3 mb-4 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                    
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Category Name (ID)</label>
+                    <input type="text" name="name_id" x-model="editFeatureCatNameID" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
                     <button type="button" @click="showEditFeatureCatModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
@@ -704,13 +756,16 @@
                         <label class="block text-sm font-semibold text-on-surface mb-2">Assigned Category</label>
                         <select name="category_id" x-model="editFeatureCategoryId" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none cursor-pointer">
                             <?php if(!empty($featureCategories)): foreach($featureCategories as $cat): ?>
-                                <option value="<?= $cat->id ?>"><?= esc($cat->name) ?></option>
+                                <option value="<?= $cat->id ?>"><?= esc($cat->name_en ?? $cat->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Feature Name</label>
-                        <input type="text" name="name" x-model="editFeatureName" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Feature Name (EN)</label>
+                        <input type="text" name="name_en" x-model="editFeatureNameEN" @blur="translateText($event.target.value, 'editFeatureNameID')" required class="w-full h-10 px-3 mb-4 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Feature Name (ID)</label>
+                        <input type="text" name="name_id" x-model="editFeatureNameID" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">

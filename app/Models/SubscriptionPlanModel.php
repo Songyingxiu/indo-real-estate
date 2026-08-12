@@ -9,7 +9,8 @@ class SubscriptionPlanModel extends Model {
     protected $useSoftDeletes   = false;
     
     protected $allowedFields    = [
-        'package_code', 'name', 'description', 'price', 
+        'package_code', 'name', 'name_en', 'name_id', 'description', 
+        'features_en', 'features_id', 'price', 
         'max_properties', 'max_agents', 'max_pois', 
         'allow_messages', 'allow_direct_email', 
         'status'
