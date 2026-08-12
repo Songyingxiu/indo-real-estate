@@ -8,25 +8,16 @@
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ 
     showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?>,
     translateText(text, targetId) {
-        if (!text.trim()) return;
-        fetch('http://127.0.0.1:5000/translate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                q: text,
-                source: 'auto',
-                target: 'id',
-                format: 'text'
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.translatedText) {
-                document.getElementById(targetId).value = data.translatedText;
-            }
-        })
-        .catch(err => console.error('Translation error:', err));
-    }
+    if (!text.trim()) return;
+    fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|id`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.responseData && data.responseData.translatedText) {
+            document.getElementById(targetId).value = data.responseData.translatedText;
+        }
+    })
+    .catch(err => console.error('Translation error:', err));
+}
 }">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Edit Property Listing</h2>
 
