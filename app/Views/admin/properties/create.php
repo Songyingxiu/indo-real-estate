@@ -249,8 +249,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Parking Availability</label>
                     <select name="parking" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="Available" <?= old('parking') == 'Available' ? 'selected' : '' ?>>Available</option>
-                        <option value="Not Available" <?= old('parking') == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
+                        <option value="Yes" <?= old('parking') == 'Yes' ? 'selected' : '' ?>>Available</option>
+                        <option value="No" <?= old('parking') == 'No' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
                 
