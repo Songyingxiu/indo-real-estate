@@ -5,7 +5,29 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?> }">
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ 
+    showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?>,
+    translateText(text, targetId) {
+        if (!text.trim()) return;
+        fetch('http://127.0.0.1:5000/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                q: text,
+                source: 'auto',
+                target: 'id',
+                format: 'text'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.translatedText) {
+                document.getElementById(targetId).value = data.translatedText;
+            }
+        })
+        .catch(err => console.error('Translation error:', err));
+    }
+}">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Create New Listing</h2>
     
     <form action="<?= base_url('admin/properties/store') ?>" method="POST" enctype="multipart/form-data" novalidate class="bg-surface-container-lowest shadow-sm rounded-lg border border-outline-variant p-6 space-y-8">
@@ -15,9 +37,14 @@
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">1. Basic Information & Legal</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Property Title *</label>
-                    <input type="text" name="title" value="<?= old('title') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                <div>
+                    <label class="block font-semibold mb-2">Property Title (EN) *</label>
+                    <input type="text" name="title_en" id="title_en" value="<?= old('title_en') ?>" @blur="translateText($event.target.value, 'title_id')" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="e.g. Luxury Villa in Canggu">
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-2">Property Title (ID) *</label>
+                    <input type="text" name="title_id" id="title_id" value="<?= old('title_id') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="e.g. Vila Mewah di Canggu">
                 </div>
 
                 <div>
@@ -26,7 +53,7 @@
                         <option value="" disabled <?= old('property_type_id') ? '' : 'selected' ?>>Select a type...</option>
                         <?php if (!empty($propertyTypes)): ?>
                             <?php foreach ($propertyTypes as $type): ?>
-                                <option value="<?= esc($type->id) ?>" <?= old('property_type_id') == $type->id ? 'selected' : '' ?>><?= esc($type->type_name ?? $type->name) ?></option>
+                                <option value="<?= esc($type->id) ?>" <?= old('property_type_id') == $type->id ? 'selected' : '' ?>><?= esc($type->name_en ?? $type->name) ?></option>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <option value="" disabled>No property types found</option>
@@ -274,7 +301,7 @@
                                 <?php foreach ($features as $feature): ?>
                                     <label class="flex items-center gap-3 cursor-pointer hover:bg-surface-bright p-1.5 rounded transition-colors">
                                         <input type="checkbox" name="features[]" value="<?= esc($feature->id ?? $feature->feature_id) ?>" <?= in_array(esc($feature->id ?? $feature->feature_id), $oldFeatures) ? 'checked' : '' ?> class="w-4 h-4 text-primary bg-surface border-outline-variant rounded focus:ring-primary">
-                                        <span class="text-sm text-on-surface font-medium"><?= esc($feature->name ?? $feature->feature_name) ?></span>
+                                        <span class="text-sm text-on-surface font-medium"><?= esc($feature->name_en ?? $feature->name) ?></span>
                                     </label>
                                 <?php endforeach; ?>
                             </div>
@@ -289,10 +316,18 @@
         <!-- SECTION 5: DESCRIPTION & MEDIA -->
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">5. Description & Media</h3>
-            <div class="md:col-span-2 mb-6">
-                <label class="block font-semibold mb-2">Description</label>
-                <textarea name="description" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Provide a detailed description of the property..."><?= old('description') ?></textarea>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block font-semibold mb-2">Description (EN)</label>
+                    <textarea name="description_en" id="description_en" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Provide a detailed description of the property..." @blur="translateText($event.target.value, 'description_id')"><?= old('description_en') ?></textarea>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2">Description (ID)</label>
+                    <textarea name="description_id" id="description_id" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Berikan deskripsi detail tentang properti..."><?= old('description_id') ?></textarea>
+                </div>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block font-semibold mb-2">Photos *</label>

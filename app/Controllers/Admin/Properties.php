@@ -94,7 +94,7 @@ class Properties extends BaseController
         // Fetch and group categorized features
         $db = \Config\Database::connect();
         $rawFeatures = $db->table('features')
-            ->select('features.id, features.name, feature_categories.name as category_name')
+            ->select('features.id, features.name, features.name_en, features.name_id, feature_categories.name as category_name')
             ->join('feature_categories', 'feature_categories.id = features.category_id', 'left')
             ->where('features.status', 'Active')
             ->get()->getResult();
@@ -148,7 +148,8 @@ class Properties extends BaseController
         // ----------------------------------------
 
         $rules = [
-            'title'            => 'required|min_length[5]|max_length[255]',
+            'title_en'         => 'required|min_length[5]|max_length[255]',
+            'title_id'         => 'required|min_length[5]|max_length[255]',
             'property_type_id' => 'required|numeric',
             'state_id'         => 'required|numeric',
             'city_id'          => 'required|numeric',
@@ -173,11 +174,15 @@ class Properties extends BaseController
         $imageModel = new PropertyImageModel();
         $propertyFeatureModel = new PropertyFeatureModel(); 
         
-        $propTitle = $this->request->getPost('title');
+        $propTitleEN = $this->request->getPost('title_en');
 
         $data = [
-            'title'            => $propTitle,
-            'description'      => $this->request->getPost('description'),
+            'title'            => $propTitleEN, // Fallback for legacy queries
+            'title_en'         => $propTitleEN,
+            'title_id'         => $this->request->getPost('title_id'),
+            'description'      => $this->request->getPost('description_en'), // Fallback
+            'description_en'   => $this->request->getPost('description_en'),
+            'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
@@ -253,13 +258,13 @@ class Properties extends BaseController
         // Email Customer (Acknowledgment)
         $emailService->sendDynamicEmail('Property Listed Customer', $userEmail, [
             '{first_name}' => $userFirstName,
-            '{property_title}' => $propTitle
+            '{property_title}' => $propTitleEN
         ]);
 
         // Email Admin (Moderation Request)
         $emailService->sendDynamicEmail('Property Listed Admin', 'admin@hunikita.com', [
             '{property_id}' => $propertyId,
-            '{property_title}' => $propTitle
+            '{property_title}' => $propTitleEN
         ]);
 
         return redirect()->to(base_url('admin/properties'))->with('success', 'Property saved! SHM document sent to verification center.');
@@ -323,7 +328,7 @@ class Properties extends BaseController
         // Fetch and group categorized features
         $db = \Config\Database::connect();
         $rawFeatures = $db->table('features')
-            ->select('features.id, features.name, feature_categories.name as category_name')
+            ->select('features.id, features.name, features.name_en, features.name_id, feature_categories.name as category_name')
             ->join('feature_categories', 'feature_categories.id = features.category_id', 'left')
             ->where('features.status', 'Active')
             ->get()->getResult();
@@ -363,7 +368,8 @@ class Properties extends BaseController
         }
 
         $rules = [
-            'title'            => 'required|min_length[5]|max_length[255]',
+            'title_en'         => 'required|min_length[5]|max_length[255]',
+            'title_id'         => 'required|min_length[5]|max_length[255]',
             'property_type_id' => 'required|numeric',
             'state_id'         => 'required|numeric',
             'city_id'          => 'required|numeric',
@@ -378,8 +384,12 @@ class Properties extends BaseController
         }
 
         $updateData = [
-            'title'            => $this->request->getPost('title'),
-            'description'      => $this->request->getPost('description'),
+            'title'            => $this->request->getPost('title_en'), // fallback
+            'title_en'         => $this->request->getPost('title_en'),
+            'title_id'         => $this->request->getPost('title_id'),
+            'description'      => $this->request->getPost('description_en'), // fallback
+            'description_en'   => $this->request->getPost('description_en'),
+            'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
