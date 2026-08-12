@@ -10,8 +10,8 @@ class PropertyModel extends Model
     protected $returnType       = 'array';
     
     protected $allowedFields    = [
-        'owner_id', 'property_type_id', 'city_id', 'zipcode_id', 'title', 'slug', 
-        'description', 'listing_type', 'address_line_1', 'address_line_2', 
+        'owner_id', 'property_type_id', 'city_id', 'zipcode_id', 'title', 'title_en', 'title_id', 'slug', 
+        'description', 'description_en', 'description_id', 'listing_type', 'address_line_1', 'address_line_2', 
         'area_name', 'unit_number', 'building_society_name', 'latitude', 
         'longitude', 'year_built', 'total_floors', 'bed', 'bath', 
         'total_area', 'total_land_area', 'usable_area', 'parking', 
@@ -51,7 +51,9 @@ class PropertyModel extends Model
 
         if (!empty($keyword)) {
             $builder->groupStart()
-                    ->like('properties.title', $keyword)
+                    ->like('properties.title_en', $keyword)
+                    ->orLike('properties.title_id', $keyword)
+                    ->orLike('properties.title', $keyword)
                     ->orLike('properties.area_name', $keyword)
                     ->orLike('cities.name', $keyword) 
                     ->groupEnd();
@@ -101,7 +103,7 @@ class PropertyModel extends Model
         return $this->db->table('properties')
             ->select('cities.name as city_name, COUNT(properties.id) as property_count, AVG(properties.tax_price) as avg_price')
             ->join('cities', 'cities.id = properties.city_id')
-            ->where('cities.state_id', $stateId) // FIXED: Uses cities.state_id instead of properties.state_id
+            ->where('cities.state_id', $stateId)
             ->where('properties.status', 'Active')
             ->where('properties.approval_status', 'Published')
             ->groupBy('cities.id')
@@ -111,7 +113,7 @@ class PropertyModel extends Model
     // Map Markers
     public function getMapMarkers($conditions = [], $limit = 150)
     {
-        $builder = $this->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, properties.listing_type');
+        $builder = $this->select('properties.id, properties.title, properties.title_en, properties.title_id, properties.tax_price, properties.latitude, properties.longitude, properties.listing_type');
 
         foreach ($conditions as $key => $val) {
             // Explicitly bind to properties table to prevent ambiguous column errors
