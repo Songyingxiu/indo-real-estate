@@ -22,7 +22,7 @@
                 <thead>
                     <tr class="bg-surface-container-low text-on-surface-variant text-sm border-b border-outline-variant">
                         <th class="p-4 font-semibold whitespace-nowrap">Image</th>
-                        <th class="p-4 font-semibold whitespace-nowrap">Title</th>
+                        <th class="p-4 font-semibold whitespace-nowrap">Title (EN)</th>
                         <th class="p-4 font-semibold whitespace-nowrap">Placement</th>
                         <th class="p-4 font-semibold whitespace-nowrap">Status</th>
                         <th class="p-4 font-semibold whitespace-nowrap">Duration</th>
@@ -35,10 +35,10 @@
                             <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
                                 <td class="p-4">
                                     <div class="w-20 h-14 bg-surface-container-low rounded border border-outline-variant overflow-hidden flex items-center justify-center">
-                                        <img src="<?= base_url($ad->image_path) ?>" alt="<?= esc($ad->title) ?>" class="w-full h-full object-cover">
+                                        <img src="<?= base_url($ad->image_path) ?>" alt="<?= esc($ad->title_en ?? $ad->title) ?>" class="w-full h-full object-cover">
                                     </div>
                                 </td>
-                                <td class="p-4 font-medium text-on-surface"><?= esc($ad->title) ?></td>
+                                <td class="p-4 font-medium text-on-surface"><?= esc($ad->title_en ?? $ad->title) ?></td>
                                 <td class="p-4 text-on-surface-variant capitalize"><?= str_replace('_', ' ', esc($ad->placement)) ?></td>
                                 <td class="p-4">
                                     <span class="px-3 py-1 rounded-full text-xs font-bold <?= $ad->status == 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">

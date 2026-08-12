@@ -1,7 +1,28 @@
 <?= $this->extend('admin/layout/master') ?>
 
 <?= $this->section('content') ?>
-<div class="w-full px-6 py-8">
+<div class="w-full px-6 py-8" x-data="{
+    translateText(text, targetId) {
+        if (!text.trim()) return;
+        fetch('http://127.0.0.1:5000/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                q: text,
+                source: 'auto',
+                target: 'id',
+                format: 'text'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.translatedText) {
+                document.getElementById(targetId).value = data.translatedText;
+            }
+        })
+        .catch(err => console.error('Translation error:', err));
+    }
+}">
     <div class="max-w-4xl mx-auto">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-on-background"><?= isset($ad) ? 'Edit Advertisement' : 'Create Advertisement' ?></h1>
@@ -24,14 +45,26 @@
                 <?= csrf_field() ?>
                 <input type="hidden" name="id" value="<?= isset($ad) ? $ad->id : '' ?>">
 
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title</label>
-                    <input type="text" name="title" value="<?= old('title', isset($ad) ? $ad->title : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Summer Sale" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title (EN)</label>
+                        <input type="text" name="title_en" id="title_en" value="<?= old('title_en', isset($ad) ? ($ad->title_en ?? $ad->title) : '') ?>" @blur="translateText($event.target.value, 'title_id')" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Summer Sale" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title (ID)</label>
+                        <input type="text" name="title_id" id="title_id" value="<?= old('title_id', isset($ad) ? ($ad->title_id ?? $ad->title) : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" required>
+                    </div>
                 </div>
 
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Description</label>
-                    <textarea name="description" rows="4" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter the full advertisement details here..." required><?= old('description', isset($ad) ? $ad->description : '') ?></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Description (EN)</label>
+                        <textarea name="description_en" id="description_en" rows="4" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter the full advertisement details here..." @blur="translateText($event.target.value, 'description_id')" required><?= old('description_en', isset($ad) ? ($ad->description_en ?? $ad->description) : '') ?></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Description (ID)</label>
+                        <textarea name="description_id" id="description_id" rows="4" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" required><?= old('description_id', isset($ad) ? ($ad->description_id ?? $ad->description) : '') ?></textarea>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

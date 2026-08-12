@@ -1,14 +1,43 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Added showDeleteModal and deleteUrl to the Alpine state -->
-<div x-data="{ showEditor: false, postId: '', postTitle: '', postCategory: 'Blog', postBody: '', showDeleteModal: false, deleteUrl: '' }">
+<div x-data="{ 
+    showEditor: false, 
+    postId: '', 
+    postTitleEN: '', 
+    postTitleID: '', 
+    postCategory: 'Blog', 
+    postBodyEN: '', 
+    postBodyID: '', 
+    showDeleteModal: false, 
+    deleteUrl: '',
+    translateText(text, targetInput) {
+        if (!text.trim()) return;
+        fetch('http://127.0.0.1:5000/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                q: text,
+                source: 'auto',
+                target: 'id',
+                format: 'text'
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.translatedText) {
+                this[targetInput] = data.translatedText;
+            }
+        })
+        .catch(err => console.error('Translation error:', err));
+    }
+}">
     <div class="flex justify-between items-center mt-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-on-surface">Content Management</h1>
             <p class="text-on-surface-variant">Manage platform news, blog posts, FAQs, and static legal/informational pages.</p>
         </div>
-        <button @click="showEditor = true; postId = ''; postTitle = ''; postCategory = 'Blog'; postBody = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
+        <button @click="showEditor = true; postId = ''; postTitleEN = ''; postTitleID = ''; postCategory = 'Blog'; postBodyEN = ''; postBodyID = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
             <span class="material-symbols-outlined text-[18px]">add</span> New Content
         </button>
     </div>
@@ -46,7 +75,7 @@
             <table class="w-full text-left border-collapse">
                 <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
                     <tr>
-                        <th class="p-4 font-semibold text-on-surface-variant">Title</th>
+                        <th class="p-4 font-semibold text-on-surface-variant">Title (EN)</th>
                         <th class="p-4 font-semibold text-on-surface-variant">Category</th>
                         <th class="p-4 font-semibold text-on-surface-variant">Published Date</th>
                         <th class="p-4 font-semibold text-on-surface-variant text-right">Actions</th>
@@ -56,7 +85,7 @@
                     <?php if (!empty($posts)): ?>
                         <?php foreach ($posts as $post): ?>
                             <tr class="border-b border-outline-variant hover:bg-surface-bright transition">
-                                <td class="p-4 font-medium text-on-surface"><?= esc($post->title) ?></td>
+                                <td class="p-4 font-medium text-on-surface"><?= esc($post->title_en ?? $post->title) ?></td>
                                 <td class="p-4">
                                     <span class="px-2 py-1 rounded text-xs font-semibold <?= $post->category === 'Page' ? 'bg-secondary-container text-on-secondary-container' : 'bg-tertiary-container text-on-tertiary-container' ?>">
                                         <?= esc($post->category) ?>
@@ -66,12 +95,13 @@
                                 <td class="p-4 text-right flex justify-end gap-3 items-center">
                                     <button @click="showEditor = true; 
                                                     postId = '<?= $post->id ?>'; 
-                                                    postTitle = '<?= esc($post->title, 'js') ?>'; 
+                                                    postTitleEN = '<?= esc($post->title_en ?? $post->title, 'js') ?>'; 
+                                                    postTitleID = '<?= esc($post->title_id ?? $post->title, 'js') ?>'; 
                                                     postCategory = '<?= esc($post->category, 'js') ?>'; 
-                                                    postBody = '<?= esc($post->content_body, 'js') ?>';" 
+                                                    postBodyEN = '<?= esc($post->content_body_en ?? $post->content_body, 'js') ?>';
+                                                    postBodyID = '<?= esc($post->content_body_id ?? $post->content_body, 'js') ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
                                     
-                                    <!-- UPDATED DELETE BUTTON: Now triggers the custom modal -->
                                     <button type="button" 
                                             @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/cms/delete/' . $post->id) ?>';" 
                                             class="text-red-600 hover:underline font-medium">Delete</button>
@@ -128,7 +158,7 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="transform opacity-0 scale-95"
              x-transition:enter-end="transform opacity-100 scale-100"
-             class="bg-surface w-full max-w-3xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+             class="bg-surface w-full max-w-4xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
             
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <h2 class="text-xl font-bold text-on-surface" x-text="postId ? 'Edit Content Details' : 'Create New Content'"></h2>
@@ -137,33 +167,45 @@
                 </button>
             </div>
 
-            <form action="<?= base_url('admin/cms/save') ?>" method="POST">
+            <form action="<?= base_url('admin/cms/save') ?>" method="POST" class="overflow-y-auto custom-scrollbar flex-1">
                 <input type="hidden" name="id" x-model="postId">
                 
-                <div class="p-6 flex flex-col gap-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Title</label>
-                            <input name="title" type="text" x-model="postTitle" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <div class="p-6 flex flex-col gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (EN)</label>
+                            <input name="title_en" type="text" x-model="postTitleEN" @blur="translateText($event.target.value, 'postTitleID')" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Type Category</label>
-                            <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-                                <option value="Blog">Blog Post / News</option>
-                                <option value="Page">Static Info Page</option>
-                                <option value="Tips">Tips & Guides</option>
-                                <option value="Announcement">Announcement</option>
-                                <option value="FAQ">FAQ</option>
-                            </select>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (ID)</label>
+                            <input name="title_id" type="text" x-model="postTitleID" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                         </div>
                     </div>
+                    
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Content Body</label>
-                        <textarea name="content_body" x-model="postBody" required rows="10" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans" placeholder="Write your content markup or text here..."></textarea>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Type Category</label>
+                        <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                            <option value="Blog">Blog Post / News</option>
+                            <option value="Page">Static Info Page</option>
+                            <option value="Tips">Tips & Guides</option>
+                            <option value="Announcement">Announcement</option>
+                            <option value="FAQ">FAQ</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (EN)</label>
+                            <textarea name="content_body_en" x-model="postBodyEN" @blur="translateText($event.target.value, 'postBodyID')" required rows="10" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans" placeholder="Write your content markup or text here..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (ID)</label>
+                            <textarea name="content_body_id" x-model="postBodyID" required rows="10" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans"></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest sticky bottom-0">
                     <button type="button" @click="showEditor = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save & Publish</button>
                 </div>

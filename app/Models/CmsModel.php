@@ -9,7 +9,12 @@ class CmsModel extends Model
     
     protected $returnType = 'object'; 
     
-    protected $allowedFields = ['title', 'slug', 'category', 'content_body', 'author_id', 'status', 'published_at'];
+    protected $allowedFields = [
+        'title', 'title_en', 'title_id', 
+        'slug', 'category', 
+        'content_body', 'content_body_en', 'content_body_id', 
+        'author_id', 'status', 'published_at'
+    ];
     
     protected $useTimestamps = true; 
 }

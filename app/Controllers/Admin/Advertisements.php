@@ -40,10 +40,12 @@ class Advertisements extends BaseController
         $id = $this->request->getPost('id');
 
         $validationRule = [
-            'title'       => 'required|min_length[3]',
-            'description' => 'required|min_length[10]', 
-            'placement'   => 'required|in_list[home_banner,sidebar,property_list]',
-            'status'      => 'required|in_list[Active,Inactive]',
+            'title_en'       => 'required|min_length[3]',
+            'title_id'       => 'required|min_length[3]',
+            'description_en' => 'required|min_length[10]', 
+            'description_id' => 'required|min_length[10]', 
+            'placement'      => 'required|in_list[home_banner,sidebar,property_list]',
+            'status'         => 'required|in_list[Active,Inactive]',
         ];
 
         if (!$id) {
@@ -54,13 +56,19 @@ class Advertisements extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $titleEN = $this->request->getPost('title_en');
+
         $data = [
-            'title'       => $this->request->getPost('title'),
-            'description' => $this->request->getPost('description'), 
-            'placement'   => $this->request->getPost('placement'),
-            'status'      => $this->request->getPost('status'),
-            'start_date'  => $this->request->getPost('start_date') ?: null,
-            'end_date'    => $this->request->getPost('end_date') ?: null,
+            'title'          => $titleEN, // fallback for legacy queries
+            'title_en'       => $titleEN,
+            'title_id'       => $this->request->getPost('title_id'),
+            'description'    => $this->request->getPost('description_en'), // fallback
+            'description_en' => $this->request->getPost('description_en'), 
+            'description_id' => $this->request->getPost('description_id'), 
+            'placement'      => $this->request->getPost('placement'),
+            'status'         => $this->request->getPost('status'),
+            'start_date'     => $this->request->getPost('start_date') ?: null,
+            'end_date'       => $this->request->getPost('end_date') ?: null,
         ];
 
         $image = $this->request->getFile('image');
