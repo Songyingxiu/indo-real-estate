@@ -18,15 +18,19 @@ class Cms extends BaseController
         $cmsModel = new CmsModel();
         
         $id = $this->request->getPost('id');
-        $title = $this->request->getPost('title');
+        $titleEN = $this->request->getPost('title_en');
         
         $data = [
-            'title'        => $title,
-            'slug'         => url_title(strtolower($title), '-', true),
-            'category'     => $this->request->getPost('category'),
-            'content_body' => $this->request->getPost('content_body'),
-            'status'       => 'Published',
-            'author_id'    => session()->get('id')
+            'title'           => $titleEN, // Fallback
+            'title_en'        => $titleEN,
+            'title_id'        => $this->request->getPost('title_id'),
+            'slug'            => url_title(strtolower($titleEN), '-', true),
+            'category'        => $this->request->getPost('category'),
+            'content_body'    => $this->request->getPost('content_body_en'), // Fallback
+            'content_body_en' => $this->request->getPost('content_body_en'),
+            'content_body_id' => $this->request->getPost('content_body_id'),
+            'status'          => 'Published',
+            'author_id'       => session()->get('id')
         ];
 
         if ($id) {
