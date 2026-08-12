@@ -9,7 +9,7 @@ class FeatureModel extends Model {
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     
-    protected $allowedFields    = ['category_id', 'name', 'status'];
+    protected $allowedFields    = ['category_id', 'name', 'name_en', 'name_id', 'status'];
 
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';

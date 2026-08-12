@@ -42,7 +42,7 @@ class MasterData extends BaseController
         $data['featureCategories'] = $db->table('feature_categories')->where('status', 'Active')->get()->getResult();
 
         // Features Fetching with Category Join
-        $featureModel->select('features.*, feature_categories.name as category_name');
+        $featureModel->select('features.*, feature_categories.name_en as category_name');
         $featureModel->join('feature_categories', 'feature_categories.id = features.category_id', 'left');
         $data['features'] = $featureModel->orderBy('features.id', 'DESC')->paginate(5, 'features');
         
@@ -61,7 +61,13 @@ class MasterData extends BaseController
     public function storeType() 
     { 
         $model = new PropertyTypeModel();
-        $model->insert(['name' => $this->request->getPost('name'), 'status' => 'Active']); 
+        $nameEN = $this->request->getPost('name_en');
+        $model->insert([
+            'name'    => $nameEN, // Fallback
+            'name_en' => $nameEN, 
+            'name_id' => $this->request->getPost('name_id'), 
+            'status'  => 'Active'
+        ]); 
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New property type added!'); 
     }
 
@@ -86,9 +92,12 @@ class MasterData extends BaseController
     public function storeFeatureCategory()
     {
         $db = \Config\Database::connect();
+        $nameEN = $this->request->getPost('name_en');
         $db->table('feature_categories')->insert([
-            'name'   => $this->request->getPost('name'),
-            'status' => 'Active'
+            'name'    => $nameEN, // Fallback
+            'name_en' => $nameEN,
+            'name_id' => $this->request->getPost('name_id'),
+            'status'  => 'Active'
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New Feature Category added!');
     }
@@ -96,9 +105,12 @@ class MasterData extends BaseController
     public function storeFeature()
     {
         $model = new FeatureModel();
+        $nameEN = $this->request->getPost('name_en');
         $model->insert([
             'category_id' => $this->request->getPost('category_id'),
-            'name'        => $this->request->getPost('name'), 
+            'name'        => $nameEN, // Fallback
+            'name_en'     => $nameEN, 
+            'name_id'     => $this->request->getPost('name_id'), 
             'status'      => 'Active'
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'New feature added and assigned to category!');
@@ -118,10 +130,16 @@ class MasterData extends BaseController
     public function storePlan()
     {
         $model = new SubscriptionPlanModel();
+        $nameEN = $this->request->getPost('name_en');
+        
         $model->insert([
             'package_code'       => strtoupper($this->request->getPost('code')),
-            'name'               => $this->request->getPost('name'),
-            'description'        => $this->request->getPost('description'),
+            'name'               => $nameEN, // Fallback
+            'name_en'            => $nameEN,
+            'name_id'            => $this->request->getPost('name_id'),
+            'description'        => $this->request->getPost('description_en'), // Fallback
+            'features_en'        => $this->request->getPost('description_en'), // Assuming description is used for features list
+            'features_id'        => $this->request->getPost('description_id'),
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
@@ -170,8 +188,18 @@ class MasterData extends BaseController
 
     // --- UPDATE METHODS ---
 
-    public function updateType($id) { (new PropertyTypeModel())->update($id, ['name' => $this->request->getPost('name')]); return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type updated successfully.'); }
+    public function updateType($id) { 
+        $nameEN = $this->request->getPost('name_en');
+        (new PropertyTypeModel())->update($id, [
+            'name'    => $nameEN, // Fallback
+            'name_en' => $nameEN, 
+            'name_id' => $this->request->getPost('name_id')
+        ]); 
+        return redirect()->to(base_url('admin/master-data'))->with('success', 'Property type updated successfully.'); 
+    }
+    
     public function updateState($id) { (new StateModel())->update($id, ['name' => $this->request->getPost('name')]); return redirect()->to(base_url('admin/master-data'))->with('success', 'Region updated successfully.'); }
+    
     public function updateCity($id) { 
         (new CityModel())->update($id, [
             'state_id' => $this->request->getPost('state_id'), 
@@ -179,6 +207,7 @@ class MasterData extends BaseController
         ]); 
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Location updated successfully.'); 
     }
+    
     public function updateZipcode($id) { 
         (new ZipcodeModel())->update($id, [
             'city_id' => $this->request->getPost('city_id'), 
@@ -190,8 +219,11 @@ class MasterData extends BaseController
     public function updateFeatureCategory($id)
     {
         $db = \Config\Database::connect();
+        $nameEN = $this->request->getPost('name_en');
         $db->table('feature_categories')->where('id', $id)->update([
-            'name' => $this->request->getPost('name')
+            'name'    => $nameEN, // Fallback
+            'name_en' => $nameEN,
+            'name_id' => $this->request->getPost('name_id')
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature Category updated successfully.');
     }
@@ -199,9 +231,12 @@ class MasterData extends BaseController
     public function updateFeature($id)
     {
         $model = new FeatureModel();
+        $nameEN = $this->request->getPost('name_en');
         $model->update($id, [
             'category_id' => $this->request->getPost('category_id'),
-            'name'        => $this->request->getPost('name')
+            'name'        => $nameEN, // Fallback
+            'name_en'     => $nameEN, 
+            'name_id'     => $this->request->getPost('name_id')
         ]);
         return redirect()->to(base_url('admin/master-data'))->with('success', 'Feature updated successfully.');
     }
@@ -209,10 +244,16 @@ class MasterData extends BaseController
     public function updatePlan($id)
     {
         $model = new SubscriptionPlanModel();
+        $nameEN = $this->request->getPost('name_en');
+        
         $model->update($id, [
             'package_code'       => strtoupper($this->request->getPost('code')),
-            'name'               => $this->request->getPost('name'),
-            'description'        => $this->request->getPost('description'),
+            'name'               => $nameEN, // Fallback
+            'name_en'            => $nameEN,
+            'name_id'            => $this->request->getPost('name_id'),
+            'description'        => $this->request->getPost('description_en'), // Fallback
+            'features_en'        => $this->request->getPost('description_en'),
+            'features_id'        => $this->request->getPost('description_id'),
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
