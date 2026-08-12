@@ -7,17 +7,17 @@
 
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ 
     showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?>,
-    translateText(text, targetId) {
-    if (!text.trim()) return;
-    fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|id`)
-    .then(res => res.json())
-    .then(data => {
-        if (data.responseData && data.responseData.translatedText) {
-            document.getElementById(targetId).value = data.responseData.translatedText;
-        }
-    })
-    .catch(err => console.error('Translation error:', err));
-}
+    translateText(text, targetId, langpair = 'en|id') {
+        if (!text.trim()) return;
+        fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langpair}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.responseData && data.responseData.translatedText) {
+                document.getElementById(targetId).value = data.responseData.translatedText;
+            }
+        })
+        .catch(err => console.error('Translation error:', err));
+    }
 }">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Edit Property Listing</h2>
 
@@ -30,12 +30,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block font-semibold mb-2">Property Title (EN) *</label>
-                    <input type="text" name="title_en" id="title_en" value="<?= esc($property['title_en'] ?? $property['title']) ?>" @blur="translateText($event.target.value, 'title_id')" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="text" name="title_en" id="title_en" value="<?= esc($property['title_en'] ?? $property['title']) ?>" @blur="translateText($event.target.value, 'title_id', 'en|id')" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
                 <div>
                     <label class="block font-semibold mb-2">Property Title (ID) *</label>
-                    <input type="text" name="title_id" id="title_id" value="<?= esc($property['title_id'] ?? $property['title']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="text" name="title_id" id="title_id" value="<?= esc($property['title_id'] ?? $property['title']) ?>" @blur="translateText($event.target.value, 'title_en', 'id|en')" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
                 <div>
@@ -298,11 +298,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block font-semibold mb-2">Description (EN)</label>
-                    <textarea name="description_en" id="description_en" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" @blur="translateText($event.target.value, 'description_id')"><?= esc($property['description_en'] ?? $property['description']) ?></textarea>
+                    <textarea name="description_en" id="description_en" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" @blur="translateText($event.target.value, 'description_id', 'en|id')"><?= esc($property['description_en'] ?? $property['description']) ?></textarea>
                 </div>
                 <div>
                     <label class="block font-semibold mb-2">Description (ID)</label>
-                    <textarea name="description_id" id="description_id" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded"><?= esc($property['description_id'] ?? $property['description']) ?></textarea>
+                    <textarea name="description_id" id="description_id" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" @blur="translateText($event.target.value, 'description_en', 'id|en')"><?= esc($property['description_id'] ?? $property['description']) ?></textarea>
                 </div>
             </div>
 

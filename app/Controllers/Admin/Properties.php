@@ -57,7 +57,7 @@ class Properties extends BaseController
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
         
         $maxPois = 0;
-        $maxProperties = 1; // Default fallback if no active subscription
+        $maxProperties = 1; 
         
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
@@ -73,7 +73,6 @@ class Properties extends BaseController
             $maxProperties = 9999;
         }
 
-        // Enforce Property Limits
         $currentListings = $propertyModel->where('owner_id', $userId)->countAllResults();
         
         if ($currentListings >= $maxProperties && $roleId != 4) {
@@ -91,7 +90,6 @@ class Properties extends BaseController
         $data['propertyTypes'] = $propertyTypeModel->findAll();
         $data['states'] = $stateModel->where('status', 'Active')->findAll();
         
-        // Fetch and group categorized features
         $db = \Config\Database::connect();
         $rawFeatures = $db->table('features')
             ->select('features.id, features.name, features.name_en, features.name_id, feature_categories.name as category_name')
@@ -123,7 +121,6 @@ class Properties extends BaseController
             return redirect()->to(base_url('admin/profile'))->with('error', 'You must verify your identity before posting a property listing.');
         }
 
-        // --- ENFORCE PROPERTY LIMITS ON SUBMIT ---
         $propertyModel = new PropertyModel();
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
@@ -145,7 +142,6 @@ class Properties extends BaseController
                 return redirect()->to(base_url('admin/properties'))->with('error', 'Limit reached. Please upgrade your subscription to post more than ' . $maxProperties . ' properties.');
             }
         }
-        // ----------------------------------------
 
         $rules = [
             'title_en'         => 'required|min_length[5]|max_length[255]',
@@ -176,26 +172,41 @@ class Properties extends BaseController
         
         $propTitleEN = $this->request->getPost('title_en');
 
+        // Helper function to safely convert empty strings to null for numeric fields
+        $getNumericPost = function($field) {
+            $val = $this->request->getPost($field);
+            return ($val === '' || $val === null) ? null : $val;
+        };
+
         $data = [
-            'title'            => $propTitleEN, // Fallback for legacy queries
+            'title'            => $propTitleEN, 
             'title_en'         => $propTitleEN,
             'title_id'         => $this->request->getPost('title_id'),
-            'description'      => $this->request->getPost('description_en'), // Fallback
+            'description'      => $this->request->getPost('description_en'), 
             'description_en'   => $this->request->getPost('description_en'),
             'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
             'city_id'          => $this->request->getPost('city_id'),
-            'zipcode_id'       => $this->request->getPost('zipcode_id') ?: null,
+            'zipcode_id'       => $getNumericPost('zipcode_id'),
             'tax_price'        => $this->request->getPost('tax_price'),
-            'bed'              => $this->request->getPost('bed'),
-            'bath'             => $this->request->getPost('bath'),
-            'total_land_area'  => $this->request->getPost('total_land_area'),
-            'usable_area'      => $this->request->getPost('usable_area'),
-            'total_area'       => $this->request->getPost('total_area') ?? $this->request->getPost('total_land_area'),
+            'bed'              => $getNumericPost('bed'),
+            'bath'             => $getNumericPost('bath'),
+            'total_land_area'  => $getNumericPost('total_land_area'),
+            'usable_area'      => $getNumericPost('usable_area'),
+            'total_area'       => $getNumericPost('total_area') ?? $getNumericPost('total_land_area'),
+            'total_floors'     => $getNumericPost('total_floors'),
+            'year_built'       => $getNumericPost('year_built'),
+            'total_parking'    => $getNumericPost('total_parking'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'address_line_2'   => $this->request->getPost('address_line_2'),
             'area_name'        => $this->request->getPost('area_name'), 
+            'unit_number'      => $this->request->getPost('unit_number'), 
+            'building_society_name' => $this->request->getPost('building_society_name'), 
+            'parking'          => $this->request->getPost('parking'), 
+            'basement'         => $this->request->getPost('basement'), 
+            'water_facility'   => $this->request->getPost('water_facility'), 
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
             'owner_id'         => $userId,
@@ -252,16 +263,13 @@ class Properties extends BaseController
             ]);
         }
 
-        // triggers: Property Listing Notifications
         $emailService = new EmailService();
         
-        // Email Customer (Acknowledgment)
         $emailService->sendDynamicEmail('Property Listed Customer', $userEmail, [
             '{first_name}' => $userFirstName,
             '{property_title}' => $propTitleEN
         ]);
 
-        // Email Admin (Moderation Request)
         $emailService->sendDynamicEmail('Property Listed Admin', 'admin@hunikita.com', [
             '{property_id}' => $propertyId,
             '{property_title}' => $propTitleEN
@@ -325,7 +333,6 @@ class Properties extends BaseController
             $data['cities'] = [];
         }
 
-        // Fetch and group categorized features
         $db = \Config\Database::connect();
         $rawFeatures = $db->table('features')
             ->select('features.id, features.name, features.name_en, features.name_id, feature_categories.name as category_name')
@@ -383,26 +390,40 @@ class Properties extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
+        $getNumericPost = function($field) {
+            $val = $this->request->getPost($field);
+            return ($val === '' || $val === null) ? null : $val;
+        };
+
         $updateData = [
-            'title'            => $this->request->getPost('title_en'), // fallback
+            'title'            => $this->request->getPost('title_en'), 
             'title_en'         => $this->request->getPost('title_en'),
             'title_id'         => $this->request->getPost('title_id'),
-            'description'      => $this->request->getPost('description_en'), // fallback
+            'description'      => $this->request->getPost('description_en'), 
             'description_en'   => $this->request->getPost('description_en'),
             'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
             'city_id'          => $this->request->getPost('city_id'),
-            'zipcode_id'       => $this->request->getPost('zipcode_id') ?: null,
+            'zipcode_id'       => $getNumericPost('zipcode_id'),
             'tax_price'        => $this->request->getPost('tax_price'),
-            'bed'              => $this->request->getPost('bed'),
-            'bath'             => $this->request->getPost('bath'),
-            'total_land_area'  => $this->request->getPost('total_land_area'),
-            'usable_area'      => $this->request->getPost('usable_area'),
-            'total_area'       => $this->request->getPost('total_area') ?? $this->request->getPost('total_land_area'),
+            'bed'              => $getNumericPost('bed'),
+            'bath'             => $getNumericPost('bath'),
+            'total_land_area'  => $getNumericPost('total_land_area'),
+            'usable_area'      => $getNumericPost('usable_area'),
+            'total_area'       => $getNumericPost('total_area') ?? $getNumericPost('total_land_area'),
+            'total_floors'     => $getNumericPost('total_floors'),
+            'year_built'       => $getNumericPost('year_built'),
+            'total_parking'    => $getNumericPost('total_parking'),
             'address_line_1'   => $this->request->getPost('address_line_1'),
+            'address_line_2'   => $this->request->getPost('address_line_2'),
             'area_name'        => $this->request->getPost('area_name'),
+            'unit_number'      => $this->request->getPost('unit_number'),
+            'building_society_name' => $this->request->getPost('building_society_name'),
+            'parking'          => $this->request->getPost('parking'),
+            'basement'         => $this->request->getPost('basement'),
+            'water_facility'   => $this->request->getPost('water_facility'),
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
             'approval_status'  => 'Draft' 
