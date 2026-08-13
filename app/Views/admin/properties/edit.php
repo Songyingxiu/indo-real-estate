@@ -23,8 +23,70 @@
             alert('You can only select up to 20 images. Please select fewer files.');
             event.target.value = '';
         }
+    },
+    // FIX: Alpine function to auto-fill the dropdowns from the Map Reverse Geocoding
+    attemptAutoFill(stateName, cityName, postcode) {
+        if (!stateName) return;
+        
+        let stateSelect = document.getElementById('state_id');
+        if(!stateSelect) return;
+        
+        let matchedState = Array.from(stateSelect.options).find(opt => {
+            if (!opt.value) return false;
+            let optText = opt.text.toLowerCase();
+            let sName = stateName.toLowerCase();
+            return optText.includes(sName) || sName.includes(optText);
+        });
+
+        if (matchedState && this.stateId !== matchedState.value) {
+            this.stateId = matchedState.value;
+            this.cityId = '';
+            this.zipcodeId = '';
+        }
+
+        // Wait for cities to load
+        let attempts = 0;
+        let cityInterval = setInterval(() => {
+            attempts++;
+            if (this.cities.length > 0 && !this.isLoading) {
+                clearInterval(cityInterval);
+                if (cityName) {
+                    let matchedCity = this.cities.find(c => {
+                        let cName = (c.city_name || c.name).toLowerCase();
+                        let sCity = cityName.toLowerCase();
+                        if (cName.includes('selatan') && sCity.includes('south')) return true;
+                        if (cName.includes('pusat') && sCity.includes('central')) return true;
+                        if (cName.includes('barat') && sCity.includes('west')) return true;
+                        if (cName.includes('timur') && sCity.includes('east')) return true;
+                        if (cName.includes('utara') && sCity.includes('north')) return true;
+                        return cName.includes(sCity) || sCity.includes(cName);
+                    });
+                    
+                    if (matchedCity && this.cityId !== matchedCity.id) {
+                        this.cityId = matchedCity.id;
+                        this.zipcodeId = '';
+                        
+                        // Wait for zipcodes to load
+                        let zipAttempts = 0;
+                        let zipInterval = setInterval(() => {
+                            zipAttempts++;
+                            if (this.zipcodes.length > 0 && !this.isZipLoading) {
+                                clearInterval(zipInterval);
+                                if (postcode) {
+                                    let matchedZip = this.zipcodes.find(z => z.zipcode === postcode);
+                                    if (matchedZip && this.zipcodeId !== matchedZip.id) {
+                                        this.zipcodeId = matchedZip.id;
+                                    }
+                                }
+                            } else if (zipAttempts > 15) { clearInterval(zipInterval); }
+                        }, 200);
+                    }
+                }
+            } else if (attempts > 15) { clearInterval(cityInterval); }
+        }, 200);
     }
-}">
+}" @autofill-location.window="attemptAutoFill($event.detail.state, $event.detail.city, $event.detail.zip)">
+    
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Edit Property Listing</h2>
 
     <form action="<?= base_url('admin/properties/update/' . $property['id']) ?>" method="POST" enctype="multipart/form-data" novalidate class="bg-surface-container-lowest shadow-sm rounded-lg border border-outline-variant p-6 space-y-8">
@@ -141,7 +203,7 @@
                 
                 <div>
                     <label class="block font-semibold mb-2">Region / State *</label>
-                    <select name="state_id" x-model="stateId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <select name="state_id" id="state_id" x-model="stateId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <?php foreach ($states as $state): ?>
                             <option value="<?= esc($state->id) ?>"><?= esc($state->region_name ?? $state->name) ?></option>
                         <?php endforeach; ?>
@@ -168,12 +230,12 @@
 
                 <div>
                     <label class="block font-semibold mb-2">Area / District Name</label>
-                    <input type="text" name="area_name" value="<?= esc($property['area_name']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="text" name="area_name" id="area_name" value="<?= esc($property['area_name']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Address Line 1 *</label>
-                    <input type="text" name="address_line_1" value="<?= esc($property['address_line_1']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <input type="text" name="address_line_1" id="address_line_1" value="<?= esc($property['address_line_1']) ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
                 <div class="md:col-span-2">
@@ -181,10 +243,18 @@
                     <input type="text" name="address_line_2" value="<?= esc($property['address_line_2']) ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                 </div>
 
+                <!-- FIX: Map Search & Dynamic Geocoding -->
                 <div class="md:col-span-2 mt-2">
                     <label class="block font-semibold mb-2">Pinpoint on Map *</label>
-                    <p class="text-xs text-on-surface-variant mb-2">Drag the marker or click anywhere on the map to set the exact property location.</p>
+                    <p class="text-xs text-on-surface-variant mb-2">Search an address, or drag the marker/click anywhere on the map to set the exact property location and auto-fill the address fields.</p>
+                    
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="mapSearchInput" placeholder="Search address or area (e.g., Kemang, Jakarta)" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary outline-none" @keydown.enter.prevent="searchMapLocation()">
+                        <button type="button" onclick="searchMapLocation()" class="bg-primary text-on-primary px-6 py-2 rounded font-semibold hover:opacity-90 transition-opacity shadow-sm">Search</button>
+                    </div>
+
                     <div id="propertyMap" class="w-full h-[300px] border border-outline-variant rounded z-10"></div>
+                    
                     <div class="flex gap-4 mt-2">
                         <input type="text" name="latitude" id="propertyLat" value="<?= esc($property['latitude']) ?>" required readonly class="w-full bg-surface-container-lowest border border-outline-variant px-2 py-1 text-xs rounded text-on-surface-variant">
                         <input type="text" name="longitude" id="propertyLng" value="<?= esc($property['longitude']) ?>" required readonly class="w-full bg-surface-container-lowest border border-outline-variant px-2 py-1 text-xs rounded text-on-surface-variant">
@@ -332,7 +402,7 @@
 
     <!-- ALPINE VALIDATION MODAL -->
     <div x-show="showValidationErrorModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
-        <div @click.outside="showValidationErrorModal = false" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+        <div @click.outside="showValidationErrorModal = false" x-show="showValidationErrorModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
             <div class="p-6 text-center">
                 <div class="w-16 h-16 rounded-full bg-error-container text-error flex items-center justify-center mx-auto mb-4">
                     <span class="material-symbols-outlined text-[32px]">error</span>
@@ -394,7 +464,60 @@
     <!-- INITIALIZE LEAFLET MAP & AJAX -->
     <script>
         let map;
+        let marker;
         let poiIcon;
+        function searchMapLocation() {
+            const query = document.getElementById('mapSearchInput').value;
+            if(!query) return;
+            
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
+                        
+                        map.setView([lat, lon], 16);
+                        marker.setLatLng([lat, lon]);
+                        
+                        document.getElementById('propertyLat').value = lat;
+                        document.getElementById('propertyLng').value = lon;
+                        
+                        reverseGeocode(lat, lon);
+                    } else {
+                        alert('Location not found. Please try a different search term.');
+                    }
+                })
+                .catch(err => console.error('Geocoding error:', err));
+        }
+        function reverseGeocode(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data.address) {
+                        const addr = data.address;
+                        const state = addr.state || addr.region || '';
+                        const city = addr.city || addr.town || addr.county || addr.municipality || '';
+                        const zip = addr.postcode || '';
+                        const road = addr.road || '';
+                        const house = addr.house_number || '';
+                        const streetAddr = [road, house].filter(Boolean).join(' ');
+                        const addrInput = document.getElementById('address_line_1');
+                        if (addrInput && !addrInput.value && streetAddr) {
+                            addrInput.value = streetAddr;
+                        }
+                        const suburb = addr.suburb || addr.neighbourhood || addr.village || '';
+                        const areaInput = document.getElementById('area_name');
+                        if (areaInput && !areaInput.value && suburb) {
+                            areaInput.value = suburb;
+                        }
+                        window.dispatchEvent(new CustomEvent('autofill-location', {
+                            detail: { state, city, zip }
+                        }));
+                    }
+                })
+                .catch(err => console.error('Reverse Geocoding error:', err));
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const savedLat = <?= !empty($property['latitude']) ? esc($property['latitude']) : '-6.2250' ?>;
@@ -408,7 +531,7 @@
 
             setTimeout(() => { map.invalidateSize(); }, 250);
 
-            const marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
+            marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
             marker.bindPopup("<b>Target Property</b><br>Drag to adjust location.").openPopup();
             
             document.getElementById('propertyLat').value = savedLat;
@@ -418,12 +541,14 @@
                 const position = marker.getLatLng();
                 document.getElementById('propertyLat').value = position.lat;
                 document.getElementById('propertyLng').value = position.lng;
+                reverseGeocode(position.lat, position.lng);
             });
 
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 document.getElementById('propertyLat').value = e.latlng.lat;
                 document.getElementById('propertyLng').value = e.latlng.lng;
+                reverseGeocode(e.latlng.lat, e.latlng.lng);
             });
 
             const poiData = <?= json_encode($pois ?? []) ?>;
