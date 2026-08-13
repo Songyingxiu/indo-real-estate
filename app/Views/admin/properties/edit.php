@@ -245,8 +245,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Parking Availability</label>
                     <select name="parking" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="1" <?= $property['parking'] == '1' ? 'selected' : '' ?>>Available</option>
-                        <option value="0" <?= $property['parking'] == '0' ? 'selected' : '' ?>>Not Available</option>
+                        <option value="Yes" <?= $property['parking'] == 'Yes' ? 'selected' : '' ?>>Available</option>
+                        <option value="No" <?= $property['parking'] == 'No' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
                 
@@ -258,8 +258,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Basement</label>
                     <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="No" <?= $property['basement'] == 'No' ? 'selected' : '' ?>>No</option>
-                        <option value="Yes" <?= $property['basement'] == 'Yes' ? 'selected' : '' ?>>Yes</option>
+                        <option value="0" <?= $property['basement'] == '0' ? 'selected' : '' ?>>No</option>
+                        <option value="1" <?= $property['basement'] == '1' ? 'selected' : '' ?>>Yes</option>
                     </select>
                 </div>
 
@@ -410,9 +410,9 @@
 
             const marker = L.marker([savedLat, savedLng], { draggable: true }).addTo(map);
             marker.bindPopup("<b>Target Property</b><br>Drag to adjust location.").openPopup();
-
-            document.getElementById('propertyLat').value = defaultLat;
-            document.getElementById('propertyLng').value = defaultLng;
+            
+            document.getElementById('propertyLat').value = savedLat;
+            document.getElementById('propertyLng').value = savedLng;
 
             marker.on('dragend', function(e) {
                 const position = marker.getLatLng();
