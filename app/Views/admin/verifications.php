@@ -48,7 +48,7 @@
                             <td class="p-4 font-semibold text-primary"><?= esc(($row->first_name ?? '') . ' ' . ($row->last_name ?? '')) ?></td>
                             <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($row->created_at ?? $row->created_date ?? 'now')) ?></td>
                             <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($row->approval_status ?? '') ?></span>
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($row->approval_status ?: 'Pending') ?></span>
                             </td>
                             <td class="p-4 text-right">
                                 <button @click="showModal = true; 
@@ -95,12 +95,12 @@
                                 <span class="font-medium">Land Certificate (SHM)</span>
                             </td>
                             <td class="p-4">
-                                <p class="font-semibold text-primary mb-1"><?= esc($row->property_title ?? '') ?></p>
+                                <p class="font-semibold text-primary mb-1"><?= esc($row->property_title ?? 'Unknown Property') ?></p>
                                 <p class="text-xs text-on-surface-variant">Owner: <?= esc(($row->first_name ?? '') . ' ' . ($row->last_name ?? '')) ?></p>
                             </td>
                             <td class="p-4 text-on-surface-variant whitespace-nowrap"><?= date('M d, Y', strtotime($row->created_at ?? $row->created_date ?? 'now')) ?></td>
                             <td class="p-4">
-                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($row->approval_status ?? '') ?></span>
+                                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= esc($row->approval_status ?: 'Pending') ?></span>
                             </td>
                             <td class="p-4 text-right">
                                 <button @click="showModal = true; 
