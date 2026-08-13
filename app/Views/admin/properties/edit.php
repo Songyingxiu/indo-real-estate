@@ -242,11 +242,12 @@
                     <input type="text" name="building_society_name" value="<?= esc($property['building_society_name']) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
                 </div>
                 
+                <!-- RESTORED CORRECT PARKING ENUM VALUES -->
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Parking Availability</label>
                     <select name="parking" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="Available" <?= $property['parking'] == 'Available' ? 'selected' : '' ?>>Available</option>
-                        <option value="Not Available" <?= $property['parking'] == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
+                        <option value="1" <?= $property['parking'] == '1' ? 'selected' : '' ?>>Available</option>
+                        <option value="0" <?= $property['parking'] == '0' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
                 
@@ -258,8 +259,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Basement</label>
                     <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="No" <?= $property['basement'] == 'No' ? 'selected' : '' ?>>No</option>
-                        <option value="Yes" <?= $property['basement'] == 'Yes' ? 'selected' : '' ?>>Yes</option>
+                        <option value="0" <?= $property['basement'] == '0' ? 'selected' : '' ?>>No</option>
+                        <option value="1" <?= $property['basement'] == '1' ? 'selected' : '' ?>>Yes</option>
                     </select>
                 </div>
 

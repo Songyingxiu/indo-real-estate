@@ -143,7 +143,6 @@ class Properties extends BaseController
             }
         }
 
-        // --- ENFORCE MAXIMUM 20 IMAGES CHECK ---
         $uploadedImages = $this->request->getFileMultiple('property_images');
         if (!empty($uploadedImages) && count($uploadedImages) > 20) {
             return redirect()->back()->withInput()->with('error', 'You can upload a maximum of 20 property images.');
@@ -209,8 +208,8 @@ class Properties extends BaseController
             'area_name'        => $this->request->getPost('area_name'), 
             'unit_number'      => $this->request->getPost('unit_number'), 
             'building_society_name' => $this->request->getPost('building_society_name'), 
-            'parking'          => $this->request->getPost('parking'), 
-            'basement'         => $this->request->getPost('basement'), 
+            'parking'          => $getNumericPost('parking'), 
+            'basement'         => $getNumericPost('basement'), 
             'water_facility'   => $this->request->getPost('water_facility'), 
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
@@ -379,7 +378,6 @@ class Properties extends BaseController
             return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
         }
 
-        // --- ENFORCE MAXIMUM 20 IMAGES CHECK ON EDIT ---
         $uploadedImages = $this->request->getFileMultiple('property_images');
         if (!empty($uploadedImages) && $uploadedImages[0]->isValid() && count($uploadedImages) > 20) {
             return redirect()->back()->withInput()->with('error', 'You can upload a maximum of 20 property images.');
@@ -432,8 +430,8 @@ class Properties extends BaseController
             'area_name'        => $this->request->getPost('area_name'),
             'unit_number'      => $this->request->getPost('unit_number'),
             'building_society_name' => $this->request->getPost('building_society_name'),
-            'parking'          => $this->request->getPost('parking'),
-            'basement'         => $this->request->getPost('basement'),
+            'parking'          => $getNumericPost('parking'),
+            'basement'         => $getNumericPost('basement'),
             'water_facility'   => $this->request->getPost('water_facility'),
             'latitude'         => $this->request->getPost('latitude'),
             'longitude'        => $this->request->getPost('longitude'),
