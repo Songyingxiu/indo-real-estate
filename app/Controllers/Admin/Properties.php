@@ -143,6 +143,12 @@ class Properties extends BaseController
             }
         }
 
+        // --- ENFORCE MAXIMUM 20 IMAGES CHECK ---
+        $uploadedImages = $this->request->getFileMultiple('property_images');
+        if (!empty($uploadedImages) && count($uploadedImages) > 20) {
+            return redirect()->back()->withInput()->with('error', 'You can upload a maximum of 20 property images.');
+        }
+
         $rules = [
             'title_en'         => 'required|min_length[5]|max_length[255]',
             'title_id'         => 'required|min_length[5]|max_length[255]',
@@ -172,7 +178,6 @@ class Properties extends BaseController
         
         $propTitleEN = $this->request->getPost('title_en');
 
-        // Helper function to safely convert empty strings to null for numeric fields
         $getNumericPost = function($field) {
             $val = $this->request->getPost($field);
             return ($val === '' || $val === null) ? null : $val;
@@ -372,6 +377,12 @@ class Properties extends BaseController
 
         if (session()->get('role_id') != 4 && $property['owner_id'] != session()->get('user_id')) {
             return redirect()->to(base_url('admin/properties'))->with('error', 'Unauthorized access.');
+        }
+
+        // --- ENFORCE MAXIMUM 20 IMAGES CHECK ON EDIT ---
+        $uploadedImages = $this->request->getFileMultiple('property_images');
+        if (!empty($uploadedImages) && $uploadedImages[0]->isValid() && count($uploadedImages) > 20) {
+            return redirect()->back()->withInput()->with('error', 'You can upload a maximum of 20 property images.');
         }
 
         $rules = [
