@@ -268,8 +268,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Basement</label>
                     <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="No" <?= old('basement') == 'No' ? 'selected' : '' ?>>No</option>
-                        <option value="Yes" <?= old('basement') == 'Yes' ? 'selected' : '' ?>>Yes</option>
+                        <option value="Available" <?= old('basement') == 'Available' ? 'selected' : '' ?>>Available</option>
+                        <option value="Not Available" <?= old('basement') == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
 
