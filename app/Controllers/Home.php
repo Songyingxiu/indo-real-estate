@@ -155,6 +155,7 @@ class Home extends BaseController
         // Generate Time Ago humanized string
         $data['timeAgo'] = Time::parse($property->created_date)->humanize();
 
+        // Check Subscription Plans for Features
         $subModel = new \App\Models\SubscriptionModel();
         $planModel = new \App\Models\SubscriptionPlanModel();
         $userModel = new \App\Models\UserModel();
@@ -162,12 +163,14 @@ class Home extends BaseController
         $activeSub = $subModel->where('user_id', $property->owner_id)->where('sub_status', 'Active')->first();
         
         $maxPois = 5; 
+        $allowDirectEmail = false;
         
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
                 $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 5) : ($plan->max_pois ?? 5);
+                $allowDirectEmail = is_array($plan) ? ($plan['allow_direct_email'] ?? false) : ($plan->allow_direct_email ?? false);
             }
         }
 
@@ -176,7 +179,10 @@ class Home extends BaseController
         
         if ($ownerRole == 4) { 
             $maxPois = 9999;
+            $allowDirectEmail = true;
         }
+
+        $data['allowDirectEmail'] = $allowDirectEmail;
 
         $isSaved = false;
         $userId = session()->get('id');
@@ -249,7 +255,7 @@ class Home extends BaseController
         return view('front/properties/details', $data);
     }
 
-    public function province($provinceSlug, $listingType = 'sale')
+    public function province_listing($provinceSlug, $listingType = 'sale')
     {
         $stateModel = new StateModel();
         $propertyModel = new PropertyModel();
@@ -277,7 +283,7 @@ class Home extends BaseController
         return view('front/properties/state', $data);
     }
 
-    public function city($citySlug, $provinceSlug, $listingType = 'sale')
+    public function city_listing($citySlug, $provinceSlug, $listingType = 'sale')
     {
         $cityModel = new CityModel();
         $propertyModel = new PropertyModel();
@@ -315,7 +321,7 @@ class Home extends BaseController
         return view('front/properties/city', $data);
     }
 
-    public function zipcode($zipcode, $listingType = 'sale')
+    public function zipcode_listing($zipcode, $listingType = 'sale')
     {
         $zipcodeModel = new ZipcodeModel();
         $propertyModel = new PropertyModel();

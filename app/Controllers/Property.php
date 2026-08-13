@@ -147,15 +147,52 @@ class Property extends BaseController
         ];
 
         $inquiryModel->insert($data);
+        $parentId = $inquiryModel->getInsertID();
 
+        // Check Subscription to Trigger Auto-Reply
+        $subModel = new \App\Models\SubscriptionModel();
+        $planModel = new \App\Models\SubscriptionPlanModel();
+        $agentSub = $subModel->where('user_id', $receiverId)->where('sub_status', 'Active')->first();
+        
+        $allowMessages = false;
+        if ($agentSub) {
+            $planId = is_array($agentSub) ? $agentSub['plan_id'] : $agentSub->plan_id;
+            $plan = $planModel->find($planId);
+            if ($plan) {
+                $allowMessages = is_array($plan) ? $plan['allow_messages'] : $plan->allow_messages;
+            }
+        }
+        
+        // Admin overrides the message block
+        $agent = $userModel->find($receiverId);
+        $agentRole = is_array($agent) ? $agent['role_id'] : $agent->role_id;
+        if ($agentRole == 4) {
+            $allowMessages = true;
+        }
+
+        // If the agent doesn't have chat privileges, inject a system auto-reply
+        if (!$allowMessages) {
+            $autoReply = [
+                'parent_id'   => $parentId,
+                'property_id' => $propertyId,
+                'sender_id'   => $receiverId,
+                'receiver_id' => session()->get('id') ?? null,
+                'message'     => "System Auto-Reply: Thank you for your inquiry! My current plan does not support live chat, but I have received your message and will contact you shortly via the email or phone number you provided.",
+                'status'      => 'Replied'
+            ];
+            $inquiryModel->insert($autoReply);
+            $inquiryModel->update($parentId, ['status' => 'Replied']);
+        }
+
+        // Send Email Notifications
         $emailService->sendDynamicEmail('New Inquiry Customer', $customerEmail, [
             '{first_name}' => $customerName,
             '{property_id}' => $propertyId
         ]);
 
-        $agent = $userModel->find($receiverId);
         if ($agent) {
-            $emailService->sendDynamicEmail('New Inquiry Agent', $agent['email'], [
+            $agentEmail = is_array($agent) ? $agent['email'] : $agent->email;
+            $emailService->sendDynamicEmail('New Inquiry Agent', $agentEmail, [
                 '{property_id}' => $propertyId
             ]);
         }
