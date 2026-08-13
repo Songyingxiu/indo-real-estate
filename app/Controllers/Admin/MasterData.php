@@ -25,6 +25,7 @@ class MasterData extends BaseController
         $zipcodeModel = new ZipcodeModel();
         $poiModel = new PoiModel();
 
+        // Paginated Data for Tables
         $data['propertyTypes'] = $propertyTypeModel->orderBy('id', 'DESC')->paginate(5, 'types');
         
         $cityModel->select('cities.*, states.name as state_name');
@@ -37,10 +38,11 @@ class MasterData extends BaseController
 
         $data['states'] = $stateModel->orderBy('id', 'DESC')->paginate(5, 'states');
 
-        // Feature Categories Fetching
+        $data['allStates'] = $stateModel->where('status', 'Active')->orderBy('name', 'ASC')->findAll();
+        $data['allCities'] = $cityModel->where('status', 'Active')->orderBy('name', 'ASC')->findAll();
+
         $db = \Config\Database::connect();
         $data['featureCategories'] = $db->table('feature_categories')->where('status', 'Active')->get()->getResult();
-
         $featureModel->select('features.*, feature_categories.name as category_name');
         $featureModel->join('feature_categories', 'feature_categories.id = features.category_id', 'left');
         $data['features'] = $featureModel->orderBy('features.id', 'DESC')->paginate(5, 'features');
@@ -132,6 +134,7 @@ class MasterData extends BaseController
     {
         $model = new SubscriptionPlanModel();
         $nameEN = $this->request->getPost('name_en');
+        
         
         $featuresArray = $this->request->getPost('features') ?? [];
         $featuresJson = json_encode($featuresArray);
@@ -249,6 +252,8 @@ class MasterData extends BaseController
     {
         $model = new SubscriptionPlanModel();
         $nameEN = $this->request->getPost('name_en');
+        
+        
         $featuresArray = $this->request->getPost('features') ?? [];
         $featuresJson = json_encode($featuresArray);
         
