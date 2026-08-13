@@ -255,11 +255,11 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Parking Availability</label>
                     <select name="parking" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="Yes" <?= old('parking') == 'Yes' ? 'selected' : '' ?>>Available</option>
-                        <option value="No" <?= old('parking') == 'No' ? 'selected' : '' ?>>Not Available</option>
+                        <option value="Available" <?= old('parking') == 'Available' ? 'selected' : '' ?>>Available</option>
+                        <option value="Not Available" <?= old('parking') == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Total Parking Spots</label>
                     <input type="number" name="total_parking" value="<?= old('total_parking', 0) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
@@ -268,8 +268,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Basement</label>
                     <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="0" <?= old('basement') == '0' ? 'selected' : '' ?>>No</option>
-                        <option value="1" <?= old('basement') == '1' ? 'selected' : '' ?>>Yes</option>
+                        <option value="No" <?= old('basement') == 'No' ? 'selected' : '' ?>>No</option>
+                        <option value="Yes" <?= old('basement') == 'Yes' ? 'selected' : '' ?>>Yes</option>
                     </select>
                 </div>
 
