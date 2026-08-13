@@ -9,6 +9,7 @@
     showEditZipcodeModal: false, editZipcodeId: '', editZipcodeVal: '', editZipcodeCityId: '',
     showCreatePlanModal: false, showEditPlanModal: false,
     editPlanId: '', editPlanCode: '', editPlanNameEN: '', editPlanNameID: '', editPlanDescEN: '', editPlanDescID: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanPoi: 0, editPlanMsg: 0, editPlanEmail: 0,
+    editPlanFeatures: [], /* FIX: Added Alpine Array for Checkboxes */
     showCreatePoiModal: false,
     showEditFeatureCatModal: false, editFeatureCatId: '', editFeatureCatNameEN: '', editFeatureCatNameID: '',
     showEditFeatureModal: false, editFeatureId: '', editFeatureNameEN: '', editFeatureNameID: '', editFeatureCategoryId: '',
@@ -78,7 +79,13 @@
                                     <td class="py-3 px-6 font-label-md font-bold text-primary"><?= esc($plan->code ?? $plan->package_code ?? 'N/A') ?></td>
                                     <td class="py-3 px-6 font-body-md text-on-surface">
                                         <span class="font-semibold block"><?= esc($plan->name_en ?? $plan->name) ?></span>
-                                        <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block"><?= esc($plan->features_en ?? $plan->description ?? 'No description') ?></span>
+                                        <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block">
+                                            <?php 
+                                                // Check if it's an array to render nicely, or fallback to description
+                                                $feats = json_decode($plan->features_en, true);
+                                                echo is_array($feats) && !empty($feats) ? esc(implode(', ', $feats)) : esc($plan->description ?? 'No description');
+                                            ?>
+                                        </span>
                                     </td>
                                     <td class="py-3 px-6 font-body-md text-on-surface">Rp <?= number_format($plan->price, 0, ',', '.') ?></td>
                                     <td class="py-3 px-6 text-on-surface-variant text-sm flex gap-1 flex-wrap">
@@ -88,7 +95,23 @@
                                     </td>
                                     <td class="py-3 px-6 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <button type="button" @click="showEditPlanModal = true; editPlanId = <?= $plan->id ?>; editPlanCode = '<?= esc(addslashes($plan->code ?? $plan->package_code ?? '')) ?>'; editPlanNameEN = '<?= esc(addslashes($plan->name_en ?? $plan->name)) ?>'; editPlanNameID = '<?= esc(addslashes($plan->name_id ?? $plan->name)) ?>'; editPlanDescEN = '<?= esc(addslashes($plan->features_en ?? $plan->description ?? '')) ?>'; editPlanDescID = '<?= esc(addslashes($plan->features_id ?? $plan->description ?? '')) ?>'; editPlanPrice = <?= $plan->price ?>; editPlanProp = <?= $plan->max_properties ?? 1 ?>; editPlanAgent = <?= $plan->max_agents ?? 0 ?>; editPlanPoi = <?= $plan->max_pois ?? 0 ?>; editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; editPlanEmail = <?= $plan->allow_direct_email ?? 0 ?>;" class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+                                            <!-- FIX: Safe JSON parse for pre-selecting checkboxes on edit -->
+                                            <button type="button" @click="
+                                                showEditPlanModal = true; 
+                                                editPlanId = <?= $plan->id ?>; 
+                                                editPlanCode = '<?= esc(addslashes($plan->code ?? $plan->package_code ?? '')) ?>'; 
+                                                editPlanNameEN = '<?= esc(addslashes($plan->name_en ?? $plan->name)) ?>'; 
+                                                editPlanNameID = '<?= esc(addslashes($plan->name_id ?? $plan->name)) ?>'; 
+                                                editPlanDescEN = '<?= esc(addslashes($plan->description ?? '')) ?>'; 
+                                                editPlanDescID = '<?= esc(addslashes($plan->description ?? '')) ?>'; 
+                                                editPlanPrice = <?= $plan->price ?>; 
+                                                editPlanProp = <?= $plan->max_properties ?? 1 ?>; 
+                                                editPlanAgent = <?= $plan->max_agents ?? 0 ?>; 
+                                                editPlanPoi = <?= $plan->max_pois ?? 0 ?>; 
+                                                editPlanMsg = <?= $plan->allow_messages ?? 0 ?>; 
+                                                editPlanEmail = <?= $plan->allow_direct_email ?? 0 ?>;
+                                                try { editPlanFeatures = JSON.parse('<?= esc(addslashes($plan->features_en ?? '[]')) ?>'); } catch(e) { editPlanFeatures = []; };
+                                            " class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
                                                 <span class="material-symbols-outlined text-[20px]">edit</span>
                                             </button>
                                             <button type="button" @click="showDeleteModal = true; deleteUrl = '<?= base_url('admin/master-data/delete-plan/' . $plan->id) ?>'; deleteMessage = 'Are you sure you want to permanently delete this package?';" class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
@@ -326,7 +349,7 @@
             </section>
             
             <!-- FEATURES / AMENITIES MODULE -->
-            <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200 md:col-span-2">
+            <section class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col hover:shadow-lg transition-shadow duration-200 md:col-span-2" id="features">
                 <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-lg">
                     <h2 class="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">format_list_bulleted</span> Features (Amenities)
@@ -476,7 +499,7 @@
         </div>
     </div>
 
-    <!-- CREATE PACKAGE (PLAN) MODAL -->
+    <!-- FIX: CREATE PACKAGE (PLAN) MODAL -->
     <div x-show="showCreatePlanModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showCreatePlanModal = false" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -499,13 +522,29 @@
                         <input type="text" name="name_id" id="create_plan_name_id" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Description/Features (EN)</label>
-                        <textarea name="description_en" @blur="translateText($event.target.value, 'create_plan_desc_id')" rows="2" required placeholder="List details separated by commas..." class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
+                        <label class="block text-sm font-semibold mb-1">Description (EN)</label>
+                        <textarea name="description_en" @blur="translateText($event.target.value, 'create_plan_desc_id')" rows="2" required placeholder="Enter plan summary..." class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Description/Features (ID)</label>
+                        <label class="block text-sm font-semibold mb-1">Description (ID)</label>
                         <textarea name="description_id" id="create_plan_desc_id" rows="2" required class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
+                    
+                    <!-- Feature Checkboxes -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-1">Included Features</label>
+                        <div class="grid grid-cols-2 gap-2 border border-outline-variant rounded p-3 bg-surface-container-lowest max-h-40 overflow-y-auto">
+                            <?php if(!empty($allFeatures)): foreach($allFeatures as $feat): ?>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="features[]" value="<?= esc($feat->name_en ?? $feat->name) ?>" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4">
+                                    <span class="text-sm text-on-surface"><?= esc($feat->name_en ?? $feat->name) ?></span>
+                                </label>
+                            <?php endforeach; else: ?>
+                                <p class="text-xs text-on-surface-variant">No features found. Please add features in the Features module first.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold mb-1">Price (IDR)</label>
                         <input type="number" name="price" value="0" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">
@@ -543,7 +582,7 @@
         </div>
     </div>
 
-    <!-- EDIT PACKAGE (PLAN) MODAL -->
+    <!-- FIX: EDIT PACKAGE (PLAN) MODAL -->
     <div x-show="showEditPlanModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showEditPlanModal = false" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -573,6 +612,22 @@
                         <label class="block text-sm font-semibold mb-1">Description (ID)</label>
                         <textarea name="description_id" x-model="editPlanDescID" required rows="2" class="w-full p-3 border border-outline-variant rounded bg-surface resize-none"></textarea>
                     </div>
+                    
+                    <!-- Feature Checkboxes -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-1">Included Features</label>
+                        <div class="grid grid-cols-2 gap-2 border border-outline-variant rounded p-3 bg-surface-container-lowest max-h-40 overflow-y-auto">
+                            <?php if(!empty($allFeatures)): foreach($allFeatures as $feat): ?>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="features[]" value="<?= esc($feat->name_en ?? $feat->name) ?>" x-model="editPlanFeatures" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4">
+                                    <span class="text-sm text-on-surface"><?= esc($feat->name_en ?? $feat->name) ?></span>
+                                </label>
+                            <?php endforeach; else: ?>
+                                <p class="text-xs text-on-surface-variant">No features found.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold mb-1">Price (IDR)</label>
                         <input type="number" name="price" x-model="editPlanPrice" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface">

@@ -46,6 +46,8 @@ class MasterData extends BaseController
         $featureModel->join('feature_categories', 'feature_categories.id = features.category_id', 'left');
         $data['features'] = $featureModel->orderBy('features.id', 'DESC')->paginate(5, 'features');
         
+        $data['allFeatures'] = $featureModel->where('status', 'Active')->findAll();
+        
         $data['plans'] = $planModel->orderBy('price', 'ASC')->paginate(10, 'plans');
         
         // Fetch POIs
@@ -63,7 +65,7 @@ class MasterData extends BaseController
         $model = new PropertyTypeModel();
         $nameEN = $this->request->getPost('name_en');
         $model->insert([
-            'name'    => $nameEN, // Fallback
+            'name'    => $nameEN,
             'name_en' => $nameEN, 
             'name_id' => $this->request->getPost('name_id'), 
             'status'  => 'Active'
@@ -94,7 +96,7 @@ class MasterData extends BaseController
         $db = \Config\Database::connect();
         $nameEN = $this->request->getPost('name_en');
         $db->table('feature_categories')->insert([
-            'name'    => $nameEN, // Fallback
+            'name'    => $nameEN,
             'name_en' => $nameEN,
             'name_id' => $this->request->getPost('name_id'),
             'status'  => 'Active'
@@ -108,7 +110,7 @@ class MasterData extends BaseController
         $nameEN = $this->request->getPost('name_en');
         $model->insert([
             'category_id' => $this->request->getPost('category_id'),
-            'name'        => $nameEN, // Fallback
+            'name'        => $nameEN,
             'name_en'     => $nameEN, 
             'name_id'     => $this->request->getPost('name_id'), 
             'status'      => 'Active'
@@ -132,14 +134,17 @@ class MasterData extends BaseController
         $model = new SubscriptionPlanModel();
         $nameEN = $this->request->getPost('name_en');
         
+        $featuresArray = $this->request->getPost('features') ?? [];
+        $featuresJson = json_encode($featuresArray);
+        
         $model->insert([
             'package_code'       => strtoupper($this->request->getPost('code')),
-            'name'               => $nameEN, // Fallback
+            'name'               => $nameEN,
             'name_en'            => $nameEN,
             'name_id'            => $this->request->getPost('name_id'),
-            'description'        => $this->request->getPost('description_en'), // Fallback
-            'features_en'        => $this->request->getPost('description_en'), // Assuming description is used for features list
-            'features_id'        => $this->request->getPost('description_id'),
+            'description'        => $this->request->getPost('description_en'),
+            'features_en'        => $featuresJson, 
+            'features_id'        => $featuresJson, 
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
@@ -191,7 +196,7 @@ class MasterData extends BaseController
     public function updateType($id) { 
         $nameEN = $this->request->getPost('name_en');
         (new PropertyTypeModel())->update($id, [
-            'name'    => $nameEN, // Fallback
+            'name'    => $nameEN,
             'name_en' => $nameEN, 
             'name_id' => $this->request->getPost('name_id')
         ]); 
@@ -221,7 +226,7 @@ class MasterData extends BaseController
         $db = \Config\Database::connect();
         $nameEN = $this->request->getPost('name_en');
         $db->table('feature_categories')->where('id', $id)->update([
-            'name'    => $nameEN, // Fallback
+            'name'    => $nameEN,
             'name_en' => $nameEN,
             'name_id' => $this->request->getPost('name_id')
         ]);
@@ -234,7 +239,7 @@ class MasterData extends BaseController
         $nameEN = $this->request->getPost('name_en');
         $model->update($id, [
             'category_id' => $this->request->getPost('category_id'),
-            'name'        => $nameEN, // Fallback
+            'name'        => $nameEN,
             'name_en'     => $nameEN, 
             'name_id'     => $this->request->getPost('name_id')
         ]);
@@ -245,15 +250,17 @@ class MasterData extends BaseController
     {
         $model = new SubscriptionPlanModel();
         $nameEN = $this->request->getPost('name_en');
+        $featuresArray = $this->request->getPost('features') ?? [];
+        $featuresJson = json_encode($featuresArray);
         
         $model->update($id, [
             'package_code'       => strtoupper($this->request->getPost('code')),
-            'name'               => $nameEN, // Fallback
+            'name'               => $nameEN,
             'name_en'            => $nameEN,
             'name_id'            => $this->request->getPost('name_id'),
-            'description'        => $this->request->getPost('description_en'), // Fallback
-            'features_en'        => $this->request->getPost('description_en'),
-            'features_id'        => $this->request->getPost('description_id'),
+            'description'        => $this->request->getPost('description_en'), 
+            'features_en'        => $featuresJson, 
+            'features_id'        => $featuresJson, 
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
