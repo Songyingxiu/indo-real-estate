@@ -32,6 +32,7 @@
                 </div>
 
                 <ul class="flex flex-col gap-4 mb-8 flex-grow">
+                    <!-- Standard Plan Limits -->
                     <li class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
                         <span class="text-on-surface text-sm font-medium"><?= $plan->max_properties == 0 ? 'Unlimited' : esc($plan->max_properties) ?> Property Listings</span>
@@ -44,6 +45,21 @@
                         <span class="material-symbols-outlined <?= ($plan->allow_direct_email ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_direct_email ?? false) ? 'check_circle' : 'cancel' ?></span>
                         <span class="text-on-surface text-sm <?= ($plan->allow_direct_email ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Email & Phone Inquiries</span>
                     </li>
+
+                    <!-- Dynamic Master Data Features -->
+                    <?php 
+                        $assignedFeatures = json_decode($plan->features_en ?? '[]', true);
+                        if (is_array($assignedFeatures) && !empty($assignedFeatures)): 
+                            foreach($assignedFeatures as $featureName): 
+                    ?>
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                            <span class="text-on-surface text-sm font-medium"><?= esc($featureName) ?></span>
+                        </li>
+                    <?php 
+                            endforeach; 
+                        endif; 
+                    ?>
                 </ul>
 
                 <form action="<?= base_url('admin/subscription/checkout') ?>" method="POST" class="mt-auto">

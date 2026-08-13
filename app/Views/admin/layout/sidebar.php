@@ -85,7 +85,7 @@
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/master-data')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/master-data') ?>">
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/master-data')) ? 'icon-fill' : '' ?>">database</span>
-                <span class="font-label-md text-label-md">Master Data</span>
+                <span class="font-label-md text-label-md">Master Data & Features</span>
             </a>
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/advertisements') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/advertisements') ?>">

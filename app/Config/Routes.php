@@ -9,10 +9,14 @@ use CodeIgniter\Router\RouteCollection;
 // Public Facing Routes
 $routes->get('lang/(:segment)', 'Language::switch/$1');
 $routes->get('/', 'Home::index');            
-$routes->get('search', 'Home::search'); // Fallback for generic searches
+$routes->get('search', 'Home::search');
 $routes->get('search/(:segment)', 'Home::search/$1'); // SEO: /search/rent or /search/sale
 $routes->get('api/suggest', 'Home::suggest');
 $routes->post('search/save', 'Home::saveSearch');
+
+// Contact Us Routes
+$routes->get('contact', 'Contact::index');
+$routes->post('contact/submit', 'Contact::submitContact');
 
 // property details routes
 $routes->get('property/(:num)', 'Home::detail/$1');
