@@ -105,8 +105,8 @@
                             <div class="absolute inset-0 bg-surface/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center border-t border-outline-variant">
                                 <div class="bg-surface border border-outline-variant p-4 rounded-lg shadow-lg text-center max-w-sm">
                                     <span class="material-symbols-outlined text-primary mb-2 text-3xl">lock</span>
-                                    <p class="text-[15px] font-bold text-on-surface mb-1">Live Chat is a Premium Feature</p>
-                                    <p class="text-[13px] text-on-surface-variant mb-4">Please contact the buyer directly via Email or Phone, or upgrade your plan to reply in real-time.</p>
+                                    <p class="text-[15px] font-bold text-on-surface mb-1">2-Way Live Chat is a Premium Feature</p>
+                                    <p class="text-[13px] text-on-surface-variant mb-4">You have received this lead, and an auto-reply was sent to them! Upgrade your plan to reply natively in-app.</p>
                                     <a href="<?= base_url('admin/pricing') ?>" class="inline-block bg-primary text-on-primary px-5 py-2 rounded text-[13px] font-bold hover:opacity-90 shadow-sm">Upgrade Plan</a>
                                 </div>
                             </div>

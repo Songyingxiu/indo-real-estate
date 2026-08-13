@@ -39,12 +39,8 @@ class Inquiries extends BaseController
                 $planId = is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id'];
                 $plan = $planModel->find($planId);
                 if ($plan) {
-                    $planName = strtolower(is_object($plan) ? $plan->name : $plan['name']);
-                    
-                    // Allow reply only if plan name does NOT contain 'free' or 'basic'
-                    if (strpos($planName, 'free') === false && strpos($planName, 'basic') === false) {
-                        $canReply = true;
-                    }
+                    // FIX: Replaced unreliable string search with exact db truth flag
+                    $canReply = is_object($plan) ? $plan->allow_messages : $plan['allow_messages'];
                 }
             }
         }
@@ -106,11 +102,7 @@ class Inquiries extends BaseController
                 $planId = is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id'];
                 $plan = $planModel->find($planId);
                 if ($plan) {
-                    $planName = strtolower(is_object($plan) ? $plan->name : $plan['name']);
-                    
-                    if (strpos($planName, 'free') === false && strpos($planName, 'basic') === false) {
-                        $canReply = true;
-                    }
+                    $canReply = is_object($plan) ? $plan->allow_messages : $plan['allow_messages'];
                 }
             }
         }

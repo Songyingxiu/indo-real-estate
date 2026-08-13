@@ -387,10 +387,25 @@
                         </div>
                         <div>
                             <h3 class="font-label-md text-[16px] text-on-surface font-bold"><?= esc($property->first_name . ' ' . $property->last_name) ?></h3>
-                            <p class="text-[12px] text-on-surface-variant mb-1"><?= lang('Front.det_premium_agent') ?></p>
-                            <span class="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded text-[12px] text-primary border border-outline-variant/50">
+                            <span class="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 mt-1 rounded text-[12px] text-primary border border-outline-variant/50">
                                 <span class="material-symbols-outlined text-[12px]">badge</span> <?= lang('Front.det_verified') ?>
                             </span>
+
+                            <!-- Hide direct contact details if not permitted by plan -->
+                            <?php if(isset($allowDirectEmail) && $allowDirectEmail): ?>
+                                <div class="mt-2 space-y-1">
+                                    <p class="text-[13px] text-on-surface-variant flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[16px]">call</span> <?= esc($property->phone_number) ?>
+                                    </p>
+                                    <p class="text-[13px] text-on-surface-variant flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[16px]">mail</span> <?= esc($property->email) ?>
+                                    </p>
+                                </div>
+                            <?php else: ?>
+                                <p class="text-[12px] text-on-surface-variant mt-2 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">lock</span> Contact details hidden
+                                </p>
+                            <?php endif; ?>
                         </div>
                     </div>
 
