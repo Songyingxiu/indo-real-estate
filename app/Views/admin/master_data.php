@@ -467,12 +467,13 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">Category</label>
-                        <select name="category" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface cursor-pointer">
-                            <option value="" disabled selected>Select Category...</option>
-                            <option value="School">School</option>
-                            <option value="Station">Station</option>
-                            <option value="Hospital">Hospital</option>
-                            <option value="Mall">Mall</option>
+                        <select id="agentPoiCategory" name="category" class="w-full h-10 px-3 border border-outline-variant rounded bg-surface cursor-pointer">
+                            <option value="School">School / University</option>
+                            <option value="Station">Station / Transit</option>
+                            <option value="Hospital">Hospital / Clinic</option>
+                            <option value="Mall">Mall / Market</option>
+                            <option value="Supermarket">Supermarket / Grocery</option>
+                            <option value="Park">Park / Garden</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
