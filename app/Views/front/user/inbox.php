@@ -5,8 +5,13 @@
     <aside class="w-full md:w-64 flex-shrink-0 sticky top-28 hidden md:block">
         <h2 class="font-headline-lg text-[24px] font-bold text-primary mb-6"><?= lang('Front.inbox_workspace') ?></h2>
         <nav class="flex flex-col gap-2">
-            <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-white font-label-md text-[14px] font-semibold transition-all shadow-sm" href="<?= base_url('user/inbox') ?>">
-                <span class="material-symbols-outlined">forum</span> <?= lang('Front.inbox_inquiries') ?>
+            <a class="flex items-center justify-between px-4 py-3 rounded-lg bg-primary-container text-white font-label-md text-[14px] font-semibold transition-all shadow-sm" href="<?= base_url('user/inbox') ?>">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">forum</span> <?= lang('Front.inbox_inquiries') ?>
+                </div>
+                <?php if (($GLOBALS['unread_count'] ?? 0) > 0): ?>
+                    <span class="bg-error text-on-error text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $GLOBALS['unread_count'] ?></span>
+                <?php endif; ?>
             </a>
             <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary font-label-md text-[14px] font-semibold transition-all" href="<?= base_url('user/profile') ?>">
                 <span class="material-symbols-outlined">settings</span> <?= lang('Front.inbox_settings') ?>
@@ -31,10 +36,14 @@
                         <template x-for="thread in threads" :key="thread.inquiry_id">
                             <div @click="loadThread(thread)" 
                                  :class="activeThread?.inquiry_id === thread.inquiry_id ? 'bg-primary/5 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
-                                 class="p-4 border-b border-outline-variant cursor-pointer transition-colors">
-                                <div class="font-bold text-primary text-[14px] truncate mb-1" x-text="thread.property_title"></div>
+                                 class="p-4 border-b border-outline-variant cursor-pointer transition-colors relative">
+                                <div class="font-bold text-primary text-[14px] truncate mb-1 pr-3" x-text="thread.property_title"></div>
                                 <div class="text-[12px] text-on-surface-variant mb-2"><?= lang('Front.inbox_agent') ?> <span x-text="thread.first_name + ' ' + thread.last_name"></span></div>
                                 <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold bg-surface-container-high text-on-surface-variant border border-outline-variant" x-text="thread.status"></span>
+                                
+                                <template x-if="thread.status == 'Replied'">
+                                    <span class="absolute top-5 right-4 w-2.5 h-2.5 bg-error rounded-full shadow-sm"></span>
+                                </template>
                             </div>
                         </template>
                     <?php else: ?>
@@ -106,6 +115,10 @@
             loadThread(thread) {
                 this.activeThread = thread;
                 this.messages = [];
+                if (this.activeThread.status === 'Replied') {
+                    this.activeThread.status = 'In Discussion';
+                }
+
                 fetch('<?= base_url('user/inbox/thread/') ?>' + thread.inquiry_id)
                     .then(res => res.json())
                     .then(data => {

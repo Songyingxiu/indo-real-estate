@@ -332,13 +332,6 @@
         <div class="lg:col-span-4">
             <div class="sticky top-28 flex flex-col gap-6">
                 
-                <?php if (session()->getFlashdata('success')) : ?>
-                    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded-xl border border-[#a8c7fa] flex items-start gap-2 shadow-sm">
-                        <span class="material-symbols-outlined mt-0.5">check_circle</span>
-                        <p class="font-label-md text-[14px] leading-relaxed"><?= session()->getFlashdata('success') ?></p>
-                    </div>
-                <?php endif; ?>
-                
                 <?php if (session()->getFlashdata('error')) : ?>
                     <div class="bg-[#ffdad6] text-[#410002] p-4 rounded-xl border border-error/30 flex items-start gap-2 shadow-sm">
                         <span class="material-symbols-outlined mt-0.5">warning</span>
@@ -449,6 +442,25 @@
         </div>
     </div>
 </main>
+
+<!-- SUCCESS MODAL POPUP -->
+<?php if (session()->getFlashdata('success')) : ?>
+<div x-data="{ show: true }" x-show="show" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#1a1c1e]/60 backdrop-blur-sm">
+    <div @click.outside="show = false" class="bg-surface rounded-2xl shadow-2xl border border-outline-variant max-w-md w-full p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 rounded-full bg-[#d3e3fd] text-primary flex items-center justify-center mb-4 shadow-inner">
+            <span class="material-symbols-outlined text-[32px]">mark_email_read</span>
+        </div>
+        <h2 class="font-headline-lg text-2xl font-bold text-on-surface mb-2">Message Sent!</h2>
+        <p class="text-on-surface-variant text-[15px] mb-6 leading-relaxed">
+            Your inquiry has been successfully delivered. The agent will reply shortly. Please check your inbox to view replies and continue the conversation.
+        </p>
+        <div class="flex gap-3 w-full">
+            <button @click="show = false" class="flex-1 py-3 px-4 border border-outline-variant text-on-surface-variant rounded-lg font-bold hover:bg-surface-container transition-colors">Close</button>
+            <a href="<?= base_url('user/inbox') ?>" class="flex-1 py-3 px-4 bg-primary text-on-primary rounded-lg font-bold hover:bg-primary-container transition-colors shadow-md">Go to Inbox</a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <?= $this->include('front/layout/footer') ?>
 

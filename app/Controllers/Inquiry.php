@@ -25,6 +25,12 @@ class Inquiry extends BaseController
     {
         $inquiryModel = new InquiryModel();
         
+        // Mark as read if the buyer is opening an agent's reply
+        $parent = $inquiryModel->find($id);
+        if ($parent && $parent['sender_id'] == session()->get('id') && $parent['status'] == 'Replied') {
+            $inquiryModel->update($id, ['status' => 'In Discussion']);
+        }
+        
         // Fetch thread messages
         $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
@@ -56,7 +62,7 @@ class Inquiry extends BaseController
             $data['inquiry_id'] = $inquiryModel->getInsertID();
             $data['created_at'] = date('Y-m-d H:i:s');
             
-            // Note: Buyers replying sets status to 'Pending' so agents know it needs attention
+            // Buyers replying sets status to 'Pending' so agents know it needs attention
             $inquiryModel->update($json->parent_id, ['status' => 'Pending']);
             
             return $this->response->setJSON(['status' => 'success', 'message_data' => $data]);
