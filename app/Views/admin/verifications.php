@@ -56,7 +56,7 @@
                                                 submitter = '<?= esc(addslashes(($row->first_name ?? '') . ' ' . ($row->last_name ?? ''))) ?>';
                                                 verificationId = <?= $row->id ?? 0 ?>;
                                                 processUrl = '<?= base_url('admin/verifications/process-agent/') ?>' + verificationId;
-                                                docUrl = '<?= strpos($row->ktp_document ?? '', 'http') === 0 ? esc($row->ktp_document) : base_url('uploads/documents/' . ($row->ktp_document ?? '')) ?>';" 
+                                                docUrl = '<?= strpos((string)($row->ktp_document ?? ''), 'http') === 0 ? esc($row->ktp_document) : base_url('uploads/documents/' . ($row->ktp_document ?? '')) ?>';" 
                                         class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
                                     View File
                                 </button>
@@ -108,7 +108,7 @@
                                                 submitter = '<?= esc(addslashes(($row->first_name ?? '') . ' ' . ($row->last_name ?? ''))) ?>';
                                                 verificationId = <?= $row->id ?? 0 ?>;
                                                 processUrl = '<?= base_url('admin/verifications/process-property/') ?>' + verificationId;
-                                                docUrl = '<?= strpos($row->ownership_certificate ?? '', 'http') === 0 ? esc($row->ownership_certificate) : base_url('uploads/documents/' . ($row->ownership_certificate ?? '')) ?>';" 
+                                                docUrl = '<?= strpos((string)($row->ownership_certificate ?? ''), 'http') === 0 ? esc($row->ownership_certificate) : base_url('uploads/documents/' . ($row->ownership_certificate ?? '')) ?>';" 
                                         class="border border-outline-variant text-on-surface px-4 py-1.5 rounded font-semibold hover:bg-surface-container transition whitespace-nowrap">
                                     View File
                                 </button>
@@ -140,15 +140,38 @@
                 </button>
             </div>
 
-            <div class="p-6 bg-surface-container-low flex justify-center items-center min-h-[300px] max-h-[60vh] overflow-y-auto">
-                <template x-if="docUrl && !docUrl.endsWith('/')">
-                    <img :src="docUrl" alt="Document Preview" class="max-w-full rounded border border-outline-variant shadow-sm" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center text-outline-variant\'><span class=\'material-symbols-outlined text-[48px] mb-2\'>broken_image</span><p>Image file not found on server.</p></div>';">
+            <div class="p-6 bg-surface-container-low flex flex-col justify-center items-center min-h-[300px] max-h-[60vh] overflow-y-auto">
+                
+                <!-- PDF Renderer -->
+                <template x-if="docUrl && docUrl.toLowerCase().includes('.pdf')">
+                    <iframe :src="docUrl" class="w-full h-[50vh] rounded border border-outline-variant shadow-sm bg-white"></iframe>
                 </template>
+                
+                <!-- Image Renderer -->
+                <template x-if="docUrl && !docUrl.toLowerCase().includes('.pdf') && !docUrl.endsWith('/')">
+                    <div class="flex flex-col items-center w-full">
+                        <img :src="docUrl" alt="Document Preview" class="max-w-full max-h-[45vh] object-contain rounded border border-outline-variant shadow-sm" onerror="this.onerror=null; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <div class="hidden text-center text-outline-variant py-8">
+                            <span class="material-symbols-outlined text-[48px] mb-2">broken_image</span>
+                            <p>Preview unavailable. The file might be corrupted.</p>
+                        </div>
+                    </div>
+                </template>
+                
+                <!-- Missing File Fallback -->
                 <template x-if="!docUrl || docUrl.endsWith('/')">
                     <div class="flex flex-col items-center text-outline-variant">
                         <span class="material-symbols-outlined text-[48px] mb-2">image_not_supported</span>
                         <p class="text-sm">No valid document file uploaded.</p>
                     </div>
+                </template>
+
+                <!-- Direct Link Button (Always visible if a URL exists) -->
+                <template x-if="docUrl && !docUrl.endsWith('/')">
+                    <a :href="docUrl" target="_blank" class="mt-6 flex items-center gap-2 px-4 py-2 border border-outline-variant bg-surface text-primary rounded font-semibold hover:bg-surface-bright transition shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                        Open Document in New Tab
+                    </a>
                 </template>
             </div>
 
