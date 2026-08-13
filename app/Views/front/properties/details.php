@@ -231,9 +231,15 @@
                         <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded flex items-center gap-4">
                             <div class="bg-primary/10 p-2 rounded-full text-primary">
                                 <span class="material-symbols-outlined">
-                                    <?= strtolower($poi->category) == 'school' || strtolower($poi->category) == 'college' ? 'school' : 
-                                       (strtolower($poi->category) == 'hospital' ? 'local_hospital' : 
-                                       (strtolower($poi->category) == 'mall' ? 'shopping_bag' : 'place')) ?>
+                                    <?= match(strtolower($poi->category)) {
+                                        'school', 'college', 'university' => 'school',
+                                        'hospital', 'clinic'              => 'local_hospital',
+                                        'mall', 'shopping center'         => 'shopping_bag',
+                                        'supermarket', 'grocery'          => 'storefront',
+                                        'park', 'garden', 'playground'    => 'park',
+                                        'train station', 'transit'        => 'train',
+                                        default                           => 'place',
+                                    } ?>
                                 </span>
                             </div>
                             <div>
@@ -391,7 +397,6 @@
                                 <span class="material-symbols-outlined text-[12px]">badge</span> <?= lang('Front.det_verified') ?>
                             </span>
 
-                            <!-- Hide direct contact details if not permitted by plan -->
                             <?php if(isset($allowDirectEmail) && $allowDirectEmail): ?>
                                 <div class="mt-2 space-y-1">
                                     <p class="text-[13px] text-on-surface-variant flex items-center gap-2">
