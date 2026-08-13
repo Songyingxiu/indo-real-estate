@@ -273,26 +273,29 @@
                 </div>
 
                 <!-- POI Button Integration -->
-                <div class="md:col-span-2 mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between">
+                <div class="md:col-span-2 mt-4 p-4 bg-surface-container-lowest border border-outline-variant rounded flex items-center justify-between" 
+                    x-data="{ poiRemaining: <?= ($maxPois ?? 0) - ($poisCreated ?? 0) ?>, maxPois: <?= $maxPois ?? 0 ?>, roleId: <?= session()->get('role_id') ?> }"
+                    @poi-added.window="if(roleId != 4) poiRemaining--">
+                    
                     <div>
                         <h4 class="font-bold text-sm text-on-surface">Enhance Local Map</h4>
                         <p class="text-xs text-on-surface-variant">Missing a school or hospital? Add it to the map for buyers.</p>
                     </div>
-                    <?php 
-                        $poiRemaining = ($maxPois ?? 0) - ($poisCreated ?? 0); 
-                    ?>
+
                     <?php if (isset($maxPois) && $maxPois > 0): ?>
-                        <?php if ($poiRemaining > 0 || session()->get('role_id') == 4): ?>
+                        <template x-if="poiRemaining > 0 || roleId == 4">
                             <button type="button" @click="$dispatch('open-poi-modal')" class="px-4 py-2 bg-secondary text-on-secondary rounded text-sm font-bold hover:opacity-90 transition flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
-                                Add Custom POI (<?= session()->get('role_id') == 4 ? 'Unlimited' : $poiRemaining . ' Left' ?>)
+                                <span x-text="roleId == 4 ? 'Add Custom POI (Unlimited)' : 'Add Custom POI (' + poiRemaining + ' Left)'"></span>
                             </button>
-                        <?php else: ?>
+                        </template>
+                        
+                        <template x-if="poiRemaining <= 0 && roleId != 4">
                             <button type="button" disabled class="px-4 py-2 bg-surface-variant text-on-surface-variant rounded text-sm font-bold opacity-50 cursor-not-allowed flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px]">lock</span>
-                                POI Limit Reached (<?= $maxPois ?>/<?= $maxPois ?>)
+                                <span x-text="'POI Limit Reached (' + maxPois + '/' + maxPois + ')'"></span>
                             </button>
-                        <?php endif; ?>
+                        </template>
                     <?php else: ?>
                         <a href="<?= base_url('admin/pricing') ?>" target="_blank" class="px-4 py-2 border border-primary text-primary rounded text-sm font-bold hover:bg-primary-container transition flex items-center gap-2">
                             <span class="material-symbols-outlined text-[18px]">upgrade</span>
