@@ -258,8 +258,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Basement</label>
                     <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="Available" <?= $property['basement'] == 'Available' ? 'selected' : '' ?>>Available</option>
-                        <option value="Not Available" <?= $property['basement'] == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
+                        <option value="No" <?= $property['basement'] == 'No' ? 'selected' : '' ?>>No</option>
+                        <option value="Yes" <?= $property['basement'] == 'Yes' ? 'selected' : '' ?>>Yes</option>
                     </select>
                 </div>
 
