@@ -41,8 +41,7 @@ class MasterData extends BaseController
         $db = \Config\Database::connect();
         $data['featureCategories'] = $db->table('feature_categories')->where('status', 'Active')->get()->getResult();
 
-        // Features Fetching with Category Join
-        $featureModel->select('features.*, feature_categories.name_en as category_name');
+        $featureModel->select('features.*, feature_categories.name as category_name');
         $featureModel->join('feature_categories', 'feature_categories.id = features.category_id', 'left');
         $data['features'] = $featureModel->orderBy('features.id', 'DESC')->paginate(5, 'features');
         
@@ -143,8 +142,8 @@ class MasterData extends BaseController
             'name_en'            => $nameEN,
             'name_id'            => $this->request->getPost('name_id'),
             'description'        => $this->request->getPost('description_en'),
-            'features_en'        => $featuresJson, 
-            'features_id'        => $featuresJson, 
+            'features_en'        => $featuresJson,
+            'features_id'        => $featuresJson,
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
@@ -258,9 +257,9 @@ class MasterData extends BaseController
             'name'               => $nameEN,
             'name_en'            => $nameEN,
             'name_id'            => $this->request->getPost('name_id'),
-            'description'        => $this->request->getPost('description_en'), 
-            'features_en'        => $featuresJson, 
-            'features_id'        => $featuresJson, 
+            'description'        => $this->request->getPost('description_en'),
+            'features_en'        => $featuresJson,
+            'features_id'        => $featuresJson,
             'price'              => $this->request->getPost('price'),
             'max_properties'     => $this->request->getPost('max_properties'),
             'max_agents'         => $this->request->getPost('max_agents'),
