@@ -35,7 +35,7 @@
                             <tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
                                 <td class="p-4">
                                     <div class="w-20 h-14 bg-surface-container-low rounded border border-outline-variant overflow-hidden flex items-center justify-center">
-                                        <img src="<?= base_url($ad->image_path) ?>" alt="<?= esc($ad->title_en ?? $ad->title) ?>" class="w-full h-full object-cover">
+                                        <img src="<?= esc($ad->image_path) ?>" alt="<?= esc($ad->title_en ?? $ad->title) ?>" class="w-full h-full object-cover">
                                     </div>
                                 </td>
                                 <td class="p-4 font-medium text-on-surface"><?= esc($ad->title_en ?? $ad->title) ?></td>
