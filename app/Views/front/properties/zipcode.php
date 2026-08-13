@@ -2,6 +2,10 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+<?php
+    $zipcode = (array) $zipcode; 
+?>
+
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-10 min-h-[calc(100vh-80px)]">
     <div class="mb-6">
         <h1 class="font-headline-lg text-[32px] font-bold text-on-background"><?= lang('Front.prop_in_zip') ?> <?= esc($zipcode['zipcode'] ?? '') ?></h1>
@@ -17,7 +21,9 @@
     <h2 class="font-headline-md text-[24px] font-bold text-on-background mb-6"><?= lang('Front.prop_available') ?></h2>
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <?php if(!empty($properties)): foreach($properties as $property): ?>
-            <?php 
+            <?php
+                $property = (array) $property;
+                
                 $cSlug = url_title(strtolower($property['city_name'] ?? 'indonesia'), '-', true);
                 $tSlug = url_title(strtolower($property['title']), '-', true);
                 $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property['id']}");

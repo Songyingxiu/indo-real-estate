@@ -33,6 +33,7 @@ class Property extends BaseController
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where("cities.state_id = " . (int)$state->id) 
             ->where('properties.listing_type', $type)
+            ->asArray()
             ->paginate(20);
 
         $data = [
@@ -62,6 +63,7 @@ class Property extends BaseController
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('city_id', $city['id'])
             ->where('properties.listing_type', $type)
+            ->asArray()
             ->paginate(20);
 
         $markers = $db->table('properties')
@@ -97,6 +99,7 @@ class Property extends BaseController
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->where('zipcode_id', $zipcodeId)
             ->where('properties.listing_type', $type)
+            ->asArray()
             ->paginate(20);
 
         $markers = $db->table('properties')
