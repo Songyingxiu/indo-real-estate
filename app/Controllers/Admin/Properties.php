@@ -158,6 +158,9 @@ class Properties extends BaseController
             'address_line_1'   => 'required',
             'latitude'         => 'required|numeric',
             'longitude'        => 'required|numeric',
+            'parking'          => 'permit_empty|in_list[Available,Not Available]',
+            'basement'         => 'permit_empty|in_list[Yes,No]',
+            'water_facility'   => 'permit_empty|max_length[255]',
             'property_images'  => 'uploaded[property_images]|is_image[property_images]',
             'shm_document'     => 'uploaded[shm_document]|ext_in[shm_document,pdf,jpg,jpeg,png]|max_size[shm_document,5120]'
         ];
@@ -392,7 +395,10 @@ class Properties extends BaseController
             'tax_price'        => 'required|numeric',
             'address_line_1'   => 'required',
             'latitude'         => 'required|numeric',
-            'longitude'        => 'required|numeric'
+            'longitude'        => 'required|numeric',
+            'parking'          => 'permit_empty|in_list[Available,Not Available]',
+            'basement'         => 'permit_empty|in_list[Yes,No]',
+            'water_facility'   => 'permit_empty|max_length[255]'
         ];
 
         if (!$this->validate($rules)) {
