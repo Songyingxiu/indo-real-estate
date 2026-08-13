@@ -21,12 +21,12 @@ class Cms extends BaseController
         $titleEN = $this->request->getPost('title_en');
         
         $data = [
-            'title'           => $titleEN, // Fallback
+            'title'           => $titleEN,
             'title_en'        => $titleEN,
             'title_id'        => $this->request->getPost('title_id'),
-            'slug'            => url_title(strtolower($titleEN), '-', true),
+            'slug'            => $cmsModel->generateUniqueSlug($titleEN, $id ?: null),
             'category'        => $this->request->getPost('category'),
-            'content_body'    => $this->request->getPost('content_body_en'), // Fallback
+            'content_body'    => $this->request->getPost('content_body_en'),
             'content_body_en' => $this->request->getPost('content_body_en'),
             'content_body_id' => $this->request->getPost('content_body_id'),
             'status'          => 'Published',
