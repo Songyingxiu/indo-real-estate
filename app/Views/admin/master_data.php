@@ -9,7 +9,7 @@
     showEditZipcodeModal: false, editZipcodeId: '', editZipcodeVal: '', editZipcodeCityId: '',
     showCreatePlanModal: false, showEditPlanModal: false,
     editPlanId: '', editPlanCode: '', editPlanNameEN: '', editPlanNameID: '', editPlanDescEN: '', editPlanDescID: '', editPlanPrice: 0, editPlanProp: 1, editPlanAgent: 0, editPlanPoi: 0, editPlanMsg: 0, editPlanEmail: 0,
-    editPlanFeatures: [], /* FIX: Added Alpine Array for Checkboxes */
+    editPlanFeatures: [], 
     showCreatePoiModal: false,
     showEditFeatureCatModal: false, editFeatureCatId: '', editFeatureCatNameEN: '', editFeatureCatNameID: '',
     showEditFeatureModal: false, editFeatureId: '', editFeatureNameEN: '', editFeatureNameID: '', editFeatureCategoryId: '',
@@ -28,11 +28,9 @@
         .then(res => res.json())
         .then(data => {
             if (data.translatedText) {
-                // If it's a property on the Alpine instance
                 if(this.hasOwnProperty(targetProperty)) {
                     this[targetProperty] = data.translatedText;
                 } else {
-                    // If it's an ID for a static form element
                     let el = document.getElementById(targetProperty);
                     if(el) el.value = data.translatedText;
                 }
@@ -81,7 +79,6 @@
                                         <span class="font-semibold block"><?= esc($plan->name_en ?? $plan->name) ?></span>
                                         <span class="text-[11px] text-on-surface-variant truncate max-w-[200px] block">
                                             <?php 
-                                                // Check if it's an array to render nicely, or fallback to description
                                                 $feats = json_decode($plan->features_en, true);
                                                 echo is_array($feats) && !empty($feats) ? esc(implode(', ', $feats)) : esc($plan->description ?? 'No description');
                                             ?>
@@ -95,7 +92,6 @@
                                     </td>
                                     <td class="py-3 px-6 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <!-- FIX: Safe JSON parse for pre-selecting checkboxes on edit -->
                                             <button type="button" @click="
                                                 showEditPlanModal = true; 
                                                 editPlanId = <?= $plan->id ?>; 
@@ -185,7 +181,7 @@
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                         <select name="state_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Select Region...</option>
-                            <?php if(!empty($states)): foreach($states as $state): ?>
+                            <?php if(!empty($allStates)): foreach($allStates as $state): ?>
                                 <option value="<?= $state->id ?>"><?= esc($state->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
@@ -232,7 +228,7 @@
                         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                         <select name="city_id" required class="w-full h-10 px-3 border border-outline-variant rounded text-sm bg-surface-container-lowest cursor-pointer">
                             <option value="" disabled selected>Select City...</option>
-                            <?php if(!empty($cities)): foreach($cities as $city): ?>
+                            <?php if(!empty($allCities)): foreach($allCities as $city): ?>
                                 <option value="<?= $city->id ?>"><?= esc($city->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
@@ -499,7 +495,7 @@
         </div>
     </div>
 
-    <!-- FIX: CREATE PACKAGE (PLAN) MODAL -->
+    <!-- CREATE PACKAGE (PLAN) MODAL -->
     <div x-show="showCreatePlanModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showCreatePlanModal = false" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -724,7 +720,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-2">Assigned Region</label>
                         <select name="state_id" x-model="editCityStateId" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none cursor-pointer">
-                            <?php if(!empty($states)): foreach($states as $state): ?>
+                            <?php if(!empty($allStates)): foreach($allStates as $state): ?>
                                 <option value="<?= $state->id ?>"><?= esc($state->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
@@ -755,7 +751,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-2">Assigned City</label>
                         <select name="city_id" x-model="editZipcodeCityId" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none cursor-pointer">
-                            <?php if(!empty($cities)): foreach($cities as $city): ?>
+                            <?php if(!empty($allCities)): foreach($allCities as $city): ?>
                                 <option value="<?= $city->id ?>"><?= esc($city->name) ?></option>
                             <?php endforeach; endif; ?>
                         </select>
