@@ -641,8 +641,9 @@
 
                     setTimeout(() => { 
                         window.dispatchEvent(new CustomEvent('close-poi-modal')); 
+                        window.dispatchEvent(new CustomEvent('poi-added'));
                         alertBox.classList.add('hidden'); 
-                    }, 1200); 
+                    }, 1200);
 
                 } else {
                     alertBox.classList.add('bg-[#ffdad6]', 'text-[#410002]');
