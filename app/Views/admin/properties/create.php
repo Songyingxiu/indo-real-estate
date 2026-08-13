@@ -17,6 +17,12 @@
             }
         })
         .catch(err => console.error('Translation error:', err));
+    },
+    validateImageCount(event) {
+        if (event.target.files.length > 20) {
+            alert('You can only select up to 20 images. Please select fewer files.');
+            event.target.value = '';
+        }
     }
 }">
     <h2 class="font-headline-lg text-[28px] font-bold text-on-surface mb-6">Create New Listing</h2>
@@ -249,8 +255,8 @@
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Parking Availability</label>
                     <select name="parking" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
-                        <option value="Yes" <?= old('parking') == 'Yes' ? 'selected' : '' ?>>Available</option>
-                        <option value="No" <?= old('parking') == 'No' ? 'selected' : '' ?>>Not Available</option>
+                        <option value="Available" <?= old('parking') == 'Available' ? 'selected' : '' ?>>Available</option>
+                        <option value="Not Available" <?= old('parking') == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
                     </select>
                 </div>
                 
@@ -321,8 +327,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-2">Photos *</label>
-                    <input type="file" name="property_images[]" required multiple accept="image/*" class="w-full p-2 border rounded bg-surface">
+                    <label class="block font-semibold mb-2">Photos (Max 20 images) *</label>
+                    <input type="file" name="property_images[]" required multiple accept="image/*" @change="validateImageCount($event)" class="w-full p-2 border rounded bg-surface">
+                    <p class="text-xs text-on-surface-variant mt-1">You can select up to 20 images.</p>
                 </div>
                 <div>
                     <label class="block font-semibold mb-2">SHM / Legal Document *</label>
