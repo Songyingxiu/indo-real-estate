@@ -264,7 +264,6 @@
                     <label class="block text-xs mb-1 font-semibold">Total Parking Spots</label>
                     <input type="number" name="total_parking" value="<?= old('total_parking', 0) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
                 </div>
-
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Basement</label>
                     <select name="basement" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
