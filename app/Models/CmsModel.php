@@ -11,7 +11,7 @@ class CmsModel extends Model
     
     protected $allowedFields = [
         'title', 'title_en', 'title_id', 
-        'slug', 'category', 
+        'slug', 'category', 'faq_category',
         'content_body', 'content_body_en', 'content_body_id', 
         'author_id', 'status', 'published_at'
     ];
