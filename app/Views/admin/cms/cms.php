@@ -96,12 +96,12 @@
                                 <td class="p-4 text-right flex justify-end gap-3 items-center">
                                     <button @click="showEditor = true; 
                                                     postId = '<?= $post->id ?>'; 
-                                                    postTitleEN = '<?= esc($post->title_en ?? $post->title, 'js') ?>'; 
-                                                    postTitleID = '<?= esc($post->title_id ?? $post->title, 'js') ?>'; 
-                                                    postCategory = '<?= esc($post->category, 'js') ?>'; 
-                                                    postFaqCategory = '<?= esc($post->faq_category ?? '', 'js') ?>'; 
-                                                    postBodyEN = '<?= esc($post->content_body_en ?? $post->content_body, 'js') ?>';
-                                                    postBodyID = '<?= esc($post->content_body_id ?? $post->content_body, 'js') ?>';" 
+                                                    postTitleEN = '<?= esc(addslashes($post->title_en ?? $post->title)) ?>'; 
+                                                    postTitleID = '<?= esc(addslashes($post->title_id ?? $post->title)) ?>'; 
+                                                    postCategory = '<?= esc(addslashes($post->category)) ?>'; 
+                                                    postFaqCategory = '<?= esc(addslashes($post->faq_category ?? '')) ?>'; 
+                                                    postBodyEN = '<?= esc(addslashes($post->content_body_en ?? $post->content_body)) ?>';
+                                                    postBodyID = '<?= esc(addslashes($post->content_body_id ?? $post->content_body)) ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
                                     
                                     <button type="button" 
@@ -160,19 +160,23 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="transform opacity-0 scale-95"
              x-transition:enter-end="transform opacity-100 scale-100"
-             class="bg-surface w-full max-w-4xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
+             class="bg-surface w-full max-w-5xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[90vh]">
             
-            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest shrink-0">
                 <h2 class="text-xl font-bold text-on-surface" x-text="postId ? 'Edit Content Details' : 'Create New Content'"></h2>
                 <button type="button" @click="showEditor = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
-            <form action="<?= base_url('admin/cms/save') ?>" method="POST" class="overflow-y-auto custom-scrollbar flex-1">
+            <!-- Modal Form -->
+            <form action="<?= base_url('admin/cms/save') ?>" method="POST" class="flex flex-col flex-1 overflow-hidden">
                 <input type="hidden" name="id" x-model="postId">
                 
-                <div class="p-6 flex flex-col gap-6">
+                <!-- Scrollable Body -->
+                <div class="p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar flex-1">
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-on-surface mb-1">Title (EN)</label>
@@ -184,7 +188,8 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- from 1 column to 2 columns if FAQ is selected -->
+                    <div class="grid gap-4 transition-all duration-300" :class="postCategory === 'FAQ' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'">
                         <div>
                             <label class="block text-sm font-semibold text-on-surface mb-1">Type Category</label>
                             <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
@@ -196,9 +201,10 @@
                             </select>
                         </div>
                         
-                        <div x-show="postCategory === 'FAQ'" style="display: none;">
-                            <label class="block text-sm font-semibold text-on-surface mb-1">FAQ Topic</label>
-                            <select name="faq_category" x-model="postFaqCategory" :required="postCategory === 'FAQ'" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                        <!-- FAQ Topic dynamically appears here -->
+                        <div x-show="postCategory === 'FAQ'" x-transition.opacity style="display: none;">
+                            <label class="block text-sm font-semibold text-on-surface mb-1 text-primary">FAQ Topic (Required for FAQs)</label>
+                            <select name="faq_category" x-model="postFaqCategory" :required="postCategory === 'FAQ'" class="w-full px-4 py-2 border border-outline-variant rounded bg-primary-container/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                                 <option value="" disabled selected>Select Topic...</option>
                                 <option value="User/Profile">User/Profile</option>
                                 <option value="Property">Property</option>
@@ -210,18 +216,20 @@
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                        <div class="flex flex-col h-full">
                             <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (EN)</label>
-                            <textarea name="content_body_en" x-model="postBodyEN" @blur="translateText($event.target.value, 'postBodyID')" required rows="10" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans" placeholder="Write your content markup or text here..."></textarea>
+                            <textarea name="content_body_en" x-model="postBodyEN" @blur="translateText($event.target.value, 'postBodyID')" required class="w-full flex-1 min-h-[250px] px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans resize-y" placeholder="Write your content markup or text here..."></textarea>
                         </div>
-                        <div>
+                        <div class="flex flex-col h-full">
                             <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (ID)</label>
-                            <textarea name="content_body_id" x-model="postBodyID" required rows="10" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans"></textarea>
+                            <textarea name="content_body_id" x-model="postBodyID" required class="w-full flex-1 min-h-[250px] px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans resize-y"></textarea>
                         </div>
                     </div>
+
                 </div>
 
-                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest sticky bottom-0">
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest shrink-0">
                     <button type="button" @click="showEditor = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Save & Publish</button>
                 </div>
