@@ -13,11 +13,9 @@
 
             <div class="flex justify-between items-center mb-2">
                 <h2 class="font-headline-lg-mobile text-[20px] font-bold text-primary"><?= lang('Front.srch_filters') ?></h2>
-                <?php if(session()->get('id')): ?>
-                    <button type="button" onclick="saveCurrentSearch()" class="text-primary hover:text-primary-container text-[12px] font-bold flex items-center gap-1 bg-primary-container/10 px-2 py-1 rounded transition-colors">
-                        <span class="material-symbols-outlined text-[14px]">bookmark_add</span> <?= lang('Front.srch_save_search') ?>
-                    </button>
-                <?php endif; ?>
+                <button type="button" onclick="saveCurrentSearch()" class="text-primary hover:text-primary-container text-[12px] font-bold flex items-center gap-1 bg-primary-container/10 px-2 py-1 rounded transition-colors">
+                    <span class="material-symbols-outlined text-[14px]">bookmark_add</span> <?= lang('Front.srch_save_search') ?>
+                </button>
             </div>
             
             <div class="flex flex-col gap-2">
@@ -187,7 +185,7 @@
                                         <a href="<?= $seoUrl ?>" class="hover:text-primary"><?= esc($property['title']) ?></a>
                                     </h3>
                                 </div>
-                                <span class="font-headline-lg-mobile text-[18px] md:text-[20px] font-bold text-primary-container mb-2 whitespace-nowrap">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></span>
+                                <span class="font-headline-lg-mobile text-[20px] font-bold text-primary-container mb-2">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></span>
                                 
                                 <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">location_on</span>
@@ -222,6 +220,9 @@
         </div>
     </main>
 </div>
+
+<!-- FIX: Inject Login Modal Component -->
+<?= $this->include('components/login_modal') ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -301,12 +302,10 @@ function getLocation() {
     }
 }
 
+// FIX: Save Search no longer relies on JS prompt. Automatically generates name on backend.
 function saveCurrentSearch() {
     const urlParams = new URLSearchParams(window.location.search);
     const filters = Object.fromEntries(urlParams.entries());
-    const searchName = prompt("Enter a name for this search:", "My Property Search");
-    
-    if (!searchName) return;
 
     const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
     const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
@@ -318,11 +317,12 @@ function saveCurrentSearch() {
             'X-Requested-With': 'XMLHttpRequest',
             [csrfName]: csrfHash
         },
-        body: JSON.stringify({ name: searchName, filters: filters })
+        body: JSON.stringify({ filters: filters })
     })
     .then(response => {
         if (response.status === 401) {
-            window.location.href = '<?= base_url('login') ?>';
+            // Trigger Auth Modal instead of redirect
+            if(typeof openAuthModal === 'function') openAuthModal();
             throw new Error('Unauthorized');
         }
         return response.json();

@@ -447,12 +447,13 @@
                             </button>
                         </form>
                     <?php else: ?>
+                        <!-- FIX: Custom Trigger for Login Modal instead of Redirect Link -->
                         <div class="text-center py-4">
                             <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2 opacity-50">lock</span>
                             <p class="font-body-md text-[14px] text-on-surface-variant mb-6"><?= lang('Front.det_lock_notice') ?></p>
-                            <a href="<?= base_url('login') ?>" class="w-full inline-block bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors">
-                                <?= lang('Front.det_signin_contact') ?>
-                            </a>
+                            <button type="button" onclick="openAuthModal()" class="w-full bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors shadow-sm">
+                                Sign in to Contact Agent
+                            </button>
                         </div>
                     <?php endif; ?>
 
@@ -480,6 +481,9 @@
     </div>
 </div>
 <?php endif; ?>
+
+<!-- FIX: Inject Login Modal Component -->
+<?= $this->include('components/login_modal') ?>
 
 <?= $this->include('front/layout/footer') ?>
 
@@ -549,7 +553,8 @@
         })
         .then(response => {
             if (response.status === 401) {
-                window.location.href = '<?= base_url('login') ?>';
+                // FIX: Trigger Auth Modal instead of redirect
+                if(typeof openAuthModal === 'function') openAuthModal();
                 throw new Error('Unauthorized');
             }
             return response.json();
