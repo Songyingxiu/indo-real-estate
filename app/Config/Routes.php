@@ -32,9 +32,10 @@ $routes->get('news', 'Cms::blog');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
 // SEO-Friendly Location Routes (Strict Rent/Sale Separation)
-$routes->get('properties/(:segment)/province/(:segment)', 'Home::province/$2/$1');
-$routes->get('properties/(:segment)/city/(:segment)/(:segment)', 'Home::city/$2/$3/$1');
-$routes->get('properties/(:segment)/zipcode/(:num)', 'Home::zipcode/$2/$1');
+// FIX: Updated method calls to match the _listing suffix in Home.php
+$routes->get('properties/(:segment)/province/(:segment)', 'Home::province_listing/$2/$1');
+$routes->get('properties/(:segment)/city/(:segment)/(:segment)', 'Home::city_listing/$2/$3/$1');
+$routes->get('properties/(:segment)/zipcode/(:num)', 'Home::zipcode_listing/$2/$1');
 
 // Authentication Routes
 $routes->get('login', 'Auth::login');
