@@ -65,13 +65,14 @@
         </div>
     <?php endif; ?>
 
+    <!-- popular listing -->
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="flex justify-between items-end mb-8">
             <div>
                 <h2 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-background mb-2"><?= lang('Front.sec_popular') ?></h2>
                 <p class="text-on-surface-variant font-body-lg"><?= lang('Front.sec_popular_sub') ?></p>
             </div>
-            <a href="<?= base_url('search/sale') ?>" class="flex items-center gap-1 text-primary font-label-md text-[14px] font-semibold hover:underline">
+            <a href="<?= base_url('search/sale?sort=popular') ?>" class="flex items-center gap-1 text-primary font-label-md text-[14px] font-semibold hover:underline">
                 <?= lang('Front.btn_view_all') ?> <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
             </a>
         </div>
@@ -83,9 +84,23 @@
                         $cSlug = url_title(strtolower($property->city_name ?? 'indonesia'), '-', true);
                         $tSlug = url_title(strtolower($property->title), '-', true);
                         $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property->id}");
+
+                        $badgeClass = '';
+                        $dispStatus = '';
+                        if ($property->status === 'Sold') { $badgeClass = 'bg-error text-white'; $dispStatus = 'Sold'; }
+                        elseif ($property->status !== 'Active') { $badgeClass = 'bg-outline text-white'; $dispStatus = $property->status; }
+                        elseif ($property->approval_status !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
                     ?>
                     <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
+                            <div class="absolute top-4 left-4 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded shadow-md flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span> <?= $property->unique_views ?? 0 ?> Views
+                            </div>
+                            <?php if($dispStatus): ?>
+                                <div class="absolute top-4 right-4 z-20 <?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
+                                    <?= esc($dispStatus) ?>
+                                </div>
+                            <?php endif; ?>
                             <?php 
                                 $imgPath = trim($property->image_path ?? '');
                                 $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
@@ -94,8 +109,8 @@
                                 }
                             ?>
                             <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
-                            <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
-                                <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
+                            <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm max-w-[90%]">
+                                <span class="font-headline-lg text-[16px] md:text-[18px] font-bold text-on-background whitespace-nowrap block truncate">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                             </div>
                         </a>
                         <div class="p-4 flex flex-col flex-grow">
@@ -121,6 +136,7 @@
         </div>
     </section>
 
+    <!-- new listed -->
     <section class="bg-surface-container-lowest py-16 border-y border-outline-variant/50">
         <div class="max-w-[1280px] mx-auto px-4 md:px-10 relative">
             <div class="flex justify-between items-end mb-8">
@@ -138,11 +154,24 @@
                                 $cSlug = url_title(strtolower($property->city_name ?? 'indonesia'), '-', true);
                                 $tSlug = url_title(strtolower($property->title), '-', true);
                                 $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property->id}");
+
+                                $badgeClass = '';
+                                $dispStatus = '';
+                                if ($property->status === 'Sold') { $badgeClass = 'bg-error text-white'; $dispStatus = 'Sold'; }
+                                elseif ($property->status !== 'Active') { $badgeClass = 'bg-outline text-white'; $dispStatus = $property->status; }
+                                elseif ($property->approval_status !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
                             ?>
                             <div class="swiper-slide h-auto">
                                 <article class="property-card h-full bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                     <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group shrink-0">
                                         <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider"><?= lang('Front.lbl_new') ?></div>
+                                        
+                                        <?php if($dispStatus): ?>
+                                            <div class="absolute top-4 right-4 z-20 <?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
+                                                <?= esc($dispStatus) ?>
+                                            </div>
+                                        <?php endif; ?>
+
                                         <?php 
                                             $imgPath = trim($property->image_path ?? '');
                                             $imgSrc = 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
@@ -151,8 +180,8 @@
                                             }
                                         ?>
                                         <img alt="<?= esc($property->title) ?>" onerror="this.onerror=null;this.src='https://placehold.co/800x600/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="<?= $imgSrc ?>">
-                                        <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm">
-                                            <span class="font-headline-lg text-[20px] font-bold text-on-background">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
+                                        <div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant shadow-sm max-w-[90%]">
+                                            <span class="font-headline-lg text-[16px] md:text-[18px] font-bold text-on-background whitespace-nowrap block truncate">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></span>
                                         </div>
                                     </a>
                                     <div class="p-4 flex flex-col flex-grow">

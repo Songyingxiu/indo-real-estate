@@ -7,9 +7,9 @@
     <aside class="w-full md:w-80 bg-surface border-r border-outline-variant flex-shrink-0 flex flex-col h-full overflow-y-auto custom-scrollbar z-20">
         <form id="filterForm" action="<?= base_url('search/' . strtolower($listingType ?? 'sale')) ?>" method="GET" class="p-6 flex flex-col gap-6 h-full relative">
             
-            <!-- Hidden inputs for Radius Search Coordinates -->
             <input type="hidden" name="lat" id="filter_lat" value="<?= esc($lat ?? '') ?>">
             <input type="hidden" name="lng" id="filter_lng" value="<?= esc($lng ?? '') ?>">
+            <input type="hidden" name="sort" value="<?= esc($sort ?? 'new') ?>">
 
             <div class="flex justify-between items-center mb-2">
                 <h2 class="font-headline-lg-mobile text-[20px] font-bold text-primary"><?= lang('Front.srch_filters') ?></h2>
@@ -109,16 +109,26 @@
 
     <main class="flex-1 flex flex-col h-full bg-background relative overflow-hidden">
         
-        <header class="bg-surface px-6 py-4 border-b border-outline-variant flex justify-between items-center z-10">
+        <header class="bg-surface px-6 py-4 border-b border-outline-variant flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 z-10">
             <div>
                 <h1 class="font-headline-lg-mobile text-[24px] font-bold text-on-background"><?= lang('Front.srch_explore') ?></h1>
                 <p class="font-body-md text-[14px] text-on-surface-variant mt-1"><?= lang('Front.srch_showing_results') ?> <?= esc($total) ?> <?= lang('Front.srch_results') ?></p>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                 <div class="flex bg-surface-container-highest p-1 rounded">
                     <button onclick="document.getElementById('filterForm').action='<?= base_url('search/sale') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Sale' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all"><?= lang('Front.srch_sale') ?></button>
                     <button onclick="document.getElementById('filterForm').action='<?= base_url('search/rent') ?>'; document.getElementById('filterForm').submit();" type="button" class="px-4 py-1.5 rounded font-label-md text-[14px] <?= (ucfirst($listingType ?? 'Sale')) == 'Rent' ? 'bg-surface text-on-surface shadow-sm' : 'text-on-surface-variant hover:text-on-surface' ?> transition-all"><?= lang('Front.srch_rent') ?></button>
+                </div>
+
+                <div class="relative">
+                    <select onchange="document.querySelector('input[name=sort]').value = this.value; document.getElementById('filterForm').submit();" class="px-3 py-2 bg-surface border border-outline-variant rounded font-label-md text-[13px] text-on-surface cursor-pointer focus:border-primary outline-none">
+                        <option value="new" <?= ($sort ?? 'new') == 'new' ? 'selected' : '' ?>>Sort By: Newest</option>
+                        <option value="popular" <?= ($sort ?? '') == 'popular' ? 'selected' : '' ?>>Sort By: Popular</option>
+                        <option value="price_low" <?= ($sort ?? '') == 'price_low' ? 'selected' : '' ?>>Price: Low → High</option>
+                        <option value="price_high" <?= ($sort ?? '') == 'price_high' ? 'selected' : '' ?>>Price: High → Low</option>
+                        <option value="sold" <?= ($sort ?? '') == 'sold' ? 'selected' : '' ?>>Status: Sold First</option>
+                    </select>
                 </div>
             </div>
         </header>
@@ -131,6 +141,12 @@
                             $cSlug = url_title(strtolower($property['city_name'] ?? 'indonesia'), '-', true);
                             $tSlug = url_title(strtolower($property['title']), '-', true);
                             $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property['id']}");
+
+                            $badgeClass = '';
+                            $dispStatus = '';
+                            if ($property['status'] === 'Sold') { $badgeClass = 'bg-error text-white'; $dispStatus = 'Sold'; }
+                            elseif ($property['status'] !== 'Active') { $badgeClass = 'bg-outline text-white'; $dispStatus = $property['status']; }
+                            elseif ($property['approval_status'] !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
                         ?>
                         <article class="bg-surface border border-outline-variant rounded-b-lg rounded-t-xl overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300 flex flex-col">
                             <a href="<?= $seoUrl ?>" class="relative h-48 w-full bg-surface-container-highest block group">
@@ -147,6 +163,18 @@
                                     <span class="material-symbols-outlined text-[14px]">sell</span>
                                     <?= esc($property['listing_type']) ?>
                                 </div>
+
+                                <div class="absolute top-3 right-3 flex flex-col items-end gap-1 z-20">
+                                    <?php if($dispStatus): ?>
+                                        <div class="<?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
+                                            <?= esc($dispStatus) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="bg-surface/90 backdrop-blur-sm text-on-surface font-label-md text-[11px] px-2 py-1 rounded shadow-sm flex items-center gap-1 font-bold">
+                                        <span class="material-symbols-outlined text-[13px] text-primary">visibility</span> <?= $property['unique_views'] ?? 0 ?> views
+                                    </div>
+                                </div>
+
                                 <?php if(isset($property['distance'])): ?>
                                     <div class="absolute bottom-3 right-3 bg-surface/90 backdrop-blur-sm text-on-surface font-label-md text-[12px] px-2 py-1 rounded shadow-sm">
                                         <?= number_format($property['distance'], 1) ?> <?= lang('Front.det_km_away') ?>
@@ -159,7 +187,7 @@
                                         <a href="<?= $seoUrl ?>" class="hover:text-primary"><?= esc($property['title']) ?></a>
                                     </h3>
                                 </div>
-                                <span class="font-headline-lg-mobile text-[20px] font-bold text-primary-container mb-2">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></span>
+                                <span class="font-headline-lg-mobile text-[18px] md:text-[20px] font-bold text-primary-container mb-2 whitespace-nowrap">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></span>
                                 
                                 <p class="font-body-md text-[14px] text-on-surface-variant mb-4 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[16px]">location_on</span>
@@ -255,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Geolocation for Radius Search
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -274,7 +301,6 @@ function getLocation() {
     }
 }
 
-// Save Search AJAX logic
 function saveCurrentSearch() {
     const urlParams = new URLSearchParams(window.location.search);
     const filters = Object.fromEntries(urlParams.entries());

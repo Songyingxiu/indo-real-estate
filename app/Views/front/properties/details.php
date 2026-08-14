@@ -30,11 +30,26 @@
         $mainImg = !empty($images[0]) ? ((strpos(trim($images[0]->image_path), 'http') === 0) ? esc($images[0]->image_path) : base_url(esc($images[0]->image_path))) : 'https://placehold.co/1920x1080/e2e8f0/8492a6?text=Property+Image';
         $img1 = !empty($images[1]) ? ((strpos(trim($images[1]->image_path), 'http') === 0) ? esc($images[1]->image_path) : base_url(esc($images[1]->image_path))) : 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
         $img2 = !empty($images[2]) ? ((strpos(trim($images[2]->image_path), 'http') === 0) ? esc($images[2]->image_path) : base_url(esc($images[2]->image_path))) : 'https://placehold.co/800x600/e2e8f0/8492a6?text=Property+Image';
+        
+        $badgeClass = '';
+        $dispStatus = '';
+        if ($property->status === 'Sold') { $badgeClass = 'bg-error text-white'; $dispStatus = 'Sold'; }
+        elseif ($property->status !== 'Active') { $badgeClass = 'bg-outline text-white'; $dispStatus = $property->status; }
+        elseif ($property->approval_status !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
     ?>
 
     <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 mb-8 rounded overflow-hidden h-[500px]">
         <div class="md:col-span-3 md:row-span-2 relative group overflow-hidden cursor-pointer" onclick="openGallery()">
             <img alt="Featured" src="<?= $mainImg ?>" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/e2e8f0/8492a6?text=No+Image+Available';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            
+            <?php if($dispStatus): ?>
+                <div class="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
+                    <div class="<?= $badgeClass ?> text-[14px] font-bold px-4 py-2 rounded shadow-lg uppercase tracking-widest border border-white/20">
+                        <?= esc($dispStatus) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded flex items-center gap-2 hover:bg-white transition-colors">
                 <span class="material-symbols-outlined text-primary text-[20px] fill">photo_library</span>
                 <span class="font-label-md text-[14px] text-primary font-bold"><?= lang('Front.det_view_all_photos') ?> (<?= count($images) ?>)</span>
@@ -53,14 +68,19 @@
         <div class="lg:col-span-8 flex flex-col gap-8">
             <section>
                 <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-2 flex-wrap">
                             <span class="bg-secondary-fixed text-on-secondary-fixed-variant px-2 py-1 rounded text-[12px] font-bold"><?= esc($property->listing_type) ?></span>
+                            
+                            <?php if($dispStatus): ?>
+                                <span class="<?= $badgeClass ?> px-2 py-1 rounded text-[12px] font-bold uppercase tracking-wider"><?= esc($dispStatus) ?></span>
+                            <?php endif; ?>
+
                             <span class="text-on-surface-variant text-[12px] flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">schedule</span> <?= esc($timeAgo) ?></span>
                         </div>
                         <div class="flex items-center gap-4">
                             <h1 class="font-headline-lg text-[28px] md:text-[32px] font-bold text-on-surface mb-2"><?= esc($property->title) ?></h1>
-                            <button onclick="toggleSaveProperty(<?= esc($property->id) ?>)" id="savePropertyBtn" class="flex items-center justify-center w-12 h-12 rounded-full border border-outline-variant hover:bg-surface-container transition-colors shadow-sm bg-surface">
+                            <button onclick="toggleSaveProperty(<?= esc($property->id) ?>)" id="savePropertyBtn" class="flex items-center justify-center w-12 h-12 rounded-full border border-outline-variant hover:bg-surface-container transition-colors shadow-sm bg-surface shrink-0">
                                 <span class="material-symbols-outlined <?= $isSaved ? 'text-error' : 'text-on-surface-variant' ?>" id="savePropertyIcon" style="<?= $isSaved ? 'font-variation-settings: \'FILL\' 1;' : '' ?>">
                                     favorite
                                 </span>
@@ -71,8 +91,8 @@
                             <?= esc($property->area_name ?? $property->city_name ?? $property->address_line_1 ?? lang('Front.lbl_location_not_set')) ?><?= !empty($property->zipcode) ? ', ' . esc($property->zipcode) : '' ?>
                         </p>
                     </div>
-                    <div class="text-left md:text-right">
-                        <p class="font-headline-lg text-[28px] md:text-[32px] font-bold text-primary">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></p>
+                    <div class="text-left md:text-right shrink-0 mt-2 md:mt-0">
+                        <p class="font-headline-lg text-[20px] md:text-[24px] font-bold text-primary whitespace-nowrap">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></p>
                     </div>
                 </div>
 
@@ -105,7 +125,6 @@
                 </div>
             </section>
 
-            <!-- PROPERTY SPECIFICATIONS SECTION -->
             <section>
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_specs') ?></h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
