@@ -80,14 +80,18 @@
 </head>
 <body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
 
-<header class="bg-surface border-b border-outline-variant w-full z-50 sticky top-0">
-    <div class="flex justify-between items-center h-20 px-4 md:px-10 w-full max-w-[1280px] mx-auto">
+<!-- Added Alpine.js state to control mobile menu expansion -->
+<header x-data="{ mobileMenuOpen: false }" class="bg-surface border-b border-outline-variant w-full z-50 sticky top-0 relative">
+    
+    <!-- Main Navbar Container -->
+    <div class="flex justify-between items-center h-20 px-4 md:px-10 w-full max-w-[1280px] mx-auto bg-surface relative z-50">
         
         <a href="<?= base_url() ?>" class="flex items-center gap-2">
             <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-10 h-10 rounded-full object-cover border border-outline-variant shadow-sm bg-white" onerror="this.outerHTML='<div class=\'w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold\'>H</div>'">
             <span class="font-brand-text text-[24px] font-bold tracking-tight text-primary">HuniKita</span>
         </a>
         
+        <!-- Desktop Nav Links -->
         <nav class="hidden md:flex items-center gap-8">
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search/sale') ?>"><?= lang('Front.nav_buy') ?></a>
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('search/rent') ?>"><?= lang('Front.nav_rent') ?></a>
@@ -96,6 +100,7 @@
             <a class="font-body-md text-[16px] text-on-surface-variant hover:text-primary transition-colors duration-200" href="<?= base_url('page/privacy-policy') ?>"><?= lang('Front.nav_privacy') ?></a>
         </nav>
         
+        <!-- Desktop Auth & Actions -->
         <div class="hidden md:flex items-center gap-4">
             <?php if($roleId != 1): ?>
                 <a href="<?= base_url('admin/properties/create') ?>" class="font-label-md text-[14px] font-semibold text-primary bg-transparent border border-primary px-4 py-2 rounded hover:bg-surface-container-high transition-colors">
@@ -104,7 +109,6 @@
             <?php endif; ?>
 
             <?php if($isLoggedIn): ?>
-                
                 <a href="<?= base_url('user/saved-properties') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Saved Properties">
                     <span class="material-symbols-outlined">favorite</span>
                 </a>
@@ -116,6 +120,7 @@
                     <?php endif; ?>
                 </a>
 
+                <!-- Desktop Notifications -->
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
                         <span class="material-symbols-outlined">notifications</span>
@@ -149,6 +154,7 @@
                     </div>
                 </div>
 
+                <!-- Desktop Profile Dropdown -->
                 <div x-data="{ open: false }" class="relative ml-2">
                     <button @click="open = !open" @click.outside="open = false" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm cursor-pointer border-2 border-outline-variant hover:border-primary transition-colors">
                         <?= esc($initial) ?>
@@ -187,9 +193,66 @@
             <?php endif; ?>
         </div>
         
-        <button class="md:hidden flex items-center justify-center w-10 h-10 text-primary">
-            <span class="material-symbols-outlined">menu</span>
+        <!-- Mobile Menu Hamburger Button -->
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden flex items-center justify-center w-10 h-10 text-primary hover:bg-surface-container-low transition-colors rounded-full">
+            <span class="material-symbols-outlined" x-text="mobileMenuOpen ? 'close' : 'menu'">menu</span>
         </button>
+    </div>
+
+    <!-- Mobile Navigation Dropdown Menu -->
+    <div x-show="mobileMenuOpen" 
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         @click.outside="mobileMenuOpen = false"
+         class="md:hidden absolute top-full left-0 w-full bg-surface border-b border-outline-variant shadow-xl z-40 max-h-[calc(100vh-80px)] overflow-y-auto">
+        
+        <nav class="flex flex-col px-4 py-4 gap-1 border-b border-outline-variant">
+            <a class="font-label-md text-[16px] text-on-surface-variant hover:text-primary hover:bg-surface-container-low px-4 py-3 rounded transition-colors" href="<?= base_url('search/sale') ?>"><?= lang('Front.nav_buy') ?></a>
+            <a class="font-label-md text-[16px] text-on-surface-variant hover:text-primary hover:bg-surface-container-low px-4 py-3 rounded transition-colors" href="<?= base_url('search/rent') ?>"><?= lang('Front.nav_rent') ?></a>
+            <a class="font-label-md text-[16px] text-on-surface-variant hover:text-primary hover:bg-surface-container-low px-4 py-3 rounded transition-colors" href="<?= base_url('page/about-us') ?>"><?= lang('Front.nav_about') ?></a>
+            <a class="font-label-md text-[16px] text-on-surface-variant hover:text-primary hover:bg-surface-container-low px-4 py-3 rounded transition-colors" href="<?= base_url('news') ?>"><?= lang('Front.nav_news') ?></a>
+            <a class="font-label-md text-[16px] text-on-surface-variant hover:text-primary hover:bg-surface-container-low px-4 py-3 rounded transition-colors" href="<?= base_url('page/privacy-policy') ?>"><?= lang('Front.nav_privacy') ?></a>
+        </nav>
+
+        <div class="flex flex-col gap-4 px-6 py-6">
+            <?php if($roleId != 1): ?>
+                <a href="<?= base_url('admin/properties/create') ?>" class="w-full text-center font-label-md text-[15px] font-semibold text-primary bg-transparent border border-primary px-4 py-3 rounded-lg hover:bg-surface-container-high transition-colors">
+                    <?= lang('Front.btn_post_listing') ?>
+                </a>
+            <?php endif; ?>
+
+            <?php if($isLoggedIn): ?>
+                <div class="grid grid-cols-3 gap-2 border border-outline-variant rounded-xl p-2 bg-surface-container-lowest">
+                     <a href="<?= base_url('user/saved-properties') ?>" class="flex flex-col items-center justify-center gap-1 text-on-surface-variant p-3 rounded-lg hover:text-primary hover:bg-surface-container-low transition-colors">
+                         <span class="material-symbols-outlined text-[24px]">favorite</span>
+                         <span class="text-[11px] font-bold mt-1">Saved</span>
+                     </a>
+                     <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/inquiries') ?>" class="relative flex flex-col items-center justify-center gap-1 text-on-surface-variant p-3 rounded-lg hover:text-primary hover:bg-surface-container-low transition-colors">
+                         <span class="material-symbols-outlined text-[24px]">mail</span>
+                         <?php if ($unreadCount > 0): ?>
+                             <span class="absolute top-2 right-4 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface-container-lowest"></span>
+                         <?php endif; ?>
+                         <span class="text-[11px] font-bold mt-1">Inbox</span>
+                     </a>
+                     <a href="<?= base_url($roleId == 1 ? 'user/profile' : 'admin/dashboard') ?>" class="flex flex-col items-center justify-center gap-1 text-on-surface-variant p-3 rounded-lg hover:text-primary hover:bg-surface-container-low transition-colors">
+                         <span class="material-symbols-outlined text-[24px]"><?= $roleId == 1 ? 'person' : 'dashboard' ?></span>
+                         <span class="text-[11px] font-bold mt-1"><?= $roleId == 1 ? 'Profile' : 'Dashboard' ?></span>
+                     </a>
+                </div>
+                <a href="<?= base_url('logout') ?>" class="w-full flex justify-center items-center gap-2 font-label-md text-[15px] font-semibold text-error bg-error-container/10 px-4 py-3 rounded-lg hover:bg-error-container/20 transition-colors mt-2">
+                    <span class="material-symbols-outlined text-[20px]">logout</span> <?= lang('Front.btn_sign_out') ?>
+                </a>
+            <?php else: ?>
+                <a href="<?= base_url('login') ?>" class="w-full text-center font-label-md text-[15px] font-bold text-on-primary bg-primary px-4 py-3 rounded-lg hover:bg-primary-container transition-colors shadow-sm">
+                    <?= lang('Front.btn_sign_in') ?>
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 </header>
 
