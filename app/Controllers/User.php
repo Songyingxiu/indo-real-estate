@@ -4,6 +4,7 @@ use App\Models\UserModel;
 use App\Models\PropertyModel;
 use App\Models\AgentVerificationModel;
 use App\Models\SavedPropertyModel;
+use App\Models\SavedSearchModel;
 use App\Libraries\EmailService;
 
 class User extends BaseController
@@ -123,11 +124,13 @@ class User extends BaseController
         return redirect()->back()->with('error', 'KTP document is required for verification.');
     }
 
+    // FIX: Combined Saved Properties and Saved Searches delivery
     public function savedProperties()
     {
         if (!session()->get('id')) return redirect()->to(base_url('login'));
 
         $savedModel = new SavedPropertyModel();
+        $searchModel = new SavedSearchModel();
         
         $data['title'] = 'My Saved Properties - HuniKita';
         
@@ -141,6 +144,11 @@ class User extends BaseController
             ->paginate(9);
 
         $data['pager'] = $savedModel->pager;
+        
+        // Fetch saved searches
+        $data['searches'] = $searchModel->where('user_id', session()->get('id'))
+                                        ->orderBy('created_at', 'DESC')
+                                        ->findAll();
 
         return view('front/user/saved_properties', $data);
     }
@@ -154,11 +162,9 @@ class User extends BaseController
         $user = $userModel->find($userId);
 
         if ($user) {
-            // Soft delete all properties owned by this user
             $propertyModel = new PropertyModel();
             $propertyModel->where('owner_id', $userId)->delete();
 
-            // Send deletion email
             $emailService = new EmailService();
             $emailService->sendDynamicEmail(
                 'Account Deleted',
@@ -166,10 +172,7 @@ class User extends BaseController
                 ['{first_name}' => $user['first_name']]
             );
 
-            // Soft delete the user
             $userModel->delete($userId);
-
-            // Destroy the session
             session()->destroy();
             
             return redirect()->to(base_url('/'))->with('success', 'Your account and active listings have been hidden. You have 60 days to restore them by logging back in.');

@@ -40,7 +40,6 @@ class Home extends BaseController
             ->groupEnd()
             ->findAll();
         
-        // Popular Properties based on unique views calculation
         $data['featuredProperties'] = $propertyModel->getPopularProperties(6);
 
         $data['newestProperties'] = $propertyModel
@@ -101,9 +100,8 @@ class Home extends BaseController
         $radius      = $this->request->getGet('radius');
         $sort        = $this->request->getGet('sort') ?? 'new';
 
-        // Dynamically resolve listing type from SEO URL route or query param
         $listingType = $type ? ucfirst(strtolower($type)) : $this->request->getGet('listing_type');
-        if (empty($listingType)) $listingType = 'Sale'; // fallback
+        if (empty($listingType)) $listingType = 'Sale';
 
         $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius, $sort);
 
@@ -143,7 +141,6 @@ class Home extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
         }
 
-        // track popular listing by IP view count
         $db = \Config\Database::connect();
         $ipAddress = $this->request->getIPAddress();
         $userId = session()->get('id') ?? null;
@@ -165,10 +162,8 @@ class Home extends BaseController
             ]);
         }
 
-        // Generate Time Ago humanized string
         $data['timeAgo'] = Time::parse($property->created_date)->humanize();
 
-        // Check Subscription Plans for Features
         $subModel = new \App\Models\SubscriptionModel();
         $planModel = new \App\Models\SubscriptionPlanModel();
         $userModel = new \App\Models\UserModel();
@@ -474,6 +469,7 @@ class Home extends BaseController
         }
     }
 
+    // FIX: Replaced JS prompt name with smart auto-generated backend name
     public function saveSearch()
     {
         $userId = session()->get('id');
@@ -482,12 +478,17 @@ class Home extends BaseController
         }
 
         $json = $this->request->getJSON();
+        $filters = $json->filters ?? [];
+        
+        $type = ucfirst($filters->listing_type ?? 'Sale');
+        $loc = !empty($filters->q) ? $filters->q : 'Any Location';
+        $searchName = $type . ' in ' . $loc;
         
         $savedSearchModel = new SavedSearchModel();
         $savedSearchModel->insert([
             'user_id'    => $userId,
-            'name'       => $json->name ?? 'Saved Search ' . date('M d, Y'),
-            'filters'    => json_encode($json->filters ?? []),
+            'name'       => $searchName,
+            'filters'    => json_encode($filters),
             'created_at' => date('Y-m-d H:i:s')
         ]);
 
