@@ -19,13 +19,15 @@ class Cms extends BaseController
         
         $id = $this->request->getPost('id');
         $titleEN = $this->request->getPost('title_en');
+        $category = $this->request->getPost('category');
         
         $data = [
             'title'           => $titleEN,
             'title_en'        => $titleEN,
             'title_id'        => $this->request->getPost('title_id'),
             'slug'            => $cmsModel->generateUniqueSlug($titleEN, $id ?: null),
-            'category'        => $this->request->getPost('category'),
+            'category'        => $category,
+            'faq_category'    => $category === 'FAQ' ? $this->request->getPost('faq_category') : null, // Only save topic if it's an FAQ
             'content_body'    => $this->request->getPost('content_body_en'),
             'content_body_en' => $this->request->getPost('content_body_en'),
             'content_body_id' => $this->request->getPost('content_body_id'),

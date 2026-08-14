@@ -7,6 +7,7 @@
     postTitleEN: '', 
     postTitleID: '', 
     postCategory: 'Blog', 
+    postFaqCategory: '',
     postBodyEN: '', 
     postBodyID: '', 
     showDeleteModal: false, 
@@ -37,7 +38,7 @@
             <h1 class="text-2xl font-bold text-on-surface">Content Management</h1>
             <p class="text-on-surface-variant">Manage platform news, blog posts, FAQs, and static legal/informational pages.</p>
         </div>
-        <button @click="showEditor = true; postId = ''; postTitleEN = ''; postTitleID = ''; postCategory = 'Blog'; postBodyEN = ''; postBodyID = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
+        <button @click="showEditor = true; postId = ''; postTitleEN = ''; postTitleID = ''; postCategory = 'Blog'; postFaqCategory = ''; postBodyEN = ''; postBodyID = ''" class="bg-primary text-on-primary px-4 py-2 rounded font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-sm">
             <span class="material-symbols-outlined text-[18px]">add</span> New Content
         </button>
     </div>
@@ -98,6 +99,7 @@
                                                     postTitleEN = '<?= esc($post->title_en ?? $post->title, 'js') ?>'; 
                                                     postTitleID = '<?= esc($post->title_id ?? $post->title, 'js') ?>'; 
                                                     postCategory = '<?= esc($post->category, 'js') ?>'; 
+                                                    postFaqCategory = '<?= esc($post->faq_category ?? '', 'js') ?>'; 
                                                     postBodyEN = '<?= esc($post->content_body_en ?? $post->content_body, 'js') ?>';
                                                     postBodyID = '<?= esc($post->content_body_id ?? $post->content_body, 'js') ?>';" 
                                             class="text-primary hover:underline font-medium">Edit</button>
@@ -162,7 +164,7 @@
             
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <h2 class="text-xl font-bold text-on-surface" x-text="postId ? 'Edit Content Details' : 'Create New Content'"></h2>
-                <button @click="showEditor = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                <button type="button" @click="showEditor = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -182,15 +184,29 @@
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Type Category</label>
-                        <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-                            <option value="Blog">Blog Post / News</option>
-                            <option value="Page">Static Info Page</option>
-                            <option value="Tips">Tips & Guides</option>
-                            <option value="Announcement">Announcement</option>
-                            <option value="FAQ">FAQ</option>
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Type Category</label>
+                            <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                                <option value="Blog">Blog Post / News</option>
+                                <option value="Page">Static Info Page</option>
+                                <option value="Tips">Tips & Guides</option>
+                                <option value="Announcement">Announcement</option>
+                                <option value="FAQ">FAQ</option>
+                            </select>
+                        </div>
+                        
+                        <div x-show="postCategory === 'FAQ'" style="display: none;">
+                            <label class="block text-sm font-semibold text-on-surface mb-1">FAQ Topic</label>
+                            <select name="faq_category" x-model="postFaqCategory" :required="postCategory === 'FAQ'" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                                <option value="" disabled selected>Select Topic...</option>
+                                <option value="User/Profile">User/Profile</option>
+                                <option value="Property">Property</option>
+                                <option value="Chat">Chat</option>
+                                <option value="Subscription">Subscription</option>
+                                <option value="Payment">Payment</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
