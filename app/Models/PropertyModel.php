@@ -123,7 +123,8 @@ class PropertyModel extends Model
     {
         $viewSubquery = "(SELECT COUNT(DISTINCT ip_address) FROM property_views WHERE property_views.property_id = properties.id)";
         
-        return $this->select("properties.*, property_types.name as type_name, property_images.image_path, cities.name as city_name, {$viewSubquery} as unique_views")
+        // FIX: Added ->asObject() to ensure compatibility with the Home.php view
+        return $this->asObject()->select("properties.*, property_types.name as type_name, property_images.image_path, cities.name as city_name, {$viewSubquery} as unique_views")
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->join('cities', 'cities.id = properties.city_id', 'left')
