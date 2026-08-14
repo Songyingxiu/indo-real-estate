@@ -98,12 +98,14 @@
         <?php else: ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($searches as $search): 
-                    $filters = json_decode($search->filters, true);
+                    $filters = json_decode(is_array($search) ? $search['filters'] : $search->filters, true);
                     $queryStr = http_build_query($filters);
+                    $searchId = is_array($search) ? $search['id'] : $search->id;
+                    $searchName = is_array($search) ? $search['name'] : $search->name;
                 ?>
                     <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow">
                         <div class="flex justify-between items-start mb-4">
-                            <h3 class="font-headline-md text-[18px] font-bold text-on-surface line-clamp-1"><?= esc($search->name) ?></h3>
+                            <h3 class="font-headline-md text-[18px] font-bold text-on-surface line-clamp-1"><?= esc($searchName) ?></h3>
                             <span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-full">saved_search</span>
                         </div>
                         <ul class="text-on-surface-variant font-body-sm text-[14px] flex flex-col gap-2 mb-6 flex-grow">
@@ -119,6 +121,9 @@
                         </ul>
                         <div class="flex gap-2 mt-auto border-t border-outline-variant pt-4">
                             <a href="<?= base_url('search?' . $queryStr) ?>" class="flex-1 bg-primary-container text-on-primary text-center py-2 rounded font-bold text-[14px] hover:bg-primary transition-colors">Apply Search</a>
+                            <button onclick="deleteSavedSearch(<?= $searchId ?>)" class="bg-error/10 text-error hover:bg-error hover:text-on-error px-3 py-2 rounded transition-colors" title="Remove Search">
+                                <span class="material-symbols-outlined text-[20px] mt-0.5">delete</span>
+                            </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -126,5 +131,32 @@
         <?php endif; ?>
     </div>
 </main>
+
+<script>
+function deleteSavedSearch(id) {
+    if(!confirm('Are you sure you want to remove this saved search?')) return;
+
+    const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
+    const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
+
+    fetch('<?= base_url('user/delete-search/') ?>' + id, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            [csrfName]: csrfHash
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            window.location.reload();
+        } else {
+            alert(data.message || 'An error occurred while deleting.');
+        }
+    })
+    .catch(err => console.error('Error:', err));
+}
+</script>
 
 <?= $this->include('front/layout/footer') ?>

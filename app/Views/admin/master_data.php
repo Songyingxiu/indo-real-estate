@@ -123,7 +123,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="p-4 border-t border-outline-variant">
+            <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                 <?php if (isset($pager)) : ?>
                     <?= $pager->links('plans', 'tailwind_pagination') ?>
                 <?php endif ?>
@@ -164,7 +164,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-outline-variant">
+                <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                     <?php if (isset($pager)) : ?>
                         <?= $pager->links('states', 'tailwind_pagination') ?>
                     <?php endif ?>
@@ -211,7 +211,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-outline-variant">
+                <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                     <?php if (isset($pager)) : ?>
                         <?= $pager->links('cities', 'tailwind_pagination') ?>
                     <?php endif ?>
@@ -258,7 +258,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-outline-variant">
+                <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                     <?php if (isset($pager)) : ?>
                         <?= $pager->links('zipcodes', 'tailwind_pagination') ?>
                     <?php endif ?>
@@ -301,7 +301,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-outline-variant">
+                <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                     <?php if (isset($pager)) : ?>
                         <?= $pager->links('types', 'tailwind_pagination') ?>
                     <?php endif ?>
@@ -341,6 +341,11 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
+                    <?php if (isset($pager)) : ?>
+                        <?= $pager->links('feature_categories', 'tailwind_pagination') ?>
+                    <?php endif ?>
                 </div>
             </section>
             
@@ -389,7 +394,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-outline-variant">
+                <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                     <?php if (isset($pager)) : ?>
                         <?= $pager->links('features', 'tailwind_pagination') ?>
                     <?php endif ?>
@@ -442,7 +447,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="p-4 border-t border-outline-variant">
+            <div class="border-t border-outline-variant bg-surface-container-lowest rounded-b-lg overflow-x-auto custom-scrollbar">
                 <?php if (isset($pager)) : ?>
                     <?= $pager->links('pois', 'tailwind_pagination') ?>
                 <?php endif ?>

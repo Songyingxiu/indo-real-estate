@@ -61,17 +61,24 @@ class User extends BaseController
         $userModel = new UserModel();
         $user = $userModel->find($userId);
 
+        // Check if the user registered via Google (password is empty)
+        $hasLocalPassword = !empty($user['password']);
+
         $rules = [
-            'current_password' => 'required',
             'new_password'     => 'required|min_length[8]',
             'confirm_password' => 'required|matches[new_password]'
         ];
+
+        // Only require current password if they actually have one
+        if ($hasLocalPassword) {
+            $rules['current_password'] = 'required';
+        }
 
         if (!$this->validate($rules)) {
             return redirect()->back()->with('error', 'Password validation failed. Ensure your new password is at least 8 characters and matches the confirmation.');
         }
 
-        if (!password_verify($this->request->getPost('current_password'), $user['password'])) {
+        if ($hasLocalPassword && !password_verify($this->request->getPost('current_password'), $user['password'])) {
             return redirect()->back()->with('error', 'Your current password is incorrect.');
         }
 
@@ -79,7 +86,7 @@ class User extends BaseController
             'password' => password_hash($this->request->getPost('new_password'), PASSWORD_BCRYPT)
         ]);
 
-        return redirect()->to(base_url('user/profile'))->with('success', 'Password updated successfully.');
+        return redirect()->to(base_url('user/profile'))->with('success', 'Password updated successfully. You can now use this password to log in.');
     }
 
     public function uploadAgentDocs()
@@ -124,7 +131,6 @@ class User extends BaseController
         return redirect()->back()->with('error', 'KTP document is required for verification.');
     }
 
-    // FIX: Combined Saved Properties and Saved Searches delivery
     public function savedProperties()
     {
         if (!session()->get('id')) return redirect()->to(base_url('login'));
@@ -151,6 +157,23 @@ class User extends BaseController
                                         ->findAll();
 
         return view('front/user/saved_properties', $data);
+    }
+
+    public function deleteSearch($id)
+    {
+        if (!session()->get('id')) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized'])->setStatusCode(401);
+        }
+
+        $searchModel = new SavedSearchModel();
+        $search = $searchModel->find($id);
+
+        if ($search && (is_array($search) ? $search['user_id'] : $search->user_id) == session()->get('id')) {
+            $searchModel->delete($id);
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Search removed successfully.']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Search not found or you do not have permission to delete it.'])->setStatusCode(404);
     }
 
     public function deleteAccount()

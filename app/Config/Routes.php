@@ -58,6 +58,7 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->post('update-profile', 'User::updateProfile');
     $routes->post('update-password', 'User::updatePassword');
     $routes->get('saved-properties', 'User::savedProperties');
+    $routes->post('delete-search/(:num)', 'User::deleteSearch/$1');
     $routes->post('delete-account', 'User::deleteAccount'); 
 });
 
