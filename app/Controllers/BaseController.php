@@ -31,18 +31,19 @@ abstract class BaseController extends Controller
             $roleId = $this->session->get('role_id');
 
             if ($roleId == 1) {
-                // Buyer: Fetch their sent inquiries and status updates
+                // Buyer: Fetch threads they started where the agent has 'Replied'
                 $notifs = $inquiryModel
                     ->select('inquiries.*, properties.title as property_title')
                     ->join('properties', 'properties.id = inquiries.property_id', 'left')
                     ->where('inquiries.sender_id', $this->session->get('id'))
+                    ->where('inquiries.status', 'Replied')
                     ->orderBy('inquiries.updated_at', 'DESC')
                     ->findAll(5); 
                 
                 $GLOBALS['global_notifications'] = $notifs;
-                $GLOBALS['unread_count'] = 0; 
+                $GLOBALS['unread_count'] = count($notifs); 
             } else {
-                // Agent/Owner/Admin: Fetch unread inbox messages (Pending status)
+                // Agent/Owner/Admin: Fetch unread inbox messages ('Pending' status)
                 $notifs = $inquiryModel
                     ->select('inquiries.*, users.first_name, users.last_name, properties.title as property_title')
                     ->join('users', 'users.id = inquiries.sender_id', 'left')
@@ -50,7 +51,7 @@ abstract class BaseController extends Controller
                     ->where('inquiries.receiver_id', $this->session->get('id'))
                     ->where('inquiries.status', 'Pending')
                     ->orderBy('inquiries.created_at', 'DESC')
-                    ->findAll();
+                    ->findAll(5);
                 
                 $GLOBALS['global_notifications'] = $notifs;
                 $GLOBALS['unread_count'] = count($notifs);

@@ -7,7 +7,7 @@
     
     // Fetch the global notifications in BaseController
     $notifications = $GLOBALS['global_notifications'] ?? [];
-    $unreadCount = count($notifications);
+    $unreadCount = $GLOBALS['unread_count'] ?? 0;
 ?>
 <header class="hidden md:flex w-full h-16 justify-between items-center px-margin-desktop sticky top-0 z-50 bg-surface border-b border-outline-variant transition-colors duration-300">
     
@@ -41,7 +41,7 @@
         <a href="<?= base_url('admin/inquiries') ?>" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative" title="Inbox">
             <span class="material-symbols-outlined">mail</span>
             <?php if ($unreadCount > 0): ?>
-                <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+                <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
             <?php endif; ?>
         </a>
 
@@ -50,7 +50,7 @@
             <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
                 <span class="material-symbols-outlined">notifications</span>
                 <?php if ($unreadCount > 0): ?>
-                    <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+                    <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
                 <?php endif; ?>
             </button>
             

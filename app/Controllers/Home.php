@@ -40,17 +40,8 @@ class Home extends BaseController
             ->groupEnd()
             ->findAll();
         
-        $data['featuredProperties'] = $propertyModel
-            ->asObject() 
-            ->select('properties.*, property_types.name as type_name, property_images.image_path, cities.name as city_name')
-            ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
-            ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
-            ->join('cities', 'cities.id = properties.city_id', 'left')
-            ->where('properties.status', 'Active')
-            ->where('properties.approval_status', 'Published')
-            ->orderBy('RAND()') 
-            ->limit(6)
-            ->find();
+        // Popular Properties based on unique views calculation
+        $data['featuredProperties'] = $propertyModel->getPopularProperties(6);
 
         $data['newestProperties'] = $propertyModel
             ->asObject() 
@@ -58,8 +49,7 @@ class Home extends BaseController
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
             ->join('cities', 'cities.id = properties.city_id', 'left')
-            ->where('properties.status', 'Active')
-            ->where('properties.approval_status', 'Published')
+            ->where('properties.approval_status !=', 'Draft')
             ->orderBy('properties.created_date', 'DESC')
             ->limit(6)
             ->find();
@@ -109,12 +99,13 @@ class Home extends BaseController
         $lat         = $this->request->getGet('lat');
         $lng         = $this->request->getGet('lng');
         $radius      = $this->request->getGet('radius');
+        $sort        = $this->request->getGet('sort') ?? 'new';
 
         // Dynamically resolve listing type from SEO URL route or query param
         $listingType = $type ? ucfirst(strtolower($type)) : $this->request->getGet('listing_type');
         if (empty($listingType)) $listingType = 'Sale'; // fallback
 
-        $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius);
+        $propertyModel->searchProperties($keyword, $listingType, $types, $lat, $lng, $radius, $sort);
 
         $data['properties'] = $propertyModel->paginate(9);
         $data['pager']      = $propertyModel->pager;
@@ -125,6 +116,7 @@ class Home extends BaseController
         $data['lat']        = $lat;
         $data['lng']        = $lng;
         $data['radius']     = $radius;
+        $data['sort']       = $sort;
         
         $data['title'] = 'Search Properties - HuniKita';
         return view('front/properties/search', $data);
@@ -144,12 +136,33 @@ class Home extends BaseController
             ->join('users', 'users.id = properties.owner_id', 'left')
             ->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left') 
             ->where('properties.id', $id)
-            ->where('properties.status', 'Active')
-            ->where('properties.approval_status', 'Published')
+            ->where('properties.approval_status !=', 'Draft')
             ->first();
 
         if (!$property) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Property not found");
+        }
+
+        // track popular listing by IP view count
+        $db = \Config\Database::connect();
+        $ipAddress = $this->request->getIPAddress();
+        $userId = session()->get('id') ?? null;
+
+        $viewBuilder = $db->table('property_views');
+        $existingView = $viewBuilder->where('property_id', $id)
+            ->where('ip_address', $ipAddress)
+            ->when($userId, function($q) use ($userId) {
+                return $q->where('user_id', $userId);
+            })
+            ->get()->getRow();
+
+        if (!$existingView) {
+            $viewBuilder->insert([
+                'property_id' => $id,
+                'user_id'     => $userId,
+                'ip_address'  => $ipAddress,
+                'viewed_at'   => date('Y-m-d H:i:s')
+            ]);
         }
 
         // Generate Time Ago humanized string
@@ -185,7 +198,6 @@ class Home extends BaseController
         $data['allowDirectEmail'] = $allowDirectEmail;
 
         $isSaved = false;
-        $userId = session()->get('id');
         if ($userId) {
             $savedModel = new SavedPropertyModel();
             $check = $savedModel->where('user_id', $userId)->where('property_id', $id)->first();
@@ -197,8 +209,6 @@ class Home extends BaseController
         $data['isSaved'] = $isSaved;
         $data['title'] = $property->title . ' - HuniKita';
 
-        $db = \Config\Database::connect();
-        
         $featuresRaw = $db->table('property_features pf')
             ->select('f.name as feature_name, fc.name as category_name')
             ->join('features f', 'f.id = pf.feature_id')
@@ -270,10 +280,9 @@ class Home extends BaseController
         $propertyModel->select('properties.*, property_images.image_path, cities.name as city_name')
                       ->join('property_images', 'property_images.property_id = properties.id AND property_images.is_primary = 1', 'left')
                       ->join('cities', 'cities.id = properties.city_id', 'left')
-                      ->where('cities.state_id', $state->id) // FIXED: Explicity use cities.state_id
+                      ->where('cities.state_id', $state->id) 
                       ->where('properties.listing_type', $type)
-                      ->where('properties.status', 'Active')
-                      ->where('properties.approval_status', 'Published');
+                      ->where('properties.approval_status !=', 'Draft');
                       
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
@@ -294,13 +303,13 @@ class Home extends BaseController
 
         $data['city'] = $city;
         
-        // Ensure map markers also query specific to the listing type.
         $db = \Config\Database::connect();
         $data['markers'] = $db->table('properties')
-            ->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, cities.name as city_name')
+            ->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, cities.name as city_name, properties.status, properties.approval_status')
             ->join('cities', 'cities.id = properties.city_id', 'left')
             ->where('properties.city_id', $city->id)
             ->where('properties.listing_type', $type)
+            ->where('properties.approval_status !=', 'Draft')
             ->where('properties.latitude IS NOT NULL')
             ->limit(150)
             ->get()->getResultArray();
@@ -310,8 +319,7 @@ class Home extends BaseController
                       ->join('cities', 'cities.id = properties.city_id', 'left')
                       ->where('properties.city_id', $city->id)
                       ->where('properties.listing_type', $type)
-                      ->where('properties.status', 'Active')
-                      ->where('properties.approval_status', 'Published');
+                      ->where('properties.approval_status !=', 'Draft');
 
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
@@ -332,13 +340,13 @@ class Home extends BaseController
 
         $data['zipcode'] = $zip;
         
-        // Ensure map markers also query specific to the listing type.
         $db = \Config\Database::connect();
         $data['markers'] = $db->table('properties')
-            ->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, cities.name as city_name')
+            ->select('properties.id, properties.title, properties.tax_price, properties.latitude, properties.longitude, cities.name as city_name, properties.status, properties.approval_status')
             ->join('cities', 'cities.id = properties.city_id', 'left')
             ->where('properties.zipcode_id', $zip->id)
             ->where('properties.listing_type', $type)
+            ->where('properties.approval_status !=', 'Draft')
             ->where('properties.latitude IS NOT NULL')
             ->limit(150)
             ->get()->getResultArray();
@@ -348,8 +356,7 @@ class Home extends BaseController
                       ->join('cities', 'cities.id = properties.city_id', 'left')
                       ->where('properties.zipcode_id', $zip->id)
                       ->where('properties.listing_type', $type)
-                      ->where('properties.status', 'Active')
-                      ->where('properties.approval_status', 'Published');
+                      ->where('properties.approval_status !=', 'Draft');
 
         $data['properties'] = $propertyModel->paginate(20);
         $data['pager'] = $propertyModel->pager;
@@ -363,7 +370,6 @@ class Home extends BaseController
     {
         helper('url');
         $query = $this->request->getGet('q');
-        // Fetch the context of the search (rent or sale), default to sale
         $typeFilter = strtolower($this->request->getGet('type') ?: 'sale');
 
         if (empty($query) || strlen($query) < 2) {
@@ -377,7 +383,6 @@ class Home extends BaseController
 
         $results = [];
 
-        // 1. Region Suggestions
         $states = $stateModel->like('name', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($states as $state) {
             $slug = url_title(strtolower($state->name), '-', true);
@@ -388,7 +393,6 @@ class Home extends BaseController
             ];
         }
 
-        // 2. City Suggestions
         $cities = $cityModel->select('cities.*, states.name as state_name')
             ->join('states', 'states.id = cities.state_id', 'left')
             ->like('cities.name', $query)
@@ -406,7 +410,6 @@ class Home extends BaseController
             ];
         }
 
-        // 3. Zipcode Suggestions
         $zipcodes = $zipcodeModel->like('zipcode', $query)->where('status', 'Active')->limit(3)->find();
         foreach ($zipcodes as $zip) {
             $results[] = [
@@ -416,7 +419,6 @@ class Home extends BaseController
             ];
         }
 
-        // 4. Property Name Suggestions
         $properties = $propertyModel->asObject()
             ->select('properties.*, cities.name as city_name')
             ->join('cities', 'cities.id = properties.city_id', 'left')
@@ -425,8 +427,7 @@ class Home extends BaseController
                 ->orLike('properties.area_name', $query)
             ->groupEnd()
             ->where('properties.listing_type', ucfirst($typeFilter))
-            ->where('properties.status', 'Active')
-            ->where('properties.approval_status', 'Published')
+            ->where('properties.approval_status !=', 'Draft')
             ->limit(4)
             ->find();
 

@@ -112,7 +112,7 @@
                 <a href="<?= base_url($roleId == 1 ? 'user/inbox' : 'admin/inquiries') ?>" class="relative text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer" title="Inbox">
                     <span class="material-symbols-outlined">mail</span>
                     <?php if ($unreadCount > 0): ?>
-                        <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
                     <?php endif; ?>
                 </a>
 
@@ -120,7 +120,7 @@
                     <button @click="open = !open" @click.outside="open = false" class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full cursor-pointer relative">
                         <span class="material-symbols-outlined">notifications</span>
                         <?php if ($unreadCount > 0): ?>
-                            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+                            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
                         <?php endif; ?>
                     </button>
                     
