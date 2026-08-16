@@ -248,6 +248,7 @@ function toggleFavorite(propertyId, btnElement) {
     })
     .then(response => {
         if (response.status === 401) {
+            window.pendingAuthAction = function() { toggleFavorite(propertyId, btnElement); };
             if(typeof openAuthModal === 'function') {
                 openAuthModal();
             } else {
@@ -281,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function() {
         clearTimeout(timeout);
         const query = this.value.trim();
-        const activeType = '<?= strtolower($listingType ?? 'sale') ?>';
+        const activeType = '<?= strtolower($listingType ?? 'sale') ?>'; 
 
         if (query.length < 2) {
             suggestDropdown.classList.add('hidden');
@@ -353,7 +354,9 @@ function saveCurrentSearch() {
     const urlParams = new URLSearchParams(window.location.search);
     const filters = Object.fromEntries(urlParams.entries());
     
-    filters.listing_type = '<?= strtolower($listingType ?? 'sale') ?>';
+    if (typeof '<?= strtolower($listingType ?? '') ?>' !== 'undefined') {
+        filters.listing_type = '<?= strtolower($listingType ?? 'sale') ?>';
+    }
 
     const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
     const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
@@ -369,6 +372,7 @@ function saveCurrentSearch() {
     })
     .then(response => {
         if (response.status === 401) {
+            window.pendingAuthAction = function() { saveCurrentSearch(); };
             if(typeof openAuthModal === 'function') openAuthModal();
             throw new Error('Unauthorized');
         }

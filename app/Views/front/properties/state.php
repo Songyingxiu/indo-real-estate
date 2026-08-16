@@ -91,6 +91,7 @@
         })
         .then(response => {
             if (response.status === 401) {
+                window.pendingAuthAction = function() { toggleFavorite(propertyId, btnElement); };
                 if(typeof openAuthModal === 'function') {
                     openAuthModal();
                 } else {

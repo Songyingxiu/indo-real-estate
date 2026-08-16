@@ -67,7 +67,6 @@
         </div>
     <?php endif; ?>
 
-    <!-- popular listing -->
     <section class="max-w-[1280px] mx-auto px-4 md:px-10 py-16">
         <div class="flex justify-between items-end mb-8">
             <div>
@@ -142,7 +141,6 @@
         </div>
     </section>
 
-    <!-- new listed -->
     <section class="bg-surface-container-lowest py-16 border-y border-outline-variant/50">
         <div class="max-w-[1280px] mx-auto px-4 md:px-10 relative">
             <div class="flex justify-between items-end mb-8">
@@ -284,6 +282,7 @@ function toggleFavorite(propertyId, btnElement) {
     })
     .then(response => {
         if (response.status === 401) {
+            window.pendingAuthAction = function() { toggleFavorite(propertyId, btnElement); };
             if(typeof openAuthModal === 'function') {
                 openAuthModal();
             } else {

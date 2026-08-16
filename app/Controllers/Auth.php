@@ -7,37 +7,23 @@ use App\Libraries\EmailService;
 
 class Auth extends BaseController
 {
-    /**
-     * Evaluates soft-deleted accounts for 60-day expiration.
-     * Restores the account if <= 60 days. Hard wipes data if > 60 days.
-     */
     private function processAccountRecovery(&$user, UserModel $userModel)
     {
         if ($user && $user['deleted_at'] !== null) {
             $deletedTime = strtotime($user['deleted_at']);
-            $daysPassed  = (time() - $deletedTime) / 86400; // 86400 seconds = 1 day
+            $daysPassed  = (time() - $deletedTime) / 86400;
 
             if ($daysPassed > 60) {
-                // 1. Account expired. Hard-delete related data first to prevent orphans.
                 $db = \Config\Database::connect();
-                
-                // Note: Ensure these table names match your database exactly
                 $db->table('inquiries')->where('user_id', $user['id'])->delete();
-                $db->table('favorites')->where('user_id', $user['id'])->delete();
-                
-                // 2. Hard delete the user (the true parameter bypasses soft-deletes)
+                $db->table('saved_properties')->where('user_id', $user['id'])->delete();
                 $userModel->delete($user['id'], true);
-                
-                // 3. Reset user to null so the system treats this as a brand new account
                 $user = null;
             } else {
-                // Account is within 60 days. Restore it!
                 $userModel->builder()->where('id', $user['id'])->update([
                     'deleted_at' => null,
                     'status'     => 'Active'
                 ]);
-                
-                // Re-fetch the clean record
                 $user = $userModel->where('id', $user['id'])->first();
             }
         }
@@ -55,16 +41,18 @@ class Auth extends BaseController
             'first_name'       => 'required|min_length[2]|max_length[100]',
             'last_name'        => 'required|min_length[2]|max_length[100]',
             'email'            => 'required|valid_email|is_unique[users.email]',
-            'phone_number'     => 'required|min_length[8]',
             'password'         => 'required|min_length[8]',
             'password_confirm' => 'required|matches[password]'
         ];
 
         if (! $this->validate($rules)) {
             $errors = $this->validator->getErrors();
-            $errorMessage = 'Please fix the following errors:<br> • ' . implode('<br> • ', $errors);
+            $errorMessage = implode('<br> • ', $errors);
             
-            return redirect()->back()->withInput()->with('error', $errorMessage);
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'error', 'message' => $errorMessage])->setStatusCode(400);
+            }
+            return redirect()->back()->withInput()->with('error', 'Please fix the following errors:<br> • ' . $errorMessage);
         }
 
         $plaintextPassword = $this->request->getPost('password');
@@ -86,7 +74,7 @@ class Auth extends BaseController
             'first_name'   => $firstName,
             'last_name'    => $this->request->getPost('last_name'),
             'email'        => $email,
-            'phone_number' => $this->request->getPost('phone_number'),
+            'phone_number' => $this->request->getPost('phone_number') ?? null,
             'password'     => $hashedPassword,
             'status'       => 'Active',
             'auth_provider'=> 'local'
@@ -94,14 +82,31 @@ class Auth extends BaseController
 
         $userModel = new UserModel();
         $userModel->insert($userData);
+        $newUserId = $userModel->getInsertID();
+
+        $sessionData = [
+            'id'         => $newUserId,
+            'user_id'    => $newUserId,
+            'role_id'    => $roleId,
+            'plan_id'    => 1,
+            'first_name' => $firstName,
+            'last_name'  => $this->request->getPost('last_name'),
+            'email'      => $email,
+            'isLoggedIn' => true
+        ];
+        session()->set($sessionData);
 
         $emailService = new EmailService();
         $emailService->sendDynamicEmail('User Sign Up', $email, [
             '{first_name}' => $firstName,
-            '{login_link}' => base_url('login') 
+            '{login_link}' => base_url('login')
         ]);
+        
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Account created seamlessly.']);
+        }
 
-        return redirect()->to('/login')->with('success', 'Account created successfully! Please sign in.');
+        return redirect()->to('/')->with('success', 'Account created successfully!');
     }
 
     public function attemptLogin()
@@ -111,20 +116,21 @@ class Auth extends BaseController
 
         $userModel = new UserModel();
         
-        // Fetch user, including soft-deleted ones, to process potential account recovery
         $user = $userModel->withDeleted()->where('email', $email)->first();
-        
-        // Run the 60-day expiration check
         $this->processAccountRecovery($user, $userModel);
 
         if ($user && $user['auth_provider'] === 'google' && empty($user['password'])) {
-             return redirect()->back()->withInput()->with('error', 'This account uses Google Sign-In. Please click "Continue with Google".');
+            $msg = 'This account uses Google Sign-In. Please click "Continue with Google".';
+            if ($this->request->isAJAX()) return $this->response->setJSON(['status' => 'error', 'message' => $msg]);
+            return redirect()->back()->withInput()->with('error', $msg);
         }
 
         if ($user && password_verify($password, $user['password'])) {
             
             if ($user['status'] !== 'Active') {
-                return redirect()->back()->withInput()->with('error', 'Your account is currently suspended. Please contact support.');
+                $msg = 'Your account is currently suspended. Please contact support.';
+                if ($this->request->isAJAX()) return $this->response->setJSON(['status' => 'error', 'message' => $msg]);
+                return redirect()->back()->withInput()->with('error', $msg);
             }
 
             helper('cookie');
@@ -153,10 +159,15 @@ class Auth extends BaseController
             ];
             session()->set($sessionData);
 
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['status' => 'success']);
+            }
             return redirect()->to($user['role_id'] == 1 ? '/' : '/admin/dashboard');
             
         } else {
-            return redirect()->back()->withInput()->with('error', 'Invalid Email or Password.');
+            $msg = 'Invalid Email or Password.';
+            if ($this->request->isAJAX()) return $this->response->setJSON(['status' => 'error', 'message' => $msg]);
+            return redirect()->back()->withInput()->with('error', $msg);
         }
     }
 
@@ -280,10 +291,7 @@ class Auth extends BaseController
 
         $userModel = new UserModel();
         
-        // Fetch user, including soft-deleted ones, to process potential account recovery
         $user = $userModel->withDeleted()->where('email', $email)->first();
-
-        // Run the 60-day expiration check
         $this->processAccountRecovery($user, $userModel);
 
         if ($user) {
@@ -295,7 +303,6 @@ class Auth extends BaseController
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Your account is currently suspended.']);
             }
         } else {
-            // New user registration (or registering after a 60-day hard wipe)
             $nameParts = explode(' ', $displayName, 2);
             $firstName = $nameParts[0] ?? 'Google';
             $lastName = $nameParts[1] ?? 'User';
@@ -314,12 +321,6 @@ class Auth extends BaseController
 
             $userModel->insert($userData);
             $user = $userModel->where('email', $email)->first();
-            
-            $emailService = new EmailService();
-            $emailService->sendDynamicEmail('User Sign Up', $email, [
-                '{first_name}' => $firstName,
-                '{login_link}' => base_url('login')
-            ]);
         }
 
         $subModel = new SubscriptionModel();
