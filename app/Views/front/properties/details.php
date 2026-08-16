@@ -351,13 +351,6 @@
         <div class="lg:col-span-4">
             <div class="sticky top-28 flex flex-col gap-6">
                 
-                <?php if (session()->getFlashdata('error')) : ?>
-                    <div class="bg-[#ffdad6] text-[#410002] p-4 rounded-xl border border-error/30 flex items-start gap-2 shadow-sm">
-                        <span class="material-symbols-outlined mt-0.5">warning</span>
-                        <p class="font-label-md text-[14px] leading-relaxed"><?= session()->getFlashdata('error') ?></p>
-                    </div>
-                <?php endif; ?>
-
                 <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm" x-data="mortgageCalculator()">
                     <h3 class="font-headline-md text-[18px] font-bold text-on-surface mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">calculate</span>
@@ -426,46 +419,31 @@
                         </div>
                     </div>
 
-                    <?php if(session()->get('id')): ?>
-                        <form action="<?= base_url('property/submit-inquiry') ?>" method="POST" class="flex flex-col gap-3">
-                            <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
-                            <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
-                            <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
-                            
-                            <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
-                                <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>><?= lang('Front.det_ask_question') ?></option>
-                                <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>><?= lang('Front.det_schedule_visit') ?></option>
-                            </select>
+                    <form id="inquiryForm" onsubmit="submitInquiry(event, this)" class="flex flex-col gap-3">
+                        <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
+                        <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
+                        
+                        <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
+                            <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>><?= lang('Front.det_ask_question') ?></option>
+                            <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>><?= lang('Front.det_schedule_visit') ?></option>
+                        </select>
 
-                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') . ' ' . session()->get('last_name'))) ?>">
-                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="<?= esc(old('phone')) ?>">
-                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
-                            <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
-                            
-                            <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined text-[20px]">send</span> <?= lang('Front.det_send_msg') ?>
-                            </button>
-                        </form>
-                    <?php else: ?>
-                        <!-- FIX: Custom Trigger for Login Modal instead of Redirect Link -->
-                        <div class="text-center py-4">
-                            <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2 opacity-50">lock</span>
-                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6"><?= lang('Front.det_lock_notice') ?></p>
-                            <button type="button" onclick="openAuthModal()" class="w-full bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors shadow-sm">
-                                Sign in to Contact Agent
-                            </button>
-                        </div>
-                    <?php endif; ?>
-
+                        <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '')) ?>">
+                        <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="<?= esc(old('phone')) ?>">
+                        <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
+                        <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
+                        
+                        <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">send</span> <?= lang('Front.det_send_msg') ?>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </main>
 
-<!-- SUCCESS MODAL POPUP -->
-<?php if (session()->getFlashdata('success')) : ?>
-<div x-data="{ show: true }" x-show="show" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#1a1c1e]/60 backdrop-blur-sm">
+<div x-data="{ show: false }" @show-inquiry-success.window="show = true" x-show="show" style="display:none;" class="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-[#1a1c1e]/80 backdrop-blur-sm">
     <div @click.outside="show = false" class="bg-surface rounded-2xl shadow-2xl border border-outline-variant max-w-md w-full p-8 text-center flex flex-col items-center">
         <div class="w-16 h-16 rounded-full bg-[#d3e3fd] text-primary flex items-center justify-center mb-4 shadow-inner">
             <span class="material-symbols-outlined text-[32px]">mark_email_read</span>
@@ -480,9 +458,7 @@
         </div>
     </div>
 </div>
-<?php endif; ?>
 
-<!-- FIX: Inject Login Modal Component -->
 <?= $this->include('components/login_modal') ?>
 
 <?= $this->include('front/layout/footer') ?>
@@ -553,7 +529,7 @@
         })
         .then(response => {
             if (response.status === 401) {
-                // FIX: Trigger Auth Modal instead of redirect
+                window.pendingAuthAction = function() { toggleSaveProperty(propertyId); };
                 if(typeof openAuthModal === 'function') openAuthModal();
                 throw new Error('Unauthorized');
             }
@@ -573,6 +549,39 @@
                 }
             } else {
                 alert(data.message || 'An error occurred.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function submitInquiry(e, formElement) {
+        e.preventDefault();
+        
+        const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
+        const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
+
+        const formData = new FormData(formElement);
+        formData.append(csrfName, csrfHash);
+
+        fetch('<?= base_url('property/submit-inquiry') ?>', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(response => {
+            if (response.status === 401) {
+                window.pendingAuthAction = function() { submitInquiry({preventDefault:()=>{}}, formElement); };
+                if(typeof openAuthModal === 'function') openAuthModal();
+                throw new Error('Unauthorized');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success' || data.message === 'Inquiry submitted successfully.') {
+                window.dispatchEvent(new CustomEvent('show-inquiry-success'));
+                formElement.reset();
+            } else {
+                alert(data.message || 'Error sending inquiry. Please try again.');
             }
         })
         .catch(error => console.error('Error:', error));
