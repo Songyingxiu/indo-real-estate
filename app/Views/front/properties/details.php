@@ -419,24 +419,35 @@
                         </div>
                     </div>
 
-                    <form id="inquiryForm" onsubmit="submitInquiry(event, this)" class="flex flex-col gap-3">
-                        <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
-                        <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
-                        
-                        <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
-                            <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>><?= lang('Front.det_ask_question') ?></option>
-                            <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>><?= lang('Front.det_schedule_visit') ?></option>
-                        </select>
+                    <?php if(session()->get('id')): ?>
+                        <form id="inquiryForm" onsubmit="submitInquiry(event, this)" class="flex flex-col gap-3">
+                            <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
+                            <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
+                            
+                            <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
+                                <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>><?= lang('Front.det_ask_question') ?></option>
+                                <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>><?= lang('Front.det_schedule_visit') ?></option>
+                            </select>
 
-                        <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '')) ?>">
-                        <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="<?= esc(old('phone')) ?>">
-                        <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
-                        <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
-                        
-                        <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-[20px]">send</span> <?= lang('Front.det_send_msg') ?>
-                        </button>
-                    </form>
+                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '')) ?>">
+                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="<?= esc(old('phone')) ?>">
+                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
+                            <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
+                            
+                            <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">send</span> <?= lang('Front.det_send_msg') ?>
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2 opacity-50">lock</span>
+                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6"><?= lang('Front.det_lock_notice') ?></p>
+                            <button type="button" onclick="openAuthModal()" class="w-full bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors shadow-sm">
+                                Sign in to Contact Agent
+                            </button>
+                        </div>
+                    <?php endif; ?>
+
                 </div>
             </div>
         </div>

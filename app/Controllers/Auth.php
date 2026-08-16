@@ -50,7 +50,7 @@ class Auth extends BaseController
             $errorMessage = implode('<br> • ', $errors);
             
             if ($this->request->isAJAX()) {
-                return $this->response->setJSON(['status' => 'error', 'message' => $errorMessage])->setStatusCode(400);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Please fix the following errors:<br> • ' . $errorMessage]);
             }
             return redirect()->back()->withInput()->with('error', 'Please fix the following errors:<br> • ' . $errorMessage);
         }
@@ -321,6 +321,12 @@ class Auth extends BaseController
 
             $userModel->insert($userData);
             $user = $userModel->where('email', $email)->first();
+            
+            $emailService = new EmailService();
+            $emailService->sendDynamicEmail('User Sign Up', $email, [
+                '{first_name}' => $firstName,
+                '{login_link}' => base_url('login')
+            ]);
         }
 
         $subModel = new SubscriptionModel();
