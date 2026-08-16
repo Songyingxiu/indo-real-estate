@@ -283,6 +283,7 @@ class Home extends BaseController
         $data['pager'] = $propertyModel->pager;
         $data['title'] = $state->name . ' Real Estate - HuniKita';
         $data['currentType'] = $type;
+        $data['listingType'] = $type;
 
         return view('front/properties/state', $data);
     }
@@ -320,6 +321,7 @@ class Home extends BaseController
         $data['pager'] = $propertyModel->pager;
         $data['title'] = 'Properties in ' . $city->name . ' - HuniKita';
         $data['currentType'] = $type;
+        $data['listingType'] = $type;
 
         return view('front/properties/city', $data);
     }
@@ -357,6 +359,7 @@ class Home extends BaseController
         $data['pager'] = $propertyModel->pager;
         $data['title'] = 'Properties in ' . $zip->zipcode . ' - HuniKita';
         $data['currentType'] = $type;
+        $data['listingType'] = $type;
 
         return view('front/properties/zipcode', $data);
     }
@@ -469,7 +472,6 @@ class Home extends BaseController
         }
     }
 
-    // FIX: Replaced JS prompt name with smart auto-generated backend name
     public function saveSearch()
     {
         $userId = session()->get('id');

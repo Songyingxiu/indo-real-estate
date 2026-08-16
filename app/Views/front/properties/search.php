@@ -2,6 +2,10 @@
 
 <meta name="<?= csrf_token() ?>" content="<?= csrf_hash() ?>">
 
+<style>
+    .favorite-btn.saved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: #e11d48; }
+</style>
+
 <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-80px)]">
     
     <aside class="w-full md:w-80 bg-surface border-r border-outline-variant flex-shrink-0 flex flex-col h-full overflow-y-auto custom-scrollbar z-20">
@@ -146,7 +150,11 @@
                             elseif ($property['status'] !== 'Active') { $badgeClass = 'bg-outline text-white'; $dispStatus = $property['status']; }
                             elseif ($property['approval_status'] !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
                         ?>
-                        <article class="bg-surface border border-outline-variant rounded-b-lg rounded-t-xl overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300 flex flex-col">
+                        <article class="bg-surface border border-outline-variant rounded-b-lg rounded-t-xl overflow-hidden hover:shadow-[0px_4px_20px_rgba(26,54,93,0.08)] transition-shadow duration-300 flex flex-col relative">
+                            <button onclick="toggleFavorite(<?= $property['id'] ?>, this)" class="favorite-btn absolute top-3 right-3 z-30 bg-surface/90 backdrop-blur-sm text-outline hover:text-error p-2 rounded-full shadow-md transition-colors flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">favorite</span>
+                            </button>
+
                             <a href="<?= $seoUrl ?>" class="relative h-48 w-full bg-surface-container-highest block group">
                                 <?php 
                                     $imgPath = trim($property['image_path'] ?? $property['image'] ?? '');
@@ -162,15 +170,16 @@
                                     <?= esc($property['listing_type']) ?>
                                 </div>
 
-                                <div class="absolute top-3 right-3 flex flex-col items-end gap-1 z-20">
+                                <div class="absolute top-12 left-3 flex flex-col items-start gap-1 z-20">
                                     <?php if($dispStatus): ?>
                                         <div class="<?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
                                             <?= esc($dispStatus) ?>
                                         </div>
                                     <?php endif; ?>
-                                    <div class="bg-surface/90 backdrop-blur-sm text-on-surface font-label-md text-[11px] px-2 py-1 rounded shadow-sm flex items-center gap-1 font-bold">
-                                        <span class="material-symbols-outlined text-[13px] text-primary">visibility</span> <?= $property['unique_views'] ?? 0 ?> views
-                                    </div>
+                                </div>
+
+                                <div class="absolute bottom-3 left-3 bg-surface/90 backdrop-blur-sm text-on-surface font-label-md text-[11px] px-2 py-1 rounded shadow-sm flex items-center gap-1 font-bold z-20">
+                                    <span class="material-symbols-outlined text-[13px] text-primary">visibility</span> <?= $property['unique_views'] ?? 0 ?> views
                                 </div>
 
                                 <?php if(isset($property['distance'])): ?>
@@ -221,10 +230,45 @@
     </main>
 </div>
 
-<!-- FIX: Inject Login Modal Component -->
 <?= $this->include('components/login_modal') ?>
 
 <script>
+function toggleFavorite(propertyId, btnElement) {
+    const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
+    const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
+
+    fetch('<?= base_url('property/toggle-save') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            [csrfName]: csrfHash
+        },
+        body: JSON.stringify({ property_id: propertyId })
+    })
+    .then(response => {
+        if (response.status === 401) {
+            if(typeof openAuthModal === 'function') {
+                openAuthModal();
+            } else {
+                window.location.href = '<?= base_url('login') ?>';
+            }
+            throw new Error('Unauthorized');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            if (data.action === 'added') {
+                btnElement.classList.add('saved');
+            } else {
+                btnElement.classList.remove('saved');
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('sidebarSearchInput');
     const suggestDropdown = document.getElementById('sidebarSuggestDropdown');
@@ -232,9 +276,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!searchInput || !suggestDropdown) return;
 
+    const createSlug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
     searchInput.addEventListener('input', function() {
         clearTimeout(timeout);
         const query = this.value.trim();
+        const activeType = '<?= strtolower($listingType ?? 'sale') ?>';
 
         if (query.length < 2) {
             suggestDropdown.classList.add('hidden');
@@ -242,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         timeout = setTimeout(() => {
-            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}&type=<?= strtolower($listingType ?? 'sale') ?>`)
+            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}&type=${activeType}`)
                 .then(response => response.json())
                 .then(data => {
                     suggestDropdown.innerHTML = '';
@@ -302,10 +349,11 @@ function getLocation() {
     }
 }
 
-// FIX: Save Search no longer relies on JS prompt. Automatically generates name on backend.
 function saveCurrentSearch() {
     const urlParams = new URLSearchParams(window.location.search);
     const filters = Object.fromEntries(urlParams.entries());
+    
+    filters.listing_type = '<?= strtolower($listingType ?? 'sale') ?>';
 
     const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
     const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
@@ -321,7 +369,6 @@ function saveCurrentSearch() {
     })
     .then(response => {
         if (response.status === 401) {
-            // Trigger Auth Modal instead of redirect
             if(typeof openAuthModal === 'function') openAuthModal();
             throw new Error('Unauthorized');
         }
