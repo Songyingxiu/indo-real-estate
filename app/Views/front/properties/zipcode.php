@@ -1,6 +1,12 @@
 <?= $this->include('front/layout/header') ?>
 
+<meta name="<?= csrf_token() ?>" content="<?= csrf_hash() ?>">
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    .favorite-btn.saved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: #e11d48; }
+</style>
 
 <?php
     $zipcode = (array) $zipcode; 
@@ -28,7 +34,11 @@
                 $tSlug = url_title(strtolower($property['title']), '-', true);
                 $seoUrl = base_url("property/{$cSlug}/{$tSlug}-{$property['id']}");
             ?>
-            <article class="bg-surface border border-outline-variant rounded overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+            <article class="bg-surface border border-outline-variant rounded overflow-hidden hover:shadow-md transition-shadow flex flex-col relative">
+                <button onclick="toggleFavorite(<?= $property['id'] ?>, this)" class="favorite-btn absolute top-3 right-3 z-30 bg-surface/90 backdrop-blur-sm text-outline hover:text-error p-2 rounded-full shadow-md transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">favorite</span>
+                </button>
+
                 <a href="<?= $seoUrl ?>" class="h-48 bg-surface-container-high block relative">
                     <?php 
                         $imgPath = trim($property['image_path'] ?? $property['image'] ?? '');
@@ -59,10 +69,47 @@
     <?php endif ?>
 </main>
 
+<?= $this->include('components/login_modal') ?>
 <?= $this->include('front/layout/footer') ?>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    function toggleFavorite(propertyId, btnElement) {
+        const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
+        const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
+
+        fetch('<?= base_url('property/toggle-save') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                [csrfName]: csrfHash
+            },
+            body: JSON.stringify({ property_id: propertyId })
+        })
+        .then(response => {
+            if (response.status === 401) {
+                if(typeof openAuthModal === 'function') {
+                    openAuthModal();
+                } else {
+                    window.location.href = '<?= base_url('login') ?>';
+                }
+                throw new Error('Unauthorized');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                if (data.action === 'added') {
+                    btnElement.classList.add('saved');
+                } else {
+                    btnElement.classList.remove('saved');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var map = L.map('zipcodeMap').setView([-0.789, 113.921], 5);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
