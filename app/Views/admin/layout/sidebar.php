@@ -100,11 +100,6 @@
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/cms')) ? 'icon-fill' : '' ?>">article</span>
                 <span class="font-label-md text-label-md">CMS Management</span>
             </a>
-
-            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/seo')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/seo') ?>">
-                <span class="material-symbols-outlined <?= (current_url() == base_url('admin/seo')) ? 'icon-fill' : '' ?>">search_insights</span>
-                <span class="font-label-md text-label-md">SEO Management</span>
-            </a>
             
         <?php endif; ?>
     </div>
