@@ -297,10 +297,19 @@
             </div>
             <form action="<?= base_url('admin/profile/update-password') ?>" method="POST">
                 <div class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Current Password</label>
-                        <input type="password" name="current_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                    </div>
+                    
+                    <?php $hasLocalPassword = !empty($user['password']); ?>
+                    <?php if($hasLocalPassword): ?>
+                        <div>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Current Password</label>
+                            <input type="password" name="current_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        </div>
+                    <?php else: ?>
+                        <div class="bg-surface-container-low text-on-surface-variant p-3 rounded text-sm border border-outline-variant">
+                            You registered with Google. Set a new password below to enable email login.
+                        </div>
+                    <?php endif; ?>
+
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-1">New Password</label>
                         <input type="password" name="new_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
