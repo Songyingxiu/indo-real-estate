@@ -7,6 +7,7 @@
     .swiper-button-prev::after { font-size: 24px !important; font-weight: bold; }
     .swiper-button-next, .swiper-button-prev { color: var(--color-primary, #0d6efd); background-color: rgba(255, 255, 255, 0.8); width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .swiper-button-next:hover, .swiper-button-prev:hover { background-color: #ffffff; }
+    .favorite-btn.saved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: #e11d48; }
 </style>
 
 <main class="flex-grow">
@@ -24,9 +25,10 @@
             
             <div class="bg-surface rounded-lg shadow-lg p-4 md:p-6 flex flex-col gap-4 border border-outline-variant">
                 <form id="homeSearchForm" action="<?= base_url('search/sale') ?>" method="GET" class="flex flex-col gap-4">
-                    <div class="flex gap-2 border-b border-outline-variant pb-2">
-                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/sale') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.nextElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors"><?= lang('Front.btn_for_sale') ?></button>
-                        <button type="button" onclick="document.getElementById('homeSearchForm').action='<?= base_url('search/rent') ?>'; this.classList.add('border-primary', 'text-primary'); this.classList.remove('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.add('border-transparent', 'text-on-surface-variant'); this.previousElementSibling.classList.remove('border-primary', 'text-primary');" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors"><?= lang('Front.btn_for_rent') ?></button>
+                    <div class="flex gap-2 border-b border-outline-variant pb-2" id="searchTypeToggle">
+                        <button type="button" onclick="setSearchType('sale', this)" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-primary text-primary transition-colors"><?= lang('Front.btn_for_sale') ?></button>
+                        <button type="button" onclick="setSearchType('rent', this)" class="font-label-md text-[14px] px-4 py-2 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors"><?= lang('Front.btn_for_rent') ?></button>
+                        <input type="hidden" id="currentSearchType" value="sale">
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4 relative">
@@ -91,13 +93,17 @@
                         elseif ($property->status !== 'Active') { $badgeClass = 'bg-outline text-white'; $dispStatus = $property->status; }
                         elseif ($property->approval_status !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
                     ?>
-                    <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <article class="property-card bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow relative">
+                        <button onclick="toggleFavorite(<?= $property->id ?>, this)" class="favorite-btn absolute top-4 right-4 z-30 bg-surface/90 backdrop-blur-sm text-outline hover:text-error p-2 rounded-full shadow-md transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">favorite</span>
+                        </button>
+                        
                         <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group">
                             <div class="absolute top-4 left-4 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded shadow-md flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[14px]">visibility</span> <?= $property->unique_views ?? 0 ?> Views
                             </div>
                             <?php if($dispStatus): ?>
-                                <div class="absolute top-4 right-4 z-20 <?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
+                                <div class="absolute top-14 left-4 z-20 <?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
                                     <?= esc($dispStatus) ?>
                                 </div>
                             <?php endif; ?>
@@ -162,12 +168,16 @@
                                 elseif ($property->approval_status !== 'Published') { $badgeClass = 'bg-tertiary text-white'; $dispStatus = 'Pending Approval'; }
                             ?>
                             <div class="swiper-slide h-auto">
-                                <article class="property-card h-full bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                <article class="property-card h-full bg-surface border border-outline-variant rounded flex flex-col overflow-hidden shadow-sm hover:shadow-md transition-shadow relative">
+                                    <button onclick="toggleFavorite(<?= $property->id ?>, this)" class="favorite-btn absolute top-4 right-4 z-30 bg-surface/90 backdrop-blur-sm text-outline hover:text-error p-2 rounded-full shadow-md transition-colors flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-[20px]">favorite</span>
+                                    </button>
+
                                     <a href="<?= $seoUrl ?>" class="relative h-64 overflow-hidden rounded-t-lg bg-surface-container-high block group shrink-0">
                                         <div class="absolute top-4 left-4 z-10 bg-secondary text-on-secondary text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider"><?= lang('Front.lbl_new') ?></div>
                                         
                                         <?php if($dispStatus): ?>
-                                            <div class="absolute top-4 right-4 z-20 <?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
+                                            <div class="absolute top-14 left-4 z-20 <?= $badgeClass ?> text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider">
                                                 <?= esc($dispStatus) ?>
                                             </div>
                                         <?php endif; ?>
@@ -242,8 +252,59 @@
     </section>
 </main>
 
+<?= $this->include('components/login_modal') ?>
+
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 <script>
+function setSearchType(type, btnElement) {
+    document.getElementById('currentSearchType').value = type;
+    document.getElementById('homeSearchForm').action = `<?= base_url('search') ?>/${type}`;
+    
+    const btns = document.getElementById('searchTypeToggle').querySelectorAll('button');
+    btns.forEach(btn => {
+        btn.classList.remove('border-primary', 'text-primary');
+        btn.classList.add('border-transparent', 'text-on-surface-variant');
+    });
+    btnElement.classList.add('border-primary', 'text-primary');
+    btnElement.classList.remove('border-transparent', 'text-on-surface-variant');
+}
+
+function toggleFavorite(propertyId, btnElement) {
+    const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
+    const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
+
+    fetch('<?= base_url('property/toggle-save') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            [csrfName]: csrfHash
+        },
+        body: JSON.stringify({ property_id: propertyId })
+    })
+    .then(response => {
+        if (response.status === 401) {
+            if(typeof openAuthModal === 'function') {
+                openAuthModal();
+            } else {
+                window.location.href = '<?= base_url('login') ?>';
+            }
+            throw new Error('Unauthorized');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            if (data.action === 'added') {
+                btnElement.classList.add('saved');
+            } else {
+                btnElement.classList.remove('saved');
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const swiper = new Swiper('.newlyListedSwiper', {
         slidesPerView: 1,
@@ -268,6 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function() {
         clearTimeout(timeout);
         const query = this.value.trim();
+        const activeType = document.getElementById('currentSearchType').value;
 
         if (query.length < 2) {
             suggestDropdown.classList.add('hidden');
@@ -275,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         timeout = setTimeout(() => {
-            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}`)
+            fetch(`<?= base_url('api/suggest') ?>?q=${encodeURIComponent(query)}&type=${activeType}`)
                 .then(response => response.json())
                 .then(data => {
                     suggestDropdown.innerHTML = '';
@@ -303,14 +365,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 } else {
                                     const slug = createSlug(item.text);
                                     if (item.category === 'Province' || item.category === 'State') {
-                                        targetUrl = `<?= base_url('properties/sale/province') ?>/${slug}`;
+                                        targetUrl = `<?= base_url('properties') ?>/${activeType}/province/${slug}`;
                                     } else if (item.category === 'City' || item.category === 'Location') {
                                         const stateSlug = item.parent_text ? createSlug(item.parent_text) : 'indonesia';
-                                        targetUrl = `<?= base_url('properties/sale/city') ?>/${slug}/${stateSlug}`;
+                                        targetUrl = `<?= base_url('properties') ?>/${activeType}/city/${slug}/${stateSlug}`;
                                     } else if (item.category === 'Zipcode') {
-                                        targetUrl = `<?= base_url('properties/sale/zipcode') ?>/${item.text}`;
+                                        targetUrl = `<?= base_url('properties') ?>/${activeType}/zipcode/${item.text}`;
                                     } else {
-                                        targetUrl = `<?= base_url('search/sale') ?>?q=${encodeURIComponent(item.text)}`;
+                                        targetUrl = `<?= base_url('search') ?>/${activeType}?q=${encodeURIComponent(item.text)}`;
                                     }
                                 }
                                 window.location.href = targetUrl;
