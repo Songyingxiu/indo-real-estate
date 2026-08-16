@@ -161,21 +161,21 @@
                                 <?php $oldRole = old('role') ?: 'buyer'; ?>
                                 <div class="grid grid-cols-3 gap-3 mb-6 relative z-30">
                                     <label class="cursor-pointer relative group">
-                                        <input <?= $oldRole == 'buyer' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="buyer">
+                                        <input <?= $oldRole == 'buyer' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="buyer" id="role-buyer">
                                         <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
                                             <span class="material-symbols-outlined text-outline mb-1 text-[24px]">person_search</span>
                                             <span class="font-label-md text-[13px] font-semibold text-on-surface">Buyer</span>
                                         </div>
                                     </label>
                                     <label class="cursor-pointer relative group">
-                                        <input <?= $oldRole == 'owner' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="owner">
+                                        <input <?= $oldRole == 'owner' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="owner" id="role-owner">
                                         <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
                                             <span class="material-symbols-outlined text-outline mb-1 text-[24px]">real_estate_agent</span>
                                             <span class="font-label-md text-[13px] font-semibold text-on-surface">Owner</span>
                                         </div>
                                     </label>
                                     <label class="cursor-pointer relative group">
-                                        <input <?= $oldRole == 'agent' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="agent">
+                                        <input <?= $oldRole == 'agent' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="agent" id="role-agent">
                                         <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
                                             <span class="material-symbols-outlined text-outline mb-1 text-[24px]">verified_user</span>
                                             <span class="font-label-md text-[13px] font-semibold text-on-surface">Agent</span>
@@ -274,12 +274,9 @@
 
     <!-- Firebase Integration -->
     <script type="module">
-        // Using version 10.8.0 to maintain compatibility with the auth functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-
-        // Injected HuniKita Firebase Configuration via Environment Variables
+        
         const firebaseConfig = {
             apiKey: "<?= getenv('FIREBASE_API_KEY') ?>",
             authDomain: "<?= getenv('FIREBASE_AUTH_DOMAIN') ?>",
@@ -292,15 +289,21 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const analytics = getAnalytics(app); // Included from your snippet
         const provider = new GoogleAuthProvider();
 
         window.signInWithGoogle = function() {
+            const isRegistering = document.getElementById('tab-register').checked;
+            let selectedRole = 'buyer';
+            
+            if (isRegistering) {
+                const roleRadio = document.querySelector('input[name="role"]:checked');
+                if (roleRadio) selectedRole = roleRadio.value;
+            }
+
             signInWithPopup(auth, provider)
                 .then((result) => {
                     const user = result.user;
                     
-                    // Dispatch the Google profile data to your CodeIgniter endpoint
                     fetch('/auth/google-login', {
                         method: 'POST',
                         headers: {
@@ -310,7 +313,8 @@
                         body: JSON.stringify({
                             uid: user.uid,
                             email: user.email,
-                            displayName: user.displayName
+                            displayName: user.displayName,
+                            role: selectedRole
                         })
                     })
                     .then(response => response.json())

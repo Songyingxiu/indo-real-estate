@@ -20,6 +20,8 @@
         </div>
     <?php endif; ?>
 
+    <?php $hasLocalPassword = !empty($user['password']); ?>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm">
@@ -64,10 +66,17 @@
             </h2>
             
             <form action="<?= base_url('user/update-password') ?>" method="POST" class="flex flex-col gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_current_pass') ?></label>
-                    <input type="password" name="current_password" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                </div>
+                
+                <?php if($hasLocalPassword): ?>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_current_pass') ?></label>
+                        <input type="password" name="current_password" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                    </div>
+                <?php else: ?>
+                    <div class="bg-surface-container-low text-on-surface-variant p-3 rounded text-sm mb-2 border border-outline-variant">
+                        You registered with Google. Set a new password below to enable email login.
+                    </div>
+                <?php endif; ?>
 
                 <div class="grid grid-cols-1 gap-4 pt-2 border-t border-outline-variant/50">
                     <div>

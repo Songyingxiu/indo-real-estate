@@ -307,8 +307,12 @@ class Auth extends BaseController
             $firstName = $nameParts[0] ?? 'Google';
             $lastName = $nameParts[1] ?? 'User';
 
+            $roleMap = ['buyer' => 1, 'owner' => 2, 'agent' => 3];
+            $roleStr = $json->role ?? 'buyer';
+            $roleId = $roleMap[$roleStr] ?? 1;
+
             $userData = [
-                'role_id'       => 1, 
+                'role_id'       => $roleId, 
                 'first_name'    => $firstName,
                 'last_name'     => $lastName,
                 'email'         => $email,

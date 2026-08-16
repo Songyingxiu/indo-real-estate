@@ -32,7 +32,6 @@ class Profile extends BaseController
             $data['activePlan'] = $planModel->find($activeSub->plan_id);
         }
 
-        // Fetch Agent Verification Status
         $agentVerifyModel = new AgentVerificationModel();
         $data['agentVerification'] = $agentVerifyModel->where('user_id', $userId)->orderBy('id', 'DESC')->first();
         
@@ -82,7 +81,9 @@ class Profile extends BaseController
         $userModel = new UserModel();
         $user = $userModel->find($userId);
 
-        if (!password_verify($currentPassword, $user['password'])) {
+        $hasLocalPassword = !empty($user['password']);
+
+        if ($hasLocalPassword && !password_verify($currentPassword, $user['password'])) {
             return redirect()->to(base_url('admin/profile'))->with('error', 'Current password is incorrect.');
         }
 
@@ -90,7 +91,7 @@ class Profile extends BaseController
             'password' => password_hash($newPassword, PASSWORD_DEFAULT)
         ]);
 
-        return redirect()->to(base_url('admin/profile'))->with('success', 'Password updated successfully.');
+        return redirect()->to(base_url('admin/profile'))->with('success', 'Password updated successfully. You can now use this password to log in.');
     }
 
     public function uploadDocs()
@@ -104,7 +105,6 @@ class Profile extends BaseController
         $isRejected = false;
         $existingId = null;
 
-        // Check if a record exists and evaluate the resubmission status
         if ($existingVerification) {
             $status = is_object($existingVerification) ? $existingVerification->approval_status : $existingVerification['approval_status'];
             
@@ -136,13 +136,11 @@ class Profile extends BaseController
                 ]);
                 
                 if ($isRejected && $existingId) {
-                    // Update the previously rejected record
                     $agentVerifyModel->update($existingId, [
                         'ktp_document'    => $response['secure_url'], 
                         'approval_status' => 'Pending'
                     ]);
                 } else {
-                    // Insert a brand new record
                     $agentVerifyModel->builder()->insert([
                         'user_id'         => $userId,
                         'ktp_document'    => $response['secure_url'], 
