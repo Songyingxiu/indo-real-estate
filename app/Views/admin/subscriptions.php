@@ -1,11 +1,11 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Added Confirmation Modal variables to Alpine data -->
 <div x-data="{ 
         showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', 
         showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '', manageSubStatus: '',
-        showConfirmModal: false, confirmTitle: '', confirmMessage: '', confirmUrl: '', confirmActionTheme: 'primary' 
+        showConfirmModal: false, confirmTitle: '', confirmMessage: '', confirmUrl: '', confirmActionTheme: 'primary',
+        showDetailsModal: false, detailPlanName: '', detailDesc: '', detailProps: 0, detailAgents: 0, detailPois: 0, detailMsg: 0, detailEmail: 0
     }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
     
     <?php if (session()->getFlashdata('success')) : ?>
@@ -50,10 +50,23 @@
                                 <span class="font-medium"><?= esc($sub->first_name . ' ' . $sub->last_name) ?></span>
                             </td>
                             <td class="py-4 px-4">
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-label-md text-caption">
-                                    <span class="material-symbols-outlined text-[14px]">workspace_premium</span>
-                                    <?= esc($sub->plan_name) ?>
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-label-md text-caption">
+                                        <span class="material-symbols-outlined text-[14px]">workspace_premium</span>
+                                        <?= esc($sub->plan_name) ?>
+                                    </span>
+                                    <button @click="showDetailsModal = true;
+                                                    detailPlanName = '<?= esc(addslashes($sub->plan_name)) ?>';
+                                                    detailDesc = '<?= esc(addslashes($sub->plan_desc ?? '')) ?>';
+                                                    detailProps = <?= $sub->max_properties ?? 0 ?>;
+                                                    detailAgents = <?= $sub->max_agents ?? 0 ?>;
+                                                    detailPois = <?= $sub->max_pois ?? 0 ?>;
+                                                    detailMsg = <?= $sub->allow_messages ?? 0 ?>;
+                                                    detailEmail = <?= $sub->allow_direct_email ?? 0 ?>;"
+                                            type="button" class="text-primary hover:bg-surface-container rounded-full p-1 transition-colors flex items-center justify-center" title="View Plan Details">
+                                        <span class="material-symbols-outlined text-[18px]">info</span>
+                                    </button>
+                                </div>
                             </td>
                             <td class="py-4 px-4 text-on-surface-variant"><?= date('d M Y', strtotime($sub->created_date)) ?></td>
                             
@@ -152,7 +165,6 @@
             </div>
             <div class="p-6 bg-surface flex flex-col gap-4">
                 
-                <!-- Display if already Revoked/Expired -->
                 <template x-if="manageSubStatus === 'Expired'">
                     <div class="text-center py-4 bg-surface-container-low text-on-surface border border-outline-variant rounded">
                         <span class="material-symbols-outlined text-error text-[32px] mb-2">block</span>
@@ -165,7 +177,6 @@
                     <p class="text-sm text-on-surface">What would you like to do with the <span class="font-bold" x-text="managePlanName"></span> subscription for this user?</p>
                 </template>
 
-                <!-- Activate Button -->
                 <template x-if="manageSubStatus === 'Pending'">
                     <button type="button" @click="
                         showConfirmModal = true;
@@ -178,7 +189,6 @@
                     </button>
                 </template>
 
-                <!-- Revoke Button -->
                 <template x-if="manageSubStatus === 'Active'">
                     <button type="button" @click="
                         showConfirmModal = true;
@@ -194,11 +204,10 @@
         </div>
     </div>
 
-    <!-- 3. Custom Confirmation Modal (Replaces browser confirm) -->
+    <!-- 3. Custom Confirmation Modal -->
     <div x-show="showConfirmModal" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center bg-[#1a1c1e]/80 backdrop-blur-sm p-4">
         <div @click.outside="showConfirmModal = false" x-show="showConfirmModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-sm rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden text-center">
             
-            <!-- Icon & Message Content -->
             <div class="p-6">
                 <div class="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-4"
                      :class="confirmActionTheme === 'error' ? 'bg-error-container text-on-error-container' : 'bg-primary-container text-on-primary-container'">
@@ -208,18 +217,63 @@
                 <p class="text-sm text-on-surface-variant" x-text="confirmMessage"></p>
             </div>
             
-            <!-- Actions -->
             <div class="px-6 py-4 bg-surface-container-lowest flex gap-3 justify-end border-t border-outline-variant">
                 <button type="button" @click="showConfirmModal = false" class="px-4 py-2 border border-outline-variant text-on-surface rounded font-label-md text-label-md hover:bg-surface-container transition">Cancel</button>
                 
-                <!-- The actual form submission -->
                 <form :action="confirmUrl" method="POST" class="m-0">
                     <button type="submit" class="px-4 py-2 rounded font-label-md text-label-md text-white transition h-full"
                             :class="confirmActionTheme === 'error' ? 'bg-error hover:bg-error/90' : 'bg-primary hover:bg-primary/90'"
                             x-text="confirmTitle.split(' ')[0]"></button>
                 </form>
             </div>
-            
+        </div>
+    </div>
+
+    <!-- 4. Plan Details Modal -->
+    <div x-show="showDetailsModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showDetailsModal = false" x-show="showDetailsModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <div>
+                    <h2 class="text-lg font-bold text-on-surface">Plan Capabilities</h2>
+                    <p class="text-sm text-primary font-bold mt-1" x-text="detailPlanName"></p>
+                </div>
+                <button @click="showDetailsModal = false" class="text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6 bg-surface flex flex-col gap-4">
+                <p class="text-sm text-on-surface-variant" x-text="detailDesc"></p>
+                
+                <ul class="grid grid-cols-1 gap-3 text-sm text-on-surface mt-2">
+                    <li class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                        <span class="font-semibold" x-text="detailProps >= 9999 ? 'Unlimited' : detailProps"></span> Properties
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                        <span class="font-semibold" x-text="detailAgents >= 9999 ? 'Unlimited' : detailAgents"></span> Agents
+                    </li>
+                    <template x-if="detailMsg == 1">
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> Messaging
+                        </li>
+                    </template>
+                    <template x-if="detailEmail == 1">
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> Direct Inquiry Email
+                        </li>
+                    </template>
+                    <template x-if="detailPois > 0">
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                            <span class="font-semibold" x-text="detailPois >= 9999 ? 'Unlimited' : detailPois"></span> Custom POI
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end bg-surface-container-lowest">
+                <button type="button" @click="showDetailsModal = false" class="px-6 py-2 border border-outline-variant text-on-surface rounded font-semibold hover:bg-surface-container transition">Close</button>
+            </div>
         </div>
     </div>
 
