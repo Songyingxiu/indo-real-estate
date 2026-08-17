@@ -1,3 +1,29 @@
+<?php
+$role_sidebar = session()->get('role_id');
+$user_sidebar = session()->get('id') ?? session()->get('user_id');
+$db = \Config\Database::connect();
+
+$badge_inquiries = $GLOBALS['unread_count'] ?? 0;
+$badge_moderation = 0;
+$badge_verifs = 0;
+$badge_dashboard = 0;
+
+if ($role_sidebar == 4) {
+    try { $badge_moderation = $db->table('properties')->where('approval_status', 'Pending Review')->countAllResults(); } catch(\Exception $e) {}
+    
+    try {
+        $p_agents = $db->table('agent_verifications')->groupStart()->whereIn('approval_status', ['Pending', 'Under Review'])->orWhere('approval_status IS NULL')->orWhere('approval_status', '')->groupEnd()->countAllResults();
+        $p_props = $db->table('property_verifications')->groupStart()->whereIn('approval_status', ['Pending', 'Pending Verification', 'Under Review'])->orWhere('approval_status IS NULL')->orWhere('approval_status', '')->groupEnd()->countAllResults();
+        $badge_verifs = $p_agents + $p_props;
+    } catch(\Exception $e) {}
+
+    $badge_dashboard = $badge_moderation + $badge_verifs + $badge_inquiries;
+} else {
+    try { $badge_moderation = $db->table('properties')->where('owner_id', $user_sidebar)->whereIn('approval_status', ['Rejected', 'Changes Requested'])->countAllResults(); } catch(\Exception $e) {}
+    $badge_dashboard = $badge_inquiries + $badge_moderation;
+}
+?>
+
 <nav class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-50 bg-surface border-b border-outline-variant transition-colors duration-300">
     <div class="flex items-center gap-stack-sm">
         <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-xl">H</div>
@@ -17,7 +43,7 @@
     <div class="px-margin-desktop mb-stack-lg flex flex-col items-center">
         <img src="<?= base_url('assets/images/logo.png') ?>" alt="HuniKita Logo" class="w-16 h-16 rounded-full object-cover shadow-sm bg-white mb-stack-sm" onerror="this.outerHTML='<div class=\'w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-brand-text text-3xl mb-stack-sm shadow-sm\'>H</div>'">
         <h1 class="font-brand-text text-brand-text text-primary text-center">HuniKita</h1>
-        
+
         <p class="font-caption text-caption text-on-surface-variant mt-unit text-center font-bold">
             <?php 
                 $role = session()->get('role_id');
@@ -28,24 +54,30 @@
             ?>
         </p>
     </div>
-    
+
     <div class="flex-1 overflow-y-auto flex flex-col gap-unit pb-4 custom-scrollbar">
-        
+
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/dashboard')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/dashboard') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/dashboard')) ? 'icon-fill' : '' ?>">dashboard</span>
             <span class="font-label-md text-label-md">Dashboard Overview</span>
+            <?php if ($badge_dashboard > 0): ?>
+                <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_dashboard ?></span>
+            <?php endif; ?>
         </a>
 
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/properties') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/properties') ?>">
             <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/properties') === 0) ? 'icon-fill' : '' ?>">real_estate_agent</span>
             <span class="font-label-md text-label-md">My Listings</span>
+            <?php if ($role != 4 && $badge_moderation > 0): ?>
+                <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full" title="Action Required on Listings"><?= $badge_moderation ?></span>
+            <?php endif; ?>
         </a>
-        
+
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/inquiries')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/inquiries') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/inquiries')) ? 'icon-fill' : '' ?>">forum</span>
             <span class="font-label-md text-label-md">Inquiries Inbox</span>
-            <?php if (($GLOBALS['unread_count'] ?? 0) > 0): ?>
-                <span class="ml-auto bg-error text-on-error text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $GLOBALS['unread_count'] ?></span>
+            <?php if ($badge_inquiries > 0): ?>
+                <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_inquiries ?></span>
             <?php endif; ?>
         </a>
 
@@ -69,6 +101,9 @@
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/moderation')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/moderation') ?>">
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/moderation')) ? 'icon-fill' : '' ?>">rule</span>
                 <span class="font-label-md text-label-md">Moderation Queue</span>
+                <?php if ($badge_moderation > 0): ?>
+                    <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_moderation ?></span>
+                <?php endif; ?>
             </a>
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/users')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/users') ?>">
@@ -79,6 +114,9 @@
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/verifications')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/verifications') ?>">
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/verifications')) ? 'icon-fill' : '' ?>">fact_check</span>
                 <span class="font-label-md text-label-md">Verification Center</span>
+                <?php if ($badge_verifs > 0): ?>
+                    <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_verifs ?></span>
+                <?php endif; ?>
             </a>
 
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/subscriptions')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/subscriptions') ?>">
@@ -100,12 +138,12 @@
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/cms')) ? 'icon-fill' : '' ?>">article</span>
                 <span class="font-label-md text-label-md">CMS Management</span>
             </a>
-            
+
         <?php endif; ?>
     </div>
-    
+
     <div class="px-margin-desktop mt-auto flex flex-col gap-unit pt-stack-md border-t border-outline-variant mx-4">
-        
+
         <?php if($role == 4): ?>
             <a href="<?= base_url('admin/reports/export') ?>" class="w-full bg-primary-container text-on-primary-container rounded font-label-md text-label-md py-2 mb-stack-sm hover:opacity-90 transition-opacity text-center block shadow-sm">
                 Generate Report
@@ -116,7 +154,7 @@
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/support')) ? 'icon-fill' : '' ?>">help</span>
             <span class="font-label-md text-label-md">Support</span>
         </a>
-        
+
         <a class="flex items-center gap-stack-sm py-2 px-2 text-error hover:bg-error-container hover:text-on-error-container rounded-lg transition-all" href="<?= base_url('logout') ?>">
             <span class="material-symbols-outlined">logout</span>
             <span class="font-label-md text-label-md">Sign Out</span>

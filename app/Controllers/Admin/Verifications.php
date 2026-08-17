@@ -5,11 +5,11 @@ use App\Models\AgentVerificationModel;
 use App\Models\PropertyVerificationModel;
 
 class Verifications extends BaseController {
-    
+
     public function index() {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
-        
-        // 1. Fetch Agent Verifications (Using LEFT JOIN and Grouped Statuses for safety)
+
+        // 1. Fetch Agent Verifications
         $agentModel = new AgentVerificationModel();
         $agentModel->select('agent_verifications.*, users.first_name, users.last_name');
         $agentModel->join('users', 'users.id = agent_verifications.user_id', 'left');
@@ -20,7 +20,7 @@ class Verifications extends BaseController {
                    ->groupEnd();
         $data['agent_verifications'] = $agentModel->orderBy('agent_verifications.created_date', 'DESC')->findAll();
 
-        // 2. Fetch Property Verifications (Using LEFT JOIN and Grouped Statuses for safety)
+        // 2. Fetch Property Verifications
         $propModel = new PropertyVerificationModel();
         $propModel->select('property_verifications.*, properties.title as property_title, users.first_name, users.last_name');
         $propModel->join('properties', 'properties.id = property_verifications.property_id', 'left');
@@ -31,7 +31,10 @@ class Verifications extends BaseController {
                   ->orWhere('property_verifications.approval_status', '')
                   ->groupEnd();
         $data['prop_verifications'] = $propModel->orderBy('property_verifications.created_date', 'DESC')->findAll();
-        
+
+        $data['pendingAgentCount'] = count($data['agent_verifications']);
+        $data['pendingPropCount'] = count($data['prop_verifications']);
+
         return view('admin/verifications', $data);
     }
 
@@ -40,7 +43,7 @@ class Verifications extends BaseController {
 
         $action = $this->request->getPost('action');
         $model = new AgentVerificationModel();
-        
+
         if ($action === 'approve') {
             $model->update($id, ['approval_status' => 'Verified']);
         } elseif ($action === 'reject') {
@@ -55,7 +58,7 @@ class Verifications extends BaseController {
 
         $action = $this->request->getPost('action');
         $model = new PropertyVerificationModel();
-        
+
         if ($action === 'approve') {
             $model->update($id, ['approval_status' => 'Verified']);
         } elseif ($action === 'reject') {
