@@ -21,12 +21,13 @@
 
 <div class="bg-surface border border-outline-variant rounded-lg overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[800px]">
+        <table class="w-full text-left border-collapse min-w-[900px]">
             <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
                 <tr>
                     <th class="p-4 font-semibold text-on-surface-variant">Property Details</th>
                     <th class="p-4 font-semibold text-on-surface-variant">Submitted By</th>
                     <th class="p-4 font-semibold text-on-surface-variant">Price</th>
+                    <th class="p-4 font-semibold text-on-surface-variant">Doc Status</th>
                     <th class="p-4 font-semibold text-on-surface-variant">Current State</th>
                     <th class="p-4 font-semibold text-on-surface-variant text-right">Workflow Action</th>
                 </tr>
@@ -47,6 +48,16 @@
                             </td>
                             <td class="p-4">
                                 <?php 
+                                    $dStatus = $prop['doc_status'] ?? 'Not Submitted';
+                                    $dBadge = 'bg-surface-container-high text-on-surface-variant border border-outline-variant';
+                                    if ($dStatus == 'Verified') $dBadge = 'bg-[#c4eed0] text-[#0d652d]';
+                                    elseif (in_array($dStatus, ['Pending Verification', 'Pending', 'Under Review'])) $dBadge = 'bg-[#fef7e0] text-[#b06000]';
+                                    elseif ($dStatus == 'Rejected') $dBadge = 'bg-error-container text-on-error-container';
+                                ?>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap <?= $dBadge ?>"><?= esc($dStatus) ?></span>
+                            </td>
+                            <td class="p-4">
+                                <?php 
                                     $badge = 'bg-surface-container text-on-surface';
                                     if ($prop['approval_status'] == 'Published') $badge = 'bg-[#c4eed0] text-[#0d652d]';
                                     if ($prop['approval_status'] == 'Approved') $badge = 'bg-[#d3e3fd] text-[#001d35]';
@@ -63,7 +74,11 @@
                                         <option value="Draft" <?= $prop['approval_status'] == 'Draft' ? 'selected' : '' ?>>Draft</option>
                                         <option value="Pending Review" <?= $prop['approval_status'] == 'Pending Review' ? 'selected' : '' ?>>Pending Review</option>
                                         <option value="Approved" <?= $prop['approval_status'] == 'Approved' ? 'selected' : '' ?>>Approved</option>
-                                        <option value="Published" <?= $prop['approval_status'] == 'Published' ? 'selected' : '' ?>>Published</option>
+                                        
+                                        <option value="Published" <?= $prop['approval_status'] == 'Published' ? 'selected' : '' ?> <?= ($prop['doc_status'] ?? '') !== 'Verified' ? 'disabled' : '' ?>>
+                                            Published <?= ($prop['doc_status'] ?? '') !== 'Verified' ? '(Doc Required)' : '' ?>
+                                        </option>
+                                        
                                         <option value="Rejected" <?= $prop['approval_status'] == 'Rejected' ? 'selected' : '' ?>>Rejected</option>
                                         <option value="Expired" <?= $prop['approval_status'] == 'Expired' ? 'selected' : '' ?>>Expired</option>
                                         <option value="Archived" <?= $prop['approval_status'] == 'Archived' ? 'selected' : '' ?>>Archived</option>
@@ -79,7 +94,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="p-8 text-center text-on-surface-variant">
+                        <td colspan="6" class="p-8 text-center text-on-surface-variant">
                             <span class="material-symbols-outlined text-[48px] opacity-50 mb-2">inbox</span>
                             <p>No properties exist in the workflow.</p>
                         </td>
