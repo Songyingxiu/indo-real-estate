@@ -13,18 +13,24 @@
 <?php endif; ?>
 
 <div x-data="{ activeTab: 'agents', showModal: false, docName: '', submitter: '', verificationId: 0, docUrl: '', processUrl: '' }" class="pb-12">
-    
+
     <div class="flex gap-4 mb-6 border-b border-outline-variant pb-2">
-        <button @click="activeTab = 'agents'" :class="activeTab === 'agents' ? 'text-primary border-b-2 border-primary font-bold' : 'text-on-surface-variant hover:text-primary'" class="pb-2 px-4 transition-colors font-label-md text-sm flex items-center gap-2">
+        <button @click="activeTab = 'agents'" :class="activeTab === 'agents' ? 'text-primary border-b-2 border-primary font-bold' : 'text-on-surface-variant hover:text-primary'" class="pb-2 px-4 transition-colors font-label-md text-sm flex items-center gap-2 relative">
             <span class="material-symbols-outlined text-[18px]">badge</span> Agent Identities
+            <?php if($pendingAgentCount > 0): ?>
+                <span class="bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-1"><?= $pendingAgentCount ?></span>
+            <?php endif; ?>
         </button>
-        <button @click="activeTab = 'properties'" :class="activeTab === 'properties' ? 'text-primary border-b-2 border-primary font-bold' : 'text-on-surface-variant hover:text-primary'" class="pb-2 px-4 transition-colors font-label-md text-sm flex items-center gap-2">
+        <button @click="activeTab = 'properties'" :class="activeTab === 'properties' ? 'text-primary border-b-2 border-primary font-bold' : 'text-on-surface-variant hover:text-primary'" class="pb-2 px-4 transition-colors font-label-md text-sm flex items-center gap-2 relative">
             <span class="material-symbols-outlined text-[18px]">description</span> Property Documents
+            <?php if($pendingPropCount > 0): ?>
+                <span class="bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-1"><?= $pendingPropCount ?></span>
+            <?php endif; ?>
         </button>
     </div>
 
     <div class="bg-surface border border-outline-variant rounded-lg overflow-x-auto">
-        
+
         <table x-show="activeTab === 'agents'" class="w-full text-left border-collapse">
             <thead class="bg-surface-container-low border-b border-outline-variant text-sm">
                 <tr>
@@ -129,7 +135,7 @@
 
     <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showModal = false" x-show="showModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
-            
+
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
                 <div>
                     <h2 class="text-xl font-bold text-on-surface" x-text="docName"></h2>
@@ -141,12 +147,12 @@
             </div>
 
             <div class="p-6 bg-surface-container-low flex flex-col justify-center items-center min-h-[300px] max-h-[60vh] overflow-y-auto">
-                
+
                 <!-- PDF Renderer -->
                 <template x-if="docUrl && docUrl.toLowerCase().includes('.pdf')">
                     <iframe :src="docUrl" class="w-full h-[50vh] rounded border border-outline-variant shadow-sm bg-white"></iframe>
                 </template>
-                
+
                 <!-- Image Renderer -->
                 <template x-if="docUrl && !docUrl.toLowerCase().includes('.pdf') && !docUrl.endsWith('/')">
                     <div class="flex flex-col items-center w-full">
@@ -157,8 +163,7 @@
                         </div>
                     </div>
                 </template>
-                
-                <!-- Missing File Fallback -->
+
                 <template x-if="!docUrl || docUrl.endsWith('/')">
                     <div class="flex flex-col items-center text-outline-variant">
                         <span class="material-symbols-outlined text-[48px] mb-2">image_not_supported</span>
@@ -180,7 +185,7 @@
                     <input type="hidden" name="action" value="reject">
                     <button type="submit" class="px-6 py-2 border border-error text-error rounded font-semibold hover:bg-error-container transition" onsubmit="return confirm('Reject this document?');">Reject</button>
                 </form>
-                
+
                 <form :action="processUrl" method="POST">
                     <input type="hidden" name="action" value="approve">
                     <button type="submit" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Approve Document</button>
