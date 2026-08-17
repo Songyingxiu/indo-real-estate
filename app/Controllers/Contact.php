@@ -33,10 +33,9 @@ class Contact extends BaseController
             ]);
         }
 
-        // Find an Admin to assign the chat to
         $userModel = new UserModel();
         $admin = $userModel->where('role_id', 4)->first();
-        $adminId = $admin ? $admin['id'] : 1; // Fallback to ID 1 if no admin found
+        $adminId = $admin ? $admin['id'] : 1; 
 
         $inquiryModel = new InquiryModel();
         
@@ -46,11 +45,12 @@ class Contact extends BaseController
         $formattedMessage = "General Support Inquiry\nSubject: " . $subject . "\n\n" . $originalMessage;
         
         $inquiryModel->insert([
-            'property_id' => null, // No property attached, it's a general inquiry
+            'property_id' => null, 
             'sender_id'   => session()->get('id'),
             'receiver_id' => $adminId,
             'message'     => $formattedMessage,
-            'status'      => 'Pending'
+            'status'      => 'Pending',
+            'created_at'  => date('Y-m-d H:i:s')
         ]);
 
         return $this->response->setJSON(['status' => 'success', 'message' => 'Message sent directly to Support!']);

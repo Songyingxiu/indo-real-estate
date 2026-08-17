@@ -25,9 +25,9 @@
             <div class="flex-1 overflow-y-auto custom-scrollbar">
                 <?php if (!empty($threads)): ?>
                     <script> const initThreads = <?= json_encode($threads) ?>; </script>
-                    <template x-for="thread in threads" :key="thread.id">
+                    <template x-for="thread in threads" :key="thread.inquiry_id">
                         <div @click="loadThread(thread)" 
-                             :class="activeThread?.id === thread.id ? 'bg-primary/10 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
+                             :class="activeThread?.inquiry_id === thread.inquiry_id ? 'bg-primary/10 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
                              class="p-4 border-b border-outline-variant cursor-pointer transition-colors">
                             <div class="flex justify-between items-start mb-1">
                                 <span class="font-bold text-on-surface text-[14px]" x-text="thread.first_name + ' ' + thread.last_name"></span>
@@ -36,7 +36,7 @@
                             <div class="text-primary font-semibold text-[13px] truncate mb-2" x-text="thread.property_title || 'General Support Inquiry'"></div>
                             
                             <!-- Status Dropdown -->
-                            <select @click.stop @change="updateThreadStatus(thread.id, $event.target.value)" class="w-full px-2 py-1 rounded bg-surface border border-outline-variant text-[12px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
+                            <select @click.stop @change="updateThreadStatus(thread.inquiry_id, $event.target.value)" class="w-full px-2 py-1 rounded bg-surface border border-outline-variant text-[12px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
                                 <option value="Pending" :selected="thread.status == 'Pending'">Pending</option>
                                 <option value="In Discussion" :selected="thread.status == 'In Discussion'">In Discussion</option>
                                 <option value="Negotiating" :selected="thread.status == 'Negotiating'">Negotiating</option>
@@ -93,7 +93,7 @@
 
                     <!-- Messages Window -->
                     <div id="chatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
-                        <template x-for="msg in messages" :key="msg.id">
+                        <template x-for="msg in messages" :key="msg.inquiry_id">
                             <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
                                 <div class="text-[11px] text-on-surface-variant mb-1 mx-1" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
                                     <span x-text="msg.sender_id == myId ? 'You' : msg.first_name"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
@@ -146,7 +146,7 @@
             loadThread(thread) {
                 this.activeThread = thread;
                 this.messages = [];
-                fetch('<?= base_url('admin/inquiries/thread/') ?>' + thread.id)
+                fetch('<?= base_url('admin/inquiries/thread/') ?>' + thread.inquiry_id)
                     .then(res => res.json())
                     .then(data => {
                         this.messages = data;
@@ -169,7 +169,7 @@
                         [csrfName]: csrfHash
                     },
                     body: JSON.stringify({
-                        parent_id: this.activeThread.id,
+                        parent_id: this.activeThread.inquiry_id,
                         property_id: this.activeThread.property_id,
                         receiver_id: this.activeThread.sender_id, 
                         message: this.replyText
@@ -219,7 +219,10 @@
             },
 
             formatDate(dateStr) {
-                const date = new Date(dateStr);
+                if (!dateStr) return 'Just now';
+                const safeDate = dateStr.replace(' ', 'T');
+                const date = new Date(safeDate);
+                if (isNaN(date)) return dateStr;
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             }
         }

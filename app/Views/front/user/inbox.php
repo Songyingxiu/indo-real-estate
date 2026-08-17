@@ -33,9 +33,9 @@
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
                     <?php if (!empty($threads)): ?>
                         <script> const initUserThreads = <?= json_encode($threads) ?>; </script>
-                        <template x-for="thread in threads" :key="thread.id">
+                        <template x-for="thread in threads" :key="thread.inquiry_id">
                             <div @click="loadThread(thread)" 
-                                 :class="activeThread?.id === thread.id ? 'bg-primary/5 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
+                                 :class="activeThread?.inquiry_id === thread.inquiry_id ? 'bg-primary/5 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
                                  class="p-4 border-b border-outline-variant cursor-pointer transition-colors relative">
                                 <div class="font-bold text-primary text-[14px] truncate mb-1 pr-3" x-text="thread.property_title || 'General Support Inquiry'"></div>
                                 <div class="text-[12px] text-on-surface-variant mb-2"><?= lang('Front.inbox_agent') ?> <span x-text="thread.first_name + ' ' + thread.last_name"></span></div>
@@ -81,7 +81,7 @@
                         </div>
 
                         <div id="userChatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
-                            <template x-for="msg in messages" :key="msg.id">
+                            <template x-for="msg in messages" :key="msg.inquiry_id">
                                 <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
                                     <div class="text-[11px] text-on-surface-variant mb-1 mx-1" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
                                         <span x-text="msg.sender_id == myId ? '<?= lang('Front.inbox_you') ?>' : msg.first_name"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
@@ -126,8 +126,7 @@
                     this.activeThread.status = 'In Discussion';
                 }
 
-                // FIX: Used proper 'thread.id' primary key instead of inquiry_id typo
-                fetch('<?= base_url('user/inbox/thread/') ?>' + thread.id)
+                fetch('<?= base_url('user/inbox/thread/') ?>' + thread.inquiry_id)
                     .then(res => res.json())
                     .then(data => {
                         this.messages = data;
@@ -146,7 +145,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', [csrfName]: csrfHash },
                     body: JSON.stringify({
-                        parent_id: this.activeThread.id,
+                        parent_id: this.activeThread.inquiry_id,
                         property_id: this.activeThread.property_id,
                         receiver_id: this.activeThread.receiver_id, 
                         message: this.replyText
@@ -170,7 +169,10 @@
             },
 
             formatDate(dateStr) {
-                const date = new Date(dateStr);
+                if (!dateStr) return 'Just now';
+                const safeDate = dateStr.replace(' ', 'T');
+                const date = new Date(safeDate);
+                if (isNaN(date)) return dateStr;
                 return date.toLocaleDateString('<?= session()->get('locale') == 'id' ? 'id-ID' : 'en-US' ?>', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             }
         }
