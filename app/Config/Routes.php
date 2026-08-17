@@ -10,7 +10,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('lang/(:segment)', 'Language::switch/$1');
 $routes->get('/', 'Home::index');            
 $routes->get('search', 'Home::search');
-$routes->get('search/(:segment)', 'Home::search/$1'); // SEO: /search/rent or /search/sale
+$routes->get('search/(:segment)', 'Home::search/$1');
 $routes->get('api/suggest', 'Home::suggest');
 $routes->post('search/save', 'Home::saveSearch');
 
@@ -18,9 +18,8 @@ $routes->post('search/save', 'Home::saveSearch');
 $routes->get('contact', 'Contact::index');
 $routes->post('contact/submit', 'Contact::submitContact');
 
-// property details routes
+// Property Details Routes
 $routes->get('property/(:num)', 'Home::detail/$1');
-// SEO Property Detail Route: /property/tangerang/classic-heritage-townhouse-9
 $routes->get('property/(:segment)/(:any)-(:num)', 'Home::detail/$3');
 
 $routes->post('property/toggle-save', 'Home::toggleSaveProperty');
@@ -31,8 +30,7 @@ $routes->get('faq', 'Cms::faq');
 $routes->get('news', 'Cms::blog');
 $routes->get('promo/(:num)', 'Home::promo/$1');      
 
-// SEO-Friendly Location Routes (Strict Rent/Sale Separation)
-// FIX: Updated method calls to match the _listing suffix in Home.php
+// SEO-Friendly Location Routes
 $routes->get('properties/(:segment)/province/(:segment)', 'Home::province_listing/$2/$1');
 $routes->get('properties/(:segment)/city/(:segment)/(:segment)', 'Home::city_listing/$2/$3/$1');
 $routes->get('properties/(:segment)/zipcode/(:num)', 'Home::zipcode_listing/$2/$1');
@@ -48,7 +46,6 @@ $routes->post('reset-password', 'Auth::attemptResetPassword');
 $routes->get('logout', 'Auth::logout');
 $routes->post('auth/google-login', 'Auth::googleLogin');
 
-// User Routes
 $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->get('inbox', 'Inquiry::index');
     $routes->get('inbox/thread/(:num)', 'Inquiry::getThread/$1');
@@ -67,10 +64,8 @@ $routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'ad
     $routes->post('poi/store-ajax', 'PoiAjax::store');
 });
 
-// Admin Dashboard Routes (Protected by AdminFilter)
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
 
-    // shared routes (Agents, Owners, Admins)
     $routes->get('dashboard', 'Dashboard::index');
     
     // Property Management
@@ -102,9 +97,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('profile/update-password', 'Profile::updatePassword');
     $routes->post('profile/upload-docs', 'Profile::uploadDocs');
     $routes->post('profile/delete-account', 'Profile::deleteAccount');
+    
     $routes->get('support', 'Support::index');
 
-    // super admin routes only
+    // Super admin routes only
     $routes->group('', ['filter' => 'superAdminAuth'], static function ($routes) {
         
         $routes->get('users', 'Users::index');
