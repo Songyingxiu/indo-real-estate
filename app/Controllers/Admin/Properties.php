@@ -164,8 +164,7 @@ class Properties extends BaseController
             'parking'          => 'permit_empty|in_list[Available,Not Available]',
             'basement'         => 'permit_empty|in_list[Yes,No]',
             'water_facility'   => 'permit_empty|max_length[255]',
-            'property_images'  => 'uploaded[property_images]|is_image[property_images]',
-            'shm_document'     => 'uploaded[shm_document]|ext_in[shm_document,pdf,jpg,jpeg,png]|max_size[shm_document,5120]'
+            'rental_period'    => 'permit_empty|in_list[Month,Year]' // Added Rule
         ];
 
         if (!$this->validate($rules)) {
@@ -196,6 +195,7 @@ class Properties extends BaseController
             'description_en'   => $this->request->getPost('description_en'),
             'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
+            'rental_period'    => $this->request->getPost('listing_type') === 'Rent' ? $this->request->getPost('rental_period') : null, // Conditionally saved
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
             'city_id'          => $this->request->getPost('city_id'),
@@ -401,7 +401,8 @@ class Properties extends BaseController
             'longitude'        => 'required|numeric',
             'parking'          => 'permit_empty|in_list[Available,Not Available]',
             'basement'         => 'permit_empty|in_list[Yes,No]',
-            'water_facility'   => 'permit_empty|max_length[255]'
+            'water_facility'   => 'permit_empty|max_length[255]',
+            'rental_period'    => 'permit_empty|in_list[Month,Year]' // Added Rule
         ];
 
         if (!$this->validate($rules)) {
@@ -421,6 +422,7 @@ class Properties extends BaseController
             'description_en'   => $this->request->getPost('description_en'),
             'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
+            'rental_period'    => $this->request->getPost('listing_type') === 'Rent' ? $this->request->getPost('rental_period') : null, // Conditionally saved
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
             'city_id'          => $this->request->getPost('city_id'),
