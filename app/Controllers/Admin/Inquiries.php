@@ -54,11 +54,12 @@ class Inquiries extends BaseController
     public function getThread($id)
     {
         $inquiryModel = new InquiryModel();
+        $pk = $inquiryModel->primaryKey;
         
         $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->groupStart()
-                ->where('inquiries.inquiry_id', $id)
+                ->where("inquiries.{$pk}", $id)
                 ->orWhere('inquiries.parent_id', $id)
             ->groupEnd()
             ->orderBy('inquiries.created_at', 'ASC')
@@ -72,7 +73,7 @@ class Inquiries extends BaseController
         $inquiryModel = new InquiryModel();
         $status = $this->request->getJSON()->status ?? '';
         
-        if ($inquiryModel->where('inquiry_id', $id)->set(['status' => $status])->update()) {
+        if ($inquiryModel->update($id, ['status' => $status])) {
             return $this->response->setJSON(['status' => 'success', 'message' => 'Status updated.']);
         }
         return $this->response->setJSON(['status' => 'error', 'message' => 'Update failed.']);
@@ -122,10 +123,10 @@ class Inquiries extends BaseController
         ];
 
         if ($inquiryModel->insert($data)) {
-            $data['inquiry_id'] = $inquiryModel->getInsertID();
+            $pk = $inquiryModel->primaryKey;
+            $data[$pk] = $inquiryModel->getInsertID();
             
-            // FIX: Explicitly target inquiry_id
-            $inquiryModel->where('inquiry_id', $json->parent_id)->set(['status' => 'Replied'])->update();
+            $inquiryModel->update($json->parent_id, ['status' => 'Replied']);
             
             return $this->response->setJSON(['status' => 'success', 'message_data' => $data]);
         }

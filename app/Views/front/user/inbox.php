@@ -25,21 +25,18 @@
             <p class="font-body-md text-[16px] text-on-surface-variant"><?= lang('Front.inbox_subtitle') ?></p>
         </header>
 
-        <!-- Split Chat Interface -->
         <div class="flex-1 bg-surface border border-outline-variant rounded-xl overflow-hidden flex shadow-sm">
             
-            <!-- Left Panel -->
             <div class="w-1/3 border-r border-outline-variant flex flex-col bg-surface-container-lowest">
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
                     <?php if (!empty($threads)): ?>
                         <script> const initUserThreads = <?= json_encode($threads) ?>; </script>
-                        <!-- FIX: Enforced inquiry_id as the iteration key -->
-                        <template x-for="thread in threads" :key="thread.inquiry_id">
+                        <template x-for="thread in threads" :key="thread.inquiry_id || thread.id">
                             <div @click="loadThread(thread)" 
-                                 :class="activeThread?.inquiry_id === thread.inquiry_id ? 'bg-primary/5 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
+                                 :class="(activeThread?.inquiry_id || activeThread?.id) === (thread.inquiry_id || thread.id) ? 'bg-primary/5 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
                                  class="p-4 border-b border-outline-variant cursor-pointer transition-colors relative">
                                 <div class="font-bold text-primary text-[14px] truncate mb-1 pr-3" x-text="thread.property_title || 'General Support Inquiry'"></div>
-                                <div class="text-[12px] text-on-surface-variant mb-2"><?= lang('Front.inbox_agent') ?> <span x-text="thread.first_name + ' ' + thread.last_name"></span></div>
+                                <div class="text-[12px] text-on-surface-variant mb-2"><?= lang('Front.inbox_agent') ?> <span x-text="(thread.first_name || 'Admin') + ' ' + (thread.last_name || '')"></span></div>
                                 <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold bg-surface-container-high text-on-surface-variant border border-outline-variant" x-text="thread.status"></span>
                                 
                                 <template x-if="thread.status == 'Replied'">
@@ -54,7 +51,6 @@
                 </div>
             </div>
 
-            <!-- Right Panel -->
             <div class="w-2/3 flex flex-col bg-surface relative">
                 <template x-if="!activeThread">
                     <div class="flex-1 flex flex-col items-center justify-center opacity-40">
@@ -77,7 +73,7 @@
                                         <span class="material-symbols-outlined text-[18px]">support_agent</span> General Support
                                     </span>
                                 </template>
-                                <p class="text-[13px] text-on-surface-variant mt-1"><?= lang('Front.inbox_agent') ?> <span x-text="activeThread.first_name + ' ' + activeThread.last_name"></span></p>
+                                <p class="text-[13px] text-on-surface-variant mt-1"><?= lang('Front.inbox_agent') ?> <span x-text="(activeThread.first_name || 'Admin') + ' ' + (activeThread.last_name || '')"></span></p>
                             </div>
                             
                             <div class="flex gap-2">
@@ -90,14 +86,13 @@
                         </div>
 
                         <div id="userChatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
-                            <!-- FIX: Enforced inquiry_id and added fallback text to prevent empty bubbles -->
-                            <template x-for="msg in messages" :key="msg.inquiry_id || Math.random()">
+                            <template x-for="msg in messages" :key="msg.inquiry_id || msg.id || Math.random()">
                                 <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
                                     <div class="text-[11px] text-on-surface-variant mb-1 mx-1" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
-                                        <span x-text="msg.sender_id == myId ? '<?= lang('Front.inbox_you') ?>' : msg.first_name"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
+                                        <span x-text="msg.sender_id == myId ? '<?= lang('Front.inbox_you') ?>' : (msg.first_name || 'Admin')"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
                                     </div>
                                     <div :class="msg.sender_id == myId ? 'bg-primary text-on-primary rounded-l-2xl rounded-tr-2xl' : 'bg-surface border border-outline-variant text-on-surface rounded-r-2xl rounded-tl-2xl'" 
-                                         class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message || 'No message content'">
+                                         class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message || 'No message content available'">
                                     </div>
                                 </div>
                             </template>
@@ -136,10 +131,11 @@
                     this.activeThread.status = 'In Discussion';
                 }
 
-                fetch('<?= base_url('user/inbox/thread/') ?>' + thread.inquiry_id)
+                const threadId = thread.inquiry_id || thread.id;
+
+                fetch('<?= base_url('user/inbox/thread/') ?>' + threadId)
                     .then(res => res.json())
                     .then(data => {
-                        // Ensure data is properly bound
                         this.messages = Array.isArray(data) ? data : (data.data || []);
                         setTimeout(this.scrollToBottom, 100);
                     });
@@ -152,11 +148,13 @@
                 const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
                 const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
                 
+                const threadId = this.activeThread.inquiry_id || this.activeThread.id;
+
                 fetch('<?= base_url('user/inbox/reply') ?>', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', [csrfName]: csrfHash },
                     body: JSON.stringify({
-                        parent_id: this.activeThread.inquiry_id,
+                        parent_id: threadId,
                         property_id: this.activeThread.property_id,
                         receiver_id: this.activeThread.receiver_id, 
                         message: this.replyText
