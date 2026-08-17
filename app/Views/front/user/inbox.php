@@ -72,11 +72,19 @@
                                     </a>
                                 </template>
                                 <template x-if="!activeThread.property_id">
-                                    <span class="font-bold text-[16px] text-primary flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">support_agent</span> General Support
+                                    <span class="font-bold text-[16px] text-primary flex items-center gap-1 mt-1">
+                                        <span class="material-symbols-outlined text-[18px]">support_agent</span> General Support Inquiry
                                     </span>
                                 </template>
                                 <p class="text-[13px] text-on-surface-variant mt-1"><?= lang('Front.inbox_agent') ?> <span x-text="activeThread.first_name + ' ' + activeThread.last_name"></span></p>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <template x-if="!activeThread.property_id">
+                                    <a href="mailto:support@hunikita.com" class="bg-surface-container-high px-3 py-1.5 rounded text-[13px] font-bold text-on-surface flex items-center gap-2 hover:bg-outline-variant/30 transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">mail</span> Email Support
+                                    </a>
+                                </template>
                             </div>
                         </div>
 
