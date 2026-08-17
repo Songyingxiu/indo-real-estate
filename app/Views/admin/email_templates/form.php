@@ -8,17 +8,6 @@
             <p class="text-on-surface-variant mt-1">Configure automated email layouts and dynamic variables.</p>
         </div>
 
-        <?php if (session()->getFlashdata('errors')) : ?>
-            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-4 rounded-lg mb-6 shadow-sm flex gap-3">
-                <span class="material-symbols-outlined mt-0.5">error</span>
-                <ul class="list-disc pl-4 space-y-1">
-                    <?php foreach (session()->getFlashdata('errors') as $error) : ?>
-                        <li><?= esc($error) ?></li>
-                    <?php endforeach ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-
         <div class="bg-surface border border-outline-variant rounded-xl shadow-sm p-8">
             <form action="<?= base_url('admin/email-templates/save') ?>" method="POST">
                 <?= csrf_field() ?>
@@ -26,22 +15,25 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Template Name</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Template Name <span class="text-error">*</span></label>
                         <input type="text" name="name" value="<?= old('name', isset($template) ? $template->name : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Welcome Email" required>
                         <p class="text-xs text-on-surface-variant mt-1">Internal name used to identify this template.</p>
+                        <?= session('errors.name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.name')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Status</label>
-                        <select name="status" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Status <span class="text-error">*</span></label>
+                        <select name="status" required class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
                             <option value="Active" <?= old('status', isset($template) ? $template->status : '') == 'Active' ? 'selected' : '' ?>>Active</option>
                             <option value="Inactive" <?= old('status', isset($template) ? $template->status : '') == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
                         </select>
+                        <?= session('errors.status') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.status')).'</p>' : '' ?>
                     </div>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Email Subject</label>
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Email Subject <span class="text-error">*</span></label>
                     <input type="text" name="subject" value="<?= old('subject', isset($template) ? $template->subject : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Welcome to HuniKita, {user_name}!" required>
+                    <?= session('errors.subject') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.subject')).'</p>' : '' ?>
                 </div>
 
                 <div class="mb-6">
@@ -51,8 +43,9 @@
                 </div>
 
                 <div class="mb-8">
-                    <label class="block text-sm font-semibold text-on-surface mb-2">Email Body (HTML Supported)</label>
+                    <label class="block text-sm font-semibold text-on-surface mb-2">Email Body (HTML Supported) <span class="text-error">*</span></label>
                     <textarea name="body" rows="10" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none font-mono text-sm" placeholder="<p>Hi {user_name},</p><p>Welcome to our platform!</p>" required><?= old('body', isset($template) ? $template->body : '') ?></textarea>
+                    <?= session('errors.body') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.body')).'</p>' : '' ?>
                 </div>
 
                 <div class="flex justify-end gap-4 pt-4 border-t border-outline-variant">

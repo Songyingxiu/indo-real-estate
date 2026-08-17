@@ -10,7 +10,7 @@
         <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Forgot Password</h2>
         <p class="text-sm text-slate-600 text-center mb-6">Enter your email and we'll send you a password reset link.</p>
 
-        <?php if (session()->getFlashdata('error')): ?>
+        <?php if (session()->getFlashdata('error') && !session()->has('errors')): ?>
             <div class="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded">
                 <?= session()->getFlashdata('error') ?>
             </div>
@@ -19,8 +19,9 @@
         <form action="<?= base_url('forgot-password') ?>" method="POST">
             <?= csrf_field() ?>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email Address <span class="text-red-500">*</span></label>
                 <input type="email" name="email" required class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <?= session('errors.email') ? '<p class="text-red-600 text-xs mt-1 font-medium">'.esc(session('errors.email')).'</p>' : '' ?>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-semibold transition">Send Reset Link</button>

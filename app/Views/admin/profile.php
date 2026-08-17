@@ -1,8 +1,11 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Added showDeleteModal to the Alpine x-data state -->
-<div class="pb-12" x-data="{ showEditModal: false, showPasswordModal: false, showDeleteModal: false }">
+<div class="pb-12" x-data="{ 
+    showEditModal: <?= session('errors.first_name') || session('errors.last_name') || session('errors.email') || session('errors.phone_number') ? 'true' : 'false' ?>, 
+    showPasswordModal: <?= session('errors.new_password') || session('errors.confirm_password') || session('errors.current_password') ? 'true' : 'false' ?>, 
+    showDeleteModal: false 
+}">
 
     <div class="mt-4 mb-6">
         <h1 class="text-2xl font-bold text-on-surface">My Profile & Settings</h1>
@@ -77,7 +80,6 @@
                 </div>
             </div>
 
-            <!-- SUBSCRIPTION WIDGET -->
             <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">card_membership</span> Subscription Status
@@ -125,8 +127,7 @@
                 <?php endif; ?>
             </div>
 
-            <!-- AGENT VERIFICATION WIDGET -->
-            <?php if ($user['role_id'] != 4 && $user['role_id'] != 1): // Only for Agents and Owners ?>
+            <?php if ($user['role_id'] != 4 && $user['role_id'] != 1): ?>
                 <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
                     <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">verified_user</span> Identity Verification
@@ -165,8 +166,9 @@
                             <form action="<?= base_url('admin/profile/upload-docs') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
                                 <?= csrf_field() ?>
                                 <div>
-                                    <label class="block text-sm font-semibold text-on-surface mb-1">KTP Document *</label>
+                                    <label class="block text-sm font-semibold text-on-surface mb-1">KTP Document <span class="text-error">*</span></label>
                                     <input type="file" name="ktp_document" accept="image/*,.pdf" required class="w-full p-2 border border-outline-variant rounded bg-surface text-sm">
+                                    <?= session('errors.ktp_document') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.ktp_document')).'</p>' : '' ?>
                                 </div>
                                 <button type="submit" class="px-5 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">Submit for Verification</button>
                             </form>
@@ -234,7 +236,6 @@
                 </div>
             </div>
 
-            <!-- DANGER ZONE -->
             <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-[#ba1a1a] mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
                     <span class="material-symbols-outlined text-[#ba1a1a]">warning</span> Danger Zone
@@ -250,8 +251,6 @@
         </div>
     </div>
 
-    <!-- Modals (Edit Profile, Password, Delete Account) -->
-    
     <!-- Edit Profile Modal -->
     <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
         <div @click.outside="showEditModal = false" x-show="showEditModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-lg rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
@@ -263,21 +262,25 @@
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">First Name</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">First Name <span class="text-error">*</span></label>
                             <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                            <?= session('errors.first_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.first_name')).'</p>' : '' ?>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Last Name</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Last Name <span class="text-error">*</span></label>
                             <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                            <?= session('errors.last_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.last_name')).'</p>' : '' ?>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Email Address</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Email Address <span class="text-error">*</span></label>
                         <input type="email" name="email" value="<?= esc($user['email']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        <?= session('errors.email') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.email')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number</label>
-                        <input type="text" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number <span class="text-error">*</span></label>
+                        <input type="tel" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        <?= session('errors.phone_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.phone_number')).'</p>' : '' ?>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
@@ -301,8 +304,9 @@
                     <?php $hasLocalPassword = !empty($user['password']); ?>
                     <?php if($hasLocalPassword): ?>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Current Password</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Current Password <span class="text-error">*</span></label>
                             <input type="password" name="current_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                            <?= session('errors.current_password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.current_password')).'</p>' : '' ?>
                         </div>
                     <?php else: ?>
                         <div class="bg-surface-container-low text-on-surface-variant p-3 rounded text-sm border border-outline-variant">
@@ -311,13 +315,15 @@
                     <?php endif; ?>
 
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">New Password</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">New Password <span class="text-error">*</span></label>
                         <input type="password" name="new_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
                         <p class="text-xs text-on-surface-variant mt-1">Must be at least 8 characters long.</p>
+                        <?= session('errors.new_password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.new_password')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Confirm New Password</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Confirm New Password <span class="text-error">*</span></label>
                         <input type="password" name="confirm_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
+                        <?= session('errors.confirm_password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.confirm_password')).'</p>' : '' ?>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">

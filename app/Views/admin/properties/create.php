@@ -1,12 +1,10 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
-<!-- Leaflet Map Dependencies -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ 
-    showValidationErrorModal: <?= session()->has('errors') ? 'true' : 'false' ?>,
     translateText(text, targetId, langpair = 'en|id') {
         if (!text.trim()) return;
         fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langpair}`)
@@ -24,13 +22,10 @@
             event.target.value = '';
         }
     },
-    // FIX: Alpine function to auto-fill the dropdowns from the Map Reverse Geocoding
     attemptAutoFill(stateName, cityName, postcode) {
         if (!stateName) return;
-        
         let stateSelect = document.getElementById('state_id');
         if(!stateSelect) return;
-        
         let matchedState = Array.from(stateSelect.options).find(opt => {
             if (!opt.value) return false;
             let optText = opt.text.toLowerCase();
@@ -44,7 +39,6 @@
             this.zipcodeId = '';
         }
 
-        // Wait for cities to load
         let attempts = 0;
         let cityInterval = setInterval(() => {
             attempts++;
@@ -54,13 +48,11 @@
                     let matchedCity = this.cities.find(c => {
                         let cName = (c.city_name || c.name).toLowerCase();
                         let sCity = cityName.toLowerCase();
-                        // Handle EN vs ID translations for directions
                         if (cName.includes('selatan') && sCity.includes('south')) return true;
                         if (cName.includes('pusat') && sCity.includes('central')) return true;
                         if (cName.includes('barat') && sCity.includes('west')) return true;
                         if (cName.includes('timur') && sCity.includes('east')) return true;
                         if (cName.includes('utara') && sCity.includes('north')) return true;
-                        
                         return cName.includes(sCity) || sCity.includes(cName);
                     });
                     
@@ -68,7 +60,6 @@
                         this.cityId = matchedCity.id;
                         this.zipcodeId = '';
                         
-                        // Wait for zipcodes to load
                         let zipAttempts = 0;
                         let zipInterval = setInterval(() => {
                             zipAttempts++;
@@ -94,22 +85,23 @@
     <form action="<?= base_url('admin/properties/store') ?>" method="POST" enctype="multipart/form-data" novalidate class="bg-surface-container-lowest shadow-sm rounded-lg border border-outline-variant p-6 space-y-8">
         <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
         
-        <!-- SECTION 1: BASIC INFO & LEGAL -->
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">1. Basic Information & Legal</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-2">Property Title (EN) *</label>
+                    <label class="block font-semibold mb-2">Property Title (EN) <span class="text-error">*</span></label>
                     <input type="text" name="title_en" id="title_en" value="<?= old('title_en') ?>" @blur="translateText($event.target.value, 'title_id', 'en|id')" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="e.g. Luxury Villa in Canggu">
+                    <?= session('errors.title_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_en')).'</p>' : '' ?>
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">Property Title (ID) *</label>
+                    <label class="block font-semibold mb-2">Property Title (ID) <span class="text-error">*</span></label>
                     <input type="text" name="title_id" id="title_id" value="<?= old('title_id') ?>" @blur="translateText($event.target.value, 'title_en', 'id|en')" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="e.g. Vila Mewah di Canggu">
+                    <?= session('errors.title_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_id')).'</p>' : '' ?>
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">Property Type *</label>
+                    <label class="block font-semibold mb-2">Property Type <span class="text-error">*</span></label>
                     <select name="property_type_id" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="" disabled <?= old('property_type_id') ? '' : 'selected' ?>>Select a type...</option>
                         <?php if (!empty($propertyTypes)): ?>
@@ -120,29 +112,32 @@
                             <option value="" disabled>No property types found</option>
                         <?php endif; ?>
                     </select>
+                    <?= session('errors.property_type_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.property_type_id')).'</p>' : '' ?>
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">Listing Type *</label>
-                    <select name="listing_type" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <label class="block font-semibold mb-2">Listing Type <span class="text-error">*</span></label>
+                    <select name="listing_type" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="Sale" <?= old('listing_type') == 'Sale' ? 'selected' : '' ?>>For Sale</option>
                         <option value="Rent" <?= old('listing_type') == 'Rent' ? 'selected' : '' ?>>For Rent</option>
                     </select>
+                    <?= session('errors.listing_type') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.listing_type')).'</p>' : '' ?>
                 </div>
                 
                 <div>
-                    <label class="block font-semibold mb-2">Asking Price (IDR) *</label>
+                    <label class="block font-semibold mb-2">Asking Price (IDR) <span class="text-error">*</span></label>
                     <input type="number" name="tax_price" value="<?= old('tax_price') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
+                    <?= session('errors.tax_price') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.tax_price')).'</p>' : '' ?>
                 </div>
 
                 <div>
                     <label class="block font-semibold mb-2">Property Tax Number (NOP / PBB)</label>
                     <input type="text" name="property_tax_number" value="<?= old('property_tax_number') ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Optional">
+                    <?= session('errors.property_tax_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.property_tax_number')).'</p>' : '' ?>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2: LOCATION DETAILS & MAP -->
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">2. Location Details & Zip Code</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
@@ -172,42 +167,22 @@
                     this.isLoading = true;
                     const url = '<?= rtrim(base_url('admin/properties/get-cities'), '/') ?>/' + this.stateId;
                     fetch(url)
-                        .then(response => {
-                            if(!response.ok) throw new Error('Server returned an error.');
-                            return response.json();
-                        })
-                        .then(data => {
-                            this.cities = data;
-                            this.isLoading = false;
-                        })
-                        .catch(error => {
-                            console.error('AJAX Error:', error);
-                            this.cities = [];
-                            this.isLoading = false;
-                        });
+                        .then(response => response.json())
+                        .then(data => { this.cities = data; this.isLoading = false; })
+                        .catch(error => { this.cities = []; this.isLoading = false; });
                 },
                 fetchZipcodes() {
                     this.isZipLoading = true;
                     const url = '<?= rtrim(base_url('admin/properties/get-zipcodes'), '/') ?>/' + this.cityId;
                     fetch(url)
-                        .then(response => {
-                            if(!response.ok) throw new Error('Server returned an error.');
-                            return response.json();
-                        })
-                        .then(data => {
-                            this.zipcodes = data;
-                            this.isZipLoading = false;
-                        })
-                        .catch(error => {
-                            console.error('AJAX Error:', error);
-                            this.zipcodes = [];
-                            this.isZipLoading = false;
-                        });
+                        .then(response => response.json())
+                        .then(data => { this.zipcodes = data; this.isZipLoading = false; })
+                        .catch(error => { this.zipcodes = []; this.isZipLoading = false; });
                 }
             }">
                 
                 <div>
-                    <label class="block font-semibold mb-2">Region / State *</label>
+                    <label class="block font-semibold mb-2">Region / State <span class="text-error">*</span></label>
                     <select name="state_id" id="state_id" x-model="stateId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded">
                         <option value="" disabled <?= old('state_id') ? '' : 'selected' ?>>Select a region...</option>
                         <?php if (!empty($states)): ?>
@@ -218,45 +193,51 @@
                             <option value="" disabled>No regions found</option>
                         <?php endif; ?>
                     </select>
+                    <?= session('errors.state_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.state_id')).'</p>' : '' ?>
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">City *</label>
+                    <label class="block font-semibold mb-2">City <span class="text-error">*</span></label>
                     <select name="city_id" x-model="cityId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!stateId || isLoading">
                         <option value="" disabled selected x-text="isLoading ? 'Loading cities...' : (cities.length === 0 ? 'No cities available in this region' : 'Select a city...')"></option>
                         <template x-for="city in cities" :key="city.id">
                             <option :value="city.id" x-text="city.city_name || city.name"></option>
                         </template>
                     </select>
+                    <?= session('errors.city_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.city_id')).'</p>' : '' ?>
                 </div>
 
                 <div>
-                    <label class="block font-semibold mb-2">Zip Code *</label>
+                    <label class="block font-semibold mb-2">Zip Code <span class="text-error">*</span></label>
                     <select name="zipcode_id" x-model="zipcodeId" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" :disabled="!cityId || isZipLoading">
                         <option value="" x-text="isZipLoading ? 'Loading zip codes...' : (zipcodes.length === 0 ? 'No zip codes available' : 'Select a zip code...')"></option>
                         <template x-for="zip in zipcodes" :key="zip.id">
                             <option :value="zip.id" x-text="zip.zipcode"></option>
                         </template>
                     </select>
+                    <?= session('errors.zipcode_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.zipcode_id')).'</p>' : '' ?>
                 </div>
 
                 <div>
                     <label class="block font-semibold mb-2">Area / District Name</label>
                     <input type="text" name="area_name" id="area_name" value="<?= old('area_name') ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="e.g. Kemang, Canggu">
+                    <?= session('errors.area_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.area_name')).'</p>' : '' ?>
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block font-semibold mb-2">Address Line 1 *</label>
+                    <label class="block font-semibold mb-2">Address Line 1 <span class="text-error">*</span></label>
                     <input type="text" name="address_line_1" id="address_line_1" value="<?= old('address_line_1') ?>" required class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Street name and number">
+                    <?= session('errors.address_line_1') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.address_line_1')).'</p>' : '' ?>
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="block font-semibold mb-2">Address Line 2</label>
                     <input type="text" name="address_line_2" value="<?= old('address_line_2') ?>" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Apartment, suite, unit, building, floor, etc.">
+                    <?= session('errors.address_line_2') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.address_line_2')).'</p>' : '' ?>
                 </div>
 
                 <div class="md:col-span-2 mt-2">
-                    <label class="block font-semibold mb-2">Pinpoint on Map *</label>
+                    <label class="block font-semibold mb-2">Pinpoint on Map <span class="text-error">*</span></label>
                     <p class="text-xs text-on-surface-variant mb-2">Search an address, or drag the marker/click anywhere on the map to set the exact property location and auto-fill the address fields.</p>
                     
                     <div class="flex gap-2 mb-3">
@@ -270,6 +251,8 @@
                         <input type="text" name="latitude" id="propertyLat" value="<?= old('latitude') ?>" required readonly class="w-full bg-surface-container-lowest border border-outline-variant px-2 py-1 text-xs rounded text-on-surface-variant">
                         <input type="text" name="longitude" id="propertyLng" value="<?= old('longitude') ?>" required readonly class="w-full bg-surface-container-lowest border border-outline-variant px-2 py-1 text-xs rounded text-on-surface-variant">
                     </div>
+                    <?= session('errors.latitude') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.latitude')).'</p>' : '' ?>
+                    <?= session('errors.longitude') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.longitude')).'</p>' : '' ?>
                 </div>
 
                 <!-- POI Button Integration -->
@@ -310,20 +293,21 @@
         <div>
             <h3 class="font-headline-md text-lg font-semibold mb-4 border-b border-outline-variant pb-2">3. Property Dimensions & Facilities</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div><label class="block text-xs mb-1 font-semibold">Beds</label><input type="number" name="bed" value="<?= old('bed') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Baths</label><input type="number" name="bath" value="<?= old('bath') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Total Area (m2)</label><input type="number" name="total_area" value="<?= old('total_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Usable Area (m2)</label><input type="number" name="usable_area" value="<?= old('usable_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Land Area (m2)</label><input type="number" name="total_land_area" value="<?= old('total_land_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Year Built</label><input type="number" name="year_built" value="<?= old('year_built') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="YYYY"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Total Floors</label><input type="number" name="total_floors" value="<?= old('total_floors') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
-                <div><label class="block text-xs mb-1 font-semibold">Unit Number</label><input type="text" name="unit_number" value="<?= old('unit_number') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"></div>
+                <div><label class="block text-xs mb-1 font-semibold">Beds <span class="text-error">*</span></label><input type="number" name="bed" value="<?= old('bed') ?>" required class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.bed') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.bed')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Baths <span class="text-error">*</span></label><input type="number" name="bath" value="<?= old('bath') ?>" required class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.bath') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.bath')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Total Area (m2) <span class="text-error">*</span></label><input type="number" name="total_area" value="<?= old('total_area') ?>" required class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.total_area') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.total_area')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Usable Area (m2)</label><input type="number" name="usable_area" value="<?= old('usable_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.usable_area') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.usable_area')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Land Area (m2)</label><input type="number" name="total_land_area" value="<?= old('total_land_area') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.total_land_area') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.total_land_area')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Year Built</label><input type="number" name="year_built" value="<?= old('year_built') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="YYYY"><?= session('errors.year_built') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.year_built')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Total Floors</label><input type="number" name="total_floors" value="<?= old('total_floors') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.total_floors') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.total_floors')).'</p>' : '' ?></div>
+                <div><label class="block text-xs mb-1 font-semibold">Unit Number</label><input type="text" name="unit_number" value="<?= old('unit_number') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface"><?= session('errors.unit_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.unit_number')).'</p>' : '' ?></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-3">
                     <label class="block text-xs mb-1 font-semibold">Building / Society Name</label>
                     <input type="text" name="building_society_name" value="<?= old('building_society_name') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="Name of complex, cluster, or apartment building">
+                    <?= session('errors.building_society_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.building_society_name')).'</p>' : '' ?>
                 </div>
                 
                 <div>
@@ -332,11 +316,13 @@
                         <option value="Available" <?= old('parking') == 'Available' ? 'selected' : '' ?>>Available</option>
                         <option value="Not Available" <?= old('parking') == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
                     </select>
+                    <?= session('errors.parking') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.parking')).'</p>' : '' ?>
                 </div>
 
                 <div>
                     <label class="block text-xs mb-1 font-semibold">Total Parking Spots</label>
                     <input type="number" name="total_parking" value="<?= old('total_parking', 0) ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface">
+                    <?= session('errors.total_parking') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.total_parking')).'</p>' : '' ?>
                 </div>
 
                 <div>
@@ -345,11 +331,13 @@
                         <option value="No" <?= old('basement') == 'No' ? 'selected' : '' ?>>No</option>
                         <option value="Yes" <?= old('basement') == 'Yes' ? 'selected' : '' ?>>Yes</option>
                     </select>
+                    <?= session('errors.basement') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.basement')).'</p>' : '' ?>
                 </div>
 
                 <div class="md:col-span-3">
                     <label class="block text-xs mb-1 font-semibold">Water Facility Type</label>
                     <input type="text" name="water_facility" value="<?= old('water_facility') ?>" class="w-full px-3 py-2 border border-outline-variant rounded bg-surface" placeholder="e.g. PDAM, Ground Water, Borehole">
+                    <?= session('errors.water_facility') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.water_facility')).'</p>' : '' ?>
                 </div>
             </div>
         </div>
@@ -390,24 +378,28 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label class="block font-semibold mb-2">Description (EN)</label>
-                    <textarea name="description_en" id="description_en" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Provide a detailed description of the property..." @blur="translateText($event.target.value, 'description_id', 'en|id')"><?= old('description_en') ?></textarea>
+                    <label class="block font-semibold mb-2">Description (EN) <span class="text-error">*</span></label>
+                    <textarea name="description_en" id="description_en" required rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Provide a detailed description of the property..." @blur="translateText($event.target.value, 'description_id', 'en|id')"><?= old('description_en') ?></textarea>
+                    <?= session('errors.description_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.description_en')).'</p>' : '' ?>
                 </div>
                 <div>
-                    <label class="block font-semibold mb-2">Description (ID)</label>
-                    <textarea name="description_id" id="description_id" rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Berikan deskripsi detail tentang properti..." @blur="translateText($event.target.value, 'description_en', 'id|en')"><?= old('description_id') ?></textarea>
+                    <label class="block font-semibold mb-2">Description (ID) <span class="text-error">*</span></label>
+                    <textarea name="description_id" id="description_id" required rows="5" class="w-full px-4 py-3 bg-surface border border-outline-variant rounded" placeholder="Berikan deskripsi detail tentang properti..." @blur="translateText($event.target.value, 'description_en', 'id|en')"><?= old('description_id') ?></textarea>
+                    <?= session('errors.description_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.description_id')).'</p>' : '' ?>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-2">Photos (Max 20 images) *</label>
+                    <label class="block font-semibold mb-2">Photos (Max 20 images) <span class="text-error">*</span></label>
                     <input type="file" name="property_images[]" required multiple accept="image/*" @change="validateImageCount($event)" class="w-full p-2 border rounded bg-surface">
                     <p class="text-xs text-on-surface-variant mt-1">You can select up to 20 images.</p>
+                    <?= session('errors.property_images') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.property_images')).'</p>' : '' ?>
                 </div>
                 <div>
-                    <label class="block font-semibold mb-2">SHM / Legal Document *</label>
+                    <label class="block font-semibold mb-2">SHM / Legal Document <span class="text-error">*</span></label>
                     <input type="file" name="shm_document" required accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border rounded bg-surface">
+                    <?= session('errors.shm_document') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.shm_document')).'</p>' : '' ?>
                 </div>
             </div>
         </div>
@@ -416,33 +408,6 @@
             <button type="submit" class="bg-primary text-on-primary px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity shadow-md">Publish Listing</button>
         </div>
     </form>
-
-    <!-- ALPINE VALIDATION MODAL -->
-    <div x-show="showValidationErrorModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
-        <div @click.outside="showValidationErrorModal = false" x-show="showValidationErrorModal" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" class="bg-surface w-full max-w-md rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden">
-            <div class="p-6 text-center">
-                <div class="w-16 h-16 rounded-full bg-error-container text-error flex items-center justify-center mx-auto mb-4">
-                    <span class="material-symbols-outlined text-[32px]">error</span>
-                </div>
-                <h2 class="text-xl font-bold text-on-surface mb-2">Missing Information</h2>
-                <p class="text-sm text-on-surface-variant mb-4">Please complete all required fields before saving:</p>
-                
-                <ul class="text-left text-sm text-error bg-error-container/30 p-4 rounded-lg space-y-1">
-                    <?php if (session()->has('errors')) : ?>
-                        <?php foreach (session('errors') as $error) : ?>
-                            <li class="flex items-start gap-2">
-                                <span class="material-symbols-outlined text-[16px] mt-0.5">fiber_manual_record</span>
-                                <?= esc($error) ?>
-                            </li>
-                        <?php endforeach ?>
-                    <?php endif ?>
-                </ul>
-            </div>
-            <div class="px-6 py-4 flex bg-surface-container-lowest border-t border-outline-variant">
-                <button type="button" @click="showValidationErrorModal = false" class="w-full px-4 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Got it, I'll fix it</button>
-            </div>
-        </div>
-    </div>
 
     <!-- AGENT AJAX POI MODAL -->
     <div x-data="{ showAgentPoiModal: false }" @open-poi-modal.window="showAgentPoiModal = true" @close-poi-modal.window="showAgentPoiModal = false">

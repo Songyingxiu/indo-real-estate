@@ -29,17 +29,6 @@
             <p class="text-on-surface-variant mt-1">Fill in the details below to configure your advertisement block.</p>
         </div>
 
-        <?php if (session()->getFlashdata('errors')) : ?>
-            <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-4 rounded-lg mb-6 shadow-sm flex gap-3">
-                <span class="material-symbols-outlined mt-0.5">error</span>
-                <ul class="list-disc pl-4 space-y-1">
-                    <?php foreach (session()->getFlashdata('errors') as $error) : ?>
-                        <li><?= esc($error) ?></li>
-                    <?php endforeach ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-
         <div class="bg-surface border border-outline-variant rounded-xl shadow-sm p-8">
             <form action="<?= base_url('admin/advertisements/save') ?>" method="POST" enctype="multipart/form-data">
                 <?= csrf_field() ?>
@@ -47,41 +36,47 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title (EN)</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title (EN) <span class="text-error">*</span></label>
                         <input type="text" name="title_en" id="title_en" value="<?= old('title_en', isset($ad) ? ($ad->title_en ?? $ad->title) : '') ?>" @blur="translateText($event.target.value, 'title_id')" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="e.g., Summer Sale" required>
+                        <?= session('errors.title_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_en')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title (ID)</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Ad Title (ID) <span class="text-error">*</span></label>
                         <input type="text" name="title_id" id="title_id" value="<?= old('title_id', isset($ad) ? ($ad->title_id ?? $ad->title) : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" required>
+                        <?= session('errors.title_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_id')).'</p>' : '' ?>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Description (EN)</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Description (EN) <span class="text-error">*</span></label>
                         <textarea name="description_en" id="description_en" rows="4" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" placeholder="Enter the full advertisement details here..." @blur="translateText($event.target.value, 'description_id')" required><?= old('description_en', isset($ad) ? ($ad->description_en ?? $ad->description) : '') ?></textarea>
+                        <?= session('errors.description_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.description_en')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Description (ID)</label>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Description (ID) <span class="text-error">*</span></label>
                         <textarea name="description_id" id="description_id" rows="4" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" required><?= old('description_id', isset($ad) ? ($ad->description_id ?? $ad->description) : '') ?></textarea>
+                        <?= session('errors.description_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.description_id')).'</p>' : '' ?>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Placement Area</label>
-                        <select name="placement" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Placement Area <span class="text-error">*</span></label>
+                        <select name="placement" required class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
                             <option value="home_banner" <?= old('placement', isset($ad) ? $ad->placement : '') == 'home_banner' ? 'selected' : '' ?>>Home Banner</option>
                             <option value="sidebar" <?= old('placement', isset($ad) ? $ad->placement : '') == 'sidebar' ? 'selected' : '' ?>>Sidebar Panel</option>
                             <option value="property_list" <?= old('placement', isset($ad) ? $ad->placement : '') == 'property_list' ? 'selected' : '' ?>>Property List Inline</option>
                         </select>
+                        <?= session('errors.placement') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.placement')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-2">Status</label>
-                        <select name="status" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Status <span class="text-error">*</span></label>
+                        <select name="status" required class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
                             <option value="Active" <?= old('status', isset($ad) ? $ad->status : '') == 'Active' ? 'selected' : '' ?>>Active</option>
                             <option value="Inactive" <?= old('status', isset($ad) ? $ad->status : '') == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
                         </select>
+                        <?= session('errors.status') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.status')).'</p>' : '' ?>
                     </div>
                 </div>
 
@@ -89,10 +84,12 @@
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-2">Start Date <span class="text-outline font-normal">(Optional)</span></label>
                         <input type="date" name="start_date" value="<?= old('start_date', isset($ad) ? $ad->start_date : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none">
+                        <?= session('errors.start_date') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.start_date')).'</p>' : '' ?>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-on-surface mb-2">End Date <span class="text-outline font-normal">(Optional)</span></label>
                         <input type="date" name="end_date" value="<?= old('end_date', isset($ad) ? $ad->end_date : '') ?>" class="w-full p-3 border border-outline-variant rounded-lg bg-surface focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none">
+                        <?= session('errors.end_date') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.end_date')).'</p>' : '' ?>
                     </div>
                 </div>
 
@@ -112,6 +109,7 @@
                         </label>
                     </div>
                     <p id="file-name-display" class="text-sm text-primary font-medium mt-2 hidden text-center"></p>
+                    <?= session('errors.image') ? '<p class="text-error text-xs mt-1 font-medium text-center">'.esc(session('errors.image')).'</p>' : '' ?>
 
                     <?php if(isset($ad) && $ad->image_path): ?>
                         <div class="mt-4 p-4 bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between">
