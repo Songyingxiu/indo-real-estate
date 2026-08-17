@@ -20,7 +20,6 @@ class Contact extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized'])->setStatusCode(401);
         }
 
-        // Inline Validation
         $rules = [
             'subject' => 'required|min_length[5]|max_length[150]',
             'message' => 'required|min_length[10]|max_length[2000]'

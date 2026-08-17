@@ -52,6 +52,7 @@
             </div>
         </div>
 
+        <!-- Chat Area -->
         <div class="w-2/3 flex flex-col bg-surface relative">
             
             <template x-if="!activeThread">
@@ -88,13 +89,13 @@
                     </div>
 
                     <div id="chatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
-                        <template x-for="msg in messages" :key="msg.inquiry_id">
+                        <template x-for="msg in messages" :key="msg.inquiry_id || Math.random()">
                             <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
                                 <div class="text-[11px] text-on-surface-variant mb-1 mx-1" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
                                     <span x-text="msg.sender_id == myId ? 'You' : msg.first_name"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
                                 </div>
                                 <div :class="msg.sender_id == myId ? 'bg-primary text-on-primary rounded-l-2xl rounded-tr-2xl' : 'bg-surface border border-outline-variant text-on-surface rounded-r-2xl rounded-tl-2xl'" 
-                                     class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message">
+                                     class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message || 'No message content'">
                                 </div>
                             </div>
                         </template>
@@ -133,7 +134,7 @@
             threads: initThreads,
             activeThread: null,
             messages: [],
-            myId: <?= session()->get('id') ?? session()->get('user_id') ?? 0 ?>,
+            myId: Number(<?= session()->get('id') ?? session()->get('user_id') ?? 0 ?>),
             replyText: '',
             isLoading: false,
 
@@ -143,7 +144,7 @@
                 fetch('<?= base_url('admin/inquiries/thread/') ?>' + thread.inquiry_id)
                     .then(res => res.json())
                     .then(data => {
-                        this.messages = data;
+                        this.messages = Array.isArray(data) ? data : (data.data || []);
                         setTimeout(this.scrollToBottom, 100);
                     });
             },
@@ -214,7 +215,8 @@
 
             formatDate(dateStr) {
                 if (!dateStr) return 'Just now';
-                const safeDate = dateStr.replace(' ', 'T');
+                let safeDate = String(dateStr).replace(' ', 'T');
+                if (!safeDate.includes('T')) safeDate = dateStr;
                 const date = new Date(safeDate);
                 if (isNaN(date)) return dateStr;
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });

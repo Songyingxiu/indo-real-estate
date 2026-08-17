@@ -11,7 +11,7 @@ class Inquiry extends BaseController
         
         $threads = $inquiryModel->select('inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name')
             ->join('properties', 'properties.id = inquiries.property_id', 'left')
-            ->join('users', 'users.id = inquiries.receiver_id', 'left') 
+            ->join('users', 'users.id = inquiries.receiver_id', 'left')
             ->where('inquiries.sender_id', $userId)
             ->where('inquiries.parent_id', null)
             ->orderBy('inquiries.created_at', 'DESC')
@@ -24,9 +24,9 @@ class Inquiry extends BaseController
     {
         $inquiryModel = new InquiryModel();
         
-        $parent = $inquiryModel->find($id);
+        $parent = $inquiryModel->where('inquiry_id', $id)->first();
         if ($parent && $parent['sender_id'] == session()->get('id') && $parent['status'] == 'Replied') {
-            $inquiryModel->update($id, ['status' => 'In Discussion']);
+            $inquiryModel->where('inquiry_id', $id)->set(['status' => 'In Discussion'])->update();
         }
         
         $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
@@ -53,14 +53,13 @@ class Inquiry extends BaseController
             'receiver_id' => $json->receiver_id,
             'message'     => $json->message,
             'status'      => 'Replied',
-            'created_at'  => date('Y-m-d H:i:s') 
+            'created_at'  => date('Y-m-d H:i:s')
         ];
 
         if ($inquiryModel->insert($data)) {
-            $data['inquiry_id'] = $inquiryModel->getInsertID(); 
-            $data['created_at'] = date('Y-m-d H:i:s');
+            $data['inquiry_id'] = $inquiryModel->getInsertID();
             
-            $inquiryModel->update($json->parent_id, ['status' => 'Pending']);
+            $inquiryModel->where('inquiry_id', $json->parent_id)->set(['status' => 'Pending'])->update();
             
             return $this->response->setJSON(['status' => 'success', 'message_data' => $data]);
         }

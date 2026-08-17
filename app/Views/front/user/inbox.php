@@ -33,6 +33,7 @@
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
                     <?php if (!empty($threads)): ?>
                         <script> const initUserThreads = <?= json_encode($threads) ?>; </script>
+                        <!-- FIX: Enforced inquiry_id as the iteration key -->
                         <template x-for="thread in threads" :key="thread.inquiry_id">
                             <div @click="loadThread(thread)" 
                                  :class="activeThread?.inquiry_id === thread.inquiry_id ? 'bg-primary/5 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
@@ -73,7 +74,7 @@
                                 </template>
                                 <template x-if="!activeThread.property_id">
                                     <span class="font-bold text-[16px] text-primary flex items-center gap-1 mt-1">
-                                        <span class="material-symbols-outlined text-[18px]">support_agent</span> General Support Inquiry
+                                        <span class="material-symbols-outlined text-[18px]">support_agent</span> General Support
                                     </span>
                                 </template>
                                 <p class="text-[13px] text-on-surface-variant mt-1"><?= lang('Front.inbox_agent') ?> <span x-text="activeThread.first_name + ' ' + activeThread.last_name"></span></p>
@@ -89,13 +90,14 @@
                         </div>
 
                         <div id="userChatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
-                            <template x-for="msg in messages" :key="msg.inquiry_id">
+                            <!-- FIX: Enforced inquiry_id and added fallback text to prevent empty bubbles -->
+                            <template x-for="msg in messages" :key="msg.inquiry_id || Math.random()">
                                 <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
                                     <div class="text-[11px] text-on-surface-variant mb-1 mx-1" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
                                         <span x-text="msg.sender_id == myId ? '<?= lang('Front.inbox_you') ?>' : msg.first_name"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
                                     </div>
                                     <div :class="msg.sender_id == myId ? 'bg-primary text-on-primary rounded-l-2xl rounded-tr-2xl' : 'bg-surface border border-outline-variant text-on-surface rounded-r-2xl rounded-tl-2xl'" 
-                                         class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message">
+                                         class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message || 'No message content'">
                                     </div>
                                 </div>
                             </template>
@@ -123,7 +125,7 @@
             threads: initUserThreads,
             activeThread: null,
             messages: [],
-            myId: <?= session()->get('id') ?>,
+            myId: Number(<?= session()->get('id') ?? 0 ?>),
             replyText: '',
             isLoading: false,
 
@@ -137,7 +139,8 @@
                 fetch('<?= base_url('user/inbox/thread/') ?>' + thread.inquiry_id)
                     .then(res => res.json())
                     .then(data => {
-                        this.messages = data;
+                        // Ensure data is properly bound
+                        this.messages = Array.isArray(data) ? data : (data.data || []);
                         setTimeout(this.scrollToBottom, 100);
                     });
             },
@@ -178,7 +181,8 @@
 
             formatDate(dateStr) {
                 if (!dateStr) return 'Just now';
-                const safeDate = dateStr.replace(' ', 'T');
+                let safeDate = String(dateStr).replace(' ', 'T');
+                if (!safeDate.includes('T')) safeDate = dateStr;
                 const date = new Date(safeDate);
                 if (isNaN(date)) return dateStr;
                 return date.toLocaleDateString('<?= session()->get('locale') == 'id' ? 'id-ID' : 'en-US' ?>', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
