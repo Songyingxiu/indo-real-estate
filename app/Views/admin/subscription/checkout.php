@@ -1,6 +1,12 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
+<?php
+$getErr = function($field) { return session('errors.' . $field); };
+$errClass = function($err) { return $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'border-outline-variant focus:border-primary bg-white'; };
+$errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]"><span class="material-symbols-outlined text-[16px] mt-0.5">warning</span>'.esc($err).'</div>' : ''; };
+?>
+
 <div class="mt-4 mb-8">
     <h1 class="text-2xl font-bold text-primary">Complete Your Upgrade</h1>
     <p class="text-on-surface-variant">Please complete the manual bank transfer to activate your <?= esc($plan->name) ?> package.</p>
@@ -57,32 +63,33 @@
             <span class="material-symbols-outlined text-primary">upload_file</span> Upload Payment Proof
         </h2>
         
-        <?php if (session()->getFlashdata('error')) : ?>
-            <div class="bg-[#ffdad6] text-[#410002] p-3 rounded mb-4 text-sm font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">error</span>
-                <?= session()->getFlashdata('error') ?>
+        <?php if (session()->has('errors') || session()->getFlashdata('error')): ?>
+            <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm mb-4">
+                <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
             </div>
         <?php endif; ?>
 
-        <form action="<?= base_url('admin/subscription/upload-proof') ?>" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+        <form action="<?= base_url('admin/subscription/upload-proof') ?>" method="POST" enctype="multipart/form-data" novalidate class="flex flex-col gap-4">
             
             <input type="hidden" name="subscription_id" value="<?= esc($subscription_id) ?>">
             <input type="hidden" name="invoice_number" value="<?= esc($invoice_number) ?>">
             
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">WhatsApp / Phone Number <span class="text-error">*</span></label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">WhatsApp / Phone Number <span class="text-[#c9302c]">*</span></label>
                 <p class="text-xs text-on-surface-variant mb-2">We will notify you once your payment is verified.</p>
-                <input type="tel" name="phone_number" required placeholder="e.g. 081234567890" value="<?= esc(session()->get('phone_number')) ?>" class="w-full border border-outline-variant rounded px-3 py-2 text-sm focus:border-primary focus:ring-1 bg-white outline-none">
-                <?= session('errors.phone_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.phone_number')).'</p>' : '' ?>
+                <?php $err = $getErr('phone_number'); ?>
+                <input type="tel" name="phone_number" required placeholder="e.g. 081234567890" value="<?= esc(old('phone_number', session()->get('phone_number'))) ?>" class="w-full border rounded px-3 py-2 text-sm focus:ring-1 outline-none <?= $errClass($err) ?>">
+                <?= $errBox($err) ?>
             </div>
 
             <!-- Alpine.js Component for Upload Box -->
             <div x-data="{ fileName: '', fileUrl: '' }">
-                <label class="block text-sm font-semibold text-on-surface mb-2">Upload Transfer Receipt <span class="text-error">*</span></label>
+                <label class="block text-sm font-semibold text-on-surface mb-2">Upload Transfer Receipt <span class="text-[#c9302c]">*</span></label>
+                <?php $err = $getErr('payment_proof'); ?>
                 
                 <label for="payment_proof" 
                        class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors duration-200"
-                       :class="fileName ? 'border-success bg-success/5' : 'border-outline-variant hover:bg-surface-container-low bg-surface'">
+                       :class="fileName ? 'border-success bg-success/5' : '<?= $err ? 'border-[#c9302c] bg-[#fff8f8]' : 'border-outline-variant hover:bg-surface-container-low bg-surface' ?>'">
                     
                     <!-- Default State -->
                     <div x-show="!fileName" class="flex flex-col items-center justify-center pt-5 pb-6">
@@ -101,7 +108,7 @@
                     <input id="payment_proof" name="payment_proof" type="file" accept="image/*" required class="hidden"
                            @change="fileName = $event.target.files[0]?.name; fileUrl = URL.createObjectURL($event.target.files[0])">
                 </label>
-                <?= session('errors.payment_proof') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.payment_proof')).'</p>' : '' ?>
+                <?= $errBox($err) ?>
 
                 <!-- Image Preview Thumbnail -->
                 <template x-if="fileUrl">

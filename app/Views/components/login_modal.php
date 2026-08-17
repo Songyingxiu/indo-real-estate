@@ -34,31 +34,38 @@
                 <button @click="authTab = 'register'; document.getElementById('modalAuthError').style.display='none';" :class="authTab === 'register' ? 'bg-surface text-primary shadow-sm' : 'text-on-surface-variant'" class="flex-1 py-2 text-[14px] font-bold rounded-md transition-all">Create Account</button>
             </div>
 
-            <div id="modalAuthError" class="bg-error-container text-on-error-container p-3 rounded-lg text-[13px] font-medium" style="display:none;"></div>
+            <!-- Red Attention Banner matching Image 3 -->
+            <div id="modalAuthError" class="bg-[#c9302c] text-white p-3 rounded-lg text-[13px] font-bold items-center gap-2 shadow-sm" style="display:none;">
+                <span class="material-symbols-outlined text-[18px]">warning</span> <span id="modalAuthErrorText">There are items that require your attention</span>
+            </div>
 
             <!-- LOGIN FORM -->
-            <form x-show="authTab === 'login'" id="ajaxLoginForm" onsubmit="handleAuthSubmit(event, '<?= base_url('login') ?>')" class="flex flex-col gap-4">
+            <form x-show="authTab === 'login'" id="ajaxLoginForm" onsubmit="handleAuthSubmit(event, '<?= base_url('login') ?>')" novalidate class="flex flex-col gap-4">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 
                 <div class="flex flex-col gap-1">
-                    <label class="font-label-md text-[13px] font-bold text-on-surface">Email Address <span class="text-error">*</span></label>
+                    <label class="font-label-md text-[13px] font-bold text-on-surface">Email Address <span class="text-[#c9302c]">*</span></label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">mail</span>
-                        <input class="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" name="email" placeholder="name@example.com" required type="email" oninput="document.getElementById('error-login-email').classList.add('hidden')">
+                        <input id="login-email" class="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" name="email" placeholder="name@example.com" required type="email" oninput="clearModalInputError(this, 'error-login-email')">
                     </div>
-                    <span id="error-login-email" class="text-error text-[12px] font-medium hidden mt-1"></span>
+                    <div id="error-login-email" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                        <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="err-msg">Please enter a valid email address.</span>
+                    </div>
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <div class="flex justify-between items-center">
-                        <label class="font-label-md text-[13px] font-bold text-on-surface">Password <span class="text-error">*</span></label>
+                        <label class="font-label-md text-[13px] font-bold text-on-surface">Password <span class="text-[#c9302c]">*</span></label>
                         <a class="font-label-md text-[12px] font-bold text-primary hover:underline" href="<?= base_url('forgot-password') ?>">Forgot?</a>
                     </div>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
-                        <input class="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" name="password" placeholder="••••••••" required type="password" oninput="document.getElementById('error-login-password').classList.add('hidden')">
+                        <input id="login-password" class="w-full pl-10 pr-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" name="password" placeholder="••••••••" required type="password" oninput="clearModalInputError(this, 'error-login-password')">
                     </div>
-                    <span id="error-login-password" class="text-error text-[12px] font-medium hidden mt-1"></span>
+                    <div id="error-login-password" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                        <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="err-msg">Please enter your password.</span>
+                    </div>
                 </div>
 
                 <button class="w-full bg-primary-container text-on-primary font-label-md text-[15px] font-bold py-3 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2 mt-2 shadow-sm disabled:opacity-50" type="submit">
@@ -68,38 +75,48 @@
             </form>
 
             <!-- REGISTER FORM -->
-            <form x-show="authTab === 'register'" style="display:none;" id="ajaxRegisterForm" onsubmit="handleAuthSubmit(event, '<?= base_url('register') ?>')" class="flex flex-col gap-4">
+            <form x-show="authTab === 'register'" style="display:none;" id="ajaxRegisterForm" onsubmit="handleAuthSubmit(event, '<?= base_url('register') ?>')" novalidate class="flex flex-col gap-4">
                 <input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>">
                 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-[13px] font-bold text-on-surface">First Name <span class="text-error">*</span></label>
-                        <input class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="first_name" required type="text" oninput="document.getElementById('error-reg-first_name').classList.add('hidden')">
-                        <span id="error-reg-first_name" class="text-error text-[12px] font-medium hidden"></span>
+                        <label class="font-label-md text-[13px] font-bold text-on-surface">First Name <span class="text-[#c9302c]">*</span></label>
+                        <input id="reg-first_name" class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="first_name" required type="text" oninput="clearModalInputError(this, 'error-reg-first_name')">
+                        <div id="error-reg-first_name" class="hidden bg-[#f2dede] text-[#a94442] text-[12px] p-1.5 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                            <span class="material-symbols-outlined text-[14px] mt-0.5">warning</span> <span class="err-msg">Required</span>
+                        </div>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-[13px] font-bold text-on-surface">Last Name <span class="text-error">*</span></label>
-                        <input class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="last_name" required type="text" oninput="document.getElementById('error-reg-last_name').classList.add('hidden')">
-                        <span id="error-reg-last_name" class="text-error text-[12px] font-medium hidden"></span>
+                        <label class="font-label-md text-[13px] font-bold text-on-surface">Last Name <span class="text-[#c9302c]">*</span></label>
+                        <input id="reg-last_name" class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="last_name" required type="text" oninput="clearModalInputError(this, 'error-reg-last_name')">
+                        <div id="error-reg-last_name" class="hidden bg-[#f2dede] text-[#a94442] text-[12px] p-1.5 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                            <span class="material-symbols-outlined text-[14px] mt-0.5">warning</span> <span class="err-msg">Required</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-1">
-                    <label class="font-label-md text-[13px] font-bold text-on-surface">Email Address <span class="text-error">*</span></label>
-                    <input class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="email" required type="email" oninput="document.getElementById('error-reg-email').classList.add('hidden')">
-                    <span id="error-reg-email" class="text-error text-[12px] font-medium hidden"></span>
+                    <label class="font-label-md text-[13px] font-bold text-on-surface">Email Address <span class="text-[#c9302c]">*</span></label>
+                    <input id="reg-email" class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="email" required type="email" oninput="clearModalInputError(this, 'error-reg-email')">
+                    <div id="error-reg-email" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                        <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="err-msg">Please enter a valid email.</span>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-[13px] font-bold text-on-surface">Password <span class="text-error">*</span></label>
-                        <input class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="password" required type="password" oninput="document.getElementById('error-reg-password').classList.add('hidden')">
-                        <span id="error-reg-password" class="text-error text-[12px] font-medium hidden"></span>
+                        <label class="font-label-md text-[13px] font-bold text-on-surface">Password <span class="text-[#c9302c]">*</span></label>
+                        <input id="reg-password" class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="password" required type="password" oninput="clearModalInputError(this, 'error-reg-password')">
+                        <div id="error-reg-password" class="hidden bg-[#f2dede] text-[#a94442] text-[12px] p-1.5 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                            <span class="material-symbols-outlined text-[14px] mt-0.5">warning</span> <span class="err-msg">Min 8 chars</span>
+                        </div>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-md text-[13px] font-bold text-on-surface">Confirm <span class="text-error">*</span></label>
-                        <input class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="password_confirm" required type="password" oninput="document.getElementById('error-reg-password_confirm').classList.add('hidden')">
-                        <span id="error-reg-password_confirm" class="text-error text-[12px] font-medium hidden"></span>
+                        <label class="font-label-md text-[13px] font-bold text-on-surface">Confirm <span class="text-[#c9302c]">*</span></label>
+                        <input id="reg-password_confirm" class="w-full px-3 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 transition-all" name="password_confirm" required type="password" oninput="clearModalInputError(this, 'error-reg-password_confirm')">
+                        <div id="error-reg-password_confirm" class="hidden bg-[#f2dede] text-[#a94442] text-[12px] p-1.5 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                            <span class="material-symbols-outlined text-[14px] mt-0.5">warning</span> <span class="err-msg">Must match</span>
+                        </div>
                     </div>
                 </div>
 
@@ -137,16 +154,28 @@
         window.dispatchEvent(new CustomEvent('close-auth-modal'));
     }
 
+    function clearModalInputError(inputEl, errorDivId) {
+        if (inputEl) {
+            inputEl.classList.remove('border-[#c9302c]', 'focus:border-[#c9302c]', 'focus:ring-[#c9302c]', 'bg-[#fff8f8]');
+            inputEl.classList.add('border-outline-variant', 'focus:border-primary');
+        }
+        const errorDiv = document.getElementById(errorDivId);
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+            errorDiv.classList.remove('flex');
+        }
+    }
+
     function handleAuthSubmit(e, targetUrl) {
         e.preventDefault();
         const form = e.target;
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        const errorDiv = document.getElementById('modalAuthError');
+        const globalErrorDiv = document.getElementById('modalAuthError');
         
         submitBtn.innerHTML = 'Processing...';
         submitBtn.disabled = true;
-        errorDiv.style.display = 'none';
+        globalErrorDiv.style.display = 'none';
 
         const formData = new FormData(form);
         const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
@@ -165,25 +194,28 @@
             return data;
         })
         .then(data => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
             if (data && data.status === 'success') {
                 closeAuthModal();
                 processPendingAction();
-            } else if (data && data.status === 'error' && data.message.includes('fix the following errors')) {
-                // If backend returns a validation error string, just show it at the top
-                errorDiv.innerHTML = data.message;
-                errorDiv.style.display = 'block';
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            } else {
-                errorDiv.innerHTML = data?.message || 'Authentication failed. Please try again.';
-                errorDiv.style.display = 'block';
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+            } else if (data && data.status === 'error') {
+                globalErrorDiv.style.display = 'flex';
+                document.getElementById('modalAuthErrorText').innerHTML = data.message || 'There are items that require your attention';
+                
+                // Highlight inputs with Image-3 styling
+                form.querySelectorAll('input[required]').forEach(input => {
+                    if (!input.value.trim()) {
+                        input.classList.remove('border-outline-variant', 'focus:border-primary');
+                        input.classList.add('border-[#c9302c]', 'focus:border-[#c9302c]', 'focus:ring-[#c9302c]', 'bg-[#fff8f8]');
+                    }
+                });
             }
         })
         .catch(error => {
-            errorDiv.innerHTML = error.message;
-            errorDiv.style.display = 'block';
+            globalErrorDiv.style.display = 'flex';
+            document.getElementById('modalAuthErrorText').innerHTML = error.message;
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         });
@@ -257,22 +289,22 @@
                         closeAuthModal();
                         processPendingAction();
                     } else {
-                        errorDiv.innerHTML = data?.message || 'Google Login failed.';
-                        errorDiv.style.display = 'block';
+                        errorDiv.style.display = 'flex';
+                        document.getElementById('modalAuthErrorText').innerHTML = data?.message || 'Google Login failed.';
                         btn.innerHTML = originalText;
                         btn.disabled = false;
                     }
                 })
                 .catch(err => {
-                    errorDiv.innerHTML = 'A server error occurred during Google authentication.';
-                    errorDiv.style.display = 'block';
+                    errorDiv.style.display = 'flex';
+                    document.getElementById('modalAuthErrorText').innerHTML = 'A server error occurred during Google authentication.';
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 });
             }).catch((error) => {
                 console.error('Firebase Auth Error:', error);
-                errorDiv.innerHTML = error.message || 'Google authentication was cancelled or failed.';
-                errorDiv.style.display = 'block';
+                errorDiv.style.display = 'flex';
+                document.getElementById('modalAuthErrorText').innerHTML = error.message || 'Google authentication was cancelled or failed.';
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             });

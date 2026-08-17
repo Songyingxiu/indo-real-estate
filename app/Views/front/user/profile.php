@@ -1,5 +1,11 @@
 <?= $this->include('front/layout/header') ?>
 
+<?php
+$getErr = function($field) { return session('errors.' . $field); };
+$errClass = function($err) { return $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'border-outline-variant focus:border-primary bg-surface'; };
+$errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]"><span class="material-symbols-outlined text-[16px] mt-0.5">warning</span>'.esc($err).'</div>' : ''; };
+?>
+
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-12 min-h-[70vh]">
     <div class="mb-8">
         <h1 class="font-headline-lg text-[32px] font-bold text-primary"><?= lang('Front.prof_title') ?></h1>
@@ -13,7 +19,7 @@
         </div>
     <?php endif; ?>
 
-    <?php if (session()->getFlashdata('error')) : ?>
+    <?php if (session()->getFlashdata('error') && !session()->has('errors')) : ?>
         <div class="bg-error-container text-on-error-container p-4 rounded-xl mb-6 border flex items-center gap-2 shadow-sm">
             <span class="material-symbols-outlined">warning</span>
             <?= session()->getFlashdata('error') ?>
@@ -29,17 +35,26 @@
                 <span class="material-symbols-outlined text-primary">person</span> <?= lang('Front.prof_personal_info') ?>
             </h2>
             
-            <form action="<?= base_url('user/update-profile') ?>" method="POST" class="flex flex-col gap-4">
+            <form action="<?= base_url('user/update-profile') ?>" method="POST" novalidate class="flex flex-col gap-4">
+                
+                <?php if (session('errors.first_name') || session('errors.last_name') || session('errors.phone_number')): ?>
+                    <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm text-sm">
+                        <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                    </div>
+                <?php endif; ?>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_first_name') ?> <span class="text-error">*</span></label>
-                        <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                        <?= session('errors.first_name') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.first_name')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_first_name') ?> <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('first_name'); ?>
+                        <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full px-3 py-2 text-[16px] border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_last_name') ?> <span class="text-error">*</span></label>
-                        <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                        <?= session('errors.last_name') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.last_name')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_last_name') ?> <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('last_name'); ?>
+                        <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full px-3 py-2 text-[16px] border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                 </div>
 
@@ -50,9 +65,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_phone') ?> <span class="text-error">*</span></label>
-                    <input type="tel" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                    <?= session('errors.phone_number') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.phone_number')).'</p>' : '' ?>
+                    <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_phone') ?> <span class="text-[#c9302c]">*</span></label>
+                    <?php $err = $getErr('phone_number'); ?>
+                    <input type="tel" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full px-3 py-2 text-[16px] border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                    <?= $errBox($err) ?>
                 </div>
 
                 <div class="pt-4 mt-2 border-t border-outline-variant">
@@ -68,13 +84,20 @@
                 <span class="material-symbols-outlined text-primary">lock</span> <?= lang('Front.prof_change_pass') ?>
             </h2>
             
-            <form action="<?= base_url('user/update-password') ?>" method="POST" class="flex flex-col gap-4">
+            <form action="<?= base_url('user/update-password') ?>" method="POST" novalidate class="flex flex-col gap-4">
                 
+                <?php if (session('errors.current_password') || session('errors.new_password') || session('errors.confirm_password')): ?>
+                    <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm text-sm">
+                        <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                    </div>
+                <?php endif; ?>
+
                 <?php if($hasLocalPassword): ?>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_current_pass') ?> <span class="text-error">*</span></label>
-                        <input type="password" name="current_password" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                        <?= session('errors.current_password') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.current_password')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_current_pass') ?> <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('current_password'); ?>
+                        <input type="password" name="current_password" required class="w-full px-3 py-2 text-[16px] border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                 <?php else: ?>
                     <div class="bg-surface-container-low text-on-surface-variant p-3 rounded text-sm mb-2 border border-outline-variant">
@@ -84,14 +107,16 @@
 
                 <div class="grid grid-cols-1 gap-4 pt-2 border-t border-outline-variant/50">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_new_pass') ?> <span class="text-error">*</span></label>
-                        <input type="password" name="new_password" required minlength="8" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                        <?= session('errors.new_password') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.new_password')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_new_pass') ?> <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('new_password'); ?>
+                        <input type="password" name="new_password" required minlength="8" class="w-full px-3 py-2 text-[16px] border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_confirm_pass') ?> <span class="text-error">*</span></label>
-                        <input type="password" name="confirm_password" required minlength="8" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
-                        <?= session('errors.confirm_password') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.confirm_password')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_confirm_pass') ?> <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('confirm_password'); ?>
+                        <input type="password" name="confirm_password" required minlength="8" class="w-full px-3 py-2 text-[16px] border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                 </div>
 
@@ -114,21 +139,31 @@
             
             <p class="text-sm text-on-surface-variant mb-6"><?= lang('Front.prof_verify_desc') ?></p>
 
-            <form action="<?= base_url('user/upload-agent-docs') ?>" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <form action="<?= base_url('user/upload-agent-docs') ?>" method="POST" enctype="multipart/form-data" novalidate class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="md:col-span-3">
+                    <?php if (session('errors.ktp_document')): ?>
+                        <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm text-sm">
+                            <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                        </div>
+                    <?php endif; ?>
+                </div>
+
                 <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_ktp') ?> <span class="text-error">*</span></label>
-                    <input type="file" name="ktp_document" accept="image/*,.pdf" required class="block w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-fixed-dim file:text-primary hover:file:bg-primary-fixed cursor-pointer">
-                    <?= session('errors.ktp_document') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.ktp_document')).'</p>' : '' ?>
+                    <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_ktp') ?> <span class="text-[#c9302c]">*</span></label>
+                    <?php $err = $getErr('ktp_document'); ?>
+                    <input type="file" name="ktp_document" accept="image/*,.pdf" required class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold cursor-pointer border rounded p-1 <?= $err ? 'border-[#c9302c] bg-[#fff8f8] file:bg-error-container file:text-error' : 'border-outline-variant bg-surface file:bg-primary-fixed-dim file:text-primary hover:file:bg-primary-fixed' ?>">
+                    <?= $errBox($err) ?>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_npwp') ?></label>
-                    <input type="file" name="npwp" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
+                    <input type="file" name="npwp" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant border border-outline-variant rounded p-1 bg-surface file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_siup') ?></label>
-                    <input type="file" name="business_license" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
+                    <input type="file" name="business_license" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant border border-outline-variant rounded p-1 bg-surface file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
                 </div>
 
                 <div class="md:col-span-3 pt-4 border-t border-outline-variant flex justify-end">
@@ -156,7 +191,6 @@
     </div>
 </main>
 
-<!-- Tailwind Modal for Account Deletion -->
 <div id="deleteModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity px-4">
     <div class="bg-white p-6 rounded-lg max-w-md w-full shadow-xl">
         <div class="flex items-center gap-3 mb-4">

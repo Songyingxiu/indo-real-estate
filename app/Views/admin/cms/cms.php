@@ -1,15 +1,21 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
+<?php
+$getErr = function($field) { return session('errors.' . $field); };
+$errClass = function($err) { return $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'border-outline-variant focus:border-primary bg-surface'; };
+$errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]"><span class="material-symbols-outlined text-[16px] mt-0.5">warning</span>'.esc($err).'</div>' : ''; };
+?>
+
 <div x-data="{ 
     showEditor: <?= session()->has('errors') ? 'true' : 'false' ?>, 
-    postId: '', 
-    postTitleEN: '', 
-    postTitleID: '', 
-    postCategory: 'Blog', 
-    postFaqCategory: '',
-    postBodyEN: '', 
-    postBodyID: '', 
+    postId: '<?= old('id', '') ?>', 
+    postTitleEN: '<?= esc(addslashes(old('title_en', ''))) ?>', 
+    postTitleID: '<?= esc(addslashes(old('title_id', ''))) ?>', 
+    postCategory: '<?= esc(addslashes(old('category', 'Blog'))) ?>', 
+    postFaqCategory: '<?= esc(addslashes(old('faq_category', ''))) ?>', 
+    postBodyEN: '<?= esc(addslashes(old('content_body_en', ''))) ?>', 
+    postBodyID: '<?= esc(addslashes(old('content_body_id', ''))) ?>', 
     showDeleteModal: false, 
     deleteUrl: '',
     translateText(text, targetInput) {
@@ -50,6 +56,20 @@
             <div class="flex items-center gap-3">
                 <span class="material-symbols-outlined text-green-600">check_circle</span>
                 <p class="font-semibold text-sm"><?= session()->getFlashdata('success') ?></p>
+            </div>
+            <button @click="show = false" class="text-green-600 hover:text-green-800 focus:outline-none">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ERROR NOTIFICATION -->
+    <?php if (session()->getFlashdata('error') && !session()->has('errors')) : ?>
+        <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
+             class="flex items-center justify-between bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-red-600">error</span>
+                <p class="font-semibold text-sm"><?= session()->getFlashdata('error') ?></p>
             </div>
             <button @click="show = false" class="text-green-600 hover:text-green-800 focus:outline-none">
                 <span class="material-symbols-outlined text-[20px]">close</span>
@@ -156,42 +176,52 @@
                 </button>
             </div>
 
-            <!-- Modal Form -->
-            <form action="<?= base_url('admin/cms/save') ?>" method="POST" class="flex flex-col flex-1 overflow-hidden">
+            <!-- Modal Form with NOVALIDATE -->
+            <form action="<?= base_url('admin/cms/save') ?>" method="POST" novalidate class="flex flex-col flex-1 overflow-hidden">
                 <input type="hidden" name="id" x-model="postId">
                 
                 <!-- Scrollable Body -->
                 <div class="p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar flex-1">
                     
+                    <?php if (session()->has('errors')): ?>
+                        <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm">
+                            <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                        </div>
+                    <?php endif; ?>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (EN) <span class="text-error">*</span></label>
-                            <input name="title_en" type="text" x-model="postTitleEN" @blur="translateText($event.target.value, 'postTitleID')" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-                            <?= session('errors.title_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_en')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (EN) <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('title_en'); ?>
+                            <input name="title_en" type="text" x-model="postTitleEN" @blur="translateText($event.target.value, 'postTitleID')" required class="w-full px-4 py-2 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                            <?= $errBox($err) ?>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (ID) <span class="text-error">*</span></label>
-                            <input name="title_id" type="text" x-model="postTitleID" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-                            <?= session('errors.title_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_id')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (ID) <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('title_id'); ?>
+                            <input name="title_id" type="text" x-model="postTitleID" required class="w-full px-4 py-2 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                            <?= $errBox($err) ?>
                         </div>
                     </div>
                     
                     <div class="grid gap-4 transition-all duration-300" :class="postCategory === 'FAQ' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'">
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Type Category <span class="text-error">*</span></label>
-                            <select name="category" x-model="postCategory" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Type Category <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('category'); ?>
+                            <select name="category" x-model="postCategory" required class="w-full px-4 py-2 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
                                 <option value="Blog">Blog Post / News</option>
                                 <option value="Page">Static Info Page</option>
                                 <option value="Tips">Tips & Guides</option>
                                 <option value="Announcement">Announcement</option>
                                 <option value="FAQ">FAQ</option>
                             </select>
-                            <?= session('errors.category') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.category')).'</p>' : '' ?>
+                            <?= $errBox($err) ?>
                         </div>
                         
                         <div x-show="postCategory === 'FAQ'" x-transition.opacity style="display: none;">
                             <label class="block text-sm font-semibold text-on-surface mb-1 text-primary">FAQ Topic (Required for FAQs)</label>
-                            <select name="faq_category" x-model="postFaqCategory" :required="postCategory === 'FAQ'" class="w-full px-4 py-2 border border-outline-variant rounded bg-primary-container/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                            <?php $err = $getErr('faq_category'); ?>
+                            <select name="faq_category" x-model="postFaqCategory" :required="postCategory === 'FAQ'" class="w-full px-4 py-2 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
                                 <option value="" disabled selected>Select Topic...</option>
                                 <option value="User/Profile">User/Profile</option>
                                 <option value="Property">Property</option>
@@ -199,20 +229,22 @@
                                 <option value="Subscription">Subscription</option>
                                 <option value="Payment">Payment</option>
                             </select>
-                            <?= session('errors.faq_category') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.faq_category')).'</p>' : '' ?>
+                            <?= $errBox($err) ?>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col h-full">
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (EN) <span class="text-error">*</span></label>
-                            <textarea name="content_body_en" x-model="postBodyEN" @blur="translateText($event.target.value, 'postBodyID')" required class="w-full flex-1 min-h-[250px] px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans resize-y" placeholder="Write your content markup or text here..."></textarea>
-                            <?= session('errors.content_body_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.content_body_en')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (EN) <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('content_body_en'); ?>
+                            <textarea name="content_body_en" x-model="postBodyEN" @blur="translateText($event.target.value, 'postBodyID')" required class="w-full flex-1 min-h-[250px] px-4 py-2 border rounded focus:ring-1 outline-none font-sans resize-y <?= $errClass($err) ?>" placeholder="Write your content markup or text here..."></textarea>
+                            <?= $errBox($err) ?>
                         </div>
                         <div class="flex flex-col h-full">
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (ID) <span class="text-error">*</span></label>
-                            <textarea name="content_body_id" x-model="postBodyID" required class="w-full flex-1 min-h-[250px] px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans resize-y"></textarea>
-                            <?= session('errors.content_body_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.content_body_id')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (ID) <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('content_body_id'); ?>
+                            <textarea name="content_body_id" x-model="postBodyID" required class="w-full flex-1 min-h-[250px] px-4 py-2 border rounded focus:ring-1 outline-none font-sans resize-y <?= $errClass($err) ?>"></textarea>
+                            <?= $errBox($err) ?>
                         </div>
                     </div>
 

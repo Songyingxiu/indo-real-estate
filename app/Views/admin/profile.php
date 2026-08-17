@@ -1,9 +1,18 @@
 <?= $this->extend('admin/layout/master') ?>
 <?= $this->section('content') ?>
 
+<?php
+$getErr = function($field) { return session('errors.' . $field); };
+$errClass = function($err) { return $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'border-outline-variant focus:border-primary bg-surface'; };
+$errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]"><span class="material-symbols-outlined text-[16px] mt-0.5">warning</span>'.esc($err).'</div>' : ''; };
+
+$editErrors = session('errors.first_name') || session('errors.last_name') || session('errors.email') || session('errors.phone_number');
+$passErrors = session('errors.current_password') || session('errors.new_password') || session('errors.confirm_password');
+?>
+
 <div class="pb-12" x-data="{ 
-    showEditModal: <?= session('errors.first_name') || session('errors.last_name') || session('errors.email') || session('errors.phone_number') ? 'true' : 'false' ?>, 
-    showPasswordModal: <?= session('errors.new_password') || session('errors.confirm_password') || session('errors.current_password') ? 'true' : 'false' ?>, 
+    showEditModal: <?= $editErrors ? 'true' : 'false' ?>, 
+    showPasswordModal: <?= $passErrors ? 'true' : 'false' ?>, 
     showDeleteModal: false 
 }">
 
@@ -18,7 +27,8 @@
             <?= session()->getFlashdata('success') ?>
         </div>
     <?php endif; ?>
-    <?php if (session()->getFlashdata('error')) : ?>
+    
+    <?php if (session()->getFlashdata('error') && empty(session('errors'))) : ?>
         <div class="bg-error-container text-on-error-container p-4 rounded mb-6 border border-error flex items-center gap-2">
             <span class="material-symbols-outlined">warning</span>
             <?= session()->getFlashdata('error') ?>
@@ -163,12 +173,20 @@
                                 <p class="text-sm text-on-surface-variant mb-4">To post listings on HuniKita, you must first verify your identity. Please upload a clear photo of your KTP.</p>
                             <?php endif; ?>
                             
-                            <form action="<?= base_url('admin/profile/upload-docs') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <form action="<?= base_url('admin/profile/upload-docs') ?>" method="POST" enctype="multipart/form-data" novalidate class="space-y-4">
                                 <?= csrf_field() ?>
+
+                                <?php if (session('errors.ktp_document')): ?>
+                                    <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm text-sm">
+                                        <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                                    </div>
+                                <?php endif; ?>
+
                                 <div>
-                                    <label class="block text-sm font-semibold text-on-surface mb-1">KTP Document <span class="text-error">*</span></label>
-                                    <input type="file" name="ktp_document" accept="image/*,.pdf" required class="w-full p-2 border border-outline-variant rounded bg-surface text-sm">
-                                    <?= session('errors.ktp_document') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.ktp_document')).'</p>' : '' ?>
+                                    <label class="block text-sm font-semibold text-on-surface mb-1">KTP Document <span class="text-[#c9302c]">*</span></label>
+                                    <?php $err = $getErr('ktp_document'); ?>
+                                    <input type="file" name="ktp_document" accept="image/*,.pdf" required class="w-full p-2 border rounded outline-none text-sm <?= $errClass($err) ?>">
+                                    <?= $errBox($err) ?>
                                 </div>
                                 <button type="submit" class="px-5 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">Submit for Verification</button>
                             </form>
@@ -258,29 +276,41 @@
                 <h2 class="text-xl font-bold text-on-surface">Edit Profile</h2>
                 <button type="button" @click="showEditModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <form action="<?= base_url('admin/profile/update') ?>" method="POST">
+            
+            <form action="<?= base_url('admin/profile/update') ?>" method="POST" novalidate>
+                
+                <?php if ($editErrors): ?>
+                    <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 m-6 mb-0 rounded shadow-sm text-sm">
+                        <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                    </div>
+                <?php endif; ?>
+
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">First Name <span class="text-error">*</span></label>
-                            <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                            <?= session('errors.first_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.first_name')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">First Name <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('first_name'); ?>
+                            <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                            <?= $errBox($err) ?>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Last Name <span class="text-error">*</span></label>
-                            <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                            <?= session('errors.last_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.last_name')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Last Name <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('last_name'); ?>
+                            <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                            <?= $errBox($err) ?>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Email Address <span class="text-error">*</span></label>
-                        <input type="email" name="email" value="<?= esc($user['email']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                        <?= session('errors.email') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.email')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Email Address <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('email'); ?>
+                        <input type="email" name="email" value="<?= esc($user['email']) ?>" required class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number <span class="text-error">*</span></label>
-                        <input type="tel" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                        <?= session('errors.phone_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.phone_number')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('phone_number'); ?>
+                        <input type="tel" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
@@ -298,15 +328,23 @@
                 <h2 class="text-xl font-bold text-on-surface">Change Password</h2>
                 <button type="button" @click="showPasswordModal = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <form action="<?= base_url('admin/profile/update-password') ?>" method="POST">
+            
+            <form action="<?= base_url('admin/profile/update-password') ?>" method="POST" novalidate>
+                
+                <?php if ($passErrors): ?>
+                    <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 m-6 mb-0 rounded shadow-sm text-sm">
+                        <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                    </div>
+                <?php endif; ?>
+
                 <div class="p-6 space-y-4">
-                    
                     <?php $hasLocalPassword = !empty($user['password']); ?>
                     <?php if($hasLocalPassword): ?>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Current Password <span class="text-error">*</span></label>
-                            <input type="password" name="current_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                            <?= session('errors.current_password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.current_password')).'</p>' : '' ?>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Current Password <span class="text-[#c9302c]">*</span></label>
+                            <?php $err = $getErr('current_password'); ?>
+                            <input type="password" name="current_password" required class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                            <?= $errBox($err) ?>
                         </div>
                     <?php else: ?>
                         <div class="bg-surface-container-low text-on-surface-variant p-3 rounded text-sm border border-outline-variant">
@@ -315,15 +353,17 @@
                     <?php endif; ?>
 
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">New Password <span class="text-error">*</span></label>
-                        <input type="password" name="new_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                        <p class="text-xs text-on-surface-variant mt-1">Must be at least 8 characters long.</p>
-                        <?= session('errors.new_password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.new_password')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">New Password <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('new_password'); ?>
+                        <input type="password" name="new_password" required minlength="8" class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                        <?php if(!$err): ?><p class="text-xs text-on-surface-variant mt-1">Must be at least 8 characters long.</p><?php endif; ?>
+                        <?= $errBox($err) ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1">Confirm New Password <span class="text-error">*</span></label>
-                        <input type="password" name="confirm_password" required class="w-full h-10 px-3 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-2 outline-none">
-                        <?= session('errors.confirm_password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.confirm_password')).'</p>' : '' ?>
+                        <label class="block text-sm font-semibold text-on-surface mb-1">Confirm New Password <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('confirm_password'); ?>
+                        <input type="password" name="confirm_password" required minlength="8" class="w-full h-10 px-3 border rounded outline-none transition-colors focus:ring-1 <?= $errClass($err) ?>">
+                        <?= $errBox($err) ?>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
