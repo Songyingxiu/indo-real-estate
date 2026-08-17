@@ -11,10 +11,8 @@
         <div id="ajaxAlert" class="hidden px-4 py-2 rounded border flex items-center gap-2 transition-all"></div>
     </div>
 
-    <!-- Main Chat Interface -->
     <div class="flex-1 bg-surface shadow-sm rounded-xl border border-outline-variant overflow-hidden flex">
         
-        <!-- Left Panel: Threads List -->
         <div class="w-1/3 border-r border-outline-variant flex flex-col bg-surface-container-lowest">
             <div class="p-4 border-b border-outline-variant bg-surface-container-low font-bold text-on-surface flex justify-between items-center">
                 Active Conversations
@@ -54,7 +52,6 @@
             </div>
         </div>
 
-        <!-- Right Panel: Chat Area -->
         <div class="w-2/3 flex flex-col bg-surface relative">
             
             <template x-if="!activeThread">
@@ -66,7 +63,6 @@
 
             <template x-if="activeThread">
                 <div class="flex flex-col h-full w-full">
-                    <!-- Chat Header -->
                     <div class="p-4 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center shadow-sm z-10">
                         <div>
                             <h3 class="font-bold text-on-surface text-[16px]" x-text="activeThread.first_name + ' ' + activeThread.last_name"></h3>
@@ -91,7 +87,6 @@
                         </div>
                     </div>
 
-                    <!-- Messages Window -->
                     <div id="chatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
                         <template x-for="msg in messages" :key="msg.inquiry_id">
                             <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
@@ -105,7 +100,6 @@
                         </template>
                     </div>
 
-                    <!-- Input Area with Subscription Gate -->
                     <div class="p-4 border-t border-outline-variant bg-surface-container-lowest relative">
                         
                         <?php if(!$canReply): ?>
