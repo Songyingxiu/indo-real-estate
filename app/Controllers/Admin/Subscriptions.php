@@ -12,7 +12,7 @@ class Subscriptions extends BaseController
         
         $model = new SubscriptionModel();
         
-        $data['subscriptions'] = $model->select('subscriptions.*, users.first_name, users.last_name, subscription_plans.name as plan_name, subscription_plans.price, offline_payments.payment_proof, offline_payments.invoice_number, offline_payments.phone_number')
+        $data['subscriptions'] = $model->select('subscriptions.*, users.first_name, users.last_name, subscription_plans.name as plan_name, subscription_plans.price, subscription_plans.description as plan_desc, subscription_plans.max_properties, subscription_plans.max_agents, subscription_plans.max_pois, subscription_plans.allow_messages, subscription_plans.allow_direct_email, offline_payments.payment_proof, offline_payments.invoice_number, offline_payments.phone_number')
                                        ->join('users', 'users.id = subscriptions.user_id', 'left')
                                        ->join('subscription_plans', 'subscription_plans.id = subscriptions.plan_id', 'left')
                                        ->join('offline_payments', 'offline_payments.subscription_id = subscriptions.id', 'left')
@@ -43,14 +43,12 @@ class Subscriptions extends BaseController
         return redirect()->to(base_url('admin/subscriptions'))->with('success', 'Payment verified! The user subscription is now active for 1 year.');
     }
 
-    // Handle the form submission from the Alpine modal
     public function revoke($id)
     {
         if (session()->get('role_id') != 4) return redirect()->to(base_url('admin/dashboard'));
         
         $subModel = new SubscriptionModel();
         
-        // Terminate the subscription immediately using accepted ENUM values
         $subModel->update($id, [
             'status'     => 'Inactive',
             'sub_status' => 'Expired',

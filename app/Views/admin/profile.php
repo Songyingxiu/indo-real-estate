@@ -90,52 +90,97 @@ $passErrors = session('errors.current_password') || session('errors.new_password
                 </div>
             </div>
 
-            <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
-                <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">card_membership</span> Subscription Status
-                </h3>
-                
-                <?php if (isset($activeSubscription) && $activeSubscription && isset($activePlan)): ?>
-                    <div class="bg-primary-container text-on-primary-container p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                        <div>
-                            <p class="text-sm font-semibold opacity-80 mb-1">Current Plan</p>
-                            <h4 class="text-2xl font-bold"><?= esc($activePlan->name ?? $activePlan['name'] ?? 'Premium Plan') ?></h4>
+            <?php if ($user['role_id'] != 4): ?>
+                <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-on-surface mb-4 pb-2 border-b border-outline-variant flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">card_membership</span> Subscription Status
+                    </h3>
+                    
+                    <?php if (isset($activeSubscription) && $activeSubscription && isset($activePlan)): ?>
+                        <?php 
+                            $pName = $activePlan->name ?? $activePlan['name'] ?? 'Premium Plan';
+                            $pDesc = $activePlan->description ?? $activePlan['description'] ?? '';
+                            $pProps = $activePlan->max_properties ?? $activePlan['max_properties'] ?? 0;
+                            $pAgents = $activePlan->max_agents ?? $activePlan['max_agents'] ?? 0;
+                            $pPois = $activePlan->max_pois ?? $activePlan['max_pois'] ?? 0;
+                            $pMsg = $activePlan->allow_messages ?? $activePlan['allow_messages'] ?? 0;
+                            $pEmail = $activePlan->allow_direct_email ?? $activePlan['allow_direct_email'] ?? 0;
+                        ?>
+                        <div class="bg-primary-container text-on-primary-container p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <p class="text-sm font-semibold opacity-80 mb-1">Current Plan</p>
+                                <h4 class="text-2xl font-bold"><?= esc($pName) ?></h4>
+                            </div>
+                            <div class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                                <span class="material-symbols-outlined text-[16px]">verified</span> 
+                                <?= esc($activeSubscription->sub_status ?? $activeSubscription['sub_status'] ?? '') ?>
+                            </div>
                         </div>
-                        <div class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                            <span class="material-symbols-outlined text-[16px]">verified</span> 
-                            <?= esc($activeSubscription->sub_status ?? $activeSubscription['sub_status'] ?? '') ?>
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined">play_circle</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+                                    <span class="material-symbols-outlined">play_circle</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-on-surface-variant">Start Date</p>
+                                    <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->start_date ?? $activeSubscription['start_date'] ?? 'now')) ?></p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-sm font-semibold text-on-surface-variant">Start Date</p>
-                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->start_date ?? $activeSubscription['start_date'] ?? 'now')) ?></p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-error">
+                                    <span class="material-symbols-outlined">event_busy</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-on-surface-variant">Expiration Date</p>
+                                    <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->end_date ?? $activeSubscription['end_date'] ?? 'now')) ?></p>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-error">
-                                <span class="material-symbols-outlined">event_busy</span>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-on-surface-variant">Expiration Date</p>
-                                <p class="text-on-surface font-medium"><?= date('F j, Y', strtotime($activeSubscription->end_date ?? $activeSubscription['end_date'] ?? 'now')) ?></p>
-                            </div>
+                        
+                        <div class="border-t border-outline-variant pt-6">
+                            <h4 class="font-bold text-on-surface mb-2">Plan Description & Features</h4>
+                            <?php if($pDesc): ?>
+                                <p class="text-sm text-on-surface-variant mb-4"><?= esc($pDesc) ?></p>
+                            <?php endif; ?>
+                            
+                            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-on-surface">
+                                <li class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                                    <span class="font-semibold"><?= $pProps >= 9999 ? 'Unlimited' : esc($pProps) ?></span> Properties
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                                    <span class="font-semibold"><?= $pAgents >= 9999 ? 'Unlimited' : esc($pAgents) ?></span> Agents
+                                </li>
+                                <?php if($pMsg): ?>
+                                    <li class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> Messaging
+                                    </li>
+                                <?php endif; ?>
+                                <?php if($pEmail): ?>
+                                    <li class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> Direct Inquiry Email
+                                    </li>
+                                <?php endif; ?>
+                                <?php if($pPois > 0): ?>
+                                    <li class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                                        <span class="font-semibold"><?= $pPois >= 9999 ? 'Unlimited' : esc($pPois) ?></span> Custom POI
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
                         </div>
-                    </div>
-                <?php else: ?>
-                    <div class="flex flex-col items-center justify-center py-6 text-center">
-                        <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">inventory_2</span>
-                        <p class="text-on-surface font-medium text-lg mb-1">No Active Plan</p>
-                        <p class="text-on-surface-variant text-sm mb-5">You do not have an active subscription package.</p>
-                        <a href="<?= base_url('admin/pricing') ?>" class="px-5 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">View Pricing Plans</a>
-                    </div>
-                <?php endif; ?>
-            </div>
+                    <?php else: ?>
+                        <div class="flex flex-col items-center justify-center py-6 text-center">
+                            <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">inventory_2</span>
+                            <p class="text-on-surface font-medium text-lg mb-1">No Active Plan</p>
+                            <p class="text-on-surface-variant text-sm mb-5">You do not have an active subscription package.</p>
+                            <a href="<?= base_url('admin/pricing') ?>" class="px-5 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition shadow-sm">View Pricing Plans</a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
             <?php if ($user['role_id'] != 4 && $user['role_id'] != 1): ?>
                 <div class="bg-surface border border-outline-variant rounded-lg p-6 shadow-sm">
