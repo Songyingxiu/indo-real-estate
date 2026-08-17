@@ -101,13 +101,14 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('profile/update', 'Profile::update');
     $routes->post('profile/update-password', 'Profile::updatePassword');
     $routes->post('profile/upload-docs', 'Profile::uploadDocs');
+    $routes->get('support', 'Support::index');
 
     // super admin routes only
     $routes->group('', ['filter' => 'superAdminAuth'], static function ($routes) {
         
         $routes->get('users', 'Users::index');
         $routes->get('users/create', 'Users::create');
-        $routes->post('users/store', 'Users::store');                          
+        $routes->post('users/store', 'Users::store');                         
         $routes->post('users/updateRole/(:num)', 'Users::updateRole/$1');
         $routes->post('users/delete/(:num)', 'Users::delete/$1');
         $routes->post('users/restore/(:num)', 'Users::restore/$1');
@@ -179,6 +180,5 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
         $routes->post('email-templates/test/(:num)', 'EmailTemplates::sendTest/$1');
 
         $routes->get('reports/export', 'Reports::export');
-        $routes->get('support', 'Support::index');
     });
 });

@@ -157,13 +157,13 @@ class Property extends BaseController
             'sender_id'   => session()->get('id') ?? null,
             'receiver_id' => $receiverId,
             'message'     => $compiledMessage,
-            'status'      => 'Pending'
+            'status'      => 'Pending',
+            'created_at'  => date('Y-m-d H:i:s') // FIX: Forced Timestamp
         ];
 
         $inquiryModel->insert($data);
         $parentId = $inquiryModel->getInsertID();
 
-        // Check Subscription to Trigger Auto-Reply
         $subModel = new \App\Models\SubscriptionModel();
         $planModel = new \App\Models\SubscriptionPlanModel();
         $agentSub = $subModel->where('user_id', $receiverId)->where('sub_status', 'Active')->first();
@@ -190,7 +190,8 @@ class Property extends BaseController
                 'sender_id'   => $receiverId,
                 'receiver_id' => session()->get('id') ?? null,
                 'message'     => "System Auto-Reply: Thank you for your inquiry! My current plan does not support live chat, but I have received your message and will contact you shortly via the email or phone number you provided.",
-                'status'      => 'Replied'
+                'status'      => 'Replied',
+                'created_at'  => date('Y-m-d H:i:s')
             ];
             $inquiryModel->insert($autoReply);
             $inquiryModel->update($parentId, ['status' => 'Replied']);

@@ -9,7 +9,8 @@ class Inquiry extends BaseController
         $inquiryModel = new InquiryModel();
         $userId = session()->get('id');
         
-        $threads = $inquiryModel->select('inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name')
+        // FIX: Explicitly alias inquiries.id to inquiry_id to prevent join collisions
+        $threads = $inquiryModel->select('inquiries.id as inquiry_id, inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name')
             ->join('properties', 'properties.id = inquiries.property_id', 'left')
             ->join('users', 'users.id = inquiries.receiver_id', 'left')
             ->where('inquiries.sender_id', $userId)
@@ -29,7 +30,8 @@ class Inquiry extends BaseController
             $inquiryModel->update($id, ['status' => 'In Discussion']);
         }
         
-        $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
+        // FIX: Explicitly alias inquiries.id to inquiry_id
+        $messages = $inquiryModel->select('inquiries.id as inquiry_id, inquiries.*, users.first_name, users.last_name')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->groupStart()
                 ->where('inquiries.id', $id)
@@ -52,12 +54,12 @@ class Inquiry extends BaseController
             'sender_id'   => session()->get('id'),
             'receiver_id' => $json->receiver_id,
             'message'     => $json->message,
-            'status'      => 'Replied'
+            'status'      => 'Replied',
+            'created_at'  => date('Y-m-d H:i:s')
         ];
 
         if ($inquiryModel->insert($data)) {
-            $data['id'] = $inquiryModel->getInsertID();
-            $data['created_at'] = date('Y-m-d H:i:s');
+            $data['inquiry_id'] = $inquiryModel->getInsertID();
             
             $inquiryModel->update($json->parent_id, ['status' => 'Pending']);
             

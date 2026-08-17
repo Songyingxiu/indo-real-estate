@@ -12,7 +12,7 @@ class Inquiries extends BaseController
         $inquiryModel = new InquiryModel();
         $userId = session()->get('id') ?? session()->get('user_id');
         
-        $threads = $inquiryModel->select('inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name, users.email, users.phone_number')
+        $threads = $inquiryModel->select('inquiries.id as inquiry_id, inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name, users.email, users.phone_number')
             ->join('properties', 'properties.id = inquiries.property_id', 'left')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->where('inquiries.receiver_id', $userId)
@@ -23,7 +23,6 @@ class Inquiries extends BaseController
         $role = session()->get('role_id');
         $canReply = false;
 
-        // DB Driven Real-Time Plan Validation
         if ($role == 4) {
             $canReply = true;
         } else {
@@ -56,7 +55,7 @@ class Inquiries extends BaseController
     {
         $inquiryModel = new InquiryModel();
         
-        $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
+        $messages = $inquiryModel->select('inquiries.id as inquiry_id, inquiries.*, users.first_name, users.last_name')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->groupStart()
                 ->where('inquiries.id', $id)
@@ -118,12 +117,12 @@ class Inquiries extends BaseController
             'sender_id'   => $userId,
             'receiver_id' => $json->receiver_id,
             'message'     => $json->message,
-            'status'      => 'Replied'
+            'status'      => 'Replied',
+            'created_at'  => date('Y-m-d H:i:s')
         ];
 
         if ($inquiryModel->insert($data)) {
-            $data['id'] = $inquiryModel->getInsertID();
-            $data['created_at'] = date('Y-m-d H:i:s');
+            $data['inquiry_id'] = $inquiryModel->getInsertID();
             
             $inquiryModel->update($json->parent_id, ['status' => 'Replied']);
             
