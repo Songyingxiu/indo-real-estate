@@ -23,16 +23,17 @@ class Inquiry extends BaseController
     public function getThread($id)
     {
         $inquiryModel = new InquiryModel();
+        $pk = $inquiryModel->primaryKey;
         
-        $parent = $inquiryModel->where('inquiry_id', $id)->first();
+        $parent = $inquiryModel->find($id);
         if ($parent && $parent['sender_id'] == session()->get('id') && $parent['status'] == 'Replied') {
-            $inquiryModel->where('inquiry_id', $id)->set(['status' => 'In Discussion'])->update();
+            $inquiryModel->update($id, ['status' => 'In Discussion']);
         }
         
         $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->groupStart()
-                ->where('inquiries.inquiry_id', $id)
+                ->where("inquiries.{$pk}", $id)
                 ->orWhere('inquiries.parent_id', $id)
             ->groupEnd()
             ->orderBy('inquiries.created_at', 'ASC')
@@ -57,9 +58,10 @@ class Inquiry extends BaseController
         ];
 
         if ($inquiryModel->insert($data)) {
-            $data['inquiry_id'] = $inquiryModel->getInsertID();
+            $pk = $inquiryModel->primaryKey;
+            $data[$pk] = $inquiryModel->getInsertID();
             
-            $inquiryModel->where('inquiry_id', $json->parent_id)->set(['status' => 'Pending'])->update();
+            $inquiryModel->update($json->parent_id, ['status' => 'Pending']);
             
             return $this->response->setJSON(['status' => 'success', 'message_data' => $data]);
         }

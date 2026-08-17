@@ -23,18 +23,17 @@
             <div class="flex-1 overflow-y-auto custom-scrollbar">
                 <?php if (!empty($threads)): ?>
                     <script> const initThreads = <?= json_encode($threads) ?>; </script>
-                    <template x-for="thread in threads" :key="thread.inquiry_id">
+                    <template x-for="thread in threads" :key="thread.inquiry_id || thread.id">
                         <div @click="loadThread(thread)" 
-                             :class="activeThread?.inquiry_id === thread.inquiry_id ? 'bg-primary/10 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
+                             :class="(activeThread?.inquiry_id || activeThread?.id) === (thread.inquiry_id || thread.id) ? 'bg-primary/10 border-l-4 border-primary' : 'border-l-4 border-transparent hover:bg-surface-container-low'"
                              class="p-4 border-b border-outline-variant cursor-pointer transition-colors">
                             <div class="flex justify-between items-start mb-1">
-                                <span class="font-bold text-on-surface text-[14px]" x-text="thread.first_name + ' ' + thread.last_name"></span>
+                                <span class="font-bold text-on-surface text-[14px]" x-text="(thread.first_name || 'Admin') + ' ' + (thread.last_name || '')"></span>
                                 <span class="text-[11px] text-on-surface-variant" x-text="formatDate(thread.created_at)"></span>
                             </div>
                             <div class="text-primary font-semibold text-[13px] truncate mb-2" x-text="thread.property_title || 'General Support Inquiry'"></div>
                             
-                            <!-- Status Dropdown -->
-                            <select @click.stop @change="updateThreadStatus(thread.inquiry_id, $event.target.value)" class="w-full px-2 py-1 rounded bg-surface border border-outline-variant text-[12px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
+                            <select @click.stop @change="updateThreadStatus(thread.inquiry_id || thread.id, $event.target.value)" class="w-full px-2 py-1 rounded bg-surface border border-outline-variant text-[12px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
                                 <option value="Pending" :selected="thread.status == 'Pending'">Pending</option>
                                 <option value="In Discussion" :selected="thread.status == 'In Discussion'">In Discussion</option>
                                 <option value="Negotiating" :selected="thread.status == 'Negotiating'">Negotiating</option>
@@ -52,7 +51,6 @@
             </div>
         </div>
 
-        <!-- Chat Area -->
         <div class="w-2/3 flex flex-col bg-surface relative">
             
             <template x-if="!activeThread">
@@ -66,7 +64,7 @@
                 <div class="flex flex-col h-full w-full">
                     <div class="p-4 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center shadow-sm z-10">
                         <div>
-                            <h3 class="font-bold text-on-surface text-[16px]" x-text="activeThread.first_name + ' ' + activeThread.last_name"></h3>
+                            <h3 class="font-bold text-on-surface text-[16px]" x-text="(activeThread.first_name || 'Admin') + ' ' + (activeThread.last_name || '')"></h3>
                             <template x-if="activeThread.property_id">
                                 <a :href="'<?= base_url('property/') ?>' + activeThread.property_id" target="_blank" class="text-[13px] text-primary hover:underline flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[14px]">link</span> <span x-text="activeThread.property_title"></span>
@@ -89,13 +87,13 @@
                     </div>
 
                     <div id="chatBox" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[#f8fafd]">
-                        <template x-for="msg in messages" :key="msg.inquiry_id || Math.random()">
+                        <template x-for="msg in messages" :key="msg.inquiry_id || msg.id || Math.random()">
                             <div :class="msg.sender_id == myId ? 'self-end' : 'self-start'" class="max-w-[75%]">
                                 <div class="text-[11px] text-on-surface-variant mb-1 mx-1" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
-                                    <span x-text="msg.sender_id == myId ? 'You' : msg.first_name"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
+                                    <span x-text="msg.sender_id == myId ? 'You' : (msg.first_name || 'Admin')"></span> &bull; <span x-text="formatDate(msg.created_at)"></span>
                                 </div>
                                 <div :class="msg.sender_id == myId ? 'bg-primary text-on-primary rounded-l-2xl rounded-tr-2xl' : 'bg-surface border border-outline-variant text-on-surface rounded-r-2xl rounded-tl-2xl'" 
-                                     class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message || 'No message content'">
+                                     class="px-4 py-3 text-[14px] shadow-sm whitespace-pre-wrap" x-text="msg.message || 'No message content available'">
                                 </div>
                             </div>
                         </template>
@@ -141,7 +139,10 @@
             loadThread(thread) {
                 this.activeThread = thread;
                 this.messages = [];
-                fetch('<?= base_url('admin/inquiries/thread/') ?>' + thread.inquiry_id)
+                
+                const threadId = thread.inquiry_id || thread.id;
+                
+                fetch('<?= base_url('admin/inquiries/thread/') ?>' + threadId)
                     .then(res => res.json())
                     .then(data => {
                         this.messages = Array.isArray(data) ? data : (data.data || []);
@@ -156,6 +157,8 @@
                 const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
                 const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
                 
+                const threadId = this.activeThread.inquiry_id || this.activeThread.id;
+
                 fetch('<?= base_url('admin/inquiries/reply') ?>', {
                     method: 'POST',
                     headers: {
@@ -164,7 +167,7 @@
                         [csrfName]: csrfHash
                     },
                     body: JSON.stringify({
-                        parent_id: this.activeThread.inquiry_id,
+                        parent_id: threadId,
                         property_id: this.activeThread.property_id,
                         receiver_id: this.activeThread.sender_id, 
                         message: this.replyText
