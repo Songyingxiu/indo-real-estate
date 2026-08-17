@@ -424,17 +424,34 @@
                             <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
                             <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
                             
-                            <select name="source" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
-                                <option value="Contact Form" <?= old('source') == 'Contact Form' ? 'selected' : '' ?>><?= lang('Front.det_ask_question') ?></option>
-                                <option value="Schedule Visit" <?= old('source') == 'Schedule Visit' ? 'selected' : '' ?>><?= lang('Front.det_schedule_visit') ?></option>
+                            <!-- Preset Auto-Update Source -->
+                            <select id="inquirySource" name="source" required onchange="updatePresetMessage()" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
+                                <option value="Contact Form"><?= lang('Front.det_ask_question') ?></option>
+                                <option value="Schedule Visit"><?= lang('Front.det_schedule_visit') ?></option>
                             </select>
 
-                            <input name="name" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(old('name') ?? (session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '')) ?>">
-                            <input name="phone" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="<?= esc(old('phone')) ?>">
-                            <input name="email" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(old('email') ?? session()->get('email')) ?>">
-                            <textarea name="message" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" placeholder="I am interested in <?= esc($property->title) ?>..." rows="3"><?= esc(old('message')) ?></textarea>
+                            <!-- Inline Validation Containers Added -->
+                            <div>
+                                <input name="name" required oninput="clearError('name')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '') ?>">
+                                <span id="error-name" class="text-error text-[12px] hidden mt-1"></span>
+                            </div>
                             
-                            <button type="submit" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
+                            <div>
+                                <input name="phone" required oninput="clearError('phone')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="">
+                                <span id="error-phone" class="text-error text-[12px] hidden mt-1"></span>
+                            </div>
+                            
+                            <div>
+                                <input name="email" required oninput="clearError('email')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(session()->get('email')) ?>">
+                                <span id="error-email" class="text-error text-[12px] hidden mt-1"></span>
+                            </div>
+                            
+                            <div>
+                                <textarea name="message" id="inquiryMessage" required oninput="clearError('message')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" rows="4"></textarea>
+                                <span id="error-message" class="text-error text-[12px] hidden mt-1"></span>
+                            </div>
+                            
+                            <button type="submit" id="submitBtn" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-[20px]">send</span> <?= lang('Front.det_send_msg') ?>
                             </button>
                         </form>
@@ -471,7 +488,6 @@
 </div>
 
 <?= $this->include('components/login_modal') ?>
-
 <?= $this->include('front/layout/footer') ?>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -512,7 +528,31 @@
                     );
             <?php endforeach; ?>
         <?php endif; ?>
+        
+        // Initialize Preset Message
+        updatePresetMessage();
     });
+
+    // Preset Message Logic
+    function updatePresetMessage() {
+        const source = document.getElementById('inquirySource')?.value;
+        const msgEl = document.getElementById('inquiryMessage');
+        if (!msgEl) return;
+        
+        if (source === 'Schedule Visit') {
+            msgEl.value = "Hello, I am interested in <?= esc($property->title) ?> and would like to schedule a visit. Please let me know your availability.";
+        } else {
+            msgEl.value = "Hello, I have a question regarding <?= esc($property->title) ?>. Could you please provide me with more details?";
+        }
+    }
+
+    function clearError(fieldName) {
+        const errorEl = document.getElementById('error-' + fieldName);
+        if (errorEl) {
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
+        }
+    }
 
     function openGallery() {
         document.body.style.overflow = 'hidden';
@@ -567,6 +607,10 @@
 
     function submitInquiry(e, formElement) {
         e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Sending...';
+        btn.disabled = true;
         
         const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
         const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
@@ -588,14 +632,31 @@
             return response.json();
         })
         .then(data => {
-            if (data.status === 'success' || data.message === 'Inquiry submitted successfully.') {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            if (data.status === 'validation_error') {
+                for (const [field, message] of Object.entries(data.errors)) {
+                    const errorEl = document.getElementById('error-' + field);
+                    if (errorEl) {
+                        errorEl.textContent = message;
+                        errorEl.classList.remove('hidden');
+                    }
+                }
+            } else if (data.status === 'success' || data.message === 'Inquiry submitted successfully.') {
                 window.dispatchEvent(new CustomEvent('show-inquiry-success'));
                 formElement.reset();
+                updatePresetMessage();
             } else {
                 alert(data.message || 'Error sending inquiry. Please try again.');
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            if(error.message !== 'Unauthorized') {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
     }
 </script>
 
