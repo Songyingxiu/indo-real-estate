@@ -22,7 +22,8 @@ class Contact extends BaseController
 
         $rules = [
             'subject' => 'required|min_length[5]|max_length[150]',
-            'message' => 'required|min_length[10]|max_length[2000]'
+            'message' => 'required|min_length[10]|max_length[2000]',
+            'email'   => 'required|valid_email'
         ];
 
         if (!$this->validate($rules)) {
@@ -34,17 +35,17 @@ class Contact extends BaseController
 
         $userModel = new UserModel();
         $admin = $userModel->where('role_id', 4)->first();
-        $adminId = $admin ? $admin['id'] : 1; 
+        $adminId = $admin ? (is_array($admin) ? $admin['id'] : $admin->id) : 1; 
 
         $inquiryModel = new InquiryModel();
         
         $subject = $this->request->getPost('subject');
         $originalMessage = $this->request->getPost('message');
+        $replyEmail = $this->request->getPost('email');
         
-        $formattedMessage = "General Support Inquiry\nSubject: " . $subject . "\n\n" . $originalMessage;
+        $formattedMessage = "General Support Inquiry\nSubject: " . $subject . "\nReply-To Email: " . $replyEmail . "\n\n" . $originalMessage;
         
         $inquiryModel->insert([
-            'property_id' => null, 
             'sender_id'   => session()->get('id'),
             'receiver_id' => $adminId,
             'message'     => $formattedMessage,

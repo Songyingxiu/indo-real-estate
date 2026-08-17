@@ -45,13 +45,13 @@
                     <?php else: ?>
                         <?php if ($slug == 'about-us'): ?>
                             <h2 class="text-2xl font-bold mb-4"><?= lang('Front.page_mission_title') ?></h2>
-                            <p class="mb-6"><?= lang('Front.page_mission_text') ?></p>
+                            <p class="mb-6 text-on-surface-variant"><?= lang('Front.page_mission_text') ?></p>
                             
-                            <h2 class="text-2xl font-bold mb-4"><?= lang('Front.page_choose_title') ?></h2>
-                            <ul class="list-disc pl-5 space-y-2 mb-6 text-on-surface-variant">
-                                <li><?= lang('Front.page_choose_li1') ?></li>
-                                <li><?= lang('Front.page_choose_li2') ?></li>
-                                <li><?= lang('Front.page_choose_li3') ?></li>
+                            <h2 class="text-2xl font-bold mb-4 mt-8"><?= lang('Front.page_choose_title') ?></h2>
+                            <ul class="list-disc pl-5 space-y-3 mb-6 text-on-surface-variant">
+                                <li><strong>Reliability:</strong> <?= lang('Front.page_choose_li1') ?></li>
+                                <li><strong>Trust:</strong> <?= lang('Front.page_choose_li2') ?></li>
+                                <li><strong>Community:</strong> <?= lang('Front.page_choose_li3') ?></li>
                             </ul>
                         
                         <?php elseif ($slug == 'privacy-policy'): ?>
