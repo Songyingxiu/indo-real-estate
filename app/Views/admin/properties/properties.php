@@ -47,7 +47,13 @@
                         <tr class="border-b border-outline-variant hover:bg-surface-container-low/50">
                             <td class="py-4 px-6 font-semibold text-primary">
                                 <?= esc($property['title']) ?><br>
-                                <span class="text-xs font-normal text-on-surface-variant">Approval: <?= esc($property['approval_status']) ?></span>
+                                <span class="text-xs font-normal text-on-surface-variant">Approval: <?= esc($property['approval_status']) ?></span><br>
+                                
+                                <?php 
+                                    $dStatus = $property['doc_status'] ?? 'Not Submitted';
+                                    $dColor = $dStatus === 'Verified' ? 'text-[#0d652d]' : 'text-error';
+                                ?>
+                                <span class="text-xs font-normal <?= $dColor ?>">Doc Status: <?= esc($dStatus) ?></span>
                             </td>
                             <td class="py-4 px-6"><span class="px-3 py-1 rounded-full bg-surface-container"><?= esc($property['listing_type']) ?></span></td>
                             <td class="py-4 px-6">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></td>
@@ -55,7 +61,11 @@
                                 <select onchange="updatePropertyStatus(<?= $property['id'] ?>, this.value)" class="px-3 py-1.5 rounded bg-surface border border-outline-variant text-[14px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
                                     <option value="Draft" <?= $property['status'] == 'Draft' ? 'selected' : '' ?>>Draft</option>
                                     <option value="Pending Approval" <?= $property['status'] == 'Pending Approval' ? 'selected' : '' ?>>Pending Approval</option>
-                                    <option value="Active" <?= $property['status'] == 'Active' ? 'selected' : '' ?>>Active</option>
+                                    
+                                    <option value="Active" <?= $property['status'] == 'Active' ? 'selected' : '' ?> <?= ($property['doc_status'] ?? '') !== 'Verified' ? 'disabled' : '' ?>>
+                                        Active <?= ($property['doc_status'] ?? '') !== 'Verified' ? '(Doc Required)' : '' ?>
+                                    </option>
+                                    
                                     <option value="Sold" <?= $property['status'] == 'Sold' ? 'selected' : '' ?>>Sold</option>
                                     <option value="Expired" <?= $property['status'] == 'Expired' ? 'selected' : '' ?>>Expired</option>
                                     <option value="Inactive" <?= $property['status'] == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
@@ -96,12 +106,14 @@
             alertBox.classList.remove('hidden', 'bg-error-container', 'text-on-error-container', 'bg-[#d3e3fd]', 'text-[#041e49]');
             if(data.status === 'success') {
                 alertBox.classList.add('bg-[#d3e3fd]', 'text-[#041e49]');
-                alertBox.innerHTML = `<span class="material-symbols-outlined mt-0.5">check_circle</span> Property status updated to ${newStatus}.`;
+                alertBox.innerHTML = `<span class="material-symbols-outlined mt-0.5">check_circle</span> ${data.message}`;
             } else {
                 alertBox.classList.add('bg-error-container', 'text-on-error-container');
-                alertBox.innerHTML = `<span class="material-symbols-outlined mt-0.5">warning</span> Failed to update status.`;
+                alertBox.innerHTML = `<span class="material-symbols-outlined mt-0.5">warning</span> ${data.message}`;
+                
+                setTimeout(() => { window.location.reload(); }, 1500);
             }
-            setTimeout(() => { alertBox.classList.add('hidden'); }, 3000);
+            setTimeout(() => { alertBox.classList.add('hidden'); }, 4000);
         })
         .catch(err => console.error('Error:', err));
     }

@@ -25,10 +25,13 @@ class Properties extends BaseController
         $roleId = session()->get('role_id');
         $userId = session()->get('user_id');
 
+        $propertyModel->select('properties.*, property_verifications.approval_status as doc_status');
+        $propertyModel->join('property_verifications', 'property_verifications.property_id = properties.id', 'left');
+
         if ($roleId == 4) {
             $data['properties'] = $propertyModel->findAll();
         } else {
-            $data['properties'] = $propertyModel->where('owner_id', $userId)->findAll();
+            $data['properties'] = $propertyModel->where('properties.owner_id', $userId)->findAll();
         }
 
         return view('admin/properties/properties', $data); 
@@ -520,6 +523,16 @@ class Properties extends BaseController
         
         if (empty($status)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'No status provided.']);
+        }
+
+        if ($status === 'Active') {
+            $docModel = new PropertyVerificationModel();
+            $doc = $docModel->where('property_id', $id)->first();
+            $docStatus = $doc ? (is_object($doc) ? $doc->approval_status : $doc['approval_status']) : 'Not Submitted';
+
+            if ($docStatus !== 'Verified') {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Cannot activate listing. The required document is currently: ' . $docStatus]);
+            }
         }
 
         if ($propertyModel->update($id, ['status' => $status])) {
