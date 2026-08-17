@@ -19,6 +19,7 @@ class Dashboard extends BaseController
         $propertyModel = new PropertyModel();
         $subscriptionModel = new SubscriptionModel();
         $inquiryModel = new InquiryModel();
+        $db = \Config\Database::connect();
 
         // Base Date Calculations
         $today = date('Y-m-d');
@@ -66,7 +67,14 @@ class Dashboard extends BaseController
             $data['subToday'] = $subscriptionModel->where("DATE(created_date) = '$today'")->countAllResults();
             $data['sub7Days'] = $subscriptionModel->where("DATE(created_date) >= '$sevenDaysAgo'")->countAllResults();
             $data['sub30Days'] = $subscriptionModel->where("DATE(created_date) >= '$thirtyDaysAgo'")->countAllResults();
-            $data['revenueSum'] = 0;
+            
+            $revenueQuery = $db->table('subscriptions')
+                ->selectSum('subscription_plans.price', 'total_revenue')
+                ->join('subscription_plans', 'subscription_plans.id = subscriptions.plan_id', 'inner')
+                ->whereIn('subscriptions.sub_status', ['Active', 'Expired', 'Upgraded', 'Cancelled'])
+                ->get()->getRow();
+                
+            $data['revenueSum'] = $revenueQuery->total_revenue ?? 0;
 
             $chartLabels[] = 'Pending Properties';
             $chartValues[] = $data['pendingProperties'];
