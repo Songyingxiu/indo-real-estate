@@ -128,49 +128,42 @@
             <section>
                 <h2 class="font-brand-text text-[24px] font-bold text-on-surface mb-4"><?= lang('Front.det_specs') ?></h2>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 bg-surface-container-lowest border border-outline-variant rounded-lg p-6">
-                    
                     <?php if(!empty($property->building_society_name)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_complex') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->building_society_name) ?></span>
                     </div>
                     <?php endif; ?>
-                    
                     <?php if(!empty($property->unit_number)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_unit_num') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->unit_number) ?></span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->year_built)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_year_built') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->year_built) ?></span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->total_floors)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_total_floors') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->total_floors) ?></span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->usable_area)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_usable_area') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->usable_area) ?> m&sup2;</span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->total_land_area)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_land_area') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->total_land_area) ?> m&sup2;</span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->parking)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_parking') ?></span>
@@ -180,21 +173,18 @@
                         </span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->basement)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_basement') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->basement) ?></span>
                     </div>
                     <?php endif; ?>
-
                     <?php if(!empty($property->water_facility)): ?>
                     <div>
                         <span class="block text-[12px] text-on-surface-variant font-medium"><?= lang('Front.det_water') ?></span>
                         <span class="block text-[14px] font-bold text-on-surface"><?= esc($property->water_facility) ?></span>
                     </div>
                     <?php endif; ?>
-
                 </div>
             </section>
 
@@ -420,35 +410,46 @@
                     </div>
 
                     <?php if(session()->get('id')): ?>
-                        <form id="inquiryForm" onsubmit="submitInquiry(event, this)" class="flex flex-col gap-3">
+                        <form id="inquiryForm" onsubmit="submitInquiry(event, this)" novalidate class="flex flex-col gap-3">
                             <input type="hidden" name="property_id" value="<?= esc($property->id) ?>">
                             <input type="hidden" name="agent_id" value="<?= esc($property->owner_id) ?>">
                             
+                            <div id="inquiry-global-error" class="hidden bg-[#c9302c] text-white p-3 font-bold items-center gap-2 rounded shadow-sm">
+                                <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                            </div>
+
                             <!-- Preset Auto-Update Source -->
                             <select id="inquirySource" name="source" required onchange="updatePresetMessage()" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
                                 <option value="Contact Form"><?= lang('Front.det_ask_question') ?></option>
                                 <option value="Schedule Visit"><?= lang('Front.det_schedule_visit') ?></option>
                             </select>
 
-                            <!-- Inline Validation Containers Added -->
                             <div>
-                                <input name="name" required oninput="clearError('name')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '') ?>">
-                                <span id="error-name" class="text-error text-[12px] hidden mt-1"></span>
+                                <input id="inquiry-name" name="name" required oninput="clearError('name')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '') ?>">
+                                <div id="error-name" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                                    <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
+                                </div>
                             </div>
                             
                             <div>
-                                <input name="phone" required oninput="clearError('phone')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="">
-                                <span id="error-phone" class="text-error text-[12px] hidden mt-1"></span>
+                                <input id="inquiry-phone" name="phone" required oninput="clearError('phone')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="">
+                                <div id="error-phone" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                                    <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
+                                </div>
                             </div>
                             
                             <div>
-                                <input name="email" required oninput="clearError('email')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(session()->get('email')) ?>">
-                                <span id="error-email" class="text-error text-[12px] hidden mt-1"></span>
+                                <input id="inquiry-email" name="email" required oninput="clearError('email')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(session()->get('email')) ?>">
+                                <div id="error-email" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                                    <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
+                                </div>
                             </div>
                             
                             <div>
                                 <textarea name="message" id="inquiryMessage" required oninput="clearError('message')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" rows="4"></textarea>
-                                <span id="error-message" class="text-error text-[12px] hidden mt-1"></span>
+                                <div id="error-message" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
+                                    <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
+                                </div>
                             </div>
                             
                             <button type="submit" id="submitBtn" class="w-full bg-primary-container text-white py-3 rounded font-bold text-[14px] hover:bg-primary transition-colors mt-2 flex items-center justify-center gap-2">
@@ -529,11 +530,9 @@
             <?php endforeach; ?>
         <?php endif; ?>
         
-        // Initialize Preset Message
         updatePresetMessage();
     });
 
-    // Preset Message Logic
     function updatePresetMessage() {
         const source = document.getElementById('inquirySource')?.value;
         const msgEl = document.getElementById('inquiryMessage');
@@ -547,10 +546,19 @@
     }
 
     function clearError(fieldName) {
-        const errorEl = document.getElementById('error-' + fieldName);
-        if (errorEl) {
-            errorEl.classList.add('hidden');
-            errorEl.textContent = '';
+        const input = document.getElementById('inquiry-' + fieldName) || document.getElementById('inquiryMessage');
+        const errorDiv = document.getElementById('error-' + fieldName);
+        if (input) {
+            input.classList.remove('border-[#c9302c]', 'focus:border-[#c9302c]', 'focus:ring-[#c9302c]', 'bg-[#fff8f8]');
+            input.classList.add('border-outline-variant', 'focus:border-primary', 'bg-white');
+        }
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+            errorDiv.classList.remove('flex');
+        }
+        const activeErrors = document.querySelectorAll('[id^="error-"]:not(.hidden)');
+        if (activeErrors.length === 0) {
+            document.getElementById('inquiry-global-error').classList.add('hidden');
         }
     }
 
@@ -612,6 +620,9 @@
         btn.innerHTML = 'Sending...';
         btn.disabled = true;
         
+        const globalBanner = document.getElementById('inquiry-global-error');
+        if (globalBanner) globalBanner.classList.add('hidden');
+
         const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
         const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');
 
@@ -636,17 +647,28 @@
             btn.disabled = false;
             
             if (data.status === 'validation_error') {
+                if (globalBanner) {
+                    globalBanner.classList.remove('hidden');
+                    globalBanner.classList.add('flex');
+                }
                 for (const [field, message] of Object.entries(data.errors)) {
-                    const errorEl = document.getElementById('error-' + field);
-                    if (errorEl) {
-                        errorEl.textContent = message;
-                        errorEl.classList.remove('hidden');
+                    const input = document.getElementById('inquiry-' + field) || (field === 'message' ? document.getElementById('inquiryMessage') : null);
+                    const errorDiv = document.getElementById('error-' + field);
+                    
+                    if (input) {
+                        input.classList.remove('border-outline-variant', 'focus:border-primary', 'bg-white');
+                        input.classList.add('border-[#c9302c]', 'focus:border-[#c9302c]', 'focus:ring-[#c9302c]', 'bg-[#fff8f8]');
+                    }
+                    if (errorDiv) {
+                        errorDiv.querySelector('.error-text').textContent = message;
+                        errorDiv.classList.remove('hidden');
+                        errorDiv.classList.add('flex');
                     }
                 }
             } else if (data.status === 'success' || data.message === 'Inquiry submitted successfully.') {
                 window.dispatchEvent(new CustomEvent('show-inquiry-success'));
                 formElement.reset();
-                updatePresetMessage();
+                updatePresetMessage(); 
             } else {
                 alert(data.message || 'Error sending inquiry. Please try again.');
             }
