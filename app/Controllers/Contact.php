@@ -45,14 +45,22 @@ class Contact extends BaseController
         
         $formattedMessage = "General Support Inquiry\nSubject: " . $subject . "\nReply-To Email: " . $replyEmail . "\n\n" . $originalMessage;
         
-        $inquiryModel->insert([
-            'sender_id'   => session()->get('id'),
-            'receiver_id' => $adminId,
-            'message'     => $formattedMessage,
-            'status'      => 'Pending',
-            'created_at'  => date('Y-m-d H:i:s')
-        ]);
-
-        return $this->response->setJSON(['status' => 'success', 'message' => 'Message sent directly to Support!']);
+        try {
+           $inquiryModel->insert([
+                'sender_id'   => session()->get('id'),
+                'receiver_id' => $adminId,
+                'message'     => $formattedMessage,
+                'status'      => 'Pending',
+                'created_at'  => date('Y-m-d H:i:s')
+            ]);
+            
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Message sent directly to Support!']);
+            
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error', 
+                'message' => 'Database configuration error: The inquiries table requires property_id to be nullable for general support tickets. Please run: ALTER TABLE inquiries MODIFY property_id INT NULL DEFAULT NULL;'
+            ]);
+        }
     }
 }
