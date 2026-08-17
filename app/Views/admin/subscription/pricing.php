@@ -32,18 +32,36 @@
                 </div>
 
                 <ul class="flex flex-col gap-4 mb-8 flex-grow">
-                    <!-- Standard Plan Limits -->
+                    <!-- Properties Limit -->
                     <li class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
-                        <span class="text-on-surface text-sm font-medium"><?= $plan->max_properties == 0 ? 'Unlimited' : esc($plan->max_properties) ?> Property Listings</span>
+                        <span class="text-on-surface text-sm font-medium"><?= $plan->max_properties >= 9999 ? 'Unlimited' : esc($plan->max_properties) ?> Properties</span>
                     </li>
+                    
+                    <!-- Agents Limit -->
+                    <li class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                        <span class="text-on-surface text-sm font-medium"><?= ($plan->max_agents ?? 0) >= 9999 ? 'Unlimited' : esc($plan->max_agents ?? 0) ?> Agents</span>
+                    </li>
+                    
+                    <!-- Messaging Permission -->
                     <li class="flex items-center gap-3">
                         <span class="material-symbols-outlined <?= ($plan->allow_messages ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_messages ?? false) ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= ($plan->allow_messages ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct In-App Messaging</span>
+                        <span class="text-on-surface text-sm <?= ($plan->allow_messages ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Messaging</span>
                     </li>
+                    
+                    <!-- Direct Email Permission -->
                     <li class="flex items-center gap-3">
                         <span class="material-symbols-outlined <?= ($plan->allow_direct_email ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_direct_email ?? false) ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= ($plan->allow_direct_email ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Email & Phone Inquiries</span>
+                        <span class="text-on-surface text-sm <?= ($plan->allow_direct_email ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Inquiry Email</span>
+                    </li>
+                    
+                    <!-- Custom POI Limit -->
+                    <li class="flex items-center gap-3">
+                        <span class="material-symbols-outlined <?= ($plan->max_pois ?? 0) > 0 ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->max_pois ?? 0) > 0 ? 'check_circle' : 'cancel' ?></span>
+                        <span class="text-on-surface text-sm <?= ($plan->max_pois ?? 0) > 0 ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">
+                            <?= ($plan->max_pois ?? 0) > 0 ? (($plan->max_pois >= 9999 ? 'Unlimited' : esc($plan->max_pois)) . ' Custom POI') : 'Custom POI' ?>
+                        </span>
                     </li>
 
                     <!-- Dynamic Master Data Features -->

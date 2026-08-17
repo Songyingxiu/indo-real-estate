@@ -169,6 +169,20 @@ $passErrors = session('errors.current_password') || session('errors.new_password
                                         <span class="font-semibold"><?= $pPois >= 9999 ? 'Unlimited' : esc($pPois) ?></span> Custom POI
                                     </li>
                                 <?php endif; ?>
+                                
+                                <?php 
+                                    $assignedFeatures = json_decode($activePlan->features_en ?? $activePlan['features_en'] ?? '[]', true);
+                                    if (is_array($assignedFeatures) && !empty($assignedFeatures)): 
+                                        foreach($assignedFeatures as $featureName): 
+                                ?>
+                                    <li class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                                        <span class="font-semibold"><?= esc($featureName) ?></span>
+                                    </li>
+                                <?php 
+                                        endforeach; 
+                                    endif; 
+                                ?>
                             </ul>
                         </div>
                     <?php else: ?>
