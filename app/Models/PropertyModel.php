@@ -11,7 +11,7 @@ class PropertyModel extends Model
     
     protected $allowedFields    = [
         'owner_id', 'property_type_id', 'city_id', 'zipcode_id', 'title', 'title_en', 'title_id', 'slug', 
-        'description', 'description_en', 'description_id', 'listing_type', 'address_line_1', 'address_line_2', 
+        'description', 'description_en', 'description_id', 'listing_type', 'rental_period', 'address_line_1', 'address_line_2', 
         'area_name', 'unit_number', 'building_society_name', 'latitude', 
         'longitude', 'year_built', 'total_floors', 'bed', 'bath', 
         'total_area', 'total_land_area', 'usable_area', 'parking', 

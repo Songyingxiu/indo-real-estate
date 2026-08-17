@@ -12,6 +12,7 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ 
+    listingType: '<?= old('listing_type', 'Sale') ?>',
     translateText(text, targetId, langpair = 'en|id') {
         if (!text.trim()) return;
         fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langpair}`)
@@ -135,10 +136,11 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
                     <?= $errBox($err) ?>
                 </div>
 
+                <!-- Bound x-model to Listing Type -->
                 <div>
                     <label class="block font-semibold mb-2">Listing Type <span class="text-[#c9302c]">*</span></label>
                     <?php $err = $getErr('listing_type'); ?>
-                    <select name="listing_type" required class="w-full px-4 py-3 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                    <select name="listing_type" x-model="listingType" required class="w-full px-4 py-3 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
                         <option value="Sale" <?= old('listing_type') == 'Sale' ? 'selected' : '' ?>>For Sale</option>
                         <option value="Rent" <?= old('listing_type') == 'Rent' ? 'selected' : '' ?>>For Rent</option>
                     </select>
@@ -149,6 +151,17 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
                     <label class="block font-semibold mb-2">Asking Price (IDR) <span class="text-[#c9302c]">*</span></label>
                     <?php $err = $getErr('tax_price'); ?>
                     <input type="number" name="tax_price" value="<?= old('tax_price') ?>" required class="w-full px-4 py-3 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>">
+                    <?= $errBox($err) ?>
+                </div>
+
+                <div x-show="listingType === 'Rent'" style="display: none;">
+                    <label class="block font-semibold mb-2">Rental Period <span class="text-[#c9302c]">*</span></label>
+                    <?php $err = $getErr('rental_period'); ?>
+                    <select name="rental_period" class="w-full px-4 py-3 border rounded focus:ring-1 outline-none <?= $errClass($err) ?>" :required="listingType === 'Rent'">
+                        <option value="" disabled <?= old('rental_period') ? '' : 'selected' ?>>Select period...</option>
+                        <option value="Month" <?= old('rental_period') == 'Month' ? 'selected' : '' ?>>Per Month</option>
+                        <option value="Year" <?= old('rental_period') == 'Year' ? 'selected' : '' ?>>Per Year</option>
+                    </select>
                     <?= $errBox($err) ?>
                 </div>
 
