@@ -101,6 +101,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     $routes->post('profile/update', 'Profile::update');
     $routes->post('profile/update-password', 'Profile::updatePassword');
     $routes->post('profile/upload-docs', 'Profile::uploadDocs');
+    $routes->post('profile/delete-account', 'Profile::deleteAccount');
     $routes->get('support', 'Support::index');
 
     // super admin routes only

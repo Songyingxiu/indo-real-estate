@@ -2,16 +2,18 @@
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\PropertyModel;
 use App\Models\SubscriptionModel;
 use App\Models\SubscriptionPlanModel;
 use App\Models\AgentVerificationModel;
+use App\Libraries\EmailService;
 use Cloudinary\Cloudinary;
 
 class Profile extends BaseController 
 {
     public function index() 
     {
-        $userId = session()->get('user_id');
+        $userId = session()->get('user_id') ?? session()->get('id');
         if (!$userId) return redirect()->to(base_url('login'));
         
         $userModel = new UserModel();
@@ -29,7 +31,7 @@ class Profile extends BaseController
         $data['activePlan'] = null;
         
         if ($activeSub) {
-            $data['activePlan'] = $planModel->find($activeSub->plan_id);
+            $data['activePlan'] = $planModel->find(is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id']);
         }
 
         $agentVerifyModel = new AgentVerificationModel();
@@ -40,7 +42,7 @@ class Profile extends BaseController
 
     public function update()
     {
-        $userId = session()->get('user_id');
+        $userId = session()->get('user_id') ?? session()->get('id');
         if (!$userId) return redirect()->to(base_url('login'));
 
         $userModel = new UserModel();
@@ -63,7 +65,7 @@ class Profile extends BaseController
 
     public function updatePassword()
     {
-        $userId = session()->get('user_id');
+        $userId = session()->get('user_id') ?? session()->get('id');
         if (!$userId) return redirect()->to(base_url('login'));
 
         $currentPassword = $this->request->getPost('current_password');
@@ -154,5 +156,33 @@ class Profile extends BaseController
         }
 
         return redirect()->back()->with('error', 'Failed to upload document.');
+    }
+
+    public function deleteAccount()
+    {
+        $userId = session()->get('user_id') ?? session()->get('id');
+        if (!$userId) return redirect()->to(base_url('login'));
+
+        $userModel = new UserModel();
+        $user = $userModel->find($userId);
+
+        if ($user) {
+            $propertyModel = new PropertyModel();
+            $propertyModel->where('owner_id', $userId)->delete();
+
+            $emailService = new EmailService();
+            $emailService->sendDynamicEmail(
+                'Account Deleted',
+                $user['email'],
+                ['{first_name}' => $user['first_name']]
+            );
+
+            $userModel->delete($userId);
+            session()->destroy();
+            
+            return redirect()->to(base_url('/'))->with('success', 'Your agent/owner account and active listings have been hidden. You have 60 days to restore them by logging back in.');
+        }
+
+        return redirect()->back()->with('error', 'We encountered an issue deleting your account. Please try again.');
     }
 }

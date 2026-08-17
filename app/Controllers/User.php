@@ -61,7 +61,6 @@ class User extends BaseController
         $userModel = new UserModel();
         $user = $userModel->find($userId);
 
-        // Check if the user registered via Google (password is empty)
         $hasLocalPassword = !empty($user['password']);
 
         $rules = [
@@ -69,7 +68,6 @@ class User extends BaseController
             'confirm_password' => 'required|matches[new_password]'
         ];
 
-        // Only require current password if they actually have one
         if ($hasLocalPassword) {
             $rules['current_password'] = 'required';
         }
@@ -151,7 +149,6 @@ class User extends BaseController
 
         $data['pager'] = $savedModel->pager;
         
-        // Fetch saved searches
         $data['searches'] = $searchModel->where('user_id', session()->get('id'))
                                         ->orderBy('created_at', 'DESC')
                                         ->findAll();
