@@ -13,11 +13,12 @@ class Inquiries extends BaseController
         $userId = session()->get('id') ?? session()->get('user_id');
         
         $threads = $inquiryModel->select('inquiries.*, properties.title as property_title, properties.address_line_1, users.first_name, users.last_name, users.email, users.phone_number')
+            ->select('(SELECT MAX(created_at) FROM inquiries AS replies WHERE replies.parent_id = inquiries.inquiry_id OR replies.inquiry_id = inquiries.inquiry_id) AS last_activity', false)
             ->join('properties', 'properties.id = inquiries.property_id', 'left')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->where('inquiries.receiver_id', $userId)
             ->where('inquiries.parent_id', null)
-            ->orderBy('inquiries.created_at', 'DESC')
+            ->orderBy('last_activity', 'DESC')
             ->findAll();
 
         $role = session()->get('role_id');

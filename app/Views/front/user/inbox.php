@@ -27,6 +27,7 @@
 
         <div class="flex-1 bg-surface border border-outline-variant rounded-xl overflow-hidden flex shadow-sm">
             
+            <!-- Left Panel -->
             <div class="w-1/3 border-r border-outline-variant flex flex-col bg-surface-container-lowest">
                 <div class="flex-1 overflow-y-auto custom-scrollbar">
                     <?php if (!empty($threads)): ?>
@@ -51,6 +52,7 @@
                 </div>
             </div>
 
+            <!-- Right Panel -->
             <div class="w-2/3 flex flex-col bg-surface relative">
                 <template x-if="!activeThread">
                     <div class="flex-1 flex flex-col items-center justify-center opacity-40">
@@ -167,6 +169,14 @@
                         this.messages.push(data.message_data);
                         this.replyText = '';
                         this.activeThread.status = 'Pending';
+                        this.activeThread.last_activity = data.message_data.created_at;
+                        
+                        const threadIndex = this.threads.findIndex(t => (t.inquiry_id || t.id) === threadId);
+                        if (threadIndex > -1) {
+                            const threadToMove = this.threads.splice(threadIndex, 1)[0];
+                            this.threads.unshift(threadToMove);
+                        }
+
                         setTimeout(this.scrollToBottom, 100);
                     }
                 }).catch(() => this.isLoading = false);

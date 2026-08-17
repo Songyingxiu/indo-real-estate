@@ -29,7 +29,6 @@
                              class="p-4 border-b border-outline-variant cursor-pointer transition-colors">
                             <div class="flex justify-between items-start mb-1">
                                 <span class="font-bold text-on-surface text-[14px]" x-text="(thread.first_name || 'Admin') + ' ' + (thread.last_name || '')"></span>
-                                <span class="text-[11px] text-on-surface-variant" x-text="formatDate(thread.created_at)"></span>
                             </div>
                             <div class="text-primary font-semibold text-[13px] truncate mb-2" x-text="thread.property_title || 'General Support Inquiry'"></div>
                             
@@ -180,6 +179,14 @@
                         this.messages.push(data.message_data);
                         this.replyText = '';
                         this.activeThread.status = 'Replied'; 
+                        this.activeThread.last_activity = data.message_data.created_at;
+                        
+                        const threadIndex = this.threads.findIndex(t => (t.inquiry_id || t.id) === threadId);
+                        if (threadIndex > -1) {
+                            const threadToMove = this.threads.splice(threadIndex, 1)[0];
+                            this.threads.unshift(threadToMove);
+                        }
+
                         setTimeout(this.scrollToBottom, 100);
                     } else if (data.status === 'error') {
                         alert(data.message || 'An error occurred.');
