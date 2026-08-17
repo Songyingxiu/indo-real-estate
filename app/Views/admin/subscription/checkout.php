@@ -70,9 +70,10 @@
             <input type="hidden" name="invoice_number" value="<?= esc($invoice_number) ?>">
             
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">WhatsApp / Phone Number</label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">WhatsApp / Phone Number <span class="text-error">*</span></label>
                 <p class="text-xs text-on-surface-variant mb-2">We will notify you once your payment is verified.</p>
                 <input type="tel" name="phone_number" required placeholder="e.g. 081234567890" value="<?= esc(session()->get('phone_number')) ?>" class="w-full border border-outline-variant rounded px-3 py-2 text-sm focus:border-primary focus:ring-1 bg-white outline-none">
+                <?= session('errors.phone_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.phone_number')).'</p>' : '' ?>
             </div>
 
             <!-- Alpine.js Component for Upload Box -->
@@ -98,8 +99,9 @@
                     </div>
 
                     <input id="payment_proof" name="payment_proof" type="file" accept="image/*" required class="hidden"
-                           @change="fileName = $event.target.files[0].name; fileUrl = URL.createObjectURL($event.target.files[0])">
+                           @change="fileName = $event.target.files[0]?.name; fileUrl = URL.createObjectURL($event.target.files[0])">
                 </label>
+                <?= session('errors.payment_proof') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.payment_proof')).'</p>' : '' ?>
 
                 <!-- Image Preview Thumbnail -->
                 <template x-if="fileUrl">
@@ -107,12 +109,12 @@
                         <img :src="fileUrl" class="max-h-40 rounded border border-outline-variant shadow-sm object-contain" />
                     </div>
                 </template>
-            </div>
 
-            <div class="pt-4 mt-2 border-t border-outline-variant">
-                <button type="submit" class="w-full bg-primary text-on-primary px-6 py-3 rounded font-bold text-sm hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined text-[18px]">verified</span> Submit Payment Proof
-                </button>
+                <div class="pt-4 mt-2 border-t border-outline-variant">
+                    <button type="submit" :disabled="!fileName" class="w-full bg-primary text-on-primary px-6 py-3 rounded font-bold text-sm flex items-center justify-center gap-2" :class="!fileName ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-container transition-colors'">
+                        <span class="material-symbols-outlined text-[18px]">verified</span> Submit Payment Proof
+                    </button>
+                </div>
             </div>
         </form>
     </div>

@@ -96,14 +96,28 @@ class Subscription extends BaseController
 
     public function uploadProof()
     {
+        // Strict Server-Side Validation
         $rules = [
-            'phone_number'  => 'required|min_length[8]',
-            'payment_proof' => 'uploaded[payment_proof]|ext_in[payment_proof,png,jpg,jpeg]|max_size[payment_proof,5120]'
+            'phone_number'  => [
+                'rules'  => 'required|min_length[8]',
+                'errors' => [
+                    'required'   => 'A WhatsApp/Phone number is required for verification updates.',
+                    'min_length' => 'Please provide a valid phone number.'
+                ]
+            ],
+            'payment_proof' => [
+                'rules'  => 'uploaded[payment_proof]|ext_in[payment_proof,png,jpg,jpeg]|max_size[payment_proof,5120]',
+                'errors' => [
+                    'uploaded' => 'You must attach a valid transfer receipt before submitting.',
+                    'ext_in'   => 'The receipt must be a PNG, JPG, or JPEG image.',
+                    'max_size' => 'The image size cannot exceed 5MB.'
+                ]
+            ]
         ];
 
+        // If validation fails, return the inline errors array to the view
         if (!$this->validate($rules)) {
-            $errorMsg = $this->validator->getError('payment_proof') ?: 'Please upload a valid image file and provide your phone number.';
-            return redirect()->back()->withInput()->with('error', $errorMsg);
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $proofFile = $this->request->getFile('payment_proof');
@@ -144,8 +158,6 @@ class Subscription extends BaseController
         if (!$inserted) {
             return redirect()->back()->with('error', 'Database error: Failed to save payment record.');
         }
-
-        $paymentId = $paymentModel->getInsertID();
 
         // Clear the session state to prevent checkout loops
         session()->remove('checkout_plan_id');

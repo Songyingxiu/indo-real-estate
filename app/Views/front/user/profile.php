@@ -32,12 +32,14 @@
             <form action="<?= base_url('user/update-profile') ?>" method="POST" class="flex flex-col gap-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_first_name') ?></label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_first_name') ?> <span class="text-error">*</span></label>
                         <input type="text" name="first_name" value="<?= esc($user['first_name']) ?>" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                        <?= session('errors.first_name') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.first_name')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_last_name') ?></label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_last_name') ?> <span class="text-error">*</span></label>
                         <input type="text" name="last_name" value="<?= esc($user['last_name']) ?>" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                        <?= session('errors.last_name') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.last_name')).'</p>' : '' ?>
                     </div>
                 </div>
 
@@ -48,8 +50,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_phone') ?></label>
+                    <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_phone') ?> <span class="text-error">*</span></label>
                     <input type="tel" name="phone_number" value="<?= esc($user['phone_number']) ?>" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                    <?= session('errors.phone_number') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.phone_number')).'</p>' : '' ?>
                 </div>
 
                 <div class="pt-4 mt-2 border-t border-outline-variant">
@@ -69,8 +72,9 @@
                 
                 <?php if($hasLocalPassword): ?>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_current_pass') ?></label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_current_pass') ?> <span class="text-error">*</span></label>
                         <input type="password" name="current_password" required class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                        <?= session('errors.current_password') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.current_password')).'</p>' : '' ?>
                     </div>
                 <?php else: ?>
                     <div class="bg-surface-container-low text-on-surface-variant p-3 rounded text-sm mb-2 border border-outline-variant">
@@ -80,12 +84,14 @@
 
                 <div class="grid grid-cols-1 gap-4 pt-2 border-t border-outline-variant/50">
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_new_pass') ?></label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_new_pass') ?> <span class="text-error">*</span></label>
                         <input type="password" name="new_password" required minlength="8" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                        <?= session('errors.new_password') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.new_password')).'</p>' : '' ?>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_confirm_pass') ?></label>
+                        <label class="block text-sm font-semibold text-on-surface mb-1"><?= lang('Front.prof_confirm_pass') ?> <span class="text-error">*</span></label>
                         <input type="password" name="confirm_password" required minlength="8" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none">
+                        <?= session('errors.confirm_password') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.confirm_password')).'</p>' : '' ?>
                     </div>
                 </div>
 
@@ -112,6 +118,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_ktp') ?> <span class="text-error">*</span></label>
                     <input type="file" name="ktp_document" accept="image/*,.pdf" required class="block w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-fixed-dim file:text-primary hover:file:bg-primary-fixed cursor-pointer">
+                    <?= session('errors.ktp_document') ? '<p class="text-error text-[12px] mt-1 font-semibold">'.esc(session('errors.ktp_document')).'</p>' : '' ?>
                 </div>
                 
                 <div>

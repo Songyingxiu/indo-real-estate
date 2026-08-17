@@ -10,49 +10,44 @@
     <p class="text-on-surface-variant ml-9">Manually register a new Administrator, Agent, or System User.</p>
 </div>
 
-<?php if (session()->has('errors')) : ?>
-    <div class="bg-error-container text-on-error-container p-4 rounded mb-6 text-sm">
-        <ul class="list-disc pl-5">
-            <?php foreach (session('errors') as $error) : ?>
-                <li><?= esc($error) ?></li>
-            <?php endforeach ?>
-        </ul>
-    </div>
-<?php endif ?>
-
 <div class="bg-surface border border-outline-variant rounded-lg p-6 max-w-3xl">
     <form action="<?= base_url('admin/users/store') ?>" method="POST" class="flex flex-col gap-5">
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">First Name</label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">First Name <span class="text-error">*</span></label>
                 <input name="first_name" type="text" value="<?= old('first_name') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <?= session('errors.first_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.first_name')).'</p>' : '' ?>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">Last Name</label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Last Name <span class="text-error">*</span></label>
                 <input name="last_name" type="text" value="<?= old('last_name') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <?= session('errors.last_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.last_name')).'</p>' : '' ?>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">Email Address</label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Email Address <span class="text-error">*</span></label>
                 <input name="email" type="email" value="<?= old('email') ?>" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <?= session('errors.email') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.email')).'</p>' : '' ?>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-on-surface mb-1">Phone Number</label>
-                <input name="phone_number" type="text" value="<?= old('phone_number') ?>" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <input name="phone_number" type="tel" value="<?= old('phone_number') ?>" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <?= session('errors.phone_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.phone_number')).'</p>' : '' ?>
             </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">Password</label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Password <span class="text-error">*</span></label>
                 <input name="password" type="password" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                 <p class="text-xs text-on-surface-variant mt-1">Must be at least 8 characters.</p>
+                <?= session('errors.password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.password')).'</p>' : '' ?>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-on-surface mb-1">Assign System Role</label>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Assign System Role <span class="text-error">*</span></label>
                 <select name="role_id" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
                     <option value="" disabled <?= old('role_id') ? '' : 'selected' ?>>Select a Role...</option>
                     <?php if(!empty($roles)): ?>
@@ -61,6 +56,7 @@
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </select>
+                <?= session('errors.role_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.role_id')).'</p>' : '' ?>
             </div>
         </div>
 

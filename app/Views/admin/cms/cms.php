@@ -2,7 +2,7 @@
 <?= $this->section('content') ?>
 
 <div x-data="{ 
-    showEditor: false, 
+    showEditor: <?= session()->has('errors') ? 'true' : 'false' ?>, 
     postId: '', 
     postTitleEN: '', 
     postTitleID: '', 
@@ -52,20 +52,6 @@
                 <p class="font-semibold text-sm"><?= session()->getFlashdata('success') ?></p>
             </div>
             <button @click="show = false" class="text-green-600 hover:text-green-800 focus:outline-none">
-                <span class="material-symbols-outlined text-[20px]">close</span>
-            </button>
-        </div>
-    <?php endif; ?>
-
-    <!-- ERROR NOTIFICATION -->
-    <?php if (session()->getFlashdata('error')) : ?>
-        <div x-data="{ show: true }" x-show="show" x-transition.duration.500ms
-             class="flex items-center justify-between bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded shadow-sm mb-6">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-red-600">error</span>
-                <p class="font-semibold text-sm"><?= session()->getFlashdata('error') ?></p>
-            </div>
-            <button @click="show = false" class="text-red-600 hover:text-red-800 focus:outline-none">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
@@ -179,29 +165,30 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (EN)</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (EN) <span class="text-error">*</span></label>
                             <input name="title_en" type="text" x-model="postTitleEN" @blur="translateText($event.target.value, 'postTitleID')" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                            <?= session('errors.title_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_en')).'</p>' : '' ?>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (ID)</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Title (ID) <span class="text-error">*</span></label>
                             <input name="title_id" type="text" x-model="postTitleID" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                            <?= session('errors.title_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.title_id')).'</p>' : '' ?>
                         </div>
                     </div>
                     
-                    <!-- from 1 column to 2 columns if FAQ is selected -->
                     <div class="grid gap-4 transition-all duration-300" :class="postCategory === 'FAQ' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'">
                         <div>
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Type Category</label>
-                            <select name="category" x-model="postCategory" class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Type Category <span class="text-error">*</span></label>
+                            <select name="category" x-model="postCategory" required class="w-full px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                                 <option value="Blog">Blog Post / News</option>
                                 <option value="Page">Static Info Page</option>
                                 <option value="Tips">Tips & Guides</option>
                                 <option value="Announcement">Announcement</option>
                                 <option value="FAQ">FAQ</option>
                             </select>
+                            <?= session('errors.category') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.category')).'</p>' : '' ?>
                         </div>
                         
-                        <!-- FAQ Topic dynamically appears here -->
                         <div x-show="postCategory === 'FAQ'" x-transition.opacity style="display: none;">
                             <label class="block text-sm font-semibold text-on-surface mb-1 text-primary">FAQ Topic (Required for FAQs)</label>
                             <select name="faq_category" x-model="postFaqCategory" :required="postCategory === 'FAQ'" class="w-full px-4 py-2 border border-outline-variant rounded bg-primary-container/10 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
@@ -212,17 +199,20 @@
                                 <option value="Subscription">Subscription</option>
                                 <option value="Payment">Payment</option>
                             </select>
+                            <?= session('errors.faq_category') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.faq_category')).'</p>' : '' ?>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col h-full">
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (EN)</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (EN) <span class="text-error">*</span></label>
                             <textarea name="content_body_en" x-model="postBodyEN" @blur="translateText($event.target.value, 'postBodyID')" required class="w-full flex-1 min-h-[250px] px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans resize-y" placeholder="Write your content markup or text here..."></textarea>
+                            <?= session('errors.content_body_en') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.content_body_en')).'</p>' : '' ?>
                         </div>
                         <div class="flex flex-col h-full">
-                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (ID)</label>
+                            <label class="block text-sm font-semibold text-on-surface mb-1">Content Body (ID) <span class="text-error">*</span></label>
                             <textarea name="content_body_id" x-model="postBodyID" required class="w-full flex-1 min-h-[250px] px-4 py-2 border border-outline-variant rounded bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none font-sans resize-y"></textarea>
+                            <?= session('errors.content_body_id') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.content_body_id')).'</p>' : '' ?>
                         </div>
                     </div>
 

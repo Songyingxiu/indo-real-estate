@@ -113,12 +113,12 @@
                             
                             <form action="<?= base_url('login') ?>" class="space-y-4" method="POST">
                                 <div>
-                                    <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address</label>
+                                    <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address <span class="text-error">*</span></label>
                                     <input class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" name="email" value="<?= old('email') ?>" placeholder="name@example.com" required type="email">
                                 </div>
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface">Password</label>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface">Password <span class="text-error">*</span></label>
                                         <a href="<?= base_url('forgot-password') ?>" class="font-label-md text-[14px] font-semibold text-primary-container hover:underline transition-all cursor-pointer">Forgot Password?</a>
                                     </div>
                                     <div class="relative">
@@ -182,21 +182,25 @@
                                         </div>
                                     </label>
                                 </div>
+                                <?= session('errors.role') ? '<p class="text-error text-[12px] -mt-4 mb-2 font-medium text-center">'.esc(session('errors.role')).'</p>' : '' ?>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">First Name</label>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">First Name <span class="text-error">*</span></label>
                                         <input name="first_name" value="<?= old('first_name') ?>" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="John" required type="text">
+                                        <?= session('errors.first_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.first_name')).'</p>' : '' ?>
                                     </div>
                                     <div>
-                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Last Name</label>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Last Name <span class="text-error">*</span></label>
                                         <input name="last_name" value="<?= old('last_name') ?>" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="Doe" required type="text">
+                                        <?= session('errors.last_name') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.last_name')).'</p>' : '' ?>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address</label>
+                                    <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Email Address <span class="text-error">*</span></label>
                                     <input name="email" value="<?= old('email') ?>" class="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="john@example.com" required type="email">
+                                    <?= session('errors.email') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.email')).'</p>' : '' ?>
                                 </div>
 
                                 <div>
@@ -205,26 +209,29 @@
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-outline font-semibold">+62</span>
                                         <input name="phone_number" value="<?= old('phone_number') ?>" class="w-full pl-14 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="812-3456-7890" required type="tel">
                                     </div>
+                                    <?= session('errors.phone_number') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.phone_number')).'</p>' : '' ?>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Password</label>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Password <span class="text-error">*</span></label>
                                         <div class="relative">
                                             <input name="password" class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
                                             <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
                                         </div>
+                                        <?= session('errors.password') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.password')).'</p>' : '' ?>
                                     </div>
                                     <div>
-                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Confirm</label>
+                                        <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Confirm <span class="text-error">*</span></label>
                                         <div class="relative">
                                             <input name="password_confirm" class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded text-on-surface font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-fixed-dim transition-all duration-200" placeholder="••••••••" required type="password">
                                             <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
                                         </div>
+                                        <?= session('errors.password_confirm') ? '<p class="text-error text-xs mt-1 font-medium">'.esc(session('errors.password_confirm')).'</p>' : '' ?>
                                     </div>
                                 </div>
                                 
