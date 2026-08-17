@@ -31,7 +31,8 @@ class Profile extends BaseController
         $data['activePlan'] = null;
         
         if ($activeSub) {
-            $data['activePlan'] = $planModel->find(is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id']);
+            $planId = is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id'];
+            $data['activePlan'] = $planModel->find($planId);
         }
 
         $agentVerifyModel = new AgentVerificationModel();
@@ -44,6 +45,17 @@ class Profile extends BaseController
     {
         $userId = session()->get('user_id') ?? session()->get('id');
         if (!$userId) return redirect()->to(base_url('login'));
+
+        $rules = [
+            'first_name'   => 'required|min_length[2]',
+            'last_name'    => 'required|min_length[2]',
+            'phone_number' => 'required|min_length[8]',
+            'email'        => 'required|valid_email'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
 
         $userModel = new UserModel();
         
@@ -68,29 +80,33 @@ class Profile extends BaseController
         $userId = session()->get('user_id') ?? session()->get('id');
         if (!$userId) return redirect()->to(base_url('login'));
 
-        $currentPassword = $this->request->getPost('current_password');
-        $newPassword = $this->request->getPost('new_password');
-        $confirmPassword = $this->request->getPost('confirm_password');
-
-        if ($newPassword !== $confirmPassword) {
-            return redirect()->to(base_url('admin/profile'))->with('error', 'New passwords do not match.');
-        }
-
-        if (strlen($newPassword) < 8) {
-            return redirect()->to(base_url('admin/profile'))->with('error', 'Password must be at least 8 characters long.');
-        }
-
         $userModel = new UserModel();
         $user = $userModel->find($userId);
 
-        $hasLocalPassword = !empty($user['password']);
+        $hasLocalPassword = !empty(is_object($user) ? $user->password : $user['password']);
 
-        if ($hasLocalPassword && !password_verify($currentPassword, $user['password'])) {
-            return redirect()->to(base_url('admin/profile'))->with('error', 'Current password is incorrect.');
+        $rules = [
+            'new_password'     => 'required|min_length[8]',
+            'confirm_password' => 'required|matches[new_password]'
+        ];
+
+        if ($hasLocalPassword) {
+            $rules['current_password'] = 'required';
+        }
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $currentPassword = $this->request->getPost('current_password');
+        $userPass = is_object($user) ? $user->password : $user['password'];
+
+        if ($hasLocalPassword && !password_verify($currentPassword, $userPass)) {
+            return redirect()->back()->withInput()->with('errors', ['current_password' => 'Current password is incorrect.']);
         }
 
         $userModel->update($userId, [
-            'password' => password_hash($newPassword, PASSWORD_DEFAULT)
+            'password' => password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT)
         ]);
 
         return redirect()->to(base_url('admin/profile'))->with('success', 'Password updated successfully. You can now use this password to log in.');
@@ -123,7 +139,7 @@ class Profile extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->with('error', 'Invalid file. Please upload an image or PDF under 5MB.');
+            return redirect()->back()->with('errors', $this->validator->getErrors());
         }
 
         $file = $this->request->getFile('ktp_document');
@@ -170,17 +186,20 @@ class Profile extends BaseController
             $propertyModel = new PropertyModel();
             $propertyModel->where('owner_id', $userId)->delete();
 
+            $userEmail = is_object($user) ? $user->email : $user['email'];
+            $userName = is_object($user) ? $user->first_name : $user['first_name'];
+
             $emailService = new EmailService();
             $emailService->sendDynamicEmail(
                 'Account Deleted',
-                $user['email'],
-                ['{first_name}' => $user['first_name']]
+                $userEmail,
+                ['{first_name}' => $userName]
             );
 
             $userModel->delete($userId);
             session()->destroy();
             
-            return redirect()->to(base_url('/'))->with('success', 'Your agent/owner account and active listings have been hidden. You have 60 days to restore them by logging back in.');
+            return redirect()->to(base_url('/'))->with('success', 'Your account and active listings have been hidden. You have 60 days to restore them by logging back in.');
         }
 
         return redirect()->back()->with('error', 'We encountered an issue deleting your account. Please try again.');

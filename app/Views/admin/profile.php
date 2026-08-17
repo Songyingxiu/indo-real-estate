@@ -390,7 +390,7 @@ $passErrors = session('errors.current_password') || session('errors.new_password
             </div>
             <div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-container-lowest">
                 <button type="button" @click="showDeleteModal = false" class="px-6 py-2 border border-outline-variant text-on-surface-variant rounded font-semibold hover:bg-surface-container transition">Cancel</button>
-                <form action="<?= base_url('user/delete-account') ?>" method="POST">
+                <form action="<?= base_url('admin/profile/delete-account') ?>" method="POST">
                     <?= csrf_field() ?>
                     <button type="submit" class="px-6 py-2 bg-[#ba1a1a] text-white rounded font-semibold hover:bg-[#93000a] transition shadow-sm">Yes, Delete Account</button>
                 </form>
