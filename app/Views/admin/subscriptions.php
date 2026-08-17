@@ -5,7 +5,7 @@
         showModal: false, receiptUrl: '', invoiceNum: '', phoneNum: '', 
         showManageModal: false, manageSubId: '', manageUserName: '', managePlanName: '', manageSubStatus: '',
         showConfirmModal: false, confirmTitle: '', confirmMessage: '', confirmUrl: '', confirmActionTheme: 'primary',
-        showDetailsModal: false, detailPlanName: '', detailDesc: '', detailProps: 0, detailAgents: 0, detailPois: 0, detailMsg: 0, detailEmail: 0
+        showDetailsModal: false, detailPlanName: '', detailDesc: '', detailProps: 0, detailAgents: 0, detailPois: 0, detailMsg: 0, detailEmail: 0, detailFeatures: []
     }" class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full">
     
     <?php if (session()->getFlashdata('success')) : ?>
@@ -62,7 +62,8 @@
                                                     detailAgents = <?= $sub->max_agents ?? 0 ?>;
                                                     detailPois = <?= $sub->max_pois ?? 0 ?>;
                                                     detailMsg = <?= $sub->allow_messages ?? 0 ?>;
-                                                    detailEmail = <?= $sub->allow_direct_email ?? 0 ?>;"
+                                                    detailEmail = <?= $sub->allow_direct_email ?? 0 ?>;
+                                                    detailFeatures = <?= empty($sub->features_en) ? '[]' : $sub->features_en ?>;"
                                             type="button" class="text-primary hover:bg-surface-container rounded-full p-1 transition-colors flex items-center justify-center" title="View Plan Details">
                                         <span class="material-symbols-outlined text-[18px]">info</span>
                                     </button>
@@ -267,6 +268,13 @@
                         <li class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
                             <span class="font-semibold" x-text="detailPois >= 9999 ? 'Unlimited' : detailPois"></span> Custom POI
+                        </li>
+                    </template>
+
+                    <template x-for="feature in detailFeatures" :key="feature">
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                            <span class="font-semibold" x-text="feature"></span>
                         </li>
                     </template>
                 </ul>
