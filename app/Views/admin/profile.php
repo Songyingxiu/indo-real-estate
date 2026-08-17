@@ -98,13 +98,14 @@ $passErrors = session('errors.current_password') || session('errors.new_password
                     
                     <?php if (isset($activeSubscription) && $activeSubscription && isset($activePlan)): ?>
                         <?php 
-                            $pName = $activePlan->name ?? $activePlan['name'] ?? 'Premium Plan';
-                            $pDesc = $activePlan->description ?? $activePlan['description'] ?? '';
-                            $pProps = $activePlan->max_properties ?? $activePlan['max_properties'] ?? 0;
-                            $pAgents = $activePlan->max_agents ?? $activePlan['max_agents'] ?? 0;
-                            $pPois = $activePlan->max_pois ?? $activePlan['max_pois'] ?? 0;
-                            $pMsg = $activePlan->allow_messages ?? $activePlan['allow_messages'] ?? 0;
-                            $pEmail = $activePlan->allow_direct_email ?? $activePlan['allow_direct_email'] ?? 0;
+                            $pName = is_object($activePlan) ? ($activePlan->name ?? 'Premium Plan') : ($activePlan['name'] ?? 'Premium Plan');
+                            $pDesc = is_object($activePlan) ? ($activePlan->description ?? '') : ($activePlan['description'] ?? '');
+                            $pProps = is_object($activePlan) ? ($activePlan->max_properties ?? 0) : ($activePlan['max_properties'] ?? 0);
+                            $pAgents = is_object($activePlan) ? ($activePlan->max_agents ?? 0) : ($activePlan['max_agents'] ?? 0);
+                            $pPois = is_object($activePlan) ? ($activePlan->max_pois ?? 0) : ($activePlan['max_pois'] ?? 0);
+                            $pMsg = is_object($activePlan) ? ($activePlan->allow_messages ?? 0) : ($activePlan['allow_messages'] ?? 0);
+                            $pEmail = is_object($activePlan) ? ($activePlan->allow_direct_email ?? 0) : ($activePlan['allow_direct_email'] ?? 0);
+                            $rawFeatures = is_object($activePlan) ? ($activePlan->features_en ?? '[]') : ($activePlan['features_en'] ?? '[]');
                         ?>
                         <div class="bg-primary-container text-on-primary-container p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                             <div>
@@ -139,7 +140,7 @@ $passErrors = session('errors.current_password') || session('errors.new_password
                         </div>
                         
                         <div class="border-t border-outline-variant pt-6">
-                            <h4 class="font-bold text-on-surface mb-2">Plan Description & Features</h4>
+                            <h4 class="font-bold text-on-surface mb-2">Plan Description & Limits</h4>
                             <?php if($pDesc): ?>
                                 <p class="text-sm text-on-surface-variant mb-4"><?= esc($pDesc) ?></p>
                             <?php endif; ?>
@@ -171,18 +172,21 @@ $passErrors = session('errors.current_password') || session('errors.new_password
                                 <?php endif; ?>
                                 
                                 <?php 
-                                    $assignedFeatures = json_decode($activePlan->features_en ?? $activePlan['features_en'] ?? '[]', true);
+                                    $assignedFeatures = json_decode($rawFeatures, true);
                                     if (is_array($assignedFeatures) && !empty($assignedFeatures)): 
-                                        foreach($assignedFeatures as $featureName): 
                                 ?>
-                                    <li class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
-                                        <span class="font-semibold"><?= esc($featureName) ?></span>
-                                    </li>
-                                <?php 
-                                        endforeach; 
-                                    endif; 
-                                ?>
+                                    <div class="col-span-1 md:col-span-2 mt-2 pt-4 border-t border-outline-variant/50">
+                                        <h5 class="text-[11px] font-bold text-outline uppercase tracking-wider mb-3">Included Amenities & Features</h5>
+                                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-on-surface">
+                                            <?php foreach($assignedFeatures as $featureName): ?>
+                                                <li class="flex items-center gap-2">
+                                                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span> 
+                                                    <span class="font-medium text-on-surface"><?= esc($featureName) ?></span>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
                             </ul>
                         </div>
                     <?php else: ?>

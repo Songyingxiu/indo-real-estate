@@ -31,54 +31,59 @@
                     <span class="text-on-surface-variant text-sm">/ yr</span>
                 </div>
 
-                <ul class="flex flex-col gap-4 mb-8 flex-grow">
-                    <!-- Properties Limit -->
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
-                        <span class="text-on-surface text-sm font-medium"><?= $plan->max_properties >= 9999 ? 'Unlimited' : esc($plan->max_properties) ?> Properties</span>
-                    </li>
-                    
-                    <!-- Agents Limit -->
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
-                        <span class="text-on-surface text-sm font-medium"><?= ($plan->max_agents ?? 0) >= 9999 ? 'Unlimited' : esc($plan->max_agents ?? 0) ?> Agents</span>
-                    </li>
-                    
-                    <!-- Messaging Permission -->
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined <?= ($plan->allow_messages ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_messages ?? false) ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= ($plan->allow_messages ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Messaging</span>
-                    </li>
-                    
-                    <!-- Direct Email Permission -->
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined <?= ($plan->allow_direct_email ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_direct_email ?? false) ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= ($plan->allow_direct_email ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Inquiry Email</span>
-                    </li>
-                    
-                    <!-- Custom POI Limit -->
-                    <li class="flex items-center gap-3">
-                        <span class="material-symbols-outlined <?= ($plan->max_pois ?? 0) > 0 ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->max_pois ?? 0) > 0 ? 'check_circle' : 'cancel' ?></span>
-                        <span class="text-on-surface text-sm <?= ($plan->max_pois ?? 0) > 0 ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">
-                            <?= ($plan->max_pois ?? 0) > 0 ? (($plan->max_pois >= 9999 ? 'Unlimited' : esc($plan->max_pois)) . ' Custom POI') : 'Custom POI' ?>
-                        </span>
-                    </li>
+                <div class="flex-grow mb-8">
+                    <ul class="flex flex-col gap-4">
+                        <!-- Properties Limit -->
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                            <span class="text-on-surface text-sm font-medium"><?= $plan->max_properties >= 9999 ? 'Unlimited' : esc($plan->max_properties) ?> Properties</span>
+                        </li>
+                        
+                        <!-- Agents Limit -->
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                            <span class="text-on-surface text-sm font-medium"><?= ($plan->max_agents ?? 0) >= 9999 ? 'Unlimited' : esc($plan->max_agents ?? 0) ?> Agents</span>
+                        </li>
+                        
+                        <!-- Messaging Permission -->
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined <?= ($plan->allow_messages ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_messages ?? false) ? 'check_circle' : 'cancel' ?></span>
+                            <span class="text-on-surface text-sm <?= ($plan->allow_messages ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Messaging</span>
+                        </li>
+                        
+                        <!-- Direct Email Permission -->
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined <?= ($plan->allow_direct_email ?? false) ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->allow_direct_email ?? false) ? 'check_circle' : 'cancel' ?></span>
+                            <span class="text-on-surface text-sm <?= ($plan->allow_direct_email ?? false) ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">Direct Inquiry Email</span>
+                        </li>
+                        
+                        <!-- Custom POI Limit -->
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined <?= ($plan->max_pois ?? 0) > 0 ? 'text-primary' : 'text-outline-variant/50' ?> text-[20px]"><?= ($plan->max_pois ?? 0) > 0 ? 'check_circle' : 'cancel' ?></span>
+                            <span class="text-on-surface text-sm <?= ($plan->max_pois ?? 0) > 0 ? 'font-medium' : 'text-outline-variant opacity-70 line-through' ?>">
+                                <?= ($plan->max_pois ?? 0) > 0 ? (($plan->max_pois >= 9999 ? 'Unlimited' : esc($plan->max_pois)) . ' Custom POI') : 'Custom POI' ?>
+                            </span>
+                        </li>
+                    </ul>
 
                     <!-- Dynamic Master Data Features -->
                     <?php 
                         $assignedFeatures = json_decode($plan->features_en ?? '[]', true);
                         if (is_array($assignedFeatures) && !empty($assignedFeatures)): 
-                            foreach($assignedFeatures as $featureName): 
                     ?>
-                        <li class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
-                            <span class="text-on-surface text-sm font-medium"><?= esc($featureName) ?></span>
-                        </li>
-                    <?php 
-                            endforeach; 
-                        endif; 
-                    ?>
-                </ul>
+                        <div class="mt-5 pt-5 border-t border-outline-variant/50">
+                            <h5 class="text-[11px] font-bold text-outline uppercase tracking-wider mb-3">Included Features</h5>
+                            <ul class="flex flex-col gap-3">
+                                <?php foreach($assignedFeatures as $featureName): ?>
+                                    <li class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+                                        <span class="text-on-surface text-sm font-medium"><?= esc($featureName) ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
                 <form action="<?= base_url('admin/subscription/checkout') ?>" method="POST" class="mt-auto">
                     <input type="hidden" name="plan_id" value="<?= $plan->id ?>">
