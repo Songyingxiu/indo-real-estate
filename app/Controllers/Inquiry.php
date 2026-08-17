@@ -25,8 +25,14 @@ class Inquiry extends BaseController
         $inquiryModel = new InquiryModel();
         
         $parent = $inquiryModel->where('inquiry_id', $id)->first();
-        if ($parent && $parent['sender_id'] == session()->get('id') && $parent['status'] == 'Replied') {
-            $inquiryModel->where('inquiry_id', $id)->set(['status' => 'In Discussion'])->update();
+        
+        if ($parent) {
+            $senderId = is_object($parent) ? $parent->sender_id : $parent['sender_id'];
+            $status   = is_object($parent) ? $parent->status : $parent['status'];
+            
+            if ($senderId == session()->get('id') && $status == 'Replied') {
+                $inquiryModel->where('inquiry_id', $id)->set(['status' => 'In Discussion'])->update();
+            }
         }
         
         $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
