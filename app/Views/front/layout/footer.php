@@ -9,7 +9,7 @@
         <div class="flex flex-col gap-3">
             <h4 class="font-label-md text-[14px] font-bold"><?= lang('Front.ft_company') ?></h4>
             <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('page/about-us') ?>"><?= lang('Front.nav_about') ?></a>
-            <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('page/contact-us') ?>"><?= lang('Front.ft_contact') ?></a>
+            <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('contact') ?>"><?= lang('Front.ft_contact') ?></a>
             <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('search/sale') ?>"><?= lang('Front.ft_properties') ?></a>
             <a class="text-on-primary/80 hover:text-white transition-colors text-sm" href="<?= base_url('faq') ?>"><?= lang('Front.ft_faq') ?></a>
         </div>
