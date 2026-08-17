@@ -39,7 +39,6 @@ class Inquiries extends BaseController
                 $planId = is_object($activeSub) ? $activeSub->plan_id : $activeSub['plan_id'];
                 $plan = $planModel->find($planId);
                 if ($plan) {
-                    // FIX: Replaced unreliable string search with exact db truth flag
                     $canReply = is_object($plan) ? $plan->allow_messages : $plan['allow_messages'];
                 }
             }
@@ -60,7 +59,7 @@ class Inquiries extends BaseController
         $messages = $inquiryModel->select('inquiries.*, users.first_name, users.last_name')
             ->join('users', 'users.id = inquiries.sender_id', 'left')
             ->groupStart()
-                ->where('inquiries.inquiry_id', $id)
+                ->where('inquiries.id', $id)
                 ->orWhere('inquiries.parent_id', $id)
             ->groupEnd()
             ->orderBy('inquiries.created_at', 'ASC')
@@ -86,7 +85,6 @@ class Inquiries extends BaseController
         $role = session()->get('role_id');
         $canReply = false;
 
-        // DB Driven Real-Time Plan Validation (Backend Security Check)
         if ($role == 4) {
             $canReply = true;
         } else {
@@ -116,7 +114,7 @@ class Inquiries extends BaseController
         
         $data = [
             'parent_id'   => $json->parent_id,
-            'property_id' => $json->property_id,
+            'property_id' => $json->property_id ?: null,
             'sender_id'   => $userId,
             'receiver_id' => $json->receiver_id,
             'message'     => $json->message,
@@ -124,7 +122,7 @@ class Inquiries extends BaseController
         ];
 
         if ($inquiryModel->insert($data)) {
-            $data['inquiry_id'] = $inquiryModel->getInsertID();
+            $data['id'] = $inquiryModel->getInsertID();
             $data['created_at'] = date('Y-m-d H:i:s');
             
             $inquiryModel->update($json->parent_id, ['status' => 'Replied']);

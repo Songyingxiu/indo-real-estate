@@ -123,6 +123,20 @@ class Property extends BaseController
 
     public function submitInquiry()
     {
+        $rules = [
+            'name'    => 'required|min_length[2]|max_length[100]',
+            'phone'   => 'required|min_length[8]|max_length[20]',
+            'email'   => 'required|valid_email',
+            'message' => 'required|min_length[10]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'status' => 'validation_error', 
+                'errors' => $this->validator->getErrors()
+            ]);
+        }
+
         $inquiryModel = new InquiryModel();
         $userModel = new UserModel();
         $emailService = new EmailService();
@@ -163,14 +177,12 @@ class Property extends BaseController
             }
         }
         
-        // Admin overrides the message block
         $agent = $userModel->find($receiverId);
         $agentRole = is_array($agent) ? $agent['role_id'] : $agent->role_id;
         if ($agentRole == 4) {
             $allowMessages = true;
         }
 
-        // If the agent doesn't have chat privileges, inject a system auto-reply
         if (!$allowMessages) {
             $autoReply = [
                 'parent_id'   => $parentId,
@@ -184,7 +196,6 @@ class Property extends BaseController
             $inquiryModel->update($parentId, ['status' => 'Replied']);
         }
 
-        // Send Email Notifications
         $emailService->sendDynamicEmail('New Inquiry Customer', $customerEmail, [
             '{first_name}' => $customerName,
             '{property_id}' => $propertyId
@@ -197,6 +208,6 @@ class Property extends BaseController
             ]);
         }
 
-        return redirect()->back()->with('success', 'Your inquiry has been sent successfully! You can track it in your inbox.');
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Inquiry submitted successfully.']);
     }
 }
