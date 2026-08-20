@@ -36,13 +36,47 @@ class Auth extends BaseController
 
     public function attemptRegister()
     {
+        // Set custom user-friendly error messages to replace default CI4 system strings
         $rules = [
-            'role'             => 'required|in_list[buyer,owner,agent]',
-            'first_name'       => 'required|min_length[2]|max_length[100]',
-            'last_name'        => 'required|min_length[2]|max_length[100]',
-            'email'            => 'required|valid_email|is_unique[users.email]',
-            'password'         => 'required|min_length[8]',
-            'password_confirm' => 'required|matches[password]'
+            'first_name' => [
+                'rules' => 'required|min_length[2]|max_length[100]',
+                'errors' => [
+                    'required' => 'The First Name field is required.',
+                    'min_length' => 'The First Name must be at least 2 characters long.',
+                    'max_length' => 'The First Name cannot exceed 100 characters.'
+                ]
+            ],
+            'last_name' => [
+                'rules' => 'required|min_length[2]|max_length[100]',
+                'errors' => [
+                    'required' => 'The Last Name field is required.',
+                    'min_length' => 'The Last Name must be at least 2 characters long.',
+                    'max_length' => 'The Last Name cannot exceed 100 characters.'
+                ]
+            ],
+            'email' => [
+                'rules' => 'required|valid_email|is_unique[users.email]',
+                'errors' => [
+                    'required' => 'The Email Address field is required.',
+                    'valid_email' => 'Please enter a valid email address.',
+                    'is_unique' => 'This email address is already registered. Please log in or use a different email.'
+                ]
+            ],
+            'password' => [
+                'rules' => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/]',
+                'errors' => [
+                    'required' => 'The Password field is required.',
+                    'min_length' => 'The Password must be at least 8 characters long.',
+                    'regex_match' => 'The Password must contain at least one uppercase letter, one digit, and one special character.'
+                ]
+            ],
+            'password_confirm' => [
+                'rules' => 'required|matches[password]',
+                'errors' => [
+                    'required' => 'The Confirm Password field is required.',
+                    'matches' => 'The password confirmation does not match the chosen password.'
+                ]
+            ]
         ];
 
         if (! $this->validate($rules)) {
@@ -58,13 +92,8 @@ class Auth extends BaseController
         $plaintextPassword = $this->request->getPost('password');
         $hashedPassword = password_hash($plaintextPassword, PASSWORD_BCRYPT);
 
-        $roleMap = [
-            'buyer' => 1,
-            'owner' => 2,
-            'agent' => 3
-        ];
-        $selectedRole = $this->request->getPost('role');
-        $roleId = $roleMap[$selectedRole] ?? 1; 
+        // All users default to Buyer (Role 1) upon initial registration
+        $roleId = 1; 
 
         $email = $this->request->getPost('email');
         $firstName = $this->request->getPost('first_name');
@@ -182,7 +211,8 @@ class Auth extends BaseController
         }
 
         session()->destroy();
-        return redirect()->to('/login')->with('success', 'You have been logged out successfully.');
+        // Updated redirect behavior upon logout
+        return redirect()->to('/')->with('success', 'You have been logged out successfully.');
     }
 
     public function forgotPassword()
@@ -245,8 +275,21 @@ class Auth extends BaseController
     {
         $rules = [
             'token'            => 'required',
-            'password'         => 'required|min_length[8]',
-            'password_confirm' => 'required|matches[password]'
+            'password' => [
+                'rules' => 'required|min_length[8]|regex_match[/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/]',
+                'errors' => [
+                    'required' => 'The Password field is required.',
+                    'min_length' => 'The Password must be at least 8 characters long.',
+                    'regex_match' => 'The Password must contain at least one uppercase letter, one digit, and one special character.'
+                ]
+            ],
+            'password_confirm' => [
+                'rules' => 'required|matches[password]',
+                'errors' => [
+                    'required' => 'The Confirm Password field is required.',
+                    'matches' => 'The password confirmation does not match the chosen password.'
+                ]
+            ]
         ];
 
         if (! $this->validate($rules)) {
@@ -307,9 +350,8 @@ class Auth extends BaseController
             $firstName = $nameParts[0] ?? 'Google';
             $lastName = $nameParts[1] ?? 'User';
 
-            $roleMap = ['buyer' => 1, 'owner' => 2, 'agent' => 3];
-            $roleStr = $json->role ?? 'buyer';
-            $roleId = $roleMap[$roleStr] ?? 1;
+            // All users default to Buyer (Role 1)
+            $roleId = 1;
 
             $userData = [
                 'role_id'       => $roleId, 

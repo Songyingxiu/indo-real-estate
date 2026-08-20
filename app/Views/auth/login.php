@@ -5,6 +5,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Authentication - HuniKita</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <script id="tailwind-config">
@@ -52,13 +53,11 @@
         #tab-register:checked ~ .tab-headers label[for="tab-register"] {
             @apply text-primary-container border-b-2 border-primary-container;
         }
-        .role-radio:checked + div { @apply border-primary-container bg-surface-container-low ring-1 ring-primary-container shadow-sm; }
-        .role-radio:checked + div .material-symbols-outlined { @apply text-primary-container; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased overflow-x-hidden">
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md antialiased overflow-x-hidden" x-data="{ showTerms: false, showPrivacy: false }">
     
     <header class="absolute top-0 left-0 w-full p-6 md:p-10 z-20 flex items-center gap-3 pointer-events-none">
         <a href="<?= base_url() ?>" class="pointer-events-auto flex items-center gap-3">
@@ -106,12 +105,12 @@
 
                     <div class="form-container relative z-10">
                         
-                        <!-- SIGN IN FORM -->
+                        <!-- SIGN IN FORM (Removed novalidate to enforce HTML5 Required) -->
                         <div id="content-login" class="tab-content fade-in pb-8">
                             <h2 class="font-headline-lg text-[32px] font-bold text-on-surface mb-2">Welcome Back</h2>
                             <p class="font-body-md text-[16px] text-on-surface-variant mb-8">Enter your credentials to access your account.</p>
                             
-                            <form action="<?= base_url('login') ?>" class="space-y-4" method="POST" novalidate>
+                            <form action="<?= base_url('login') ?>" class="space-y-4" method="POST">
                                 
                                 <?php if (session('errors.email') || session('errors.password')): ?>
                                     <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm mb-4">
@@ -170,12 +169,12 @@
                             </div>
                         </div>
 
-                        <!-- CREATE ACCOUNT FORM -->
+                        <!-- CREATE ACCOUNT FORM (Removed novalidate to enforce HTML5 Checkbox validation) -->
                         <div id="content-register" class="tab-content fade-in pb-8">
                             <h2 class="font-headline-lg text-[32px] font-bold text-on-surface mb-2">Create Account</h2>
-                            <p class="font-body-md text-[16px] text-on-surface-variant mb-6">Select your primary intent to personalize your experience.</p>
+                            <p class="font-body-md text-[16px] text-on-surface-variant mb-6">Join HuniKita to post, save, and manage properties.</p>
                             
-                            <form action="<?= base_url('register') ?>" class="space-y-4" method="POST" novalidate>
+                            <form action="<?= base_url('register') ?>" class="space-y-4" method="POST">
                                 
                                 <?php if ($isRegistering && session()->has('errors')): ?>
                                     <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm mb-4">
@@ -183,35 +182,7 @@
                                     </div>
                                 <?php endif; ?>
 
-                                <?php $oldRole = old('role') ?: 'buyer'; ?>
-                                <div class="grid grid-cols-3 gap-3 mb-2 relative z-30">
-                                    <label class="cursor-pointer relative group">
-                                        <input <?= $oldRole == 'buyer' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="buyer" id="role-buyer">
-                                        <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
-                                            <span class="material-symbols-outlined text-outline mb-1 text-[24px]">person_search</span>
-                                            <span class="font-label-md text-[13px] font-semibold text-on-surface">Buyer</span>
-                                        </div>
-                                    </label>
-                                    <label class="cursor-pointer relative group">
-                                        <input <?= $oldRole == 'owner' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="owner" id="role-owner">
-                                        <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
-                                            <span class="material-symbols-outlined text-outline mb-1 text-[24px]">real_estate_agent</span>
-                                            <span class="font-label-md text-[13px] font-semibold text-on-surface">Owner</span>
-                                        </div>
-                                    </label>
-                                    <label class="cursor-pointer relative group">
-                                        <input <?= $oldRole == 'agent' ? 'checked' : '' ?> class="role-radio absolute opacity-0 w-0 h-0" name="role" type="radio" value="agent" id="role-agent">
-                                        <div class="border border-outline-variant rounded p-3 flex flex-col items-center justify-center text-center hover:bg-surface-container-low transition-colors h-full">
-                                            <span class="material-symbols-outlined text-outline mb-1 text-[24px]">verified_user</span>
-                                            <span class="font-label-md text-[13px] font-semibold text-on-surface">Agent</span>
-                                        </div>
-                                    </label>
-                                </div>
-                                <?php if ($err = session('errors.role')): ?>
-                                    <div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
-                                        <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <?= esc($err) ?>
-                                    </div>
-                                <?php endif; ?>
+                                <!-- Note: Role Selection completely removed. Users default to Buyer in Controller. -->
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -252,7 +223,7 @@
                                     <?php $err = session('errors.phone_number'); ?>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 font-body-md text-outline font-semibold">+62</span>
-                                        <input name="phone_number" value="<?= old('phone_number') ?>" class="w-full pl-14 pr-4 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="812-3456-7890" required type="tel">
+                                        <input name="phone_number" value="<?= old('phone_number') ?>" class="w-full pl-14 pr-4 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="812-3456-7890" type="tel">
                                     </div>
                                     <?php if ($err): ?>
                                         <div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
@@ -266,7 +237,8 @@
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Password <span class="text-[#c9302c]">*</span></label>
                                         <div class="relative">
                                             <?php $err = session('errors.password'); ?>
-                                            <input name="password" class="w-full pl-4 pr-10 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="••••••••" required type="password">
+                                            <!-- Enforced HTML5 pattern validation for Password -->
+                                            <input name="password" class="w-full pl-4 pr-10 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="••••••••" required type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="Password must contain at least 8 characters, one uppercase letter, one number, and one special character.">
                                             <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
@@ -297,7 +269,7 @@
                                 <div class="flex items-start gap-2 pt-2 pb-2 relative z-30">
                                     <input class="mt-0.5 w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container cursor-pointer" type="checkbox" required>
                                     <label class="font-caption text-[13px] text-on-surface-variant cursor-pointer leading-tight">
-                                        I agree to the <a class="text-primary-container font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary-container font-semibold hover:underline" href="#">Privacy Policy</a>.
+                                        I agree to the <a href="#" @click.prevent="showTerms = true" class="text-primary-container font-semibold hover:underline">Terms of Service</a> and <a href="#" @click.prevent="showPrivacy = true" class="text-primary-container font-semibold hover:underline">Privacy Policy</a>.
                                     </label>
                                 </div>
                                 
@@ -321,6 +293,42 @@
             </div>
         </div>
     </main>
+
+    <!-- TERMS OF SERVICE MODAL -->
+    <div x-show="showTerms" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showTerms = false" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[80vh]">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Terms of Service</h2>
+                <button type="button" @click="showTerms = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar text-sm text-on-surface-variant space-y-4">
+                <p><strong>1. Acceptance of Terms:</strong> By creating an account on HuniKita, you agree to comply with our platform's usage guidelines and real estate marketing policies.</p>
+                <p><strong>2. Account Default:</strong> All newly registered accounts default to standard Buyer privileges. If you wish to upgrade to Agent status to list properties, you must submit a formal request via your account dashboard.</p>
+                <p><strong>3. Property Authenticity:</strong> Any user found posting fraudulent listings, misleading information, or unverified documents will face immediate account suspension.</p>
+            </div>
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end bg-surface-container-lowest">
+                <button type="button" @click="showTerms = false" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">I Understand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVACY POLICY MODAL -->
+    <div x-show="showPrivacy" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#1a1c1e]/60 backdrop-blur-sm p-4">
+        <div @click.outside="showPrivacy = false" class="bg-surface w-full max-w-2xl rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden max-h-[80vh]">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+                <h2 class="text-xl font-bold text-on-surface">Privacy Policy</h2>
+                <button type="button" @click="showPrivacy = false" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar text-sm text-on-surface-variant space-y-4">
+                <p><strong>1. Data Collection:</strong> We collect essential contact information, including your email and phone number, solely to facilitate property inquiries and platform communications.</p>
+                <p><strong>2. Google Authentication:</strong> If you sign in via Google, we access only your basic profile information (Name and Email) to create your HuniKita account.</p>
+                <p><strong>3. Document Security:</strong> Any identity documents or property certificates (SHM) uploaded to our system are stored securely via encrypted cloud storage and are only accessible by system administrators during the verification process.</p>
+            </div>
+            <div class="px-6 py-4 border-t border-outline-variant flex justify-end bg-surface-container-lowest">
+                <button type="button" @click="showPrivacy = false" class="px-6 py-2 bg-primary text-on-primary rounded font-semibold hover:opacity-90 transition">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         function togglePassword(button) {
@@ -357,14 +365,7 @@
         const provider = new GoogleAuthProvider();
 
         window.signInWithGoogle = function() {
-            const isRegistering = document.getElementById('tab-register').checked;
-            let selectedRole = 'buyer';
-            
-            if (isRegistering) {
-                const roleRadio = document.querySelector('input[name="role"]:checked');
-                if (roleRadio) selectedRole = roleRadio.value;
-            }
-
+            // Role selection removed. All Google sign-ins default to Buyer (Role 1) in backend.
             signInWithPopup(auth, provider)
                 .then((result) => {
                     const user = result.user;
@@ -379,7 +380,7 @@
                             uid: user.uid,
                             email: user.email,
                             displayName: user.displayName,
-                            role: selectedRole
+                            role: 'buyer' 
                         })
                     })
                     .then(response => response.json())
