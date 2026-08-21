@@ -10,9 +10,12 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
 <!-- Leaflet Map Dependencies -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Image Compression Library -->
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 
 <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 fade-in" x-data="{ 
     listingType: '<?= old('listing_type', esc($property['listing_type'])) ?>',
+    isCompressing: false,
     translateText(text, targetId, langpair = 'en|id') {
         if (!text.trim()) return;
         fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langpair}`)
@@ -24,10 +27,65 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
         })
         .catch(err => console.error('Translation error:', err));
     },
-    validateImageCount(event) {
-        if (event.target.files.length > 20) {
+    async handleImageCompression(event) {
+        const files = event.target.files;
+        if (files.length === 0) return;
+        
+        if (files.length > 20) {
             alert('You can only select up to 20 images. Please select fewer files.');
             event.target.value = '';
+            return;
+        }
+
+        this.isCompressing = true;
+        const dataTransfer = new DataTransfer();
+        
+        const options = {
+            maxSizeMB: 0.2, 
+            maxWidthOrHeight: 1920,
+            useWebWorker: true
+        };
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) {
+                    dataTransfer.items.add(file);
+                    continue;
+                }
+                const compressedFile = await imageCompression(file, options);
+                const newFile = new File([compressedFile], file.name, {
+                    type: compressedFile.type,
+                    lastModified: Date.now()
+                });
+                dataTransfer.items.add(newFile);
+            }
+            event.target.files = dataTransfer.files;
+        } catch (error) {
+            console.error('Compression error:', error);
+            alert('An error occurred while compressing images. Please try smaller files.');
+            event.target.value = '';
+        } finally {
+            this.isCompressing = false;
+        }
+    },
+    async handleSingleDocCompression(event) {
+        const file = event.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        
+        this.isCompressing = true;
+        const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1920, useWebWorker: true };
+        
+        try {
+            const compressedFile = await imageCompression(file, options);
+            const newFile = new File([compressedFile], file.name, { type: compressedFile.type, lastModified: Date.now() });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(newFile);
+            event.target.files = dataTransfer.files;
+        } catch(e) {
+            console.error(e);
+        } finally {
+            this.isCompressing = false;
         }
     },
     attemptAutoFill(stateName, cityName, postcode) {
@@ -443,18 +501,24 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block font-semibold mb-2">Upload New Photos (Max 20 images) (Optional)</label>
-                    <input type="file" name="property_images[]" multiple accept="image/*" @change="validateImageCount($event)" class="w-full p-2 border border-outline-variant rounded bg-surface">
-                    <p class="text-xs text-on-surface-variant mt-1">You can select up to 20 images.</p>
+                    <input type="file" name="property_images[]" multiple accept="image/*" @change="handleImageCompression($event)" class="w-full p-2 border border-outline-variant rounded bg-surface">
+                    <p class="text-xs text-on-surface-variant mt-1">Images will be automatically compressed before upload.</p>
                 </div>
                 <div>
                     <label class="block font-semibold mb-2">Upload New SHM Document (Optional)</label>
-                    <input type="file" name="shm_document" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-outline-variant rounded bg-surface">
+                    <input type="file" name="shm_document" accept=".pdf,image/*" @change="handleSingleDocCompression($event)" class="w-full p-2 border border-outline-variant rounded bg-surface">
                 </div>
             </div>
         </div>
 
         <div class="pt-6 border-t flex justify-end">
-            <button type="submit" class="bg-primary text-on-primary px-8 py-3 rounded font-semibold hover:opacity-90 transition-opacity shadow-md">Update Listing</button>
+            <button type="submit" 
+                    :disabled="isCompressing" 
+                    :class="{'opacity-50 cursor-not-allowed': isCompressing, 'hover:opacity-90': !isCompressing}" 
+                    class="bg-primary text-on-primary px-8 py-3 rounded font-semibold transition-opacity shadow-md flex items-center gap-2">
+                <span class="material-symbols-outlined" x-show="isCompressing" style="display:none;">hourglass_top</span>
+                <span x-text="isCompressing ? 'Compressing Images...' : 'Update Listing'">Update Listing</span>
+            </button>
         </div>
     </form>
 
