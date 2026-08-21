@@ -102,7 +102,8 @@
         
         <!-- Desktop Auth & Actions -->
         <div class="hidden md:flex items-center gap-4">
-            <?php if($roleId != 1): ?>
+            <!-- Allow ALL logged-in users to post properties -->
+            <?php if($isLoggedIn): ?>
                 <a href="<?= base_url('admin/properties/create') ?>" class="font-label-md text-[14px] font-semibold text-primary bg-transparent border border-primary px-4 py-2 rounded hover:bg-surface-container-high transition-colors">
                     <?= lang('Front.btn_post_listing') ?>
                 </a>
@@ -171,12 +172,11 @@
                             <span class="font-body-sm text-body-sm"><?= lang('Front.menu_profile') ?></span>
                         </a>
 
-                        <?php if($roleId != 1): ?>
-                            <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined text-[18px]">dashboard</span>
-                                <span class="font-body-sm text-body-sm"><?= lang('Front.menu_dashboard') ?></span>
-                            </a>
-                        <?php endif; ?>
+                        <!-- Dashboard is now accessible to all authenticated users -->
+                        <a href="<?= base_url('admin/dashboard') ?>" class="flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                            <span class="font-body-sm text-body-sm"><?= lang('Front.menu_dashboard') ?></span>
+                        </a>
 
                         <div class="border-t border-outline-variant mt-1 pt-1">
                             <a href="<?= base_url('logout') ?>" class="flex items-center gap-2 px-4 py-2 text-error hover:bg-error-container transition-colors">
@@ -220,7 +220,8 @@
         </nav>
 
         <div class="flex flex-col gap-4 px-6 py-6">
-            <?php if($roleId != 1): ?>
+            <!-- Allow ALL logged-in users to post properties -->
+            <?php if($isLoggedIn): ?>
                 <a href="<?= base_url('admin/properties/create') ?>" class="w-full text-center font-label-md text-[15px] font-semibold text-primary bg-transparent border border-primary px-4 py-3 rounded-lg hover:bg-surface-container-high transition-colors">
                     <?= lang('Front.btn_post_listing') ?>
                 </a>
@@ -239,9 +240,9 @@
                          <?php endif; ?>
                          <span class="text-[11px] font-bold mt-1">Inbox</span>
                      </a>
-                     <a href="<?= base_url($roleId == 1 ? 'user/profile' : 'admin/dashboard') ?>" class="flex flex-col items-center justify-center gap-1 text-on-surface-variant p-3 rounded-lg hover:text-primary hover:bg-surface-container-low transition-colors">
-                         <span class="material-symbols-outlined text-[24px]"><?= $roleId == 1 ? 'person' : 'dashboard' ?></span>
-                         <span class="text-[11px] font-bold mt-1"><?= $roleId == 1 ? 'Profile' : 'Dashboard' ?></span>
+                     <a href="<?= base_url('admin/dashboard') ?>" class="flex flex-col items-center justify-center gap-1 text-on-surface-variant p-3 rounded-lg hover:text-primary hover:bg-surface-container-low transition-colors">
+                         <span class="material-symbols-outlined text-[24px]">dashboard</span>
+                         <span class="text-[11px] font-bold mt-1">Dashboard</span>
                      </a>
                 </div>
                 <a href="<?= base_url('logout') ?>" class="w-full flex justify-center items-center gap-2 font-label-md text-[15px] font-semibold text-error bg-error-container/10 px-4 py-3 rounded-lg hover:bg-error-container/20 transition-colors mt-2">

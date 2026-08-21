@@ -7,9 +7,14 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
 ?>
 
 <main class="max-w-[1280px] mx-auto px-4 md:px-10 py-12 min-h-[70vh]">
-    <div class="mb-8">
-        <h1 class="font-headline-lg text-[32px] font-bold text-primary"><?= lang('Front.prof_title') ?></h1>
-        <p class="text-on-surface-variant font-body-md"><?= lang('Front.prof_subtitle') ?></p>
+    <div class="mb-8 flex justify-between items-end">
+        <div>
+            <h1 class="font-headline-lg text-[32px] font-bold text-primary"><?= lang('Front.prof_title') ?></h1>
+            <p class="text-on-surface-variant font-body-md"><?= lang('Front.prof_subtitle') ?></p>
+        </div>
+        <a href="<?= base_url('admin/dashboard') ?>" class="bg-surface-container-highest text-on-surface px-6 py-2.5 border border-outline-variant rounded font-bold text-[14px] hover:bg-surface-container transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">dashboard</span> Dashboard
+        </a>
     </div>
 
     <?php if (session()->getFlashdata('success')) : ?>
@@ -128,50 +133,70 @@ $errBox = function($err) { return $err ? '<div class="bg-[#f2dede] text-[#a94442
             </form>
         </div>
 
-        <?php if(in_array(session()->get('role_id'), [2, 3])): ?>
-        <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm md:col-span-2">
+        <!-- Agent Upgrade / Verification Block (Targeted explicitly at Standard Users & Existing Agents) -->
+        <?php 
+            $approvalStatus = '';
+            if (isset($agentVerification) && $agentVerification) {
+                $approvalStatus = is_object($agentVerification) ? $agentVerification->approval_status : $agentVerification['approval_status'];
+            }
+        ?>
+        
+        <?php if (session()->get('role_id') == 1 || $approvalStatus !== ''): ?>
+        <div class="bg-surface border border-outline-variant rounded-xl p-6 shadow-sm md:col-span-2 mt-4">
             <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant">
                 <h2 class="font-label-md text-[18px] font-bold text-on-surface flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">verified_user</span> <?= lang('Front.prof_verify_id') ?>
+                    <span class="material-symbols-outlined text-primary">verified_user</span> <?= session()->get('role_id') == 1 ? 'Upgrade to Verified Agent' : lang('Front.prof_verify_id') ?>
                 </h2>
-                <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold"><?= lang('Front.prof_not_verified') ?></span>
+                <?php if ($approvalStatus == 'Verified'): ?>
+                    <span class="bg-[#d3e3fd] text-[#041e49] px-3 py-1 rounded-full text-xs font-semibold">Verified Agent</span>
+                <?php elseif ($approvalStatus == 'Pending Verification'): ?>
+                    <span class="bg-[#fef7e0] text-[#b06000] px-3 py-1 rounded-full text-xs font-semibold">Pending Approval</span>
+                <?php else: ?>
+                    <span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-semibold">Standard User</span>
+                <?php endif; ?>
             </div>
             
-            <p class="text-sm text-on-surface-variant mb-6"><?= lang('Front.prof_verify_desc') ?></p>
+            <?php if ($approvalStatus == 'Verified'): ?>
+                <p class="text-sm text-on-surface-variant mb-6">Your identity has been fully verified. You now have access to advanced agent privileges and priority support.</p>
+            <?php elseif ($approvalStatus == 'Pending Verification'): ?>
+                <p class="text-sm text-on-surface-variant mb-6">Your identity documents are currently under review by our moderation team. You will be notified once approved.</p>
+            <?php else: ?>
+                <p class="text-sm text-on-surface-variant mb-6">Standard users (Buyers/Owners) can post properties for free. To unlock advanced agent limits, unlimited custom POIs, and dedicated support, please submit your formal identification documents below to upgrade your account status to Agent.</p>
 
-            <form action="<?= base_url('user/upload-agent-docs') ?>" method="POST" enctype="multipart/form-data" novalidate class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <div class="md:col-span-3">
-                    <?php if (session('errors.ktp_document')): ?>
-                        <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm text-sm">
-                            <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
-                        </div>
-                    <?php endif; ?>
-                </div>
+                <form action="<?= base_url('user/upload-agent-docs') ?>" method="POST" enctype="multipart/form-data" novalidate class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <div class="md:col-span-3">
+                        <?php if (session('errors.ktp_document')): ?>
+                            <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm text-sm">
+                                <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_ktp') ?> <span class="text-[#c9302c]">*</span></label>
-                    <?php $err = $getErr('ktp_document'); ?>
-                    <input type="file" name="ktp_document" accept="image/*,.pdf" required class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold cursor-pointer border rounded p-1 <?= $err ? 'border-[#c9302c] bg-[#fff8f8] file:bg-error-container file:text-error' : 'border-outline-variant bg-surface file:bg-primary-fixed-dim file:text-primary hover:file:bg-primary-fixed' ?>">
-                    <?= $errBox($err) ?>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_npwp') ?></label>
-                    <input type="file" name="npwp" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant border border-outline-variant rounded p-1 bg-surface file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
-                </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Upload KTP (National ID) <span class="text-[#c9302c]">*</span></label>
+                        <?php $err = $getErr('ktp_document'); ?>
+                        <input type="file" name="ktp_document" accept="image/*,.pdf" required class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold cursor-pointer border rounded p-1 <?= $err ? 'border-[#c9302c] bg-[#fff8f8] file:bg-error-container file:text-error' : 'border-outline-variant bg-surface file:bg-primary-fixed-dim file:text-primary hover:file:bg-primary-fixed' ?>">
+                        <?= $errBox($err) ?>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_npwp') ?> (Optional)</label>
+                        <input type="file" name="npwp" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant border border-outline-variant rounded p-1 bg-surface file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-on-surface mb-2"><?= lang('Front.prof_siup') ?></label>
-                    <input type="file" name="business_license" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant border border-outline-variant rounded p-1 bg-surface file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
-                </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-on-surface mb-2">Business License / SIUP (Optional)</label>
+                        <input type="file" name="business_license" accept="image/*,.pdf" class="block w-full text-sm text-on-surface-variant border border-outline-variant rounded p-1 bg-surface file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-on-surface-variant hover:file:bg-surface-container cursor-pointer">
+                    </div>
 
-                <div class="md:col-span-3 pt-4 border-t border-outline-variant flex justify-end">
-                    <button type="submit" class="bg-primary text-on-primary px-6 py-2.5 rounded font-bold text-[14px] hover:bg-primary-container transition-colors flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px]">upload_file</span> <?= lang('Front.prof_submit_verify') ?>
-                    </button>
-                </div>
-            </form>
+                    <div class="md:col-span-3 pt-4 border-t border-outline-variant flex justify-end">
+                        <button type="submit" class="bg-primary text-on-primary px-6 py-2.5 rounded font-bold text-[14px] hover:bg-primary-container transition-colors flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[20px]">upgrade</span> Submit Agent Request
+                        </button>
+                    </div>
+                </form>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
 
