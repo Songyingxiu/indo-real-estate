@@ -142,36 +142,53 @@ class Profile extends BaseController
             return redirect()->back()->with('errors', $this->validator->getErrors());
         }
 
-        $file = $this->request->getFile('ktp_document');
-        
-        if ($file && $file->isValid() && ! $file->hasMoved()) {
-            $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
-            
-            if (!empty($cloudinaryUrl)) {
-                $cloudinary = new Cloudinary($cloudinaryUrl);
-                $response = $cloudinary->uploadApi()->upload($file->getTempName(), [
-                    'folder' => 'hunikita_documents',
-                ]);
-                
-                if ($isRejected && $existingId) {
-                    $agentVerifyModel->update($existingId, [
-                        'ktp_document'    => $response['secure_url'], 
-                        'approval_status' => 'Pending'
-                    ]);
-                } else {
-                    $agentVerifyModel->builder()->insert([
-                        'user_id'         => $userId,
-                        'ktp_document'    => $response['secure_url'], 
-                        'approval_status' => 'Pending',
-                        'status'          => 'Active'
-                    ]);
-                }
+        $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+        if (empty($cloudinaryUrl)) {
+            return redirect()->back()->with('error', 'Cloudinary configuration is missing.');
+        }
+        $cloudinary = new Cloudinary($cloudinaryUrl);
 
-                return redirect()->back()->with('success', 'Your identity document has been submitted and is pending verification.');
+        $ktpUrl = null; $npwpUrl = null; $licenseUrl = null;
+
+        if ($ktpFile = $this->request->getFile('ktp_document')) {
+            if ($ktpFile->isValid() && !$ktpFile->hasMoved()) {
+                $resp = $cloudinary->uploadApi()->upload($ktpFile->getTempName(), ['folder' => 'hunikita_documents']);
+                $ktpUrl = $resp['secure_url'];
+            }
+        }
+        if ($npwpFile = $this->request->getFile('npwp')) {
+            if ($npwpFile->isValid() && !$npwpFile->hasMoved()) {
+                $resp = $cloudinary->uploadApi()->upload($npwpFile->getTempName(), ['folder' => 'hunikita_documents']);
+                $npwpUrl = $resp['secure_url'];
+            }
+        }
+        if ($licenseFile = $this->request->getFile('business_license')) {
+            if ($licenseFile->isValid() && !$licenseFile->hasMoved()) {
+                $resp = $cloudinary->uploadApi()->upload($licenseFile->getTempName(), ['folder' => 'hunikita_documents']);
+                $licenseUrl = $resp['secure_url'];
             }
         }
 
-        return redirect()->back()->with('error', 'Failed to upload document.');
+        if ($ktpUrl) {
+            $updateData = [
+                'ktp_document'    => $ktpUrl, 
+                'approval_status' => 'Pending Verification'
+            ];
+            if ($npwpUrl) $updateData['npwp'] = $npwpUrl;
+            if ($licenseUrl) $updateData['business_license'] = $licenseUrl;
+
+            if ($isRejected && $existingId) {
+                $agentVerifyModel->update($existingId, $updateData);
+            } else {
+                $updateData['user_id'] = $userId;
+                $updateData['status']  = 'Active';
+                $agentVerifyModel->builder()->insert($updateData);
+            }
+
+            return redirect()->back()->with('success', 'Your identity documents have been submitted and are pending verification.');
+        }
+
+        return redirect()->back()->with('error', 'Failed to upload KTP document.');
     }
 
     public function deleteAccount()

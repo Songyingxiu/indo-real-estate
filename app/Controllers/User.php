@@ -6,6 +6,7 @@ use App\Models\AgentVerificationModel;
 use App\Models\SavedPropertyModel;
 use App\Models\SavedSearchModel;
 use App\Libraries\EmailService;
+use Cloudinary\Cloudinary; 
 
 class User extends BaseController
 {
@@ -16,6 +17,9 @@ class User extends BaseController
         $userModel = new UserModel();
         $data['title'] = 'My Profile - HuniKita';
         $data['user']  = $userModel->find(session()->get('id'));
+
+        $agentVerifyModel = new AgentVerificationModel();
+        $data['agentVerification'] = $agentVerifyModel->where('user_id', session()->get('id'))->orderBy('id', 'DESC')->first();
 
         return view('front/user/profile', $data);
     }
@@ -90,39 +94,79 @@ class User extends BaseController
     public function uploadAgentDocs()
     {
         if (!session()->get('id')) return redirect()->to(base_url('login'));
+        $userId = session()->get('id');
 
         $agentVerifyModel = new AgentVerificationModel();
         
-        $ktpName = null; $npwpName = null; $licenseName = null;
+        // Prevent duplicate spam
+        $existingVerification = $agentVerifyModel->where('user_id', $userId)->first();
+        $isRejected = false;
+        $existingId = null;
 
+        if ($existingVerification) {
+            $status = is_object($existingVerification) ? $existingVerification->approval_status : $existingVerification['approval_status'];
+            
+            if ($status !== 'Rejected') {
+                return redirect()->back()->with('error', 'You have already submitted a verification document.');
+            }
+            
+            $isRejected = true;
+            $existingId = is_object($existingVerification) ? $existingVerification->id : $existingVerification['id'];
+        }
+
+        $rules = [
+            'ktp_document' => 'uploaded[ktp_document]|ext_in[ktp_document,pdf,jpg,jpeg,png]|max_size[ktp_document,5120]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->with('errors', $this->validator->getErrors());
+        }
+
+        $cloudinaryUrl = env('CLOUDINARY_URL') ?: getenv('CLOUDINARY_URL');
+        if (empty($cloudinaryUrl)) {
+            return redirect()->back()->with('error', 'Cloudinary configuration is missing.');
+        }
+        $cloudinary = new Cloudinary($cloudinaryUrl);
+
+        $ktpUrl = null; $npwpUrl = null; $licenseUrl = null;
+
+        // Secure Cloudinary Uploads replacing Local FileSystem (Vercel Fix)
         if ($ktpFile = $this->request->getFile('ktp_document')) {
             if ($ktpFile->isValid() && !$ktpFile->hasMoved()) {
-                $ktpName = $ktpFile->getRandomName();
-                $ktpFile->move(FCPATH . 'uploads/documents', $ktpName);
+                $resp = $cloudinary->uploadApi()->upload($ktpFile->getTempName(), ['folder' => 'hunikita_documents']);
+                $ktpUrl = $resp['secure_url'];
             }
         }
         if ($npwpFile = $this->request->getFile('npwp')) {
             if ($npwpFile->isValid() && !$npwpFile->hasMoved()) {
-                $npwpName = $npwpFile->getRandomName();
-                $npwpFile->move(FCPATH . 'uploads/documents', $npwpName);
+                $resp = $cloudinary->uploadApi()->upload($npwpFile->getTempName(), ['folder' => 'hunikita_documents']);
+                $npwpUrl = $resp['secure_url'];
             }
         }
         if ($licenseFile = $this->request->getFile('business_license')) {
             if ($licenseFile->isValid() && !$licenseFile->hasMoved()) {
-                $licenseName = $licenseFile->getRandomName();
-                $licenseFile->move(FCPATH . 'uploads/documents', $licenseName);
+                $resp = $cloudinary->uploadApi()->upload($licenseFile->getTempName(), ['folder' => 'hunikita_documents']);
+                $licenseUrl = $resp['secure_url'];
             }
         }
 
-        if ($ktpName) {
-            $agentVerifyModel->insert([
-                'user_id'          => session()->get('id'),
-                'ktp_document'     => $ktpName,
-                'npwp'             => $npwpName,
-                'business_license' => $licenseName,
-                'approval_status'  => 'Pending',
-                'status'           => 'Active'
-            ]);
+        if ($ktpUrl) {
+            $updateData = [
+                'ktp_document'    => $ktpUrl,
+                'approval_status' => 'Pending Verification'
+            ];
+            
+            if ($npwpUrl) $updateData['npwp'] = $npwpUrl;
+            if ($licenseUrl) $updateData['business_license'] = $licenseUrl;
+
+            // Upsert Logic to prevent DB bloat
+            if ($isRejected && $existingId) {
+                $agentVerifyModel->update($existingId, $updateData);
+            } else {
+                $updateData['user_id'] = $userId;
+                $updateData['status']  = 'Active';
+                $agentVerifyModel->insert($updateData);
+            }
             return redirect()->back()->with('success', 'Verification documents uploaded! Please wait for Admin review.');
         }
 
