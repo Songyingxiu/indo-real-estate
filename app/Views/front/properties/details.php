@@ -92,7 +92,12 @@
                         </p>
                     </div>
                     <div class="text-left md:text-right shrink-0 mt-2 md:mt-0">
-                        <p class="font-headline-lg text-[20px] md:text-[24px] font-bold text-primary whitespace-nowrap">Rp <?= number_format($property->tax_price, 0, ',', '.') ?></p>
+                        <p class="font-headline-lg text-[20px] md:text-[24px] font-bold text-primary whitespace-nowrap">
+                            Rp <?= number_format($property->tax_price, 0, ',', '.') ?>
+                            <?php if ($property->listing_type === 'Rent' && !empty($property->rental_period)): ?>
+                                <span class="text-[16px] text-on-surface-variant font-normal"> / <?= esc($property->rental_period) ?></span>
+                            <?php endif; ?>
+                        </p>
                     </div>
                 </div>
 
@@ -279,7 +284,10 @@
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($np->title) ?></span>
-                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($np->tax_price, 0, ',', '.') ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">
+                                    Rp <?= number_format($np->tax_price, 0, ',', '.') ?>
+                                    <?= ($np->listing_type === 'Rent' && !empty($np->rental_period)) ? ' <span class="text-[12px] text-on-surface-variant font-normal">/ ' . esc($np->rental_period) . '</span>' : '' ?>
+                                </span>
                                 <span class="text-[12px] text-on-surface-variant mt-1"><?= number_format($np->distance ?? 0, 1) ?> <?= lang('Front.det_km_away') ?></span>
                             </div>
                         </a>
@@ -303,7 +311,10 @@
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($st->title) ?></span>
-                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($st->tax_price, 0, ',', '.') ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">
+                                    Rp <?= number_format($st->tax_price, 0, ',', '.') ?>
+                                    <?= ($st->listing_type === 'Rent' && !empty($st->rental_period)) ? ' <span class="text-[12px] text-on-surface-variant font-normal">/ ' . esc($st->rental_period) . '</span>' : '' ?>
+                                </span>
                                 <span class="text-[12px] text-on-surface-variant mt-1"><?= esc($st->bed ?? 0) ?> <?= lang('Front.lbl_beds') ?> • <?= esc($st->bath ?? 0) ?> <?= lang('Front.lbl_baths') ?></span>
                             </div>
                         </a>
@@ -327,7 +338,10 @@
                             </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-[14px] text-on-surface line-clamp-1 group-hover:text-primary"><?= esc($sp->title) ?></span>
-                                <span class="font-bold text-[14px] text-primary-container">Rp <?= number_format($sp->tax_price, 0, ',', '.') ?></span>
+                                <span class="font-bold text-[14px] text-primary-container">
+                                    Rp <?= number_format($sp->tax_price, 0, ',', '.') ?>
+                                    <?= ($sp->listing_type === 'Rent' && !empty($sp->rental_period)) ? ' <span class="text-[12px] text-on-surface-variant font-normal">/ ' . esc($sp->rental_period) . '</span>' : '' ?>
+                                </span>
                                 <span class="text-[12px] text-on-surface-variant mt-1 line-clamp-1"><?= esc($sp->area_name ?? $sp->city_name ?? $sp->address_line_1 ?? 'Location') ?></span>
                             </div>
                         </a>
@@ -616,9 +630,6 @@
     function submitInquiry(e, formElement) {
         e.preventDefault();
 
-        // -------------------------------------------------------------------
-        // INJECTED CLIENT-SIDE VALIDATION LOGIC FOR REQUIRED FIELDS
-        // -------------------------------------------------------------------
         let hasError = false;
         const requiredFields = [
             { id: 'name', label: 'Full Name' },
@@ -627,7 +638,6 @@
             { id: 'message', label: 'Message', isTextarea: true }
         ];
 
-        // Reset previous validation visual states
         requiredFields.forEach(f => clearError(f.id));
 
         requiredFields.forEach(field => {
@@ -636,11 +646,9 @@
                 const val = input.value.trim();
                 let errorMessage = '';
 
-                // Check for empty string
                 if (!val) {
                     errorMessage = `The ${field.label} field is required.`;
                 } 
-                // Check simple valid email structure if field is email
                 else if (field.id === 'email') {
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailRegex.test(val)) {
@@ -648,7 +656,6 @@
                     }
                 }
 
-                // If a validation error exists, paint the red UI flags
                 if (errorMessage) {
                     hasError = true;
                     input.classList.remove('border-outline-variant', 'focus:border-primary', 'bg-white');
@@ -664,19 +671,16 @@
             }
         });
 
-        // Toggle the global top warning banner
         const globalBanner = document.getElementById('inquiry-global-error');
         if (hasError) {
             if (globalBanner) {
                 globalBanner.classList.remove('hidden');
                 globalBanner.classList.add('flex');
             }
-            return; // EXIT FUNCTION: Stop the submission completely
+            return;
         }
         if (globalBanner) globalBanner.classList.add('hidden');
-        // -------------------------------------------------------------------
 
-        // Proceed to Submit
         const btn = document.getElementById('submitBtn');
         const originalText = btn.innerHTML;
         btn.innerHTML = 'Sending...';
