@@ -17,14 +17,16 @@ class AdminFilter implements FilterInterface
 
         // Role-Based Access Control (RBAC)
         // We use role_id numbers based on the MasterSeeder:
-        // 1 = Buyer
-        // 2 = Owner
+        // 1 = Standard User (Buyer/Owner)
+        // 2 = Owner (Legacy)
         // 3 = Agent
         // 4 = Admin
         
         $userRoleId = session()->get('role_id');
-        // Define who gets access to the admin panel (Owners, Agents, Admins)
-        $allowedRoles = [2, 3, 4]; 
+        
+        // Define who gets access to the admin panel. 
+        // Role 1 is now explicitly allowed since all users can post properties.
+        $allowedRoles = [1, 2, 3, 4]; 
 
         // Kick out unauthorized users and destroy their session
         if (! in_array($userRoleId, $allowedRoles)) {

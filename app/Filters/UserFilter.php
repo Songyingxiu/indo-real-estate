@@ -13,10 +13,6 @@ class UserFilter implements FilterInterface
             return redirect()->to(base_url('login'))->with('error', 'Please log in.');
         }
 
-        // Redirect if role is not Buyer (1)
-        if (session()->get('role_id') != 1) {
-            return redirect()->to(base_url('admin/dashboard'))->with('error', 'Access denied.');
-        }
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null) {}
