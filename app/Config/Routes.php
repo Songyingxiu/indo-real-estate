@@ -56,15 +56,15 @@ $routes->group('user', ['filter' => 'userAuth'], static function ($routes) {
     $routes->post('update-password', 'User::updatePassword');
     $routes->get('saved-properties', 'User::savedProperties');
     $routes->post('delete-search/(:num)', 'User::deleteSearch/$1');
-    $routes->post('delete-account', 'User::deleteAccount'); 
+    $routes->post('delete-account', 'User::deleteAccount');
+    $routes->post('upload-agent-docs', 'User::uploadAgentDocs');
 });
 
-// Agent AJAX Routes
-$routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'adminAuth'], static function ($routes) {
+$routes->group('agent', ['namespace' => 'App\Controllers\Agent', 'filter' => 'userAuth'], static function ($routes) {
     $routes->post('poi/store-ajax', 'PoiAjax::store');
 });
 
-$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'adminAuth'], static function ($routes) {
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'userAuth'], static function ($routes) {
 
     $routes->get('dashboard', 'Dashboard::index');
     
@@ -100,7 +100,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ad
     
     $routes->get('support', 'Support::index');
 
-    // Super admin routes only
+    // Super admin routes strictly protected by superAdminAuth
     $routes->group('', ['filter' => 'superAdminAuth'], static function ($routes) {
         
         $routes->get('users', 'Users::index');

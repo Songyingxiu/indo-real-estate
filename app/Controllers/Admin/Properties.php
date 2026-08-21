@@ -42,12 +42,7 @@ class Properties extends BaseController
         $userId = session()->get('user_id');
         $roleId = session()->get('role_id');
 
-        $agentVerifyModel = new AgentVerificationModel();
-        $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
-        
-        if ($roleId != 4 && !$isVerified) {
-            return redirect()->to(base_url('admin/profile'))->with('error', 'You must verify your identity before posting a property listing.');
-        }
+        // Note: Strict identity verification block has been removed to allow standard Buyers/Owners to post properties.
 
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
@@ -117,12 +112,7 @@ class Properties extends BaseController
         $userFirstName = session()->get('first_name') ?? 'User';
         $userEmail = session()->get('email');
 
-        $agentVerifyModel = new AgentVerificationModel();
-        $isVerified = $agentVerifyModel->where('user_id', $userId)->where('approval_status', 'Verified')->first();
-        
-        if ($roleId != 4 && !$isVerified) {
-            return redirect()->to(base_url('admin/profile'))->with('error', 'You must verify your identity before posting a property listing.');
-        }
+        // Note: Strict identity verification block has been removed to allow standard Buyers/Owners to post properties.
 
         $propertyModel = new PropertyModel();
         $subModel = new SubscriptionModel();
@@ -164,7 +154,9 @@ class Properties extends BaseController
             'parking'          => 'permit_empty|in_list[Available,Not Available]',
             'basement'         => 'permit_empty|in_list[Yes,No]',
             'water_facility'   => 'permit_empty|max_length[255]',
-            'rental_period'    => 'permit_empty|in_list[Month,Year]' // Added Rule
+            'rental_period'    => 'permit_empty|in_list[Month,Year]',
+            'property_images'  => 'uploaded[property_images]|is_image[property_images]',
+            'shm_document'     => 'uploaded[shm_document]|ext_in[shm_document,pdf,jpg,jpeg,png]|max_size[shm_document,5120]'
         ];
 
         if (!$this->validate($rules)) {
@@ -195,7 +187,7 @@ class Properties extends BaseController
             'description_en'   => $this->request->getPost('description_en'),
             'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
-            'rental_period'    => $this->request->getPost('listing_type') === 'Rent' ? $this->request->getPost('rental_period') : null, // Conditionally saved
+            'rental_period'    => $this->request->getPost('listing_type') === 'Rent' ? $this->request->getPost('rental_period') : null,
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
             'city_id'          => $this->request->getPost('city_id'),
@@ -402,7 +394,7 @@ class Properties extends BaseController
             'parking'          => 'permit_empty|in_list[Available,Not Available]',
             'basement'         => 'permit_empty|in_list[Yes,No]',
             'water_facility'   => 'permit_empty|max_length[255]',
-            'rental_period'    => 'permit_empty|in_list[Month,Year]' // Added Rule
+            'rental_period'    => 'permit_empty|in_list[Month,Year]'
         ];
 
         if (!$this->validate($rules)) {
@@ -422,7 +414,7 @@ class Properties extends BaseController
             'description_en'   => $this->request->getPost('description_en'),
             'description_id'   => $this->request->getPost('description_id'),
             'listing_type'     => $this->request->getPost('listing_type'),
-            'rental_period'    => $this->request->getPost('listing_type') === 'Rent' ? $this->request->getPost('rental_period') : null, // Conditionally saved
+            'rental_period'    => $this->request->getPost('listing_type') === 'Rent' ? $this->request->getPost('rental_period') : null, 
             'property_type_id' => $this->request->getPost('property_type_id'),
             'state_id'         => $this->request->getPost('state_id'), 
             'city_id'          => $this->request->getPost('city_id'),
