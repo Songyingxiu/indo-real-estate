@@ -425,28 +425,28 @@
                             </select>
 
                             <div>
-                                <input id="inquiry-name" name="name" required oninput="clearError('name')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '') ?>">
+                                <input id="inquiry-name" name="name" oninput="clearError('name')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_full_name') ?>" type="text" value="<?= esc(session()->get('first_name') ? session()->get('first_name').' '.session()->get('last_name') : '') ?>">
                                 <div id="error-name" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
                                     <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
                                 </div>
                             </div>
                             
                             <div>
-                                <input id="inquiry-phone" name="phone" required oninput="clearError('phone')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="">
+                                <input id="inquiry-phone" name="phone" oninput="clearError('phone')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_phone_num') ?>" type="tel" value="">
                                 <div id="error-phone" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
                                     <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
                                 </div>
                             </div>
                             
                             <div>
-                                <input id="inquiry-email" name="email" required oninput="clearError('email')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(session()->get('email')) ?>">
+                                <input id="inquiry-email" name="email" oninput="clearError('email')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none" placeholder="<?= lang('Front.det_email_addr') ?>" type="email" value="<?= esc(session()->get('email')) ?>">
                                 <div id="error-email" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
                                     <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
                                 </div>
                             </div>
                             
                             <div>
-                                <textarea name="message" id="inquiryMessage" required oninput="clearError('message')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" rows="4"></textarea>
+                                <textarea name="message" id="inquiryMessage" oninput="clearError('message')" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white resize-none outline-none" rows="4"></textarea>
                                 <div id="error-message" class="hidden bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
                                     <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <span class="error-text"></span>
                                 </div>
@@ -615,13 +615,72 @@
 
     function submitInquiry(e, formElement) {
         e.preventDefault();
+
+        // -------------------------------------------------------------------
+        // INJECTED CLIENT-SIDE VALIDATION LOGIC FOR REQUIRED FIELDS
+        // -------------------------------------------------------------------
+        let hasError = false;
+        const requiredFields = [
+            { id: 'name', label: 'Full Name' },
+            { id: 'phone', label: 'Phone Number' },
+            { id: 'email', label: 'Email Address' },
+            { id: 'message', label: 'Message', isTextarea: true }
+        ];
+
+        // Reset previous validation visual states
+        requiredFields.forEach(f => clearError(f.id));
+
+        requiredFields.forEach(field => {
+            const input = field.isTextarea ? document.getElementById('inquiryMessage') : document.getElementById('inquiry-' + field.id);
+            if (input) {
+                const val = input.value.trim();
+                let errorMessage = '';
+
+                // Check for empty string
+                if (!val) {
+                    errorMessage = `The ${field.label} field is required.`;
+                } 
+                // Check simple valid email structure if field is email
+                else if (field.id === 'email') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(val)) {
+                        errorMessage = 'Please enter a valid email address.';
+                    }
+                }
+
+                // If a validation error exists, paint the red UI flags
+                if (errorMessage) {
+                    hasError = true;
+                    input.classList.remove('border-outline-variant', 'focus:border-primary', 'bg-white');
+                    input.classList.add('border-[#c9302c]', 'focus:border-[#c9302c]', 'focus:ring-[#c9302c]', 'bg-[#fff8f8]');
+                    
+                    const errorDiv = document.getElementById('error-' + field.id);
+                    if (errorDiv) {
+                        errorDiv.querySelector('.error-text').textContent = errorMessage;
+                        errorDiv.classList.remove('hidden');
+                        errorDiv.classList.add('flex');
+                    }
+                }
+            }
+        });
+
+        // Toggle the global top warning banner
+        const globalBanner = document.getElementById('inquiry-global-error');
+        if (hasError) {
+            if (globalBanner) {
+                globalBanner.classList.remove('hidden');
+                globalBanner.classList.add('flex');
+            }
+            return; // EXIT FUNCTION: Stop the submission completely
+        }
+        if (globalBanner) globalBanner.classList.add('hidden');
+        // -------------------------------------------------------------------
+
+        // Proceed to Submit
         const btn = document.getElementById('submitBtn');
         const originalText = btn.innerHTML;
         btn.innerHTML = 'Sending...';
         btn.disabled = true;
-        
-        const globalBanner = document.getElementById('inquiry-global-error');
-        if (globalBanner) globalBanner.classList.add('hidden');
 
         const csrfName = document.querySelector('meta[name="csrf_token_name"]')?.getAttribute('content') || 'csrf_test_name';
         const csrfHash = document.querySelector('meta[name="X-CSRF-TOKEN"]')?.getAttribute('content') || document.querySelector('meta[name="csrf_token"]')?.getAttribute('content');

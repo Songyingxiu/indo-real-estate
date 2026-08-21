@@ -42,8 +42,6 @@ class Properties extends BaseController
         $userId = session()->get('user_id');
         $roleId = session()->get('role_id');
 
-        // Note: Strict identity verification block has been removed to allow standard Buyers/Owners to post properties.
-
         $propertyTypeModel = new PropertyTypeModel();
         $stateModel = new StateModel();
         $propertyModel = new PropertyModel();
@@ -52,17 +50,19 @@ class Properties extends BaseController
         $planModel = new SubscriptionPlanModel();
         $poiModel = new PoiModel();
 
+        // 1. Fetch the default "Free" plan dynamically from Master Data
+        $freePlan = $planModel->where('price', 0)->first();
+        $maxPois = $freePlan ? (is_array($freePlan) ? $freePlan['max_pois'] : $freePlan->max_pois) : 0;
+        $maxProperties = $freePlan ? (is_array($freePlan) ? $freePlan['max_properties'] : $freePlan->max_properties) : 1;
+
+        // 2. Override with Active Subscription if they bought one
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
-        
-        $maxPois = 0;
-        $maxProperties = 1; 
-        
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
-                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
-                $maxProperties = is_array($plan) ? ($plan['max_properties'] ?? 1) : ($plan->max_properties ?? 1);
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? $maxPois) : ($plan->max_pois ?? $maxPois);
+                $maxProperties = is_array($plan) ? ($plan['max_properties'] ?? $maxProperties) : ($plan->max_properties ?? $maxProperties);
             }
         }
 
@@ -112,20 +112,21 @@ class Properties extends BaseController
         $userFirstName = session()->get('first_name') ?? 'User';
         $userEmail = session()->get('email');
 
-        // Note: Strict identity verification block has been removed to allow standard Buyers/Owners to post properties.
-
         $propertyModel = new PropertyModel();
         $subModel = new SubscriptionModel();
         $planModel = new SubscriptionPlanModel();
         
+        // 1. Fetch the default "Free" plan limits
+        $freePlan = $planModel->where('price', 0)->first();
+        $maxProperties = $freePlan ? (is_array($freePlan) ? $freePlan['max_properties'] : $freePlan->max_properties) : 1;
+
+        // 2. Override with active subscription
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
-        $maxProperties = 1; 
-        
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
-                $maxProperties = is_array($plan) ? ($plan['max_properties'] ?? 1) : ($plan->max_properties ?? 1);
+                $maxProperties = is_array($plan) ? ($plan['max_properties'] ?? $maxProperties) : ($plan->max_properties ?? $maxProperties);
             }
         }
 
@@ -154,9 +155,7 @@ class Properties extends BaseController
             'parking'          => 'permit_empty|in_list[Available,Not Available]',
             'basement'         => 'permit_empty|in_list[Yes,No]',
             'water_facility'   => 'permit_empty|max_length[255]',
-            'rental_period'    => 'permit_empty|in_list[Month,Year]',
-            'property_images'  => 'uploaded[property_images]|is_image[property_images]',
-            'shm_document'     => 'uploaded[shm_document]|ext_in[shm_document,pdf,jpg,jpeg,png]|max_size[shm_document,5120]'
+            'rental_period'    => 'permit_empty|in_list[Month,Year]'
         ];
 
         if (!$this->validate($rules)) {
@@ -302,14 +301,17 @@ class Properties extends BaseController
         $userId = session()->get('user_id');
         $roleId = session()->get('role_id');
 
+        // 1. Fetch the default "Free" plan limits
+        $freePlan = $planModel->where('price', 0)->first();
+        $maxPois = $freePlan ? (is_array($freePlan) ? $freePlan['max_pois'] : $freePlan->max_pois) : 0;
+
+        // 2. Override with active subscription
         $activeSub = $subModel->where('user_id', $userId)->where('sub_status', 'Active')->first();
-        
-        $maxPois = 0;
         if ($activeSub) {
             $planId = is_array($activeSub) ? $activeSub['plan_id'] : $activeSub->plan_id;
             $plan = $planModel->find($planId);
             if ($plan) {
-                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? 0) : ($plan->max_pois ?? 0);
+                $maxPois = is_array($plan) ? ($plan['max_pois'] ?? $maxPois) : ($plan->max_pois ?? $maxPois);
             }
         }
 
