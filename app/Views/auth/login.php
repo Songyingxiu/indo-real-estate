@@ -83,10 +83,14 @@
             <div class="min-h-full flex flex-col pt-16 pb-12 px-6 md:pt-15 md:pb-16 md:px-12 lg:px-16">
                 
                 <?php if (session()->getFlashdata('error') && !session()->has('errors')) : ?>
-                    <div class="bg-[#ffdad6] text-[#410002] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('error') ?></div>
+                    <div class="bg-[#ffdad6] text-[#410002] p-4 rounded mb-4 font-semibold text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">error</span> <?= session()->getFlashdata('error') ?>
+                    </div>
                 <?php endif; ?>
                 <?php if (session()->getFlashdata('success')) : ?>
-                    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm"><?= session()->getFlashdata('success') ?></div>
+                    <div class="bg-[#d3e3fd] text-[#041e49] p-4 rounded mb-4 font-semibold text-sm flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">check_circle</span> <?= session()->getFlashdata('success') ?>
+                    </div>
                 <?php endif; ?>
 
                 <?php 
@@ -105,12 +109,12 @@
 
                     <div class="form-container relative z-10">
                         
-                        <!-- SIGN IN FORM (Removed novalidate to enforce HTML5 Required) -->
+                        <!-- SIGN IN FORM (Added novalidate, hooked custom JS validation) -->
                         <div id="content-login" class="tab-content fade-in pb-8">
                             <h2 class="font-headline-lg text-[32px] font-bold text-on-surface mb-2">Welcome Back</h2>
                             <p class="font-body-md text-[16px] text-on-surface-variant mb-8">Enter your credentials to access your account.</p>
                             
-                            <form action="<?= base_url('login') ?>" class="space-y-4" method="POST">
+                            <form action="<?= base_url('login') ?>" class="space-y-4" method="POST" novalidate onsubmit="return handleCustomValidation(event, this)">
                                 
                                 <?php if (session('errors.email') || session('errors.password')): ?>
                                     <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm mb-4">
@@ -169,26 +173,24 @@
                             </div>
                         </div>
 
-                        <!-- CREATE ACCOUNT FORM (Removed novalidate to enforce HTML5 Checkbox validation) -->
+                        <!-- CREATE ACCOUNT FORM (Added novalidate, hooked custom JS validation) -->
                         <div id="content-register" class="tab-content fade-in pb-8">
                             <h2 class="font-headline-lg text-[32px] font-bold text-on-surface mb-2">Create Account</h2>
                             <p class="font-body-md text-[16px] text-on-surface-variant mb-6">Join HuniKita to post, save, and manage properties.</p>
                             
-                            <form action="<?= base_url('register') ?>" class="space-y-4" method="POST">
+                            <form action="<?= base_url('register') ?>" class="space-y-4" method="POST" novalidate onsubmit="return handleCustomValidation(event, this)">
                                 
                                 <?php if ($isRegistering && session()->has('errors')): ?>
                                     <div class="bg-[#c9302c] text-white p-3 font-bold flex items-center gap-2 rounded shadow-sm mb-4">
                                         <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
                                     </div>
                                 <?php endif; ?>
-
-                                <!-- Note: Role Selection completely removed. Users default to Buyer in Controller. -->
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">First Name <span class="text-[#c9302c]">*</span></label>
                                         <?php $err = session('errors.first_name'); ?>
-                                        <input name="first_name" value="<?= old('first_name') ?>" class="w-full px-4 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="John" required type="text">
+                                        <input name="first_name" value="<?= old('first_name') ?>" class="w-full px-4 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="John" required minlength="2" type="text">
                                         <?php if ($err): ?>
                                             <div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
                                                 <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <?= esc($err) ?>
@@ -198,7 +200,7 @@
                                     <div>
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Last Name <span class="text-[#c9302c]">*</span></label>
                                         <?php $err = session('errors.last_name'); ?>
-                                        <input name="last_name" value="<?= old('last_name') ?>" class="w-full px-4 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="Doe" required type="text">
+                                        <input name="last_name" value="<?= old('last_name') ?>" class="w-full px-4 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="Doe" required minlength="2" type="text">
                                         <?php if ($err): ?>
                                             <div class="bg-[#f2dede] text-[#a94442] text-[13px] p-2 mt-1 flex items-start gap-1 rounded-sm shadow-sm border border-[#ebcccc]">
                                                 <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span> <?= esc($err) ?>
@@ -237,8 +239,7 @@
                                         <label class="block font-label-md text-[14px] font-semibold text-on-surface mb-2">Password <span class="text-[#c9302c]">*</span></label>
                                         <div class="relative">
                                             <?php $err = session('errors.password'); ?>
-                                            <!-- Enforced HTML5 pattern validation for Password -->
-                                            <input name="password" class="w-full pl-4 pr-10 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="••••••••" required type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="Password must contain at least 8 characters, one uppercase letter, one number, and one special character.">
+                                            <input name="password" class="w-full pl-4 pr-10 py-3 border rounded text-on-surface font-body-md text-[14px] outline-none focus:ring-1 transition-all <?= $err ? 'border-[#c9302c] focus:border-[#c9302c] focus:ring-[#c9302c] bg-[#fff8f8]' : 'bg-surface-container-lowest border-outline-variant focus:border-primary-container focus:ring-primary-fixed-dim' ?>" placeholder="••••••••" required type="password" minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="Password must contain at least 8 characters, one uppercase letter, one number, and one special character.">
                                             <button onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
@@ -267,7 +268,7 @@
                                 </div>
                                 
                                 <div class="flex items-start gap-2 pt-2 pb-2 relative z-30">
-                                    <input class="mt-0.5 w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container cursor-pointer" type="checkbox" required>
+                                    <input class="mt-0.5 w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container cursor-pointer" type="checkbox" name="terms" required>
                                     <label class="font-caption text-[13px] text-on-surface-variant cursor-pointer leading-tight">
                                         I agree to the <a href="#" @click.prevent="showTerms = true" class="text-primary-container font-semibold hover:underline">Terms of Service</a> and <a href="#" @click.prevent="showPrivacy = true" class="text-primary-container font-semibold hover:underline">Privacy Policy</a>.
                                     </label>
@@ -330,6 +331,7 @@
         </div>
     </div>
 
+    <!-- CUSTOM CLIENT-SIDE VALIDATION SCRIPT -->
     <script>
         function togglePassword(button) {
             const input = button.previousElementSibling;
@@ -342,6 +344,81 @@
                 input.type = 'password';
                 icon.textContent = 'visibility_off';
             }
+        }
+
+        function handleCustomValidation(event, form) {
+            let isValid = true;
+            
+            // Clear out any old custom error messages
+            form.querySelectorAll('.custom-client-error').forEach(el => el.remove());
+            form.querySelectorAll('input').forEach(input => {
+                input.classList.remove('border-[#c9302c]', 'bg-[#fff8f8]');
+            });
+
+            // Grab all inputs that have rules attached
+            const inputs = form.querySelectorAll('input[required], input[pattern], input[type="email"]');
+            
+            inputs.forEach(input => {
+                let errorMessage = '';
+                let inputIsValid = true;
+
+                // Check HTML5 states natively but silently
+                if (input.validity.valueMissing) {
+                    if(input.type === 'checkbox') {
+                        errorMessage = 'You must agree to the Terms and Privacy Policy to register.';
+                    } else {
+                        errorMessage = 'This field is required.';
+                    }
+                    inputIsValid = false;
+                } else if (input.type === 'email' && input.validity.typeMismatch) {
+                    errorMessage = 'Please enter a valid email address.';
+                    inputIsValid = false;
+                } else if (input.validity.patternMismatch) {
+                    errorMessage = input.title || 'Invalid format.';
+                    inputIsValid = false;
+                } else if (input.validity.tooShort) {
+                    errorMessage = `Minimum length is ${input.minLength} characters.`;
+                    input  = false;
+                }
+
+                // Custom validation to ensure passwords match exactly
+                if (input.name === 'password_confirm') {
+                    const pwd = form.querySelector('input[name="password"]');
+                    if (pwd && pwd.value !== input.value && !input.validity.valueMissing) {
+                        errorMessage = 'Passwords do not match.';
+                        inputIsValid = false;
+                    }
+                }
+
+                // If this input failed, build the red Tailwind error block
+                if (!inputIsValid) {
+                    isValid = false;
+                    
+                    if (input.type !== 'checkbox') {
+                        input.classList.add('border-[#c9302c]', 'bg-[#fff8f8]');
+                    }
+                    
+                    const errDiv = document.createElement('div');
+                    errDiv.className = 'custom-client-error text-[#c9302c] text-[13px] mt-1 flex items-start gap-1 rounded-sm';
+                    errDiv.innerHTML = `<span class="material-symbols-outlined text-[16px] mt-0.5">error</span> <span class="font-medium">${errorMessage}</span>`;
+                    
+                    // Attach it safely beneath the input or the input's wrapper
+                    if (input.type === 'checkbox') {
+                        input.parentElement.after(errDiv);
+                    } else if (input.parentElement.classList.contains('relative') || input.parentElement.classList.contains('flex')) {
+                        input.parentElement.after(errDiv);
+                    } else {
+                        input.after(errDiv);
+                    }
+                }
+            });
+
+            // Prevent browser from submitting or showing default tooltips if invalid
+            if (!isValid) {
+                event.preventDefault();
+            }
+            
+            return isValid;
         }
     </script>
 
@@ -365,7 +442,6 @@
         const provider = new GoogleAuthProvider();
 
         window.signInWithGoogle = function() {
-            // Role selection removed. All Google sign-ins default to Buyer (Role 1) in backend.
             signInWithPopup(auth, provider)
                 .then((result) => {
                     const user = result.user;
