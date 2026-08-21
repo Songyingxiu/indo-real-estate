@@ -8,7 +8,10 @@ $badge_moderation = 0;
 $badge_verifs = 0;
 $badge_dashboard = 0;
 
+$allow_messages = false;
+
 if ($role_sidebar == 4) {
+    $allow_messages = true;
     try { $badge_moderation = $db->table('properties')->where('approval_status', 'Pending Review')->countAllResults(); } catch(\Exception $e) {}
     
     try {
@@ -19,6 +22,13 @@ if ($role_sidebar == 4) {
 
     $badge_dashboard = $badge_moderation + $badge_verifs + $badge_inquiries;
 } else {
+    // Check if the user's current plan allows messaging
+    try {
+        $plan_id = session()->get('plan_id') ?? 1;
+        $plan = $db->table('subscription_plans')->where('id', $plan_id)->get()->getRow();
+        $allow_messages = $plan ? $plan->allow_messages : false;
+    } catch (\Exception $e) {}
+
     try { $badge_moderation = $db->table('properties')->where('owner_id', $user_sidebar)->whereIn('approval_status', ['Rejected', 'Changes Requested'])->countAllResults(); } catch(\Exception $e) {}
     $badge_dashboard = $badge_inquiries + $badge_moderation;
 }
@@ -73,13 +83,27 @@ if ($role_sidebar == 4) {
             <?php endif; ?>
         </a>
 
-        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/inquiries')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/inquiries') ?>">
+        <!-- Dynamically locked Inquiries Inbox -->
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/inquiries')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" 
+           href="<?= $allow_messages ? base_url('admin/inquiries') : base_url('admin/pricing') ?>" 
+           <?= !$allow_messages ? 'title="Upgrade to a Premium plan to access direct messaging"' : '' ?>>
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/inquiries')) ? 'icon-fill' : '' ?>">forum</span>
             <span class="font-label-md text-label-md">Inquiries Inbox</span>
-            <?php if ($badge_inquiries > 0): ?>
+            
+            <?php if (!$allow_messages): ?>
+                <span class="ml-auto material-symbols-outlined text-[16px] opacity-70">lock</span>
+            <?php elseif ($badge_inquiries > 0): ?>
                 <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_inquiries ?></span>
             <?php endif; ?>
         </a>
+
+        <!-- Sent Inquiries (Available to everyone for properties they want to buy) -->
+        <?php if($role != 4): ?>
+        <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('user/inbox')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('user/inbox') ?>">
+            <span class="material-symbols-outlined <?= (current_url() == base_url('user/inbox')) ? 'icon-fill' : '' ?>">send</span>
+            <span class="font-label-md text-label-md">Sent Inquiries</span>
+        </a>
+        <?php endif; ?>
 
         <?php if($role != 4): ?>
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/pricing') ?>">
@@ -149,6 +173,12 @@ if ($role_sidebar == 4) {
                 Generate Report
             </a>
         <?php endif; ?>
+
+        <!-- Back to Homepage Escape Hatch -->
+        <a class="flex items-center gap-stack-sm py-2 px-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg transition-all" href="<?= base_url() ?>">
+            <span class="material-symbols-outlined">home</span>
+            <span class="font-label-md text-label-md">Back to Homepage</span>
+        </a>
 
         <a class="flex items-center gap-stack-sm py-2 px-2 <?= (current_url() == base_url('admin/support')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all" href="<?= base_url('admin/support') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/support')) ? 'icon-fill' : '' ?>">help</span>
