@@ -76,16 +76,20 @@
                         </div>
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
+                            <?php 
+                                $nName = !empty($notif->name) ? $notif->name : (!empty($notif->first_name) ? $notif->first_name : 'New Alert');
+                                $nDate = !empty($notif->created_at) ? $notif->created_at : (!empty($notif->created_date) ? $notif->created_date : date('Y-m-d H:i:s'));
+                            ?>
                             <a href="<?= base_url('admin/inquiries') ?>" class="block px-4 py-3 hover:bg-surface-container transition-colors border-b border-outline-variant/50 relative">
                                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
                                 <div class="flex justify-between items-start mb-1">
-                                    <span class="font-label-md text-label-md text-on-surface truncate pr-2"><?= esc($notif->name ?? $notif->first_name) ?></span>
+                                    <span class="font-label-md text-label-md text-on-surface truncate pr-2"><?= esc($nName) ?></span>
                                     <span class="font-caption text-caption text-primary font-medium shrink-0">
-                                        <?= date('M d', strtotime($notif->created_at ?? $notif->created_date)) ?>
+                                        <?= date('M d', strtotime($nDate)) ?>
                                     </span>
                                 </div>
                                 <p class="font-caption text-caption text-on-surface-variant line-clamp-2">
-                                    Inquired about: <?= esc($notif->property_title) ?>
+                                    <?= !empty($notif->property_title) ? 'Inquired about: ' . esc($notif->property_title) : 'New system activity logged.' ?>
                                 </p>
                             </a>
                         <?php endforeach; ?>
