@@ -397,22 +397,30 @@
                     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-outline-variant">
                         <div class="relative">
                             <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant uppercase font-bold text-xl">
-                                <?= substr($property->first_name, 0, 1) . substr($property->last_name ?? '', 0, 1) ?>
+                                <?= substr($property->first_name ?? 'U', 0, 1) . substr($property->last_name ?? '', 0, 1) ?>
                             </div>
                         </div>
                         <div>
-                            <h3 class="font-label-md text-[16px] text-on-surface font-bold"><?= esc($property->first_name . ' ' . $property->last_name) ?></h3>
-                            <span class="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 mt-1 rounded text-[12px] text-primary border border-outline-variant/50">
-                                <span class="material-symbols-outlined text-[12px]">badge</span> <?= lang('Front.det_verified') ?>
-                            </span>
+                            <h3 class="font-label-md text-[16px] text-on-surface font-bold"><?= esc(($property->first_name ?? '') . ' ' . ($property->last_name ?? '')) ?></h3>
+                            
+                            <?php 
+                                $isVerifiedAgent = (isset($property->role_id) && $property->role_id == 4);
+                                $contactType = $isVerifiedAgent ? 'Agent' : 'Owner';
+                            ?>
+
+                            <?php if($isVerifiedAgent): ?>
+                                <span class="inline-flex items-center gap-1 bg-surface-container-low px-2 py-0.5 mt-1 rounded text-[12px] text-primary border border-outline-variant/50">
+                                    <span class="material-symbols-outlined text-[12px]">badge</span> <?= lang('Front.det_verified') ?>
+                                </span>
+                            <?php endif; ?>
 
                             <?php if(isset($allowDirectEmail) && $allowDirectEmail): ?>
                                 <div class="mt-2 space-y-1">
                                     <p class="text-[13px] text-on-surface-variant flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-[16px]">call</span> <?= esc($property->phone_number) ?>
+                                        <span class="material-symbols-outlined text-[16px]">call</span> <?= esc($property->phone_number ?? '') ?>
                                     </p>
                                     <p class="text-[13px] text-on-surface-variant flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-[16px]">mail</span> <?= esc($property->email) ?>
+                                        <span class="material-symbols-outlined text-[16px]">mail</span> <?= esc($property->email ?? '') ?>
                                     </p>
                                 </div>
                             <?php else: ?>
@@ -432,7 +440,6 @@
                                 <span class="material-symbols-outlined text-[20px]">warning</span> There are items that require your attention
                             </div>
 
-                            <!-- Preset Auto-Update Source -->
                             <select id="inquirySource" name="source" required onchange="updatePresetMessage()" class="w-full border border-outline-variant rounded px-3 py-2 text-[16px] focus:border-primary focus:ring-1 bg-white outline-none cursor-pointer mb-1">
                                 <option value="Contact Form"><?= lang('Front.det_ask_question') ?></option>
                                 <option value="Schedule Visit"><?= lang('Front.det_schedule_visit') ?></option>
@@ -473,9 +480,11 @@
                     <?php else: ?>
                         <div class="text-center py-4">
                             <span class="material-symbols-outlined text-[48px] text-outline-variant mb-2 opacity-50">lock</span>
-                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6"><?= lang('Front.det_lock_notice') ?></p>
+                            <p class="font-body-md text-[14px] text-on-surface-variant mb-6">
+                                You must be logged in to contact the <?= strtolower($contactType) ?> and schedule a visit securely.
+                            </p>
                             <button type="button" onclick="openAuthModal()" class="w-full bg-primary text-on-primary py-3 rounded font-bold text-[14px] hover:bg-primary-container transition-colors shadow-sm">
-                                Sign in to Contact Agent
+                                Sign in to Contact <?= esc($contactType) ?>
                             </button>
                         </div>
                     <?php endif; ?>
@@ -493,7 +502,7 @@
         </div>
         <h2 class="font-headline-lg text-2xl font-bold text-on-surface mb-2">Message Sent!</h2>
         <p class="text-on-surface-variant text-[15px] mb-6 leading-relaxed">
-            Your inquiry has been successfully delivered. The agent will reply shortly. Please check your inbox to view replies and continue the conversation.
+            Your inquiry has been successfully delivered. The <?= strtolower($contactType) ?> will reply shortly. Please check your inbox to view replies and continue the conversation.
         </p>
         <div class="flex gap-3 w-full">
             <button @click="show = false" class="flex-1 py-3 px-4 border border-outline-variant text-on-surface-variant rounded-lg font-bold hover:bg-surface-container transition-colors">Close</button>
