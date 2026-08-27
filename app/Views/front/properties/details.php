@@ -403,8 +403,8 @@
                         <div>
                             <h3 class="font-label-md text-[16px] text-on-surface font-bold"><?= esc(($property->first_name ?? '') . ' ' . ($property->last_name ?? '')) ?></h3>
                             
-                            <?php 
-                                $isVerifiedAgent = (isset($property->role_id) && $property->role_id == 4);
+                            <?php
+                                $isVerifiedAgent = (isset($property->role_id) && in_array($property->role_id, [3, 4]));
                                 $contactType = $isVerifiedAgent ? 'Agent' : 'Owner';
                             ?>
 
