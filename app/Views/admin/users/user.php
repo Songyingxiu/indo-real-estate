@@ -76,7 +76,7 @@
                         <?= date('M d, Y', strtotime($user['created_date'])) ?>
                     </div>
                     <div class="col-span-1 md:col-span-2 flex justify-end gap-2">
-                        <?php if (($user['role_id'] == 2 || $user['role_id'] == 3) && $userDoc): ?>
+                        <?php if ($userDoc): ?>
                             <button @click="showDocModal = true; 
                                             docUrl = '<?= strpos($userDoc->ktp_document, 'http') === 0 ? esc($userDoc->ktp_document) : base_url('uploads/documents/' . esc($userDoc->ktp_document)) ?>';
                                             docStatus = '<?= esc($userDoc->approval_status) ?>';
