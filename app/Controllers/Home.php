@@ -129,7 +129,7 @@ class Home extends BaseController
         
         $property = $propertyModel
             ->asObject()
-            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone_number, users.email, zipcodes.zipcode')
+            ->select('properties.*, property_types.name as type_name, users.first_name, users.last_name, users.phone_number, users.email, users.role_id, zipcodes.zipcode')
             ->join('property_types', 'property_types.id = properties.property_type_id', 'left')
             ->join('users', 'users.id = properties.owner_id', 'left')
             ->join('zipcodes', 'zipcodes.id = properties.zipcode_id', 'left') 
