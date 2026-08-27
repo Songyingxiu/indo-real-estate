@@ -172,7 +172,7 @@ class Profile extends BaseController
         if ($ktpUrl) {
             $updateData = [
                 'ktp_document'    => $ktpUrl, 
-                'approval_status' => 'Pending Verification'
+                'approval_status' => 'Pending' 
             ];
             if ($npwpUrl) $updateData['npwp'] = $npwpUrl;
             if ($licenseUrl) $updateData['business_license'] = $licenseUrl;
