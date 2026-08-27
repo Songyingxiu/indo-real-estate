@@ -172,7 +172,7 @@ class Profile extends BaseController
         if ($ktpUrl) {
             $updateData = [
                 'ktp_document'    => $ktpUrl, 
-                'approval_status' => 'Pending' 
+                'approval_status' => 'Pending Approval' // Safest match for application ENUM schema
             ];
             if ($npwpUrl) $updateData['npwp'] = $npwpUrl;
             if ($licenseUrl) $updateData['business_license'] = $licenseUrl;
