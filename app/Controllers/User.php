@@ -151,7 +151,7 @@ class User extends BaseController
         if ($ktpUrl) {
             $updateData = [
                 'ktp_document'    => $ktpUrl,
-                'approval_status' => 'Pending' 
+                'approval_status' => 'Pending Approval' // Safest match for application ENUM schema
             ];
             
             if ($npwpUrl) $updateData['npwp'] = $npwpUrl;
@@ -162,7 +162,7 @@ class User extends BaseController
             } else {
                 $updateData['user_id'] = $userId;
                 $updateData['status']  = 'Active';
-                $agentVerifyModel->insert($updateData);
+                $agentVerifyModel->builder()->insert($updateData);
             }
             return redirect()->back()->with('success', 'Verification documents uploaded! Please wait for Admin review.');
         }
