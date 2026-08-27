@@ -3,6 +3,7 @@
 use App\Controllers\BaseController;
 use App\Models\AgentVerificationModel;
 use App\Models\PropertyVerificationModel;
+use App\Models\UserModel;
 
 class Verifications extends BaseController {
 
@@ -43,14 +44,22 @@ class Verifications extends BaseController {
 
         $action = $this->request->getPost('action');
         $model = new AgentVerificationModel();
+        $userModel = new UserModel();
 
         if ($action === 'approve') {
             $model->update($id, ['approval_status' => 'Verified']);
+            
+            $verification = $model->find($id);
+            if ($verification) {
+                $userId = is_array($verification) ? $verification['user_id'] : $verification->user_id;
+                $userModel->update($userId, ['role_id' => 3]);
+            }
+            
         } elseif ($action === 'reject') {
             $model->update($id, ['approval_status' => 'Rejected']);
         }
 
-        return redirect()->to(base_url('admin/verifications'))->with('success', 'Agent Identity status updated!');
+        return redirect()->to(base_url('admin/verifications'))->with('success', 'Agent Identity status updated and user role upgraded!');
     }
 
     public function processProperty($id) {
