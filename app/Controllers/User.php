@@ -98,7 +98,6 @@ class User extends BaseController
 
         $agentVerifyModel = new AgentVerificationModel();
         
-        // Prevent duplicate spam
         $existingVerification = $agentVerifyModel->where('user_id', $userId)->first();
         $isRejected = false;
         $existingId = null;
@@ -130,7 +129,6 @@ class User extends BaseController
 
         $ktpUrl = null; $npwpUrl = null; $licenseUrl = null;
 
-        // Secure Cloudinary Uploads replacing Local FileSystem (Vercel Fix)
         if ($ktpFile = $this->request->getFile('ktp_document')) {
             if ($ktpFile->isValid() && !$ktpFile->hasMoved()) {
                 $resp = $cloudinary->uploadApi()->upload($ktpFile->getTempName(), ['folder' => 'hunikita_documents']);
@@ -153,13 +151,12 @@ class User extends BaseController
         if ($ktpUrl) {
             $updateData = [
                 'ktp_document'    => $ktpUrl,
-                'approval_status' => 'Pending Verification'
+                'approval_status' => 'Pending' 
             ];
             
             if ($npwpUrl) $updateData['npwp'] = $npwpUrl;
             if ($licenseUrl) $updateData['business_license'] = $licenseUrl;
 
-            // Upsert Logic to prevent DB bloat
             if ($isRejected && $existingId) {
                 $agentVerifyModel->update($existingId, $updateData);
             } else {
