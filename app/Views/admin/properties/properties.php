@@ -59,13 +59,9 @@
                             <td class="py-4 px-6">Rp <?= number_format($property['tax_price'], 0, ',', '.') ?></td>
                             <td class="py-4 px-6 whitespace-nowrap">
                                 <select onchange="updatePropertyStatus(<?= $property['id'] ?>, this.value)" class="px-3 py-1.5 rounded bg-surface border border-outline-variant text-[14px] font-semibold cursor-pointer focus:ring-1 focus:ring-primary outline-none">
-                                    <option value="Draft" <?= $property['status'] == 'Draft' ? 'selected' : '' ?>>Draft</option>
-                                    <option value="Pending Approval" <?= $property['status'] == 'Pending Approval' ? 'selected' : '' ?>>Pending Approval</option>
-                                    
                                     <option value="Active" <?= $property['status'] == 'Active' ? 'selected' : '' ?> <?= ($property['doc_status'] ?? '') !== 'Verified' ? 'disabled' : '' ?>>
                                         Active <?= ($property['doc_status'] ?? '') !== 'Verified' ? '(Doc Required)' : '' ?>
                                     </option>
-                                    
                                     <option value="Sold" <?= $property['status'] == 'Sold' ? 'selected' : '' ?>>Sold</option>
                                     <option value="Expired" <?= $property['status'] == 'Expired' ? 'selected' : '' ?>>Expired</option>
                                     <option value="Inactive" <?= $property['status'] == 'Inactive' ? 'selected' : '' ?>>Inactive</option>

@@ -179,7 +179,7 @@ class Properties extends BaseController
         };
 
         $data = [
-            'title'            => $propTitleEN, 
+            'title'             => $propTitleEN, 
             'title_en'         => $propTitleEN,
             'title_id'         => $this->request->getPost('title_id'),
             'description'      => $this->request->getPost('description_en'), 
@@ -409,7 +409,7 @@ class Properties extends BaseController
         };
 
         $updateData = [
-            'title'            => $this->request->getPost('title_en'), 
+            'title'             => $this->request->getPost('title_en'), 
             'title_en'         => $this->request->getPost('title_en'),
             'title_id'         => $this->request->getPost('title_id'),
             'description'      => $this->request->getPost('description_en'), 
@@ -439,9 +439,8 @@ class Properties extends BaseController
             'basement'         => $this->request->getPost('basement'),
             'water_facility'   => $this->request->getPost('water_facility'),
             'latitude'         => $this->request->getPost('latitude'),
-            'longitude'        => $this->request->getPost('longitude'),
-            'approval_status'  => 'Draft' 
-        ];
+            'longitude'        => $this->request->getPost('longitude')
+            ];
 
         $propertyModel->update($id, $updateData);
 
@@ -458,6 +457,8 @@ class Properties extends BaseController
                 ]);
             }
         }
+
+        $successMessage = 'Property updated successfully.';
 
         $shmFile = $this->request->getFile('shm_document');
         if ($shmFile && $shmFile->isValid() && ! $shmFile->hasMoved()) {
@@ -476,10 +477,12 @@ class Properties extends BaseController
                     'approval_status' => 'Pending Verification',
                     'status' => 'Active'
                 ]);
+
+                $successMessage = 'Property updated! New SHM document sent to verification center.';
             }
         }
 
-        return redirect()->to(base_url('admin/properties'))->with('success', 'Property updated and reset to Draft.');
+        return redirect()->to(base_url('admin/properties'))->with('success', $successMessage);
     }
     
     public function getCities($stateId = null)
