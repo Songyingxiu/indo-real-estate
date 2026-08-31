@@ -9,6 +9,7 @@ $badge_verifs = 0;
 $badge_dashboard = 0;
 
 $allow_messages = false;
+$is_verified_agent = in_array($role_sidebar, [3, 4]); // ADDED: Global agent check
 
 if ($role_sidebar == 4) {
     $allow_messages = true;
@@ -56,10 +57,9 @@ if ($role_sidebar == 4) {
 
         <p class="font-caption text-caption text-on-surface-variant mt-unit text-center font-bold">
             <?php 
-                $role = session()->get('role_id');
-                if($role == 4) echo "Administrator";
-                elseif($role == 3) echo "Agent Portal";
-                elseif($role == 2) echo "Owner Portal";
+                if($role_sidebar == 4) echo "Administrator";
+                elseif($role_sidebar == 3) echo "Agent Portal";
+                elseif($role_sidebar == 2) echo "Owner Portal";
                 else echo "User Portal";
             ?>
         </p>
@@ -78,7 +78,7 @@ if ($role_sidebar == 4) {
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (strpos(uri_string(), 'admin/properties') === 0) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/properties') ?>">
             <span class="material-symbols-outlined <?= (strpos(uri_string(), 'admin/properties') === 0) ? 'icon-fill' : '' ?>">real_estate_agent</span>
             <span class="font-label-md text-label-md">My Listings</span>
-            <?php if ($role != 4 && $badge_moderation > 0): ?>
+            <?php if ($role_sidebar != 4 && $badge_moderation > 0): ?>
                 <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full" title="Action Required on Listings"><?= $badge_moderation ?></span>
             <?php endif; ?>
         </a>
@@ -98,21 +98,28 @@ if ($role_sidebar == 4) {
         </a>
 
         <!-- Sent Inquiries (Available to everyone for properties they want to buy) -->
-        <?php if($role != 4): ?>
+        <?php if($role_sidebar != 4): ?>
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('user/inbox')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('user/inbox') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('user/inbox')) ? 'icon-fill' : '' ?>">send</span>
             <span class="font-label-md text-label-md">Sent Inquiries</span>
         </a>
         <?php endif; ?>
 
-        <?php if($role != 4): ?>
-            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('admin/pricing') ?>">
+        <!-- Dynamically Locked Upgrade Plan -->
+        <?php if($role_sidebar != 4): ?>
+            <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" 
+               href="<?= $is_verified_agent ? base_url('admin/pricing') : base_url('user/profile') ?>"
+               <?= !$is_verified_agent ? 'title="You must verify your identity to unlock agent packages"' : '' ?>>
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/pricing')) ? 'icon-fill' : '' ?>">workspace_premium</span>
                 <span class="font-label-md text-label-md">Upgrade Plan</span>
+                
+                <?php if (!$is_verified_agent): ?>
+                    <span class="ml-auto material-symbols-outlined text-[16px] opacity-70">lock</span>
+                <?php endif; ?>
             </a>
         <?php endif; ?>
 
-        <?php if($role == 4): ?>
+        <?php if($role_sidebar == 4): ?>
             <div class="px-6 py-3 mt-4">
                 <p class="text-[11px] font-bold text-outline uppercase tracking-wider">Administration</p>
             </div>
@@ -168,7 +175,7 @@ if ($role_sidebar == 4) {
 
     <div class="px-margin-desktop mt-auto flex flex-col gap-unit pt-stack-md border-t border-outline-variant mx-4">
 
-        <?php if($role == 4): ?>
+        <?php if($role_sidebar == 4): ?>
             <a href="<?= base_url('admin/reports/export') ?>" class="w-full bg-primary-container text-on-primary-container rounded font-label-md text-label-md py-2 mb-stack-sm hover:opacity-90 transition-opacity text-center block shadow-sm">
                 Generate Report
             </a>

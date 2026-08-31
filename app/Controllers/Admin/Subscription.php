@@ -10,6 +10,10 @@ class Subscription extends BaseController
 {
     public function pricing()
     {
+        if (!in_array(session()->get('role_id'), [3, 4])) {
+            return redirect()->to(base_url('user/profile'))->with('error', 'You must verify your identity and become a Verified Agent before unlocking subscription packages.');
+        }
+
         $planModel = new SubscriptionPlanModel();
         
         $data['title'] = 'Pricing Plans - HuniKita';
@@ -20,6 +24,10 @@ class Subscription extends BaseController
 
     public function checkout()
     {
+        if (!in_array(session()->get('role_id'), [3, 4])) {
+            return redirect()->to(base_url('user/profile'))->with('error', 'You must verify your identity and become a Verified Agent before purchasing a premium subscription.');
+        }
+
         $planId = $this->request->getPost('plan_id') ?? session()->get('checkout_plan_id');
         if (!$planId) return redirect()->to(base_url('admin/pricing'));
 
