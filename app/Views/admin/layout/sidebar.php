@@ -9,7 +9,7 @@ $badge_verifs = 0;
 $badge_dashboard = 0;
 
 $allow_messages = false;
-$is_verified_agent = in_array($role_sidebar, [3, 4]); // ADDED: Global agent check
+$is_verified_agent = in_array($role_sidebar, [3, 4]);
 
 if ($role_sidebar == 4) {
     $allow_messages = true;
@@ -83,21 +83,24 @@ if ($role_sidebar == 4) {
             <?php endif; ?>
         </a>
 
-        <!-- Dynamically locked Inquiries Inbox -->
+        <!-- Inquiries Inbox (With Popup for unverified users) -->
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/inquiries')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" 
-           href="<?= $allow_messages ? base_url('admin/inquiries') : base_url('admin/pricing') ?>" 
-           <?= !$allow_messages ? 'title="Upgrade to a Premium plan to access direct messaging"' : '' ?>>
+           <?php if (!$is_verified_agent): ?>
+               href="#" onclick="document.getElementById('agentVerificationModal').classList.remove('hidden'); document.getElementById('agentVerificationModal').classList.add('flex'); return false;"
+           <?php else: ?>
+               href="<?= $allow_messages ? base_url('admin/inquiries') : base_url('admin/pricing') ?>" 
+           <?php endif; ?>>
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/inquiries')) ? 'icon-fill' : '' ?>">forum</span>
             <span class="font-label-md text-label-md">Inquiries Inbox</span>
             
-            <?php if (!$allow_messages): ?>
-                <span class="ml-auto material-symbols-outlined text-[16px] opacity-70">lock</span>
+            <?php if ($is_verified_agent && !$allow_messages): ?>
+                <span class="ml-auto material-symbols-outlined text-[16px] opacity-70" title="Premium Feature">lock</span>
             <?php elseif ($badge_inquiries > 0): ?>
                 <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_inquiries ?></span>
             <?php endif; ?>
         </a>
 
-        <!-- Sent Inquiries (Available to everyone for properties they want to buy) -->
+        <!-- Sent Inquiries -->
         <?php if($role_sidebar != 4): ?>
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('user/inbox')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" href="<?= base_url('user/inbox') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('user/inbox')) ? 'icon-fill' : '' ?>">send</span>
@@ -105,17 +108,16 @@ if ($role_sidebar == 4) {
         </a>
         <?php endif; ?>
 
-        <!-- Dynamically Locked Upgrade Plan -->
+        <!-- Upgrade Plan (With Popup for unverified users) -->
         <?php if($role_sidebar != 4): ?>
             <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/pricing')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" 
-               href="<?= $is_verified_agent ? base_url('admin/pricing') : base_url('user/profile') ?>"
-               <?= !$is_verified_agent ? 'title="You must verify your identity to unlock agent packages"' : '' ?>>
+               <?php if (!$is_verified_agent): ?>
+                   href="#" onclick="document.getElementById('agentVerificationModal').classList.remove('hidden'); document.getElementById('agentVerificationModal').classList.add('flex'); return false;"
+               <?php else: ?>
+                   href="<?= base_url('admin/pricing') ?>"
+               <?php endif; ?>>
                 <span class="material-symbols-outlined <?= (current_url() == base_url('admin/pricing')) ? 'icon-fill' : '' ?>">workspace_premium</span>
                 <span class="font-label-md text-label-md">Upgrade Plan</span>
-                
-                <?php if (!$is_verified_agent): ?>
-                    <span class="ml-auto material-symbols-outlined text-[16px] opacity-70">lock</span>
-                <?php endif; ?>
             </a>
         <?php endif; ?>
 
@@ -181,7 +183,6 @@ if ($role_sidebar == 4) {
             </a>
         <?php endif; ?>
 
-        <!-- Back to Homepage Escape Hatch -->
         <a class="flex items-center gap-stack-sm py-2 px-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary rounded-lg transition-all" href="<?= base_url() ?>">
             <span class="material-symbols-outlined">home</span>
             <span class="font-label-md text-label-md">Back to Homepage</span>
@@ -198,3 +199,22 @@ if ($role_sidebar == 4) {
         </a>
     </div>
 </nav>
+
+<!-- Agent Verification Required Modal -->
+<?php if (!$is_verified_agent): ?>
+<div id="agentVerificationModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4 bg-[#1a1c1e]/80 backdrop-blur-sm transition-opacity">
+    <div class="bg-surface rounded-2xl shadow-2xl border border-outline-variant max-w-sm w-full p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 rounded-full bg-[#fef7e0] text-[#b06000] flex items-center justify-center mb-4 shadow-inner">
+            <span class="material-symbols-outlined text-[32px]">admin_panel_settings</span>
+        </div>
+        <h2 class="font-headline-lg text-xl font-bold text-on-surface mb-2">Agent Access Only</h2>
+        <p class="text-on-surface-variant text-[14px] mb-6 leading-relaxed">
+            You must be a Verified Agent to unlock this feature. Please submit your identity documents in the Verification Center.
+        </p>
+        <div class="flex gap-3 w-full">
+            <button onclick="document.getElementById('agentVerificationModal').classList.add('hidden'); document.getElementById('agentVerificationModal').classList.remove('flex');" class="flex-1 py-3 px-4 border border-outline-variant text-on-surface-variant rounded-lg font-bold hover:bg-surface-container transition-colors">Cancel</button>
+            <a href="<?= base_url('user/profile') ?>" class="flex-1 py-3 px-4 bg-primary text-on-primary rounded-lg font-bold hover:bg-primary-container transition-colors shadow-md">Verify Now</a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
