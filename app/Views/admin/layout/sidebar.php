@@ -9,7 +9,7 @@ $badge_verifs = 0;
 $badge_dashboard = 0;
 
 $allow_messages = false;
-$is_verified_agent = in_array($role_sidebar, [3, 4]);
+$is_verified_agent = in_array($role_sidebar, [3, 4]); // Global agent check
 
 if ($role_sidebar == 4) {
     $allow_messages = true;
@@ -83,19 +83,12 @@ if ($role_sidebar == 4) {
             <?php endif; ?>
         </a>
 
-        <!-- Inquiries Inbox (With Popup for unverified users) -->
+        <!-- Inquiries Inbox (Unlocked for everyone so Owners can see their messages) -->
         <a class="flex items-center gap-stack-sm py-2 px-4 mx-2 <?= (current_url() == base_url('admin/inquiries')) ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary' ?> rounded-lg transition-all scale-98 duration-150" 
-           <?php if (!$is_verified_agent): ?>
-               href="#" onclick="document.getElementById('agentVerificationModal').classList.remove('hidden'); document.getElementById('agentVerificationModal').classList.add('flex'); return false;"
-           <?php else: ?>
-               href="<?= $allow_messages ? base_url('admin/inquiries') : base_url('admin/pricing') ?>" 
-           <?php endif; ?>>
+           href="<?= base_url('admin/inquiries') ?>">
             <span class="material-symbols-outlined <?= (current_url() == base_url('admin/inquiries')) ? 'icon-fill' : '' ?>">forum</span>
             <span class="font-label-md text-label-md">Inquiries Inbox</span>
-            
-            <?php if ($is_verified_agent && !$allow_messages): ?>
-                <span class="ml-auto material-symbols-outlined text-[16px] opacity-70" title="Premium Feature">lock</span>
-            <?php elseif ($badge_inquiries > 0): ?>
+            <?php if ($badge_inquiries > 0): ?>
                 <span class="ml-auto bg-[#c9302c] text-white text-[10px] font-bold px-2 py-0.5 rounded-full"><?= $badge_inquiries ?></span>
             <?php endif; ?>
         </a>
@@ -200,7 +193,7 @@ if ($role_sidebar == 4) {
     </div>
 </nav>
 
-<!-- Agent Verification Required Modal -->
+<!-- Agent Verification Required Modal (Only for Upgrade Plan now) -->
 <?php if (!$is_verified_agent): ?>
 <div id="agentVerificationModal" class="hidden fixed inset-0 z-[600] items-center justify-center p-4 bg-[#1a1c1e]/80 backdrop-blur-sm transition-opacity">
     <div class="bg-surface rounded-2xl shadow-2xl border border-outline-variant max-w-sm w-full p-8 text-center flex flex-col items-center">
@@ -209,7 +202,7 @@ if ($role_sidebar == 4) {
         </div>
         <h2 class="font-headline-lg text-xl font-bold text-on-surface mb-2">Agent Access Only</h2>
         <p class="text-on-surface-variant text-[14px] mb-6 leading-relaxed">
-            You must be a Verified Agent to unlock this feature. Please submit your identity documents in the Verification Center.
+            You must be a Verified Agent to unlock premium subscriptions. Please submit your identity documents in the Verification Center.
         </p>
         <div class="flex gap-3 w-full">
             <button onclick="document.getElementById('agentVerificationModal').classList.add('hidden'); document.getElementById('agentVerificationModal').classList.remove('flex');" class="flex-1 py-3 px-4 border border-outline-variant text-on-surface-variant rounded-lg font-bold hover:bg-surface-container transition-colors">Cancel</button>
